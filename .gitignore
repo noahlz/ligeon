@@ -6,6 +6,7 @@
 
 # Claude Code
 .claude/settings.local.json
+.claude-cost-snapshot.json
 
 # Node.js
 node_modules/
