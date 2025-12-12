@@ -1,22 +1,17 @@
-# ligeon - Part 4: PGN Parsing & Indexing
+# ligeon Part 4: PGN Parsing & Indexing
 
-Complete guide for PGN file parsing, game indexing, and import with progress logging.
+**Goal:** Create PGN parser, import handler with streaming, progress logging
 
----
-
-## Overview
-
-This part implements:
-- PGN file parsing with pgn-parser library
-- Game metadata extraction
-- Import handler with streaming
-- Progress logging (every 10k games + skips)
-- Result and date validation
-- Skip logic for invalid games
+**Files to create:**
+- src/utils/pgnParser.js (parse metadata, moves)
+- electron/ipc/importHandlers.js (import with progress logging)
+- Tests for parser and import flow
 
 ---
 
-## 4.1 Create src/utils/pgnParser.js
+## Actions to Complete
+
+### 1. Create src/utils/pgnParser.js
 
 ```javascript
 import { parse as parsePgn } from 'pgn-parser'
@@ -72,7 +67,7 @@ export function parsePgnGame(pgnText) {
 
 ---
 
-## 4.2 Create electron/ipc/importHandlers.js
+### 2. Create electron/ipc/importHandlers.js
 
 ```javascript
 import readline from 'readline'
@@ -234,7 +229,7 @@ export async function importAndIndexPgn(filePath, collectionId, collectionName, 
 
 ---
 
-## 4.3 Create Unit Tests for PGN Parser
+### 3. Create Unit Tests
 
 **File: `__tests__/unit/pgnParser.test.js`**
 
@@ -285,8 +280,6 @@ describe('PGN Parser', () => {
 - [ ] Run `npm test` - all tests pass
 
 ---
-
-## 4.4 Create Integration Test
 
 **File: `__tests__/integration/importAndReplay.test.js`**
 
@@ -366,89 +359,24 @@ describe('Import and Replay Integration', () => {
 
 ---
 
-## 4.5 Verify Import Flow
+### 4. Test Import Flow
 
-Test the complete import:
-
-1. Run app:
 ```bash
 npm run dev
 ```
 
-2. Click "Import New"
-3. Select the Bobby Fischer 60 PGN file
-4. Watch progress bar and logs
-5. Verify games indexed
+Then in UI: Click "Import New" → select PGN → watch progress → verify games indexed
 
-**Checklist:**
-- [ ] Import dialog opens
-- [ ] File picker works
-- [ ] Progress bar updates
-- [ ] Logs display in real-time
-- [ ] Final count shown
-- [ ] Games searchable after import
+### 5. Run Tests
 
----
-
-## 4.6 Test Skip Logic
-
-Create test PGN with invalid games:
-
-```pgn
-[Event "Valid"]
-[White "A"]
-[Black "B"]
-[Result "1-0"]
-
-1. e4 c5
-
-[Event "Missing Result"]
-[White "C"]
-[Black "D"]
-
-1. e4 e5
-
-[Event "Unfinished"]
-[White "E"]
-[Black "F"]
-[Result "*"]
-
-1. d4
+```bash
+npm test -- pgnParser.test
+npm test -- importAndReplay.test
+npm run dev
 ```
 
-Import and verify:
-- First game indexed
-- Second game skipped (no result)
-- Third game skipped (unfinished)
+Expected: Tests pass, import works correctly
 
-**Checklist:**
-- [ ] Skip logic works correctly
-- [ ] Logs identify skip reasons
-- [ ] Statistics accurate
+**Summary:** PGN parser, import handler with streaming, progress logging created
 
----
-
-## Summary
-
-Created:
-- ✅ PGN parser (metadata and moves extraction)
-- ✅ Import handler (streaming, progress, logging)
-- ✅ Skip logic (invalid games, no results, unfinished)
-- ✅ Progress logging (every 10k games + immediate skips)
-- ✅ Final statistics and summary
-- ✅ Unit tests for parser
-- ✅ Integration tests for import
-- ✅ Sample games download script
-
----
-
-## Next Steps
-
-Proceed to **Part 5: React Components** to implement:
-- Board display (Chessground)
-- Move list and navigation
-- Game info panel
-- Game list sidebar
-- Import dialog
-
-**PGN Parsing & Indexing complete! Ready for Part 5: React Components.**
+**Next:** Proceed to ligeon_05-1_react_components.md

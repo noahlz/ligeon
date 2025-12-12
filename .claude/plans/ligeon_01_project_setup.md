@@ -1,28 +1,21 @@
-# ligeon - Part 1: Project Setup & Configuration
+# ligeon Part 1: Project Setup
 
-Complete guide for setting up the ligeon project with all necessary configuration files and dependencies.
+**Goal:** Create project structure, install dependencies, create all config files
 
----
-
-## Prerequisites
-
-- Node.js 16+ and npm 8+
-- macOS 11+ or Windows 10+
-- Text editor or IDE (VS Code recommended)
+**Prerequisites:** Node.js 16+, npm 8+, macOS 11+ or Windows 10+
 
 ---
 
-## 1.1 Initialize Project Directory
+## Actions to Complete
+
+### 1. Initialize and Install
 
 ```bash
-mkdir ligeon
-cd ligeon
+mkdir ligeon && cd ligeon
 npm init -y
 ```
 
----
-
-## 1.2 Create package.json
+### 2. Create package.json
 
 Replace the generated package.json with this complete configuration:
 
@@ -83,30 +76,14 @@ Replace the generated package.json with this complete configuration:
 
 ---
 
-## 1.3 Create Project Directory Structure
-
-Create all directories:
+### 3. Create Directory Structure
 
 ```bash
-mkdir -p electron/ipc
-mkdir -p src/components
-mkdir -p src/utils
-mkdir -p src/hooks
-mkdir -p src/styles
-mkdir -p resources/sample-games
-mkdir -p scripts
-mkdir -p public
-mkdir -p __tests__/unit/components
-mkdir -p __tests__/integration
-mkdir -p __tests__/performance
+mkdir -p electron/ipc src/{components,utils,hooks,styles} \
+         resources/sample-games __tests__/{unit/components,integration,performance} public
 ```
 
-**Checklist:**
-- [ ] All directories created
-
----
-
-## 1.4 Create Vite Configuration
+### 4. Create Vite Configuration
 
 **File: `vite.config.js`**
 
@@ -533,87 +510,20 @@ contextBridge.exposeInMainWorld('electron', {
 
 ---
 
-## 1.14 Verify Setup
-
-Run these commands to verify the setup:
+### 15. Verify Setup Works
 
 ```bash
-# Install dependencies
-npm install
-
-# Verify structure
-ls -la
-
-# Check if Vite works
-npm run build
-
-# Try dev server (Ctrl+C to stop)
-npm run dev
+npm install              # Install deps
+npm run build            # Build React
+npm run dev              # Start dev server (Ctrl+C to stop)
 ```
 
-**Checklist:**
-- [ ] `npm install` completes without errors
-- [ ] All directories visible with `ls -la`
-- [ ] `npm run build` creates dist/ directory
-- [ ] `npm run dev` starts without crashing
-- [ ] Browser shows basic app (or Electron window opens)
-- [ ] No major console errors
+Expected: Vite builds successfully, Electron window opens without errors.
 
----
+**Files Created (Summary):**
+- package.json, vite.config.js, tailwind.config.js, postcss.config.js
+- jest.config.js, jest.setup.js, electron-builder.json
+- public/index.html, src/{styles/index.css, index.jsx, App.jsx}
+- electron/{main.js, preload.js}, .gitignore
 
-## Summary of Created Files
-
-| File | Purpose |
-|------|---------|
-| package.json | Dependencies and scripts |
-| vite.config.js | Vite build configuration |
-| tailwind.config.js | Tailwind CSS theme |
-| postcss.config.js | PostCSS plugins |
-| jest.config.js | Jest testing setup |
-| jest.setup.js | Jest initialization |
-| electron-builder.json | Electron build config (io.github.ligeon) |
-| public/index.html | React entry point |
-| src/styles/index.css | Global styles + Tailwind |
-| src/index.jsx | React root |
-| src/App.jsx | Main App component |
-| electron/main.js | Electron main process |
-| electron/preload.js | IPC bridge (security) |
-| .gitignore | Git ignore rules |
-
----
-
-## Next Steps
-
-Once setup is complete and verified, proceed to **Part 2: Electron Main Process** to implement:
-- Window management
-- IPC handlers
-- Collections directory
-- Auto-import first-run experience
-
----
-
-## Troubleshooting
-
-**Issue: `npm install` fails**
-- Delete node_modules/ and package-lock.json
-- Run `npm cache clean --force`
-- Run `npm install` again
-
-**Issue: Vite build fails**
-- Check Node.js version: `node --version` (should be 16+)
-- Delete dist/ and .vite/ directories
-- Run `npm run build` again
-
-**Issue: Electron won't start**
-- Check main.js has correct paths
-- Verify electron/preload.js exists
-- Check browser console for errors (F12)
-
-**Issue: Styles not loading**
-- Verify tailwind.config.js content paths
-- Check public/index.html script src
-- Clear browser cache (hard refresh)
-
----
-
-**Setup complete! Ready for Part 2: Electron Main Process.**
+**Next:** Proceed to ligeon_02_electron_main.md

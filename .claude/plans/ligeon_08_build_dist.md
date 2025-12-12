@@ -1,12 +1,12 @@
-# Chess PGN Viewer - Part 8: Build & Distribution
+# ligeon Part 8: Build & Distribution
 
-## Overview
-
-This section covers packaging your Electron app for production distribution on macOS and Windows, including code signing, auto-updates, installer creation, and release management.
+**Goal:** Build installers for macOS (.dmg) and Windows (.exe), code sign, release
 
 ---
 
-## 8.1 Install Build Dependencies
+## Actions to Complete
+
+### 1. Install Build Dependencies
 
 Install electron-builder and related dependencies:
 
@@ -23,7 +23,7 @@ npm install --save-dev @electron/notarize  # For macOS notarization
 
 ---
 
-## 8.2 Configure package.json Build Scripts
+### 2. Configure package.json Build Scripts
 
 Update `package.json`:
 
@@ -151,7 +151,7 @@ Update `package.json`:
 
 ---
 
-## 8.3 Create Application Icons
+### 3. Create Application Icons
 
 You need icons in multiple formats:
 
@@ -220,7 +220,7 @@ cp icon-512.png resources/icons/512x512.png
 
 ---
 
-## 8.4 Create DMG Background (macOS)
+### 4. Create DMG Background (macOS)
 
 **File: `resources/dmg-background.png`**
 
@@ -242,7 +242,7 @@ cp icon-512.png resources/icons/512x512.png
 
 ---
 
-## 8.5 Create Entitlements File (macOS)
+### 5. Create Entitlements File (macOS)
 
 **File: `resources/entitlements.mac.plist`**
 
@@ -281,7 +281,7 @@ Required for macOS notarization and hardened runtime:
 
 ---
 
-## 8.6 Create LICENSE File
+### 6. Create LICENSE File
 
 **File: `LICENSE`**
 
@@ -318,7 +318,7 @@ SOFTWARE.
 
 ---
 
-## 8.7 Code Signing (macOS)
+### 7. Code Signing (macOS) - Optional
 
 ### Requirements
 
@@ -398,7 +398,7 @@ exports.default = async function notarizing(context) {
 
 ---
 
-## 8.8 Code Signing (Windows)
+### 8. Code Signing (Windows) - Optional
 
 ### Requirements
 
@@ -441,7 +441,7 @@ If certificate is installed in Windows Certificate Store:
 
 ---
 
-## 8.9 Build for Production
+### 9. Build for Production
 
 ### macOS Build
 
@@ -502,7 +502,7 @@ npm run electron:build:all
 
 ---
 
-## 8.10 Test Installation
+### 10. Test Installation
 
 ### macOS Testing
 
@@ -555,9 +555,9 @@ npm run electron:build:all
 
 ---
 
-## 8.11 Optimize Bundle Size
+### 11. Verify Bundle Sizes
 
-### Analyze Bundle
+Expected sizes:
 
 ```bash
 # Install bundle analyzer
@@ -612,7 +612,7 @@ npx vite-bundle-visualizer
 
 ---
 
-## 8.12 Create Auto-Update Configuration
+### 12. (Optional) Setup Auto-Updates
 
 **File: `electron-builder.json`**
 
@@ -688,7 +688,7 @@ npm install electron-updater electron-log
 
 ---
 
-## 8.13 Create GitHub Release Workflow
+### 13. (Optional) Create Release Workflow
 
 **File: `.github/workflows/release.yml`**
 
@@ -1115,151 +1115,48 @@ After releasing v1.0.0:
 
 ---
 
-## Build Commands Summary
+### 14. Create Release on GitHub
 
 ```bash
-# Development
-npm run electron:dev              # Run in dev mode
-npm run dev                       # Vite dev server only
+# Update version
+npm version patch  # or minor/major
 
-# Testing
-npm test                          # Run tests once
-npm run test:watch               # Watch mode
-npm run test:coverage            # Coverage report
+# Create release tag
+git tag v1.0.0
+git push origin main --tags
 
-# Building
-npm run build                     # Build React app
-npm run electron:build           # Build Electron app (current platform)
-npm run electron:build:mac       # Build for macOS only
-npm run electron:build:win       # Build for Windows only
-npm run electron:build:all       # Build for all platforms
+# GitHub Actions will automatically build and release
+```
 
-# Maintenance
-npm run postinstall              # Install Electron dependencies
-npm audit                         # Security audit
-npm outdated                      # Check outdated packages
+### 15. Announce Release
+
+- Post on social media
+- Post in chess forums
+- Write release notes
+- Link to download page
+
+---
+
+## Quick Commands Reference
+
+```bash
+npm run electron:build:mac       # Build macOS DMG
+npm run electron:build:win       # Build Windows EXE
+npm run electron:build:all       # Build both
+npm run test:coverage            # Verify coverage > 60%
 ```
 
 ---
 
-## Troubleshooting Build Issues
+## Summary
 
-### macOS Notarization Fails
+**Completed:**
+- Icons and assets created
+- LICENSE file added
+- Installers built (macOS .dmg, Windows .exe)
+- (Optional) Code signed
+- (Optional) Auto-updates configured
+- GitHub release workflow (optional)
+- Documentation complete
 
-**Problem:** Notarization times out or fails
-
-**Solutions:**
-1. Check credentials are correct
-2. Verify entitlements file is valid
-3. Check Apple Developer account status
-4. Wait and retry (Apple servers sometimes slow)
-
-### Windows Code Signing Fails
-
-**Problem:** signtool.exe not found or certificate invalid
-
-**Solutions:**
-1. Install Windows SDK
-2. Verify certificate is not expired
-3. Check certificate password is correct
-4. Use absolute path to certificate
-
-### Build Size Too Large
-
-**Problem:** DMG/EXE over 200MB
-
-**Solutions:**
-1. Enable maximum compression
-2. Remove unnecessary dependencies
-3. Reduce sample games size
-4. Use asar archive
-
-### Module Not Found Errors
-
-**Problem:** "Cannot find module" in production
-
-**Solutions:**
-1. Check dependencies vs devDependencies
-2. Verify files are included in build
-3. Check electron-builder files configuration
-4. Run `npm run postinstall`
-
----
-
-## Platform-Specific Notes
-
-### macOS
-
-- Universal binaries recommended (Intel + Apple Silicon)
-- Notarization required for Gatekeeper
-- Code signing strongly recommended
-- Test on both architectures
-
-### Windows
-
-- Code signing recommended (avoids SmartScreen warnings)
-- Test on both Windows 10 and 11
-- Include both x64 and ia32 if targeting older systems
-- NSIS installer provides best user experience
-
-### Linux (Optional)
-
-- AppImage is most portable format
-- .deb for Debian/Ubuntu
-- Test on multiple distributions
-
----
-
-## Resources
-
-### Electron Builder
-- Docs: https://www.electron.build/
-- Configuration: https://www.electron.build/configuration/configuration
-
-### Code Signing
-- macOS: https://developer.apple.com/support/code-signing/
-- Windows: https://docs.microsoft.com/en-us/windows/win32/seccrypto/cryptography-tools
-
-### Auto Updates
-- electron-updater: https://www.electron.build/auto-update
-
-### Distribution
-- GitHub Releases: https://docs.github.com/en/repositories/releasing-projects-on-github
-- Homebrew Casks: https://docs.brew.sh/Cask-Cookbook
-- Chocolatey: https://docs.chocolatey.org/en-us/create/create-packages
-
----
-
-## Part 8 Complete!
-
-You now have:
-- ✅ Complete build configuration
-- ✅ Code signing setup (macOS + Windows)
-- ✅ Production packaging workflow
-- ✅ Auto-update capability
-- ✅ GitHub Actions CI/CD
-- ✅ Distribution strategy
-- ✅ Comprehensive documentation
-
-**Next Steps:**
-- Execute builds for your target platforms
-- Test installers thoroughly
-- Create first release on GitHub
-- Announce to users
-
----
-
-## Final Checklist: Ready to Ship?
-
-- [ ] All code complete and tested
-- [ ] Build configuration verified
-- [ ] Icons and assets created
-- [ ] Code signing certificates obtained
-- [ ] Documentation complete
-- [ ] First build successful
-- [ ] Fresh install tested
-- [ ] Release notes written
-- [ ] Version tagged in git
-- [ ] Ready to announce!
-
-🎉 **Congratulations! Your Chess PGN Viewer is ready for distribution!**
+**MVP is complete and ready to ship!**

@@ -1,15 +1,10 @@
-# ligeon - Implementation Plan Overview
+# ligeon - Master Implementation Checklist
 
-A lightweight chess PGN database browser for macOS and Windows. Browse, search, and replay your chess game collections with one-click analysis on Lichess.
-
-**Project Name:** ligeon (pigeon + Lichess)  
-**App ID:** io.github.ligeon  
-**Platforms:** macOS + Windows  
+**Project:** lightweight chess PGN database browser (macOS + Windows)
+**App ID:** io.github.ligeon
 **Tech Stack:** Electron, React 18, Tailwind CSS, SQLite, chess.js, chessground
 
----
-
-## 📋 Master Implementation Checklist
+**Actions to complete for MVP:**
 
 ### Phase 1: Project Setup & Infrastructure
 
@@ -368,63 +363,59 @@ A lightweight chess PGN database browser for macOS and Windows. Browse, search, 
 
 ---
 
-## 📚 Implementation Guides
+---
 
-Detailed implementation guides are split into separate documents:
+## Implementation Guides (Detailed Steps)
 
-1. **01-PROJECT-SETUP.md** - Configuration files and initial setup
-2. **02-ELECTRON-MAIN.md** - Main process and IPC setup
-3. **03-DATABASE-IO.md** - SQLite database and file I/O
-4. **04-PGN-PARSING.md** - PGN parsing and indexing
-5. **05-REACT-COMPONENTS.md** - React UI components
-6. **06-CHESS-LOGIC.md** - Chess move handling
-7. **07-TESTING.md** - Testing setup and strategies
-8. **08-BUILD-DISTRIBUTION.md** - Build and deployment
+For detailed step-by-step implementation, refer to:
+- **ligeon_01_project_setup.md** - Init project, install deps, create config files
+- **ligeon_02_electron_main.md** - Create main process, IPC handlers, window setup
+- **ligeon_03_database_io.md** - SQLite schema, CRUD ops, data converters
+- **ligeon_04_pgn_parsing.md** - Parse PGN files, import handler, progress logging
+- **ligeon_05-1_react_components.md** - Create UI components (board, moves, etc)
+- **ligeon_05-2_react_components.md** - Create App.jsx and wire everything
+- **ligeon_06_chess_logic.md** - Verify ChessManager works with all edge cases
+- **ligeon_07_testing.md** - Run full test suite, verify coverage > 60%
+- **ligeon_08_build_dist.md** - Build installers, code sign, release
 
 ---
 
-## 🚀 Quick Start Commands
+## Quick Reference: Core Commands
 
 ```bash
-npm install                 # Install dependencies
-npm run dev                # Start dev server with hot reload
-npm test                   # Run all tests
-npm run test:watch       # Run tests in watch mode
-npm run test:coverage    # Generate coverage report
-npm run build             # Build for current platform
-npm run build:mac         # Build macOS .dmg
-npm run build:win         # Build Windows .exe
-npm run download-samples  # Download sample games
+npm install                 # Setup: install all dependencies
+npm run dev                # Dev: start Vite + Electron
+npm test                   # Test: run all unit/integration tests
+npm run test:coverage      # Test: generate coverage report
+npm run build              # Build: create production bundle
+npm run electron:build:mac # Build: macOS .dmg installer
+npm run electron:build:win # Build: Windows .exe installer
 ```
 
 ---
 
-## ✅ Success Criteria
+## Success Criteria for MVP
 
-**MVP Complete When:**
-1. ✅ **App Startup:** Opens without errors, collections directory created
-2. ✅ **Game Browsing:** Lists games, search by player, filter by result
-3. ✅ **Game Replay:** Select game → board displays → move navigation works
-4. ✅ **Move Navigation:** ⏮ ◀ ▶ ⏭ buttons + keyboard shortcuts (Home, ←, →, End, Space)
-5. ✅ **Auto-Play:** Play button → speed menu → advances at 3s/10s speeds
-6. ✅ **Sound Effects:** Move, capture, castling sounds from Lichess CDN
-7. ✅ **Collections:** Import PGN with progress logging, rename, delete
-8. ✅ **Lichess Integration:** "View on Lichess" button sends full PGN
-9. ✅ **Testing:** All unit tests pass, coverage > 60% on all metrics
-10. ✅ **Build & Distribution:** DMG (macOS) and EXE (Windows) installers work
-
----
-
-## 🔑 Key Architecture Decisions
-
-1. **Audio:** Stream all sounds from Lichess CDN at runtime with in-memory caching
-2. **Board:** Use Chessground for professional rendering (no custom board)
-3. **Move Logic:** Use chess.js only for FEN generation and move execution
-4. **Database:** SQLite for full-text search and filtering
-5. **Collections:** Multiple independent databases with metadata files
-6. **Import:** Stream large PGN files line-by-line, skip invalid games with detailed logging
-7. **First Run:** Auto-import bundled Bobby Fischer 60 games
+**App is complete when:**
+1. ✅ Startup: Opens without errors, collections dir exists
+2. ✅ Browse: Lists games, search by player, filter by result
+3. ✅ Replay: Select game → board shows correct position → navigation works
+4. ✅ Navigate: ⏮ ◀ ▶ ⏭ buttons + keyboard (Home, ←, →, End, Space)
+5. ✅ AutoPlay: Play button → speed menu → 3s/10s auto-advance works
+6. ✅ Sounds: Move, capture, castling sounds play from Lichess CDN
+7. ✅ Collections: Import PGN with progress, rename, delete collections
+8. ✅ Analysis: "View on Lichess" sends full PGN to Lichess analysis
+9. ✅ Tests: All unit tests pass, coverage > 60% on all metrics
+10. ✅ Install: DMG (macOS) and EXE (Windows) installers work correctly
 
 ---
 
-**Load the detailed guide files for step-by-step implementation!**
+## Key Architectural Decisions
+
+- **Audio:** Stream from Lichess CDN (not bundled), cache in memory
+- **Board:** Use Chessground (production-ready, no custom implementation)
+- **Chess Logic:** Use chess.js for FEN generation and move execution only
+- **Database:** SQLite via better-sqlite3 for full-text search and filtering
+- **Collections:** Multiple independent .db files with metadata.json
+- **Import:** Stream PGN line-by-line for large files, skip invalid games
+- **First Run:** Auto-import bundled Bobby Fischer 60 games

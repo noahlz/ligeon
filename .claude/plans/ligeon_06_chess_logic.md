@@ -1,20 +1,16 @@
-# ligeon - Part 6: Chess Logic
+# ligeon Part 6: Chess Logic
 
-Detailed guide for ChessManager and move validation.
+**Goal:** Verify ChessManager handles all edge cases correctly
 
----
-
-## Overview
-
-ChessManager wraps chess.js to handle:
-- Game loading and move replay
-- Move navigation (next, prev, jump)
-- FEN generation at any position
-- Error handling for malformed moves
+**Key methods to test:**
+- loadGame(), nextMove(), prevMove(), goToMove()
+- goToStart(), goToEnd(), getCurrentFEN()
 
 ---
 
-## 6.1 Review src/utils/chessManager.js
+## Actions to Complete
+
+### 1. Review src/utils/chessManager.js
 
 Already created in Part 5. Key methods:
 
@@ -36,7 +32,7 @@ resetToMove(index)    // Internal: reset and play to index
 
 ---
 
-## 6.2 Unit Tests for ChessManager
+### 2. Create Unit Tests
 
 **File: `__tests__/unit/chessManager.test.js`**
 
@@ -116,9 +112,9 @@ describe('ChessManager', () => {
 
 ---
 
-## 6.3 Edge Cases & Error Handling
+### 3. Create Integration Tests
 
-ChessManager handles these edge cases:
+**File: `__tests__/integration/chessLogic.test.js`** (see code in original)
 
 **Malformed moves in PGN:**
 ```javascript
@@ -152,16 +148,7 @@ if (this.currentMoveIndex < this.moves.length) {
 // Guarantees correct board state
 ```
 
-**Checklist:**
-- [ ] Verify error handling in ChessManager
-- [ ] Test with malformed PGN
-- [ ] Test boundary conditions
-
----
-
-## 6.4 Integration Test - Full Replay
-
-**File: `__tests__/integration/chessLogic.test.js`**
+### 4. Run Tests
 
 ```javascript
 import ChessManager from '../../src/utils/chessManager'
@@ -237,9 +224,15 @@ describe('Chess Replay Logic', () => {
 
 ---
 
-## 6.5 Sloppy Mode
+```bash
+npm test -- chessManager.test
+npm test -- chessLogic.test
+npm run dev
+```
 
-ChessManager uses `{ sloppy: true }` in chess.js:
+Expected: All tests pass
+
+**Sloppy Mode Note:**
 
 ```javascript
 this.chess.move(moveStr, { sloppy: true })
@@ -254,17 +247,7 @@ this.chess.move(moveStr, { sloppy: true })
 - Strict validation needed
 - Converting to standard notation
 
-For PGN replay, sloppy mode is ideal because PGN uses various notations.
-
-**Checklist:**
-- [ ] Understand sloppy mode behavior
-- [ ] Verify it works with imported PGN moves
-
----
-
-## 6.6 FEN Validation
-
-ChessManager uses chess.js for FEN generation:
+Sloppy mode is ideal for PGN replay because PGN uses various notations.
 
 ```javascript
 const fen = this.chess.fen()
@@ -279,39 +262,9 @@ FEN includes:
 - Halfmove clock
 - Fullmove number
 
-Chessground uses FEN to render board.
+Chessground uses FEN to render the board.
 
-**Checklist:**
-- [ ] Verify FEN valid for Chessground
-- [ ] Test: render board at various positions
-
----
-
-## 6.7 Performance Considerations
-
-**Move replay speed:**
-- Playing 1000 moves: ~50ms (fast)
-- Backward navigation: recalculates from start (~100ms for full game)
-
-**Memory usage:**
-- ChessManager stores moves array (text)
-- For 100-move game: ~1KB
-- No memory leaks with proper cleanup
-
-**Optimization:**
-- Don't call getCurrentFEN() in tight loops
-- Cache FEN if needed multiple times
-- Use goToMove() instead of manual nextMove() looping
-
-**Checklist:**
-- [ ] Profile move replay with large game
-- [ ] Verify no memory leaks
-
----
-
-## 6.8 Capture Detection (App.jsx)
-
-For sound effects, App.jsx detects captures:
+**Capture Detection (for sounds):**
 
 ```javascript
 const detectCapture = (beforeFen, afterFen) => {
@@ -321,21 +274,9 @@ const detectCapture = (beforeFen, afterFen) => {
 }
 ```
 
-Count pieces in FEN:
-- Remove board notation (/, digits)
-- Compare lengths
-- If piece count decreased = capture
+Count pieces by removing board notation and comparing lengths.
 
-**Checklist:**
-- [ ] Test capture detection with captures
-- [ ] Test with non-captures
-- [ ] Verify sound plays correctly
-
----
-
-## 6.9 Castling Detection (App.jsx)
-
-For sound effects, App.jsx detects castling:
+**Castling Detection (for sounds):**
 
 ```javascript
 const detectCastling = (beforeFen, afterFen) => {
@@ -349,38 +290,8 @@ Castling moves king 2 files:
 - King from e-file to g-file (kingside): +2
 - King from e-file to c-file (queenside): -2
 
-Normal moves move king 1 file at most.
+King moves 2 files on castling (normal moves = 1 file max).
 
-**Checklist:**
-- [ ] Test castling detection
-- [ ] Verify sound plays on castling
-- [ ] Test queenside and kingside
+**Summary:** ChessManager thoroughly tested with edge cases, capture and castling detection verified
 
----
-
-## Summary
-
-Implemented:
-- ✅ ChessManager with all move methods
-- ✅ Error handling for invalid moves
-- ✅ FEN generation at any position
-- ✅ Unit tests for ChessManager
-- ✅ Integration tests for replay
-- ✅ Capture and castling detection
-- ✅ Performance optimized
-
----
-
-## Next Steps
-
-Proceed to **Part 7: Testing** for comprehensive test suite setup.
-
-**Checklist:**
-- [ ] ChessManager thoroughly tested
-- [ ] Capture detection verified
-- [ ] Castling detection verified
-- [ ] All edge cases handled
-
----
-
-**Chess Logic Complete! Ready for Part 7: Testing.**
+**Next:** Proceed to ligeon_07_testing.md

@@ -1,10 +1,12 @@
-# ligeon - Part 5 Continued: Main App Component
+# ligeon Part 5.2: React Components - Main App
 
-The main App.jsx that orchestrates all components and state management.
+**Goal:** Create App.jsx that orchestrates all components and manages state
 
 ---
 
-## 5.12 Create src/App.jsx
+## Actions to Complete
+
+### 1. Create src/App.jsx
 
 ```javascript
 import React, { useEffect, useRef, useState } from 'react'
@@ -208,65 +210,23 @@ export default function App() {
 
 ---
 
-## State Management
+### 2. Test App
 
-**App-level state:**
-- `collections` - array of collection metadata
-- `selectedCollectionId` - currently active collection
-- `selectedGame` - full game object with moves
-- `moveIndex` - current move position
-- `fen` - current board position
-- `showImportDialog` - import modal visibility
+```bash
+npm run dev
+```
 
-**Refs:**
-- `chessManagerRef` - ChessManager instance (persists across renders)
+Expected: App starts, collections load, all components render
 
----
+**User flow:**
+1. App starts → collections load
+2. Select collection → games list
+3. Click game → board shows, move list displays
+4. Use ⏮ ◀ ▶ ⏭ or keyboard → navigate moves
+5. Click play → speed menu → auto-play works
+6. Sounds play (move/capture/castling)
+7. "View on Lichess" sends full PGN
 
-## Key Functions
+**Summary:** App.jsx created with full state management and user interaction
 
-| Function | Purpose |
-|----------|---------|
-| `handleStart()` | Go to move 0 |
-| `handlePrev()` | Go back one move + play sound |
-| `handleNext()` | Go forward one move + detect sound |
-| `handleEnd()` | Go to last move |
-| `handleMoveClick(index)` | Jump to specific move |
-| `handleSelectGame(game)` | Load full game + reset position |
-| `handleRenameCollection()` | Rename collection via IPC |
-| `handleDeleteCollection()` | Delete collection via IPC |
-| `detectCapture()` | Compare FEN piece counts |
-| `detectCastling()` | Compare king position |
-
----
-
-## User Flow
-
-1. **App starts** → Load collections
-2. **First run?** → Show welcome dialog
-3. **Select collection** → Lists games from that collection
-4. **Click game** → Load moves, reset to start
-5. **Navigate moves** → Use ⏮ ◀ ▶ ⏭ or click move list
-6. **Auto-play** → Press play, select speed
-7. **Sounds play** → move, capture, or castling
-8. **View on Lichess** → Send full PGN
-
----
-
-## Next Steps
-
-Proceed to **Part 6: Chess Logic** to verify ChessManager works with all edge cases.
-
-Then **Part 7: Testing** for full test coverage.
-
-**Checklist:**
-- [ ] App.jsx created and working
-- [ ] All components render
-- [ ] Collections load
-- [ ] Game selection works
-- [ ] Move navigation works
-- [ ] Sounds play correctly
-
----
-
-**React Components Complete! Ready for Part 6: Chess Logic.**
+**Next:** Proceed to ligeon_06_chess_logic.md

@@ -1,20 +1,17 @@
-# ligeon - Part 7: Testing
+# ligeon Part 7: Testing
 
-Complete testing strategy and setup for all layers.
+**Goal:** Run complete test suite, verify coverage > 60%, fix failures
 
----
-
-## Overview
-
-Testing covers:
-- Unit tests (utilities, database, components)
-- Integration tests (import, replay, search)
-- Performance benchmarks
-- Setup and configuration
+**Test files already created in parts 3-6:**
+- Unit tests: dateConverter, resultConverter, database, pgnParser, chessManager
+- Integration tests: importAndReplay, chessLogic
+- Component tests: BoardDisplay, MoveList, GameInfo
 
 ---
 
-## 7.1 Jest Configuration
+## Actions to Complete
+
+### 1. Jest Configuration
 
 Already created in Part 1. Verify `jest.config.js`:
 
@@ -41,9 +38,7 @@ module.exports = {
 
 ---
 
-## 7.2 Run Tests
-
-Execute tests:
+### 2. Run All Tests
 
 ```bash
 # Run all tests once
@@ -69,26 +64,7 @@ npm test -- --testNamePattern="parses"
 
 ---
 
-## 7.3 Test Files Created (Parts 3-6)
-
-**Utility tests:**
-- `__tests__/unit/dateConverter.test.js`
-- `__tests__/unit/resultConverter.test.js`
-- `__tests__/unit/pgnParser.test.js`
-- `__tests__/unit/database.test.js`
-- `__tests__/unit/chessManager.test.js`
-
-**Integration tests:**
-- `__tests__/integration/importAndReplay.test.js`
-- `__tests__/integration/chessLogic.test.js`
-
-**Checklist:**
-- [ ] All test files exist
-- [ ] All tests pass
-
----
-
-## 7.4 Add Component Tests
+### 3. Create Component Tests
 
 **File: `__tests__/unit/components/BoardDisplay.test.jsx`**
 
@@ -183,9 +159,13 @@ describe('GameInfo', () => {
 
 ---
 
-## 7.5 Performance Tests
+### 4. Run Coverage Report
 
-**File: `__tests__/performance/indexing.test.js`**
+```bash
+npm run test:coverage
+```
+
+Check output for coverage on all metrics (should be > 60%)
 
 ```javascript
 import { importAndIndexPgn } from '../../electron/ipc/importHandlers'
@@ -224,224 +204,18 @@ describe('Performance', () => {
 
 ---
 
-## 7.6 Coverage Report
-
-Generate and view coverage:
+### 5. Fix Failures
 
 ```bash
-npm run test:coverage
+npm test 2>&1 | tee test-output.txt
 ```
 
-This creates `coverage/` directory with HTML report.
+If tests fail, debug and fix:
+- Check error messages
+- Fix code issues
+- Re-run tests
+- Verify coverage > 60%
 
-**Open in browser:**
-```bash
-open coverage/lcov-report/index.html
-```
+**Summary:** All tests passing, coverage > 60% on all metrics
 
-**Target coverage:**
-- Branches: 60%+
-- Functions: 60%+
-- Lines: 60%+
-- Statements: 60%+
-
-**Checklist:**
-- [ ] Run coverage report
-- [ ] Verify all metrics meet 60%
-- [ ] Identify untested code
-
----
-
-## 7.7 Test All Utilities
-
-Run each test category:
-
-```bash
-# Converters
-npm test -- dateConverter.test
-npm test -- resultConverter.test
-
-# Parser
-npm test -- pgnParser.test
-
-# Database
-npm test -- database.test
-
-# Chess
-npm test -- chessManager.test
-
-# Components
-npm test -- components
-
-# Integration
-npm test -- integration
-
-# Performance
-npm test -- performance
-```
-
-**Checklist:**
-- [ ] All converter tests pass
-- [ ] Parser tests pass
-- [ ] Database tests pass
-- [ ] Chess tests pass
-- [ ] Component tests pass
-- [ ] Integration tests pass
-- [ ] Performance acceptable
-
----
-
-## 7.8 Continuous Test During Development
-
-Run tests in watch mode:
-
-```bash
-npm run test:watch
-```
-
-This re-runs tests when files change. Great for TDD.
-
-**Workflow:**
-1. Write failing test
-2. Write code to pass test
-3. Watch mode auto-reruns
-4. Refactor with confidence
-
-**Checklist:**
-- [ ] Understand watch mode
-- [ ] Use during development
-
----
-
-## 7.9 Mock IPC Calls in Tests
-
-For components that call `window.electron`, mock it:
-
-```javascript
-beforeAll(() => {
-  global.window.electron = {
-    listCollections: jest.fn().mockResolvedValue([]),
-    searchGames: jest.fn().mockResolvedValue([]),
-    getGameMoves: jest.fn().mockResolvedValue(null),
-  }
-})
-```
-
-**Checklist:**
-- [ ] Add mocks for IPC calls in component tests
-- [ ] Mock should return realistic data
-
----
-
-## 7.10 Debugging Failed Tests
-
-Print debug info:
-
-```javascript
-import { screen, debug } from '@testing-library/react'
-
-test('something', () => {
-  render(<MyComponent />)
-  
-  // Print DOM
-  debug()
-  
-  // Print specific element
-  debug(screen.getByText('text'))
-})
-```
-
-Or run single test:
-
-```bash
-npm test -- --testNamePattern="specific test name"
-```
-
-**Checklist:**
-- [ ] Know how to debug failing tests
-- [ ] Use debug() for DOM inspection
-- [ ] Use --testNamePattern for single tests
-
----
-
-## 7.11 Before Deployment
-
-Run full test suite:
-
-```bash
-npm test -- --coverage
-```
-
-**Verification checklist:**
-- [ ] All tests pass
-- [ ] Coverage > 60% on all metrics
-- [ ] No console errors
-- [ ] No console warnings (if possible)
-- [ ] Performance acceptable
-
----
-
-## 7.12 CI/CD Integration
-
-For GitHub Actions, add `.github/workflows/test.yml`:
-
-```yaml
-name: Tests
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '18'
-      - run: npm install
-      - run: npm test -- --coverage
-      - uses: codecov/codecov-action@v2
-```
-
-**Checklist:**
-- [ ] (Optional) Setup GitHub Actions
-- [ ] Automated tests on every push
-
----
-
-## Summary
-
-Implemented:
-- ✅ Jest configuration (Part 1)
-- ✅ Unit tests for all utilities
-- ✅ Integration tests for workflows
-- ✅ Component tests
-- ✅ Performance benchmarks
-- ✅ Coverage reporting
-- ✅ Watch mode development
-- ✅ Debugging strategies
-
----
-
-## Testing Commands Reference
-
-```bash
-npm test                    # Run all tests
-npm run test:watch        # Watch mode
-npm run test:coverage     # Coverage report
-npm test -- file.test     # Specific test
-npm test -- --testNamePattern="name"  # Named test
-```
-
----
-
-## Next Steps
-
-Proceed to **Part 8: Build & Distribution** for packaging and deployment.
-
-**Checklist:**
-- [ ] All tests passing
-- [ ] Coverage acceptable
-- [ ] Ready for build phase
-
----
-
-**Testing Complete! Ready for Part 8: Build & Distribution.**
+**Next:** Proceed to ligeon_08_build_dist.md

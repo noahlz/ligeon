@@ -1,20 +1,16 @@
-# ligeon - Part 2: Electron Main Process
+# ligeon Part 2: Electron Main Process
 
-Complete guide for setting up the Electron main process with window management, IPC handlers, and first-run collection auto-import.
+**Goal:** Create main.js with window management, collections dir init, and IPC handlers
 
----
-
-## Overview
-
-The main process handles:
-- Creating and managing the Electron window
-- Initializing collections directory on first run
-- Setting up IPC (Inter-Process Communication) handlers
-- File dialogs for PGN import
+**Key files to create:**
+- electron/main.js (window + IPC setup)
+- electron/preload.js (security bridge)
 
 ---
 
-## 2.1 Update electron/main.js - Full Implementation
+## Actions to Complete
+
+### 1. Create electron/main.js
 
 Replace your placeholder `electron/main.js` with this complete implementation:
 
@@ -218,9 +214,7 @@ process.on('uncaughtException', (error) => {
 
 ---
 
-## 2.2 Create electron/preload.js - Security Bridge
-
-Replace your placeholder `electron/preload.js` with this complete implementation:
+### 2. Create electron/preload.js
 
 ```javascript
 import { contextBridge, ipcRenderer } from 'electron'
@@ -292,183 +286,31 @@ contextBridge.exposeInMainWorld('electron', {
 
 ---
 
-## 2.3 Create electron/ipc Directory Structure
-
-The ipc directory will contain modular handlers (created in Part 4):
-
-```bash
-mkdir -p electron/ipc
-```
-
-**Files to create in Part 4:**
-- `electron/ipc/gameDatabase.js` - SQLite wrapper
-- `electron/ipc/importHandlers.js` - PGN import logic
-- `electron/ipc/collectionHandlers.js` - Collection CRUD
-- `electron/ipc/gameHandlers.js` - Game search/retrieval
-
-**Checklist:**
-- [ ] Create electron/ipc directory
-
----
-
-## 2.4 Add Collections Path to package.json (Optional)
-
-You can add this to help with development:
-
-In `package.json`, add to `scripts`:
-
-```json
-"clean": "rm -rf ~/.ligeon",
-```
-
-This allows `npm run clean` to reset collections during development.
-
-**Checklist:**
-- [ ] (Optional) Add clean script to package.json
-
----
-
-## 2.5 Test Main Process Startup
-
-Now test that everything works:
+### 3. Test Main Process
 
 ```bash
 npm run dev
 ```
 
-**Expected behavior:**
-1. Vite dev server starts (Terminal 1)
-2. Electron window opens with React app
-3. Console logs show:
-   - "App ready"
-   - "Initializing ligeon..."
-   - "Creating collections directory..." (first time only)
-   - "Ready for PGN imports"
-   - "Setting up IPC handlers..."
+Expected: App starts, console shows "App ready", "Initializing ligeon...", "Ready for PGN imports"
 
-**Checklist:**
-- [ ] `npm run dev` starts without crashing
-- [ ] Electron window opens
-- [ ] Console shows app initialization logs
-- [ ] No major errors in console
-- [ ] DevTools opens (if isDev=true)
-
----
-
-## 2.6 Verify Collections Directory Created
-
-After running the app once, verify the collections directory:
-
-**macOS:**
+**Verify collections directory exists:**
 ```bash
-ls -la ~/.ligeon/collections/
+ls -la ~/.ligeon/collections/      # macOS
+dir %APPDATA%\..\Local\ligeon\     # Windows
 ```
 
-**Windows:**
-```cmd
-dir %APPDATA%\..\Local\ligeon\collections\
-```
+### 4. Test IPC (Temporary Test in src/App.jsx)
 
-**Expected:**
-- Collections directory exists and is empty (ready for user imports)
-
-**Checklist:**
-- [ ] Collections directory created in correct location
-- [ ] Directory is empty (no auto-import)
-
----
-
-## 2.7 Test IPC Communication
-
-To verify IPC is working, add this to `src/App.jsx` temporarily:
-
+Add to App.jsx useEffect:
 ```javascript
-import React, { useEffect } from 'react'
-
-export default function App() {
-  useEffect(() => {
-    // Test IPC
-    window.electron.listCollections()
-      .then(cols => console.log('Collections:', cols))
-      .catch(err => console.error('Error:', err))
-  }, [])
-
-  return (
-    <div className="min-h-screen bg-slate-900 text-white p-8">
-      <h1 className="text-4xl font-bold">ligeon</h1>
-      <p className="text-gray-400 mt-2">Check console for IPC test results</p>
-    </div>
-  )
-}
+window.electron.listCollections().then(cols => console.log('Collections:', cols))
 ```
 
-Expected console output: `Collections: []` (empty array - ready for user imports)
+Expected console output: `Collections: []`
 
-Remove this code after testing.
+Then remove the test code.
 
-**Checklist:**
-- [ ] IPC communication verified
-- [ ] Collections listed in console
-- [ ] Test code removed
+**Summary:** Main process window created, collections dir initialized, IPC handlers registered
 
----
-
-## 2.8 Create electron/main.js Comments Reference
-
-Key functions in main.js:
-
-| Function | Purpose |
-|----------|---------|
-| `createWindow()` | Create and configure Electron window |
-| `initializeApp()` | Create collections directory |
-| `setupIpcHandlers()` | Register all IPC event handlers |
-
-**Checklist:**
-- [ ] All key functions understand and documented
-
----
-
-## 2.9 Troubleshooting
-
-**Issue: "Cannot find module 'electron'"**
-- Run `npm install` again
-- Delete node_modules and package-lock.json
-- Run `npm install` fresh
-
-**Issue: Window doesn't open**
-- Check that `preload.js` path is correct
-- Verify preload.js exists
-- Check for errors in DevTools console (F12)
-
-**Issue: IPC methods not available**
-- Verify `contextBridge.exposeInMainWorld` called in preload.js
-- Check that `contextIsolation: true` in BrowserWindow config
-- Verify preload path in main.js
-
-**Issue: Collections directory in wrong location**
-- Verify `app.getPath('userData')` returns correct location
-- macOS: Should be `~/Library/Application Support/ligeon/`
-- Windows: Should be `%APPDATA%\..\Local\ligeon\`
-
----
-
-## Summary
-
-You've now set up:
-- ✅ Main process window creation
-- ✅ Collections directory initialization
-- ✅ IPC handler framework (with stubs)
-- ✅ Security with context isolation and preload script
-
----
-
-## Next Steps
-
-Proceed to **Part 3: Database & I/O** to implement:
-- SQLite database schema and operations
-- Date and result conversion utilities
-- Collection and game database handlers
-
----
-
-**Main process complete! Ready for Part 3: Database & I/O.**
+**Next:** Proceed to ligeon_03_database_io.md

@@ -1,21 +1,17 @@
-# ligeon - Part 3: Database & I/O Layer
+# ligeon Part 3: Database & I/O
 
-Complete guide for SQLite database operations, data converters, and collection handlers.
+**Goal:** Create SQLite database wrapper, converters, and collection/game handlers
 
----
-
-## Overview
-
-This part implements:
-- SQLite database schema and operations via better-sqlite3
-- Date conversion utilities (PGN format ↔ Unix timestamp)
-- Result conversion utilities (PGN notation ↔ numeric values)
-- Collection management (CRUD operations)
-- Game database queries with filtering
+**Files to create:**
+- electron/ipc/gameDatabase.js (SQLite operations)
+- src/utils/{dateConverter,resultConverter}.js (data conversion)
+- electron/ipc/{collectionHandlers,gameHandlers}.js (CRUD operations)
 
 ---
 
-## 3.1 Create electron/ipc/gameDatabase.js - SQLite Wrapper
+## Actions to Complete
+
+### 1. Create electron/ipc/gameDatabase.js
 
 ```javascript
 import Database from 'better-sqlite3'
@@ -201,7 +197,7 @@ export class GameDatabase {
 
 ---
 
-## 3.2 Create src/utils/dateConverter.js
+### 2. Create src/utils/dateConverter.js
 
 ```javascript
 export function pgnDateToTimestamp(pgnDate) {
@@ -248,7 +244,7 @@ export function timestampToDisplay(timestamp) {
 
 ---
 
-## 3.3 Create src/utils/resultConverter.js
+### 3. Create src/utils/resultConverter.js
 
 ```javascript
 export function convertResult(pgnResult) {
@@ -290,7 +286,7 @@ export function resultNumericToDisplay(resultNumeric) {
 
 ---
 
-## 3.4 Create Unit Tests for Converters
+### 4. Create Unit Tests
 
 **File: `__tests__/unit/dateConverter.test.js`**
 
@@ -361,8 +357,6 @@ describe('Result Converter', () => {
 - [ ] Run `npm test` - all tests pass
 
 ---
-
-## 3.5 Create Unit Tests for Database
 
 **File: `__tests__/unit/database.test.js`**
 
@@ -498,7 +492,7 @@ describe('GameDatabase', () => {
 
 ---
 
-## 3.6 Create Collection Handlers (Stubs)
+### 5. Create Collection Handlers
 
 **File: `electron/ipc/collectionHandlers.js`**
 
@@ -580,7 +574,7 @@ export async function deleteCollection(collectionId) {
 
 ---
 
-## 3.7 Create Game Handlers (Stubs)
+### 6. Create Game Handlers
 
 **File: `electron/ipc/gameHandlers.js`**
 
@@ -620,17 +614,15 @@ export async function getGameMoves(collectionId, gameId) {
 
 ---
 
-## 3.8 Update electron/main.js with Imports
+### 7. Wire Handlers in electron/main.js
 
-Add these imports to top of `electron/main.js`:
-
+Add imports to top of electron/main.js:
 ```javascript
 import { listCollections, renameCollection, deleteCollection } from './ipc/collectionHandlers.js'
 import { searchGames, getGameMoves } from './ipc/gameHandlers.js'
 ```
 
-Then replace the stub handlers in `setupIpcHandlers()`:
-
+Replace stubs in setupIpcHandlers():
 ```javascript
 ipcMain.handle('list-collections', async () => listCollections())
 ipcMain.handle('rename-collection', async (event, { collectionId, newName }) => renameCollection(collectionId, newName))
@@ -639,48 +631,17 @@ ipcMain.handle('search-games', async (event, { collectionId, filters }) => searc
 ipcMain.handle('get-game-moves', async (event, { collectionId, gameId }) => getGameMoves(collectionId, gameId))
 ```
 
-**Checklist:**
-- [ ] Add imports to electron/main.js
-- [ ] Replace stub handlers with real implementations
-- [ ] Test: `npm run dev` starts without errors
-
----
-
-## 3.9 Test Database & I/O Layer
-
-Run tests:
+### 8. Test Database & I/O
 
 ```bash
 npm test -- dateConverter.test
 npm test -- resultConverter.test
 npm test -- database.test
+npm run dev
 ```
 
-**Checklist:**
-- [ ] All converter tests pass
-- [ ] All database tests pass
-- [ ] No console errors
+Expected: All tests pass, app starts without errors
 
----
+**Summary:** Database wrapper, converters, collection & game handlers created and tested
 
-## Summary
-
-Created:
-- ✅ SQLite database wrapper (gameDatabase.js)
-- ✅ Date conversion utilities
-- ✅ Result conversion utilities
-- ✅ Collection handlers (list, rename, delete)
-- ✅ Game handlers (search, get moves)
-- ✅ Unit tests for all utilities
-- ✅ IPC handler integration
-
----
-
-## Next Steps
-
-Proceed to **Part 4: PGN Parsing & Indexing** to implement:
-- PGN file streaming and parsing
-- Import with progress logging
-- Skip logic with detailed logging
-
-**Database & I/O complete! Ready for Part 4: PGN Parsing & Indexing.**
+**Next:** Proceed to ligeon_04_pgn_parsing.md

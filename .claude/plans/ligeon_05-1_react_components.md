@@ -1,16 +1,17 @@
-# ligeon - Part 5: React Components
+# ligeon Part 5.1: React Components - Core
 
-Complete guide for building React UI components for ligeon.
+**Goal:** Create all reusable React components and utilities
+
+**Components to create:**
+- BoardDisplay (Chessground), MoveList, MoveNavigation, GameInfo
+- GameListSidebar, ImportDialog, CollectionSelector
+- useAutoPlay hook, AudioManager, ChessManager
 
 ---
 
-## Overview
+## Actions to Complete
 
-This part implements 10+ React components for the complete UI.
-
----
-
-## 5.1 Create src/index.jsx
+### 1. Create src/index.jsx
 
 ```javascript
 import React from 'react'
@@ -30,7 +31,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 ---
 
-## 5.2 Create src/components/BoardDisplay.jsx
+### 2. Create src/components/BoardDisplay.jsx
 
 ```javascript
 import React, { useEffect, useRef } from 'react'
@@ -63,7 +64,7 @@ export default function BoardDisplay({ fen }) {
 
 ---
 
-## 5.3 Create src/components/MoveList.jsx
+### 3. Create src/components/MoveList.jsx
 
 ```javascript
 import React, { useRef, useEffect } from 'react'
@@ -102,7 +103,7 @@ export default function MoveList({ moves, currentMoveIndex, onMoveClick }) {
 
 ---
 
-## 5.4 Create src/hooks/useAutoPlay.js
+### 4. Create src/hooks/useAutoPlay.js
 
 ```javascript
 import { useEffect, useRef, useState } from 'react'
@@ -150,7 +151,7 @@ export function useAutoPlay(moveIndex, totalMoves, onNext, onStop) {
 
 ---
 
-## 5.5 Create src/components/MoveNavigation.jsx
+### 5. Create src/components/MoveNavigation.jsx
 
 ```javascript
 import React, { useEffect, useState } from 'react'
@@ -228,7 +229,7 @@ export default function MoveNavigation({ moveIndex, totalMoves, onStart, onPrev,
 
 ---
 
-## 5.6 Create src/components/GameInfo.jsx
+### 6. Create src/components/GameInfo.jsx
 
 ```javascript
 import React from 'react'
@@ -279,7 +280,7 @@ export default function GameInfo({ game }) {
 
 ---
 
-## 5.7 Create src/components/GameListSidebar.jsx
+### 7. Create src/components/GameListSidebar.jsx
 
 ```javascript
 import React, { useState, useEffect } from 'react'
@@ -343,7 +344,7 @@ export default function GameListSidebar({ collectionId, onGameSelect }) {
 
 ---
 
-## 5.8 Create src/components/ImportDialog.jsx
+### 8. Create src/components/ImportDialog.jsx
 
 ```javascript
 import React, { useEffect, useRef, useState } from 'react'
@@ -418,7 +419,7 @@ export default function ImportDialog({ isOpen, onComplete }) {
 
 ---
 
-## 5.9 Create src/components/CollectionSelector.jsx
+### 9. Create src/components/CollectionSelector.jsx
 
 ```javascript
 import React, { useState } from 'react'
@@ -455,7 +456,7 @@ export default function CollectionSelector({ collections, selectedId, onSelect, 
 
 ---
 
-## 5.10 Create src/utils/audioManager.js
+### 10. Create src/utils/audioManager.js
 
 ```javascript
 const SOUND_URLS = {
@@ -523,7 +524,7 @@ export const audioManager = new AudioManager()
 
 ---
 
-## 5.11 Create src/utils/chessManager.js
+### 11. Create src/utils/chessManager.js
 
 ```javascript
 import { Chess } from 'chess.js'
@@ -599,28 +600,14 @@ export default class ChessManager {
 
 ---
 
-## 5.12 Create src/App.jsx
+### 12. Test Components
 
-See **Part 5 Continued** (next document) for the main App component.
+```bash
+npm run dev
+```
 
-**Checklist:**
-- [ ] Proceed to Part 5 Continued
+Expected: All components render without errors
 
----
+**Summary:** All reusable components created (board, moves, navigation, info, sidebar, dialog, selector, audio, chess logic)
 
-## Summary
-
-Created 11 components:
-- ✅ BoardDisplay (Chessground)
-- ✅ MoveList (with highlighting)
-- ✅ MoveNavigation (⏮ ◀ ▶ ⏭ + play)
-- ✅ GameInfo (metadata + Lichess link)
-- ✅ GameListSidebar (search/filter)
-- ✅ ImportDialog (progress + logs)
-- ✅ CollectionSelector (dropdown)
-- ✅ useAutoPlay hook
-- ✅ AudioManager (CDN sounds)
-- ✅ ChessManager (move logic)
-- ✅ App.jsx (orchestration)
-
-**Next: Part 5 Continued - Full App.jsx with state management**
+**Next:** Proceed to ligeon_05-2_react_components.md for App.jsx
