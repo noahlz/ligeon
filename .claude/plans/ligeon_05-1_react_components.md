@@ -33,34 +33,29 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 ### 2. Create src/components/BoardDisplay.jsx
 
-```javascript
-import React, { useEffect, useRef } from 'react'
-import { Chessground } from 'chessground'
-import 'chessground/assets/chessground.base.css'
-import 'chessground/assets/chessground.brown.css'
+Implement Chessground board display in React with FEN-based position updates and move visualization.
 
-export default function BoardDisplay({ fen }) {
-  const boardRef = useRef(null)
-  const cgRef = useRef(null)
+References:
+- `@chessground-examples/src/units/basics.ts` - basic Chessground setup
+- `@chessground-examples/src/units/anim.ts` - animation configuration and lastMove highlighting
+- `@chessground-examples/src/units/viewOnly.ts` - view-only mode with drawable layer disabled
 
-  useEffect(() => {
-    if (!boardRef.current) return
-    if (!cgRef.current) {
-      cgRef.current = Chessground(boardRef.current, {
-        fen, coordinates: true, viewOnly: true, disableContextMenu: true,
-        animation: { enabled: true, duration: 200 },
-      })
-    } else {
-      cgRef.current.set({ fen })
-    }
-  }, [fen])
+Key patterns:
+- Initialize Chessground on first render with container element and config options
+- Update board position via `cg.set({ fen, lastMove })` when position changes
+- Use view-only mode (no interactive moves) for game replay
+- Configure animation duration (e.g., 300-500ms for smooth piece movement)
+- Highlight last move squares via `lastMove: [fromSquare, toSquare]` to show which move just played
+- Disable drawable layer with `drawable: { visible: false }` (replay doesn't need annotations)
+- Import Chessground CSS stylesheets for styling
 
-  return <div ref={boardRef} style={{ width: '400px', height: '400px' }} />
-}
-```
+Props needed: `fen` (position), `lastMove` (array of 2 squares or null)
 
 **Checklist:**
-- [ ] Create src/components/BoardDisplay.jsx
+- [ ] Create src/components/BoardDisplay.jsx with FEN and lastMove props
+- [ ] Configure animation duration for smooth transitions
+- [ ] Disable drawable layer for view-only mode
+- [ ] Update board when either FEN or lastMove prop changes
 
 ---
 
@@ -105,49 +100,26 @@ export default function MoveList({ moves, currentMoveIndex, onMoveClick }) {
 
 ### 4. Create src/hooks/useAutoPlay.js
 
-```javascript
-import { useEffect, useRef, useState } from 'react'
+Implement auto-play timer hook with visibility checking to avoid wasted animations.
 
-export function useAutoPlay(moveIndex, totalMoves, onNext, onStop) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [playSpeed, setPlaySpeed] = useState(null)
-  const timerRef = useRef(null)
-  const speeds = { fast: 3000, slow: 10000 }
+Reference: `@chessground-examples/src/units/viewOnly.ts` and `src/units/fen.ts` show board visibility check pattern: `if (!cg.state.dom.elements.board.offsetParent) return;`
 
-  const start = (speed) => {
-    if (moveIndex >= totalMoves) return
-    setPlaySpeed(speed)
-    setIsPlaying(true)
-  }
+Implementation notes:
+- Timer-based auto-advance through moves at configurable speeds (3s fast, 10s slow)
+- Check if board is visible before advancing (prevents animation waste if user switches tabs)
+- Stop auto-play when reaching end of game
+- Support pause/resume during playback
+- Clear timers on unmount to prevent memory leaks
 
-  const stop = () => {
-    setIsPlaying(false)
-    setPlaySpeed(null)
-    if (timerRef.current) clearTimeout(timerRef.current)
-  }
-
-  const pause = () => {
-    stop()
-    onStop?.()
-  }
-
-  useEffect(() => {
-    if (!isPlaying || !playSpeed) return
-    if (moveIndex >= totalMoves) {
-      setIsPlaying(false)
-      onStop?.()
-      return
-    }
-    timerRef.current = setTimeout(() => onNext(), speeds[playSpeed])
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [isPlaying, playSpeed, moveIndex, totalMoves, onNext, onStop])
-
-  return { isPlaying, playSpeed, start, stop, pause }
-}
-```
+Methods/state needed:
+- `start(speed)` - begin auto-play at given speed
+- `stop()` / `pause()` - halt auto-play
+- `isPlaying` - boolean state
+- `playSpeed` - current speed identifier
 
 **Checklist:**
-- [ ] Create src/hooks/useAutoPlay.js
+- [ ] Create src/hooks/useAutoPlay.js with timer-based advance
+- [ ] Add board visibility check before calling onNext() to skip hidden frames
 
 ---
 
@@ -458,145 +430,52 @@ export default function CollectionSelector({ collections, selectedId, onSelect, 
 
 ### 10. Create src/utils/audioManager.js
 
-```javascript
-const SOUND_URLS = {
-  move: 'https://lichess1.org/sounds/standard/Move.ogg',
-  capture: 'https://lichess1.org/sounds/standard/Capture.ogg',
-  castling: 'https://lichess1.org/sounds/standard/Castling.ogg',
-}
+Implement audio manager for streaming sound effects from Lichess CDN with in-memory caching.
 
-export class AudioManager {
-  constructor() {
-    this.audioContext = null
-    this.enabled = true
-    this.volume = 0.5
-    this.bufferCache = new Map()
-  }
-
-  initialize() {
-    if (!this.audioContext) {
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext
-        this.audioContext = new AudioContext()
-      } catch (e) {
-        this.enabled = false
-      }
-    }
-  }
-
-  async playSound(soundName) {
-    if (!this.enabled || !this.audioContext) return
-    try {
-      const url = SOUND_URLS[soundName]
-      if (!url) return
-
-      let buffer = this.bufferCache.get(soundName)
-      if (!buffer) {
-        const res = await fetch(url)
-        if (!res.ok) return
-        const data = await res.arrayBuffer()
-        buffer = await this.audioContext.decodeAudioData(data)
-        this.bufferCache.set(soundName, buffer)
-      }
-
-      const src = this.audioContext.createBufferSource()
-      const gain = this.audioContext.createGain()
-      src.buffer = buffer
-      gain.gain.value = this.volume
-      src.connect(gain)
-      gain.connect(this.audioContext.destination)
-      src.start(0)
-    } catch (e) {
-      console.warn('Audio error:', soundName)
-    }
-  }
-
-  playMove() { this.playSound('move') }
-  playCapture() { this.playSound('capture') }
-  playCastling() { this.playSound('castling') }
-}
-
-export const audioManager = new AudioManager()
-```
+Implementation notes:
+- Stream sound URLs from Lichess CDN (not bundled)
+- Cache decoded audio buffers in memory after first play
+- Use Web Audio API for playback control
+- Handle network/decode errors gracefully
+- Provide methods: `playMove()`, `playCapture()`, `playCastling()`
+- Initialize on first user interaction (browser audio policy)
 
 **Checklist:**
-- [ ] Create src/utils/audioManager.js
+- [ ] Create src/utils/audioManager.js with AudioContext initialization, buffer caching, and playback methods
 
 ---
 
 ### 11. Create src/utils/chessManager.js
 
-```javascript
-import { Chess } from 'chess.js'
+Implement chess move replay logic for PGN game navigation with move tracking.
 
-export default class ChessManager {
-  constructor() {
-    this.chess = new Chess()
-    this.moves = []
-    this.currentMoveIndex = 0
-  }
+References:
+- `@chessground-examples/src/util.ts` - chess.js integration with board state
+- `@chessground-examples/src/units/anim.ts` - move tracking for animation
+- `@chessground-examples/src/units/viewOnly.ts` - automatic move execution pattern
 
-  loadGame(moves) {
-    this.chess.reset()
-    this.moves = moves
-    this.currentMoveIndex = 0
-  }
+Implementation notes:
+- Load game moves from PGN parser output
+- Track current move index during replay and previous move for UI highlighting
+- Generate FEN at any move position by replaying moves from start
+- Support navigation: next, previous, go to start/end, jump to arbitrary move
+- Use chess.js sloppy notation for PGN move compatibility
+- Reset and replay moves from start for backward navigation (efficient enough for typical games)
+- Store last move (fromSquare, toSquare) for highlighting in BoardDisplay
 
-  nextMove() {
-    if (this.currentMoveIndex < this.moves.length) {
-      try {
-        this.chess.move(this.moves[this.currentMoveIndex], { sloppy: true })
-        this.currentMoveIndex++
-      } catch (e) {}
-    }
-  }
-
-  prevMove() {
-    if (this.currentMoveIndex > 0) {
-      this.currentMoveIndex--
-      this.resetToMove(this.currentMoveIndex)
-    }
-  }
-
-  goToMove(index) {
-    if (index >= 0 && index <= this.moves.length) {
-      this.resetToMove(index)
-    }
-  }
-
-  goToStart() {
-    this.chess.reset()
-    this.currentMoveIndex = 0
-  }
-
-  goToEnd() {
-    this.chess.reset()
-    for (let i = 0; i < this.moves.length; i++) {
-      try {
-        this.chess.move(this.moves[i], { sloppy: true })
-      } catch (e) { break }
-    }
-    this.currentMoveIndex = this.moves.length
-  }
-
-  getCurrentFEN() { return this.chess.fen() }
-  getTotalMoves() { return this.moves.length }
-
-  resetToMove(index) {
-    this.chess.reset()
-    this.currentMoveIndex = 0
-    for (let i = 0; i < index; i++) {
-      try {
-        this.chess.move(this.moves[i], { sloppy: true })
-        this.currentMoveIndex++
-      } catch (e) { break }
-    }
-  }
-}
-```
+Methods needed:
+- `loadGame(moves)` - load PGN moves
+- `nextMove()` / `prevMove()` - advance/rewind one move
+- `goToMove(index)` - jump to arbitrary move
+- `goToStart()` / `goToEnd()` - jump to start/end
+- `getCurrentFEN()` - get current board position
+- `getLastMove()` - get [fromSquare, toSquare] or null for highlighting
+- `getTotalMoves()` - get total move count
 
 **Checklist:**
-- [ ] Create src/utils/chessManager.js
+- [ ] Create src/utils/chessManager.js with move replay and FEN generation
+- [ ] Track previous/current move for lastMove highlighting
+- [ ] Export getLastMove() method for BoardDisplay
 
 ---
 
