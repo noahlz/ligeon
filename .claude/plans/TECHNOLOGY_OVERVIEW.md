@@ -6,16 +6,16 @@ A technical deep-dive into the major tools, platforms, and frameworks used to bu
 
 ## Quick Technology Stack
 
-**Main Application:** Electron, React 18, Tailwind CSS
-**Desktop Framework:** Electron (macOS, Windows)
-**Frontend UI:** React 18, Chessground
-**Styling:** Tailwind CSS
-**Chess Logic:** chess.js, chessground
-**Database:** SQLite, better-sqlite3
-**Build Tool:** Vite
-**Testing:** Jest, React Testing Library
-**Distribution:** electron-builder
-**Code Signing:** Apple Notarization, Windows Authenticode
+- **Main Application:** Electron, React 18, Tailwind CSS
+- **Desktop Framework:** Electron (macOS, Windows)
+- **Frontend UI:** React 18, Chessground
+- **Styling:** Tailwind CSS
+- **Chess Logic:** chess.js, chessground
+- **Database:** SQLite, better-sqlite3
+- **Build Tool:** Vite
+- **Testing:** Jest, React Testing Library
+- **Distribution:** electron-builder
+- **Code Signing:** Apple Notarization, Windows Authenticode
 
 ---
 
@@ -24,6 +24,7 @@ A technical deep-dive into the major tools, platforms, and frameworks used to bu
 ### Electron
 
 **Purpose:** Cross-platform desktop application framework
+
 **Why:** Enables building native macOS and Windows apps from a single JavaScript codebase, leveraging web technologies with full system access.
 
 **Project:** https://www.electronjs.org/
@@ -37,6 +38,7 @@ Electron powers the entire ligeon application, providing window management, IPC 
 ### React 18
 
 **Purpose:** JavaScript library for building interactive user interfaces
+
 **Why:** React's component-based architecture, virtual DOM, and hot reload capability accelerate UI development and make the codebase maintainable.
 
 **Project:** https://react.dev/
@@ -46,6 +48,7 @@ React orchestrates all UI components in ligeon, managing state for collections, 
 ### Tailwind CSS
 
 **Purpose:** Utility-first CSS framework
+
 **Why:** Tailwind eliminates the need for custom CSS files while providing a consistent design system with rapid styling without context-switching.
 
 **Project:** https://tailwindcss.com/
@@ -55,6 +58,7 @@ Tailwind CSS styles all UI components in ligeon—from the game board layout to 
 ### Chessground
 
 **Purpose:** Professional chess board UI library
+
 **Why:** Chessground provides an optimized, accessible, and beautiful chess board rendering with smooth animations and keyboard support—no custom implementation needed.
 
 **Project:** https://github.com/lichess-org/chessground
@@ -77,6 +81,7 @@ chess.js powers the ChessManager utility in ligeon, validating moves during repl
 ### pgn-parser
 
 **Purpose:** PGN (Portable Game Notation) file parsing
+
 **Why:** pgn-parser extracts game metadata (players, event, date) and move sequences from PGN files, abstracting the complexity of the PGN format.
 
 **Project:** https://github.com/shortercode/pgn-parser
@@ -90,6 +95,7 @@ pgn-parser extracts game information during PGN import, parsing headers and move
 ### SQLite
 
 **Purpose:** Embedded SQL database
+
 **Why:** SQLite is lightweight, serverless, and perfect for desktop applications—no separate database server needed, and files are portable across systems.
 
 **Project:** https://www.sqlite.org/
@@ -99,6 +105,7 @@ SQLite stores all game data in ligeon, with one .db file per collection. Each da
 ### better-sqlite3
 
 **Purpose:** Fast, synchronous SQLite driver for Node.js
+
 **Why:** better-sqlite3 provides synchronous database access with superior performance compared to async alternatives, simplifying query logic in the main process.
 
 **Project:** https://github.com/WiseLibs/better-sqlite3
@@ -112,6 +119,7 @@ better-sqlite3 handles all database operations in ligeon—inserting games durin
 ### Vite
 
 **Purpose:** Modern frontend build tool and development server
+
 **Why:** Vite offers instant hot module replacement (HMR), fast builds via esbuild, and minimal configuration—dramatically improving development experience.
 
 **Project:** https://vitejs.dev/
@@ -121,6 +129,7 @@ Vite builds ligeon's React frontend, bundling components, styles, and assets int
 ### electron-builder
 
 **Purpose:** Complete solution for packaging and distributing Electron apps
+
 **Why:** electron-builder automates code signing, installer creation (.dmg for macOS, .exe for Windows), and notarization—eliminating manual build steps.
 
 **Project:** https://www.electron.build/
@@ -134,6 +143,7 @@ electron-builder packages ligeon into production installers for both platforms. 
 ### Jest
 
 **Purpose:** JavaScript testing framework
+
 **Why:** Jest provides zero-config testing with built-in mocking, code coverage reporting, and watch mode—making test-driven development practical.
 
 **Project:** https://jestjs.io/
@@ -143,6 +153,7 @@ Jest runs all unit and integration tests in ligeon—testing utilities (dateConv
 ### React Testing Library
 
 **Purpose:** React component testing utilities
+
 **Why:** React Testing Library encourages testing components from a user's perspective rather than implementation details, resulting in more maintainable tests.
 
 **Project:** https://testing-library.com/react
@@ -156,6 +167,7 @@ React Testing Library tests ligeon's UI components (BoardDisplay, MoveList, Game
 ### Node.js
 
 **Purpose:** JavaScript runtime for server-side and desktop application code
+
 **Why:** Node.js enables JavaScript in the Electron main process, providing filesystem access, IPC handling, and database operations.
 
 **Project:** https://nodejs.org/
@@ -165,6 +177,7 @@ Node.js runs ligeon's main process, handling window management, IPC communicatio
 ### npm
 
 **Purpose:** Package manager for JavaScript
+
 **Why:** npm manages all dependencies, build scripts, and provides a centralized way to run development and build commands.
 
 **Project:** https://www.npmjs.com/
@@ -178,6 +191,7 @@ npm installs all dependencies (React, Electron, SQLite driver, testing libraries
 ### Lucide React
 
 **Purpose:** Icon component library
+
 **Why:** Lucide provides a consistent set of SVG icons as React components, reducing design work and maintaining visual consistency.
 
 **Project:** https://lucide.dev/
@@ -187,6 +201,7 @@ Lucide icons are used throughout ligeon's UI for navigation buttons (⏮ ◀ ▶
 ### PostCSS & Autoprefixer
 
 **Purpose:** CSS processing and vendor prefixing
+
 **Why:** PostCSS transforms CSS (applying Tailwind), while Autoprefixer ensures compatibility across browser engines and macOS/Windows rendering engines.
 
 **Project:** https://postcss.org/ | https://autoprefixer.github.io/
@@ -200,6 +215,7 @@ PostCSS + Autoprefixer processes Tailwind CSS at build time, converting utility 
 ### Apple Notarization (@electron/notarize)
 
 **Purpose:** Code signing and notarization for macOS distribution
+
 **Why:** macOS requires notarization to ensure the app is from a trusted developer and hasn't been tampered with—this is a security requirement.
 
 **Project:** https://github.com/electron/notarize
@@ -209,6 +225,7 @@ PostCSS + Autoprefixer processes Tailwind CSS at build time, converting utility 
 ### electron-updater
 
 **Purpose:** Auto-update framework for Electron apps
+
 **Why:** electron-updater simplifies delivering updates to users, checking for new versions and installing them automatically.
 
 **Project:** https://www.electron.build/auto-update
@@ -222,6 +239,7 @@ electron-updater enables ligeon to check for new versions on startup and notify 
 ### GitHub
 
 **Purpose:** Version control and release hosting
+
 **Why:** GitHub stores the codebase, tracks issues, and hosts releases (installers) for easy distribution to users.
 
 **Project:** https://github.com/
@@ -285,6 +303,3 @@ ligeon is hosted on GitHub, with releases containing DMG (macOS) and EXE (Window
 
 **Shared Code:** Electron main process, React UI, and database logic work identically on both platforms.
 
----
-
-**This stack provides a solid foundation for a performant, maintainable, and distributable desktop application.**
