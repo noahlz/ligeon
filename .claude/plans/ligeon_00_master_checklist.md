@@ -249,23 +249,16 @@
 
 ### Phase 9: Build & Distribution
 
-**Part 9.1 - Build Configuration:**
+**Part 9 - Build Configuration & Testing:**
 - [ ] Update package.json with build scripts and dependencies
 - [ ] Update electron-builder.json with all platforms config
-- [ ] Create LICENSE file (MIT or other)
-- [ ] Create .github/workflows/release.yml (CI/CD)
-
-**Part 9.2 - Code Signing Setup (Optional):**
-- [ ] macOS: Create .env.local with APPLE_ID, APPLE_ID_PASSWORD, APPLE_TEAM_ID
-- [ ] Windows: Obtain code signing certificate (optional)
-- [ ] Add .env.local to .gitignore
-
-**Part 9.3 - Build Process:**
+- [ ] Create LICENSE file (GPL v3)
+- [ ] Create resources/icons/ (icon.icns, icon.ico, png files)
+- [ ] Create resources/dmg-background.png (macOS)
+- [ ] Create resources/entitlements.mac.plist (macOS)
 - [ ] Test: `npm run build` completes and creates dist/
-- [ ] Test: `npm run electron:build:mac` creates .dmg
-- [ ] Test: `npm run electron:build:win` creates .exe
-- [ ] Verify installer works on fresh machines
-- [ ] Test app functionality in production build
+- [ ] Test: `npm run electron:build:mac` creates .dmg on macOS
+- [ ] Test: `npm run electron:build:win` creates .exe on Windows
 
 ---
 
