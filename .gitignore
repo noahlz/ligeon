@@ -60,3 +60,6 @@ tmp/
 *.bak
 *.orig
 *.rej
+
+# Vi swap files
+*.swp

@@ -8,15 +8,15 @@ A technical deep-dive into the major tools, platforms, and frameworks used to bu
 
 ## Quick Technology Stack
 
-- **Language:** TypeScript (NOT JavaScript)
+- **Language:** TypeScript
 - **Main Application:** Electron, React 18, Tailwind CSS
-- **Chess Logic:** chessops (NOT chess.js)
-- **PGN Parsing:** chessops parsePgn() (NOT pgn-parser)
+- **Chess Logic:** chessops
+- **PGN Parsing:** chessops parsePgn()
 - **Board UI:** @lichess-org/chessground
 - **Database:** SQLite, better-sqlite3
 - **Build Tool:** Vite
-- **Package Manager:** pnpm (NOT npm)
-- **Testing:** Vitest (NOT Jest)
+- **Package Manager:** pnpm
+- **Testing:** Vitest
 
 ---
 
@@ -269,18 +269,3 @@ electron-builder packages ligeon into a local Electron app for testing. No code 
 **Windows:** Native Electron app, local build for testing
 
 **Shared Code:** Electron main process, React UI, and database logic work identically on both platforms.
-
----
-
-## Critical Differences from Original Plans
-
-| Component | ❌ Original (Wrong) | ✅ Corrected |
-|-----------|-------------------|--------------|
-| Language | JavaScript (.jsx) | TypeScript (.tsx) |
-| Chess library | chess.js | chessops |
-| PGN parser | pgn-parser (separate) | chessops (built-in) |
-| Package manager | npm | pnpm |
-| Testing | Jest | Vitest |
-| Move validation | "sloppy mode" hack | Native chessops notation support |
-
-These corrections align ligeon with the actual Lichess technology stack.

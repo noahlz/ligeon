@@ -2,7 +2,7 @@
 
 **Goal:** Create project structure with TypeScript, pnpm, chessops, and correct dependencies
 
-**Prerequisites:** Node.js 18+, pnpm 8+, macOS 11+ or Windows 10+
+**Prerequisites:** Node.js 22+, pnpm 8+, macOS 11+ or Windows 10+
 
 ---
 
@@ -11,7 +11,6 @@
 ### 1. Initialize Project
 
 ```bash
-mkdir ligeon && cd ligeon
 pnpm init
 ```
 
@@ -22,7 +21,7 @@ Replace the generated package.json with this complete configuration:
 ```json
 {
   "name": "ligeon",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Browse and replay chess games from PGN databases",
   "author": "",
@@ -67,13 +66,6 @@ Replace the generated package.json with this complete configuration:
   }
 }
 ```
-
-**Key differences from original plan:**
-- ✅ `chessops` (NOT chess.js or pgn-parser)
-- ✅ `vitest` and `happy-dom` (NOT jest or jsdom)
-- ✅ `@types/*` packages for TypeScript
-- ✅ No Babel packages (Vite handles TypeScript natively)
-- ✅ `tsc` in build:vite script for type checking
 
 **Checklist:**
 - [ ] package.json created with correct dependencies
@@ -198,7 +190,7 @@ export default {
 ```
 
 **Checklist:**
-- [ ] tailwind.config.ts created (NOT .js)
+- [ ] tailwind.config.ts created
 
 ---
 
@@ -271,7 +263,7 @@ import { expect } from 'vitest'
 ```
 
 **Checklist:**
-- [ ] vitest.config.ts created (NOT jest.config.js)
+- [ ] vitest.config.ts created
 - [ ] vitest.setup.ts created
 - [ ] happy-dom environment configured
 
@@ -333,7 +325,7 @@ import { expect } from 'vitest'
 
 **Checklist:**
 - [ ] public/index.html created
-- [ ] Script points to src/index.tsx (NOT .jsx)
+- [ ] Script points to src/index.tsx
 
 ---
 
@@ -397,9 +389,11 @@ body {
 
 ---
 
-### 12. Create .gitignore
+### 12. Update .gitignore
 
 **File: `.gitignore`**
+
+The project already has a .gitignore. Update/consolidate it with the below it to contain ignores relevant to the plan. Keep any custom ignores already in the existing file.
 
 ```
 # Dependencies
@@ -439,7 +433,7 @@ games.db
 ```
 
 **Checklist:**
-- [ ] .gitignore created
+- [ ] .gitignore updated 
 - [ ] Includes .logs/ directory
 
 ---
@@ -465,7 +459,7 @@ if (root) {
 ```
 
 **Checklist:**
-- [ ] src/index.tsx created (NOT .jsx)
+- [ ] src/index.tsx created
 
 ---
 
@@ -486,7 +480,7 @@ export default function App() {
 ```
 
 **Checklist:**
-- [ ] src/App.tsx created (NOT .jsx)
+- [ ] src/App.tsx created
 
 ---
 
@@ -548,7 +542,7 @@ app.on('activate', () => {
 ```
 
 **Checklist:**
-- [ ] electron/main.ts created (NOT .js)
+- [ ] electron/main.ts created
 
 ---
 
@@ -563,7 +557,7 @@ contextBridge.exposeInMainWorld('electron', {
 ```
 
 **Checklist:**
-- [ ] electron/preload.ts created (NOT .js)
+- [ ] electron/preload.ts created
 
 ---
 

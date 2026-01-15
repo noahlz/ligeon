@@ -9,19 +9,19 @@
 ### Phase 1: Project Setup & Infrastructure
 
 **Part 1 - Configuration Files:**
-- [ ] Create package.json with pnpm, chessops (NOT chess.js), @lichess-org/chessground
+- [ ] Create package.json with dependencies: pnpm, chessops, @lichess-org/chessground
 - [ ] Create tsconfig.json for TypeScript
 - [ ] Create vite.config.ts with React plugin
 - [ ] Create tailwind.config.ts with color palette
 - [ ] Create postcss.config.js with tailwind and autoprefixer
-- [ ] Create vitest.config.ts (NOT jest.config.js)
+- [ ] Create vitest.config.ts
 - [ ] Create electron-builder.json (appId: io.github.ligeon)
 - [ ] Create public/index.html with React root div
-- [ ] Create .gitignore (node_modules, dist, .db, .logs)
 - [ ] Create directory structure (electron/ipc, src/components, src/hooks, src/utils, __tests__, resources)
 - [ ] Run `pnpm install` successfully
 - [ ] Verify `pnpm run build:vite` creates dist/
 - [ ] Verify `pnpm run dev` starts without errors
+- [ ] Update .gitignore (node_modules, dist, .db, .logs)
 
 **Part 1 - Placeholder Components:**
 - [ ] Create src/index.tsx (React entry point)
@@ -87,7 +87,7 @@
 ### Phase 4: Chess Logic & PGN Parsing (chessops)
 
 **Part 4.1 - Chess Manager:**
-- [ ] Create src/utils/chessManager.ts using chessops (NOT chess.js)
+- [ ] Create src/utils/chessManager.ts using chessops
 - [ ] Implement loadGame(), nextMove(), prevMove(), goToMove()
 - [ ] Implement goToStart(), goToEnd(), getCurrentFEN()
 - [ ] Implement getLastMove() for board highlighting
@@ -97,7 +97,7 @@
 - [ ] Test: All move operations work correctly
 
 **Part 4.2 - PGN Import Handler:**
-- [ ] Create electron/ipc/importHandlers.ts using chessops parsePgn() (NOT pgn-parser)
+- [ ] Create electron/ipc/importHandlers.ts using chessops parsePgn()
 - [ ] Implement streaming import with chessops iterator
 - [ ] Implement result validation and skip logic
 - [ ] Implement progress logging every 10,000 games
@@ -338,13 +338,13 @@ pnpm run build             # Build: package Electron app locally
 
 ## Key Architectural Decisions
 
-- **Language:** TypeScript for type safety (NOT JavaScript)
-- **Chess Logic:** chessops (NOT chess.js) - Lichess standard
-- **PGN Parsing:** chessops parsePgn() (NOT pgn-parser library)
-- **Package Manager:** pnpm (NOT npm) - Lichess standard
-- **Testing:** Vitest (NOT Jest) - faster, better TypeScript support
-- **Audio:** Stream from Lichess CDN (not bundled), cache in memory
-- **Board:** @lichess-org/chessground (production-ready)
+- **Language:** TypeScript for type safety
+- **Chess Logic:** chessops - Lichess standard
+- **PGN Parsing:** chessops parsePgn()
+- **Package Manager:** pnpm - Lichess standard
+- **Testing:** Vitest - fast with TypeScript support
+- **Audio:** Stream from Lichess CDN, cache in memory
+- **Board:** @lichess-org/chessground 
 - **Database:** SQLite via better-sqlite3 for full-text search
 - **Collections:** Multiple independent .db files with metadata.json
 - **Import:** Stream PGN with chessops iterator, skip invalid games
