@@ -9,7 +9,7 @@
 ### 1. Install electron-builder
 
 ```bash
-npm install --save-dev electron-builder
+pnpm add -D electron-builder
 ```
 
 ### 2. Update package.json
@@ -25,10 +25,10 @@ Add to `package.json`:
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "npm run build && electron-builder",
-    "electron:build:mac": "npm run build && electron-builder --mac",
-    "electron:build:win": "npm run build && electron-builder --win"
+    "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "pnpm build && electron-builder",
+    "electron:build:mac": "pnpm build && electron-builder --mac",
+    "electron:build:win": "pnpm build && electron-builder --win"
   },
   "build": {
     "appId": "io.github.ligeon",
@@ -120,15 +120,15 @@ Copy existing GPL v3 license to `LICENSE` file in project root (already done at 
 
 **macOS:**
 ```bash
-npm run build
-npm run electron:build:mac
+pnpm build
+pnpm electron:build:mac
 ```
 Output: `dist-electron/*.dmg` and `dist-electron/*.zip`
 
 **Windows:**
 ```bash
-npm run build
-npm run electron:build:win
+pnpm build
+pnpm electron:build:win
 ```
 Output: `dist-electron/*.exe` (installer and portable)
 

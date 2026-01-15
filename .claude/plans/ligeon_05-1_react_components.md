@@ -11,9 +11,9 @@
 
 ## Actions to Complete
 
-### 1. Create src/index.jsx
+### 1. Create src/index.tsx
 
-```javascript
+```typescript
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
@@ -27,11 +27,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 ```
 
 **Checklist:**
-- [ ] Create src/index.jsx
+- [ ] Create src/index.tsx
 
 ---
 
-### 2. Create src/components/BoardDisplay.jsx
+### 2. Create src/components/BoardDisplay.tsx
 
 Implement Chessground board display in React with FEN-based position updates and move visualization.
 
@@ -52,16 +52,16 @@ Key patterns:
 Props needed: `fen` (position), `lastMove` (array of 2 squares or null)
 
 **Checklist:**
-- [ ] Create src/components/BoardDisplay.jsx with FEN and lastMove props
+- [ ] Create src/components/BoardDisplay.tsx with FEN and lastMove props
 - [ ] Configure animation duration for smooth transitions
 - [ ] Disable drawable layer for view-only mode
 - [ ] Update board when either FEN or lastMove prop changes
 
 ---
 
-### 3. Create src/components/MoveList.jsx
+### 3. Create src/components/MoveList.tsx
 
-```javascript
+```typescript
 import React, { useRef, useEffect } from 'react'
 
 export default function MoveList({ moves, currentMoveIndex, onMoveClick }) {
@@ -94,11 +94,11 @@ export default function MoveList({ moves, currentMoveIndex, onMoveClick }) {
 ```
 
 **Checklist:**
-- [ ] Create src/components/MoveList.jsx
+- [ ] Create src/components/MoveList.tsx
 
 ---
 
-### 4. Create src/hooks/useAutoPlay.js
+### 4. Create src/hooks/useAutoPlay.ts
 
 Implement auto-play timer hook with visibility checking to avoid wasted animations.
 
@@ -118,14 +118,14 @@ Methods/state needed:
 - `playSpeed` - current speed identifier
 
 **Checklist:**
-- [ ] Create src/hooks/useAutoPlay.js with timer-based advance
+- [ ] Create src/hooks/useAutoPlay.ts with timer-based advance
 - [ ] Add board visibility check before calling onNext() to skip hidden frames
 
 ---
 
-### 5. Create src/components/MoveNavigation.jsx
+### 5. Create src/components/MoveNavigation.tsx
 
-```javascript
+```typescript
 import React, { useEffect, useState } from 'react'
 import { ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, Play, Pause } from 'lucide-react'
 import { useAutoPlay } from '../hooks/useAutoPlay'
@@ -197,13 +197,13 @@ export default function MoveNavigation({ moveIndex, totalMoves, onStart, onPrev,
 ```
 
 **Checklist:**
-- [ ] Create src/components/MoveNavigation.jsx
+- [ ] Create src/components/MoveNavigation.tsx
 
 ---
 
-### 6. Create src/components/GameInfo.jsx
+### 6. Create src/components/GameInfo.tsx
 
-```javascript
+```typescript
 import React from 'react'
 import { timestampToDisplay } from '../utils/dateConverter'
 import { resultNumericToDisplay } from '../utils/resultConverter'
@@ -248,13 +248,13 @@ export default function GameInfo({ game }) {
 ```
 
 **Checklist:**
-- [ ] Create src/components/GameInfo.jsx
+- [ ] Create src/components/GameInfo.tsx
 
 ---
 
-### 7. Create src/components/GameListSidebar.jsx
+### 7. Create src/components/GameListSidebar.tsx
 
-```javascript
+```typescript
 import React, { useState, useEffect } from 'react'
 import { timestampToDisplay } from '../utils/dateConverter'
 import { resultNumericToDisplay } from '../utils/resultConverter'
@@ -312,13 +312,13 @@ export default function GameListSidebar({ collectionId, onGameSelect }) {
 ```
 
 **Checklist:**
-- [ ] Create src/components/GameListSidebar.jsx
+- [ ] Create src/components/GameListSidebar.tsx
 
 ---
 
-### 8. Create src/components/ImportDialog.jsx
+### 8. Create src/components/ImportDialog.tsx
 
-```javascript
+```typescript
 import React, { useEffect, useRef, useState } from 'react'
 
 export default function ImportDialog({ isOpen, onComplete }) {
@@ -387,13 +387,13 @@ export default function ImportDialog({ isOpen, onComplete }) {
 ```
 
 **Checklist:**
-- [ ] Create src/components/ImportDialog.jsx
+- [ ] Create src/components/ImportDialog.tsx
 
 ---
 
-### 9. Create src/components/CollectionSelector.jsx
+### 9. Create src/components/CollectionSelector.tsx
 
-```javascript
+```typescript
 import React, { useState } from 'react'
 
 export default function CollectionSelector({ collections, selectedId, onSelect, onImport }) {
@@ -424,11 +424,11 @@ export default function CollectionSelector({ collections, selectedId, onSelect, 
 ```
 
 **Checklist:**
-- [ ] Create src/components/CollectionSelector.jsx
+- [ ] Create src/components/CollectionSelector.tsx
 
 ---
 
-### 10. Create src/utils/audioManager.js
+### 10. Create src/utils/audioManager.ts
 
 Implement audio manager for streaming sound effects from Lichess CDN with in-memory caching.
 
@@ -441,26 +441,26 @@ Implementation notes:
 - Initialize on first user interaction (browser audio policy)
 
 **Checklist:**
-- [ ] Create src/utils/audioManager.js with AudioContext initialization, buffer caching, and playback methods
+- [ ] Create src/utils/audioManager.ts with AudioContext initialization, buffer caching, and playback methods
 
 ---
 
-### 11. Create src/utils/chessManager.js
+### 11. Create src/utils/chessManager.ts
 
-Implement chess move replay logic for PGN game navigation with move tracking.
+Implement chess move replay logic for PGN game navigation with move tracking using chessops.
 
 References:
-- `@chessground-examples/src/util.ts` - chess.js integration with board state
+- `@chessground-examples/src/util.ts` - chessops integration with board state
 - `@chessground-examples/src/units/anim.ts` - move tracking for animation
 - `@chessground-examples/src/units/viewOnly.ts` - automatic move execution pattern
 
 Implementation notes:
 - Load game moves from PGN parser output
 - Track current move index during replay and previous move for UI highlighting
-- Generate FEN at any move position by replaying moves from start
+- Generate FEN at any move position using chessops position management
 - Support navigation: next, previous, go to start/end, jump to arbitrary move
-- Use chess.js sloppy notation for PGN move compatibility
-- Reset and replay moves from start for backward navigation (efficient enough for typical games)
+- Use chessops which handles all standard PGN notation natively (no sloppy mode needed)
+- Maintain position history for efficient forward/backward navigation
 - Store last move (fromSquare, toSquare) for highlighting in BoardDisplay
 
 Methods needed:
@@ -473,7 +473,7 @@ Methods needed:
 - `getTotalMoves()` - get total move count
 
 **Checklist:**
-- [ ] Create src/utils/chessManager.js with move replay and FEN generation
+- [ ] Create src/utils/chessManager.ts with chessops move replay and FEN generation
 - [ ] Track previous/current move for lastMove highlighting
 - [ ] Export getLastMove() method for BoardDisplay
 
@@ -482,7 +482,7 @@ Methods needed:
 ### 12. Test Components
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Expected: All components render without errors

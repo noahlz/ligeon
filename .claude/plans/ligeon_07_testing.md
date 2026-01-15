@@ -11,30 +11,50 @@
 
 ## Actions to Complete
 
-### 1. Jest Configuration
+### 1. Vitest Configuration
 
-Already created in Part 1. Verify `jest.config.js`:
+Already created in Part 1. Verify `vitest.config.ts`:
 
-```javascript
-module.exports = {
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  moduleNameMapper: { '^@/(.*)$': '<rootDir>/src/$1' },
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx}',
-    'electron/**/*.js',
-    '!**/*.test.{js,jsx}',
-    '!**/node_modules/**',
-  ],
-  coverageThreshold: {
-    global: { branches: 60, functions: 60, lines: 60, statements: 60 },
+```typescript
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+    setupFiles: ['./vitest.setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        '__tests__/',
+        '*.config.*',
+        'dist/',
+        'dist-electron/',
+      ],
+      thresholds: {
+        lines: 60,
+        functions: 60,
+        branches: 60,
+        statements: 60,
+      },
+    },
   },
-}
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+})
 ```
 
 **Checklist:**
-- [ ] Verify jest.config.js exists
-- [ ] Verify jest.setup.js imports @testing-library/jest-dom
+- [ ] Verify vitest.config.ts exists
+- [ ] Verify vitest.setup.ts imports @testing-library/jest-dom
 
 ---
 
@@ -42,23 +62,23 @@ module.exports = {
 
 ```bash
 # Run all tests once
-npm test
+pnpm test
 
 # Run in watch mode
-npm run test:watch
+pnpm test:watch
 
 # Generate coverage report
-npm run test:coverage
+pnpm test:coverage
 
 # Run specific test file
-npm test -- dateConverter.test
+pnpm test dateConverter.test
 
 # Run tests matching pattern
-npm test -- --testNamePattern="parses"
+pnpm test -- --testNamePattern="parses"
 ```
 
 **Checklist:**
-- [ ] `npm test` runs without errors
+- [ ] `pnpm test` runs without errors (Vitest)
 - [ ] All tests pass
 - [ ] Coverage meets thresholds
 
@@ -66,9 +86,9 @@ npm test -- --testNamePattern="parses"
 
 ### 3. Create Component Tests
 
-**File: `__tests__/unit/components/BoardDisplay.test.jsx`**
+**File: `__tests__/unit/components/BoardDisplay.test.tsx`**
 
-```javascript
+```typescript
 import React from 'react'
 import { render } from '@testing-library/react'
 import BoardDisplay from '../../../src/components/BoardDisplay'
@@ -88,9 +108,9 @@ describe('BoardDisplay', () => {
 })
 ```
 
-**File: `__tests__/unit/components/MoveList.test.jsx`**
+**File: `__tests__/unit/components/MoveList.test.tsx`**
 
-```javascript
+```typescript
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import MoveList from '../../../src/components/MoveList'
@@ -110,7 +130,7 @@ describe('MoveList', () => {
   })
 
   test('calls onMoveClick', () => {
-    const onClick = jest.fn()
+    const onClick = vi.fn()
     render(<MoveList moves={moves} currentMoveIndex={0} onMoveClick={onClick} />)
     // Component should be clickable
     expect(onClick).toBeDefined()
@@ -118,9 +138,9 @@ describe('MoveList', () => {
 })
 ```
 
-**File: `__tests__/unit/components/GameInfo.test.jsx`**
+**File: `__tests__/unit/components/GameInfo.test.tsx`**
 
-```javascript
+```typescript
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import GameInfo from '../../../src/components/GameInfo'
@@ -152,22 +172,22 @@ describe('GameInfo', () => {
 ```
 
 **Checklist:**
-- [ ] Create __tests__/unit/components/BoardDisplay.test.jsx
-- [ ] Create __tests__/unit/components/MoveList.test.jsx
-- [ ] Create __tests__/unit/components/GameInfo.test.jsx
-- [ ] Run `npm test -- components` - all pass
+- [ ] Create __tests__/unit/components/BoardDisplay.test.tsx
+- [ ] Create __tests__/unit/components/MoveList.test.tsx
+- [ ] Create __tests__/unit/components/GameInfo.test.tsx
+- [ ] Run `pnpm test components` - all pass (Vitest)
 
 ---
 
 ### 4. Run Coverage Report
 
 ```bash
-npm run test:coverage
+pnpm test:coverage
 ```
 
 Check output for coverage on all metrics (should be > 60%)
 
-```javascript
+```typescript
 import { importAndIndexPgn } from '../../electron/ipc/importHandlers'
 import { GameDatabase } from '../../electron/ipc/gameDatabase'
 import fs from 'fs'
@@ -198,7 +218,7 @@ describe('Performance', () => {
 ```
 
 **Checklist:**
-- [ ] Create __tests__/performance/indexing.test.js
+- [ ] Create __tests__/performance/indexing.test.ts
 - [ ] Run performance tests
 - [ ] Verify acceptable timings
 
@@ -207,7 +227,7 @@ describe('Performance', () => {
 ### 5. Fix Failures
 
 ```bash
-npm test 2>&1 | tee test-output.txt
+pnpm test 2>&1 | tee test-output.txt
 ```
 
 If tests fail, debug and fix:

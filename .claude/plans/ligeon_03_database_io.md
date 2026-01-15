@@ -3,17 +3,17 @@
 **Goal:** Create SQLite database wrapper, converters, and collection/game handlers
 
 **Files to create:**
-- electron/ipc/gameDatabase.js (SQLite operations)
-- src/utils/{dateConverter,resultConverter}.js (data conversion)
-- electron/ipc/{collectionHandlers,gameHandlers}.js (CRUD operations)
+- electron/ipc/gameDatabase.ts (SQLite operations)
+- src/utils/{dateConverter,resultConverter}.ts (data conversion)
+- electron/ipc/{collectionHandlers,gameHandlers}.ts (CRUD operations)
 
 ---
 
 ## Actions to Complete
 
-### 1. Create electron/ipc/gameDatabase.js
+### 1. Create electron/ipc/gameDatabase.ts
 
-```javascript
+```typescript
 import Database from 'better-sqlite3'
 import path from 'path'
 import { app } from 'electron'
@@ -191,15 +191,15 @@ export class GameDatabase {
 ```
 
 **Checklist:**
-- [ ] Create electron/ipc/gameDatabase.js
+- [ ] Create electron/ipc/gameDatabase.ts
 - [ ] Verify all methods present
 - [ ] Test with sample game data
 
 ---
 
-### 2. Create src/utils/dateConverter.js
+### 2. Create src/utils/dateConverter.ts
 
-```javascript
+```typescript
 export function pgnDateToTimestamp(pgnDate) {
   if (!pgnDate || pgnDate === '?.?.?') return null
 
@@ -237,16 +237,16 @@ export function timestampToDisplay(timestamp) {
 ```
 
 **Checklist:**
-- [ ] Create src/utils/dateConverter.js
+- [ ] Create src/utils/dateConverter.ts
 - [ ] Test: "1985.01.15" converts to timestamp
 - [ ] Test: "1985.??.??" handles partial dates
 - [ ] Test: "?.?.?" returns null
 
 ---
 
-### 3. Create src/utils/resultConverter.js
+### 3. Create src/utils/resultConverter.ts
 
-```javascript
+```typescript
 export function convertResult(pgnResult) {
   const trimmed = pgnResult.trim()
 
@@ -279,7 +279,7 @@ export function resultNumericToDisplay(resultNumeric) {
 ```
 
 **Checklist:**
-- [ ] Create src/utils/resultConverter.js
+- [ ] Create src/utils/resultConverter.ts
 - [ ] Test: "1-0" → 1.0, "White Wins"
 - [ ] Test: "1/2-1/2" → 0.5, "Draw"
 - [ ] Test: "*" → skip: true
@@ -288,9 +288,9 @@ export function resultNumericToDisplay(resultNumeric) {
 
 ### 4. Create Unit Tests
 
-**File: `__tests__/unit/dateConverter.test.js`**
+**File: `__tests__/unit/dateConverter.test.ts`**
 
-```javascript
+```typescript
 import { pgnDateToTimestamp, timestampToDisplay } from '../../src/utils/dateConverter'
 
 describe('Date Converter', () => {
@@ -321,9 +321,9 @@ describe('Date Converter', () => {
 })
 ```
 
-**File: `__tests__/unit/resultConverter.test.js`**
+**File: `__tests__/unit/resultConverter.test.ts`**
 
-```javascript
+```typescript
 import { convertResult, resultNumericToDisplay } from '../../src/utils/resultConverter'
 
 describe('Result Converter', () => {
@@ -352,15 +352,15 @@ describe('Result Converter', () => {
 ```
 
 **Checklist:**
-- [ ] Create __tests__/unit/dateConverter.test.js
-- [ ] Create __tests__/unit/resultConverter.test.js
-- [ ] Run `npm test` - all tests pass
+- [ ] Create __tests__/unit/dateConverter.test.ts
+- [ ] Create __tests__/unit/resultConverter.test.ts
+- [ ] Run `pnpm test` - all tests pass (Vitest compatible)
 
 ---
 
-**File: `__tests__/unit/database.test.js`**
+**File: `__tests__/unit/database.test.ts`**
 
-```javascript
+```typescript
 import { GameDatabase } from '../../electron/ipc/gameDatabase'
 import fs from 'fs'
 import path from 'path'
@@ -487,16 +487,16 @@ describe('GameDatabase', () => {
 ```
 
 **Checklist:**
-- [ ] Create __tests__/unit/database.test.js
-- [ ] Run `npm test` - all tests pass
+- [ ] Create __tests__/unit/database.test.ts
+- [ ] Run `pnpm test` - all tests pass
 
 ---
 
 ### 5. Create Collection Handlers
 
-**File: `electron/ipc/collectionHandlers.js`**
+**File: `electron/ipc/collectionHandlers.ts`**
 
-```javascript
+```typescript
 import path from 'path'
 import fs from 'fs'
 import { app } from 'electron'
@@ -569,16 +569,16 @@ export async function deleteCollection(collectionId) {
 ```
 
 **Checklist:**
-- [ ] Create electron/ipc/collectionHandlers.js
+- [ ] Create electron/ipc/collectionHandlers.ts
 - [ ] All three methods implemented: list, rename, delete
 
 ---
 
 ### 6. Create Game Handlers
 
-**File: `electron/ipc/gameHandlers.js`**
+**File: `electron/ipc/gameHandlers.ts`**
 
-```javascript
+```typescript
 import { GameDatabase } from './gameDatabase.js'
 
 export async function searchGames(collectionId, filters) {
@@ -609,21 +609,21 @@ export async function getGameMoves(collectionId, gameId) {
 ```
 
 **Checklist:**
-- [ ] Create electron/ipc/gameHandlers.js
+- [ ] Create electron/ipc/gameHandlers.ts
 - [ ] Both methods implemented: searchGames, getGameMoves
 
 ---
 
-### 7. Wire Handlers in electron/main.js
+### 7. Wire Handlers in electron/main.ts
 
-Add imports to top of electron/main.js:
-```javascript
+Add imports to top of electron/main.ts:
+```typescript
 import { listCollections, renameCollection, deleteCollection } from './ipc/collectionHandlers.js'
 import { searchGames, getGameMoves } from './ipc/gameHandlers.js'
 ```
 
 Replace stubs in setupIpcHandlers():
-```javascript
+```typescript
 ipcMain.handle('list-collections', async () => listCollections())
 ipcMain.handle('rename-collection', async (event, { collectionId, newName }) => renameCollection(collectionId, newName))
 ipcMain.handle('delete-collection', async (event, { collectionId }) => deleteCollection(collectionId))
@@ -634,13 +634,13 @@ ipcMain.handle('get-game-moves', async (event, { collectionId, gameId }) => getG
 ### 8. Test Database & I/O
 
 ```bash
-npm test -- dateConverter.test
-npm test -- resultConverter.test
-npm test -- database.test
-npm run dev
+pnpm test dateConverter.test
+pnpm test resultConverter.test
+pnpm test database.test
+pnpm dev
 ```
 
-Expected: All tests pass, app starts without errors
+Expected: All tests pass (Vitest), app starts without errors
 
 **Summary:** Database wrapper, converters, collection & game handlers created and tested
 

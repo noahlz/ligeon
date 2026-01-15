@@ -1,20 +1,20 @@
 # ligeon Part 2: Electron Main Process
 
-**Goal:** Create main.js with window management, collections dir init, and IPC handlers
+**Goal:** Create main.ts with window management, collections dir init, and IPC handlers
 
 **Key files to create:**
-- electron/main.js (window + IPC setup)
-- electron/preload.js (security bridge)
+- electron/main.ts (window + IPC setup)
+- electron/preload.ts (security bridge)
 
 ---
 
 ## Actions to Complete
 
-### 1. Create electron/main.js
+### 1. Create electron/main.ts
 
-Replace your placeholder `electron/main.js` with this complete implementation:
+Replace your placeholder `electron/main.ts` with this complete implementation:
 
-```javascript
+```typescript
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import path from 'path'
 import fs from 'fs'
@@ -208,15 +208,15 @@ process.on('uncaughtException', (error) => {
 ```
 
 **Checklist:**
-- [ ] Replace electron/main.js with complete code above
+- [ ] Replace electron/main.ts with complete code above
 - [ ] Verify `import` statements work (ES modules)
 - [ ] Ensure collectionsPath includes 'ligeon' subdirectory
 
 ---
 
-### 2. Create electron/preload.js
+### 2. Create electron/preload.ts
 
-```javascript
+```typescript
 import { contextBridge, ipcRenderer } from 'electron'
 
 /**
@@ -279,7 +279,7 @@ contextBridge.exposeInMainWorld('electron', {
 ```
 
 **Checklist:**
-- [ ] Replace electron/preload.js with complete code above
+- [ ] Replace electron/preload.ts with complete code above
 - [ ] All IPC methods exposed via contextBridge
 - [ ] Event listeners return unsubscribe functions
 - [ ] Security: nodeIntegration disabled, contextIsolation enabled
@@ -289,7 +289,7 @@ contextBridge.exposeInMainWorld('electron', {
 ### 3. Test Main Process
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Expected: App starts, console shows "App ready", "Initializing ligeon...", "Ready for PGN imports"
@@ -300,10 +300,10 @@ ls -la ~/.ligeon/collections/      # macOS
 dir %APPDATA%\..\Local\ligeon\     # Windows
 ```
 
-### 4. Test IPC (Temporary Test in src/App.jsx)
+### 4. Test IPC (Temporary Test in src/App.tsx)
 
-Add to App.jsx useEffect:
-```javascript
+Add to App.tsx useEffect:
+```typescript
 window.electron.listCollections().then(cols => console.log('Collections:', cols))
 ```
 
