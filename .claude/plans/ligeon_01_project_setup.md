@@ -1,18 +1,18 @@
 # ligeon Part 1: Project Setup
 
-**Goal:** Create project structure, install dependencies, create all config files
+**Goal:** Create project structure with TypeScript, pnpm, chessops, and correct dependencies
 
-**Prerequisites:** Node.js 16+, npm 8+, macOS 11+ or Windows 10+
+**Prerequisites:** Node.js 18+, pnpm 8+, macOS 11+ or Windows 10+
 
 ---
 
 ## Actions to Complete
 
-### 1. Initialize and Install
+### 1. Initialize Project
 
 ```bash
 mkdir ligeon && cd ligeon
-npm init -y
+pnpm init
 ```
 
 ### 2. Create package.json
@@ -26,68 +26,114 @@ Replace the generated package.json with this complete configuration:
   "type": "module",
   "description": "Browse and replay chess games from PGN databases",
   "author": "",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "main": "electron/main.js",
   "homepage": "./",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "build": "vite build && electron-builder",
-    "build:mac": "vite build && electron-builder --mac",
-    "build:win": "vite build && electron-builder --win",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "build:vite": "tsc && vite build",
+    "build": "pnpm run build:vite && electron-builder",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@lichess-org/chessground": "^9.9.0",
     "better-sqlite3": "^12.5.0",
-    "chess.js": "^0.13.0",
-    "chessground": "^9.9.0",
-    "electron-squirrel-startup": "^1.1.1",
+    "chessops": "^0.15.0",
     "lucide-react": "^0.263.1",
-    "pgn-parser": "^2.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.5",
-    "@babel/preset-react": "^7.27.1",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
+    "@types/better-sqlite3": "^7.6.5",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/ui": "^3.2.0",
     "autoprefixer": "^10.4.20",
-    "babel-jest": "^29.7.0",
     "concurrently": "^9.1.2",
     "electron": "^39.2.6",
     "electron-builder": "^26.0.12",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
+    "happy-dom": "^15.0.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
+    "typescript": "^5.9.0",
     "vite": "^6.0.7",
+    "vitest": "^3.2.0",
     "wait-on": "^8.0.1"
   }
 }
 ```
 
+**Key differences from original plan:**
+- ✅ `chessops` (NOT chess.js or pgn-parser)
+- ✅ `vitest` and `happy-dom` (NOT jest or jsdom)
+- ✅ `@types/*` packages for TypeScript
+- ✅ No Babel packages (Vite handles TypeScript natively)
+- ✅ `tsc` in build:vite script for type checking
+
 **Checklist:**
-- [ ] package.json created with all dependencies
-- [ ] Run `npm install` successfully
-- [ ] Verify node_modules/ created
+- [ ] package.json created with correct dependencies
+- [ ] Run `pnpm install` successfully
+- [ ] Verify pnpm-lock.yaml created
 
 ---
 
-### 3. Create Directory Structure
+### 3. Create TypeScript Configuration
+
+**File: `tsconfig.json`**
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*", "electron/**/*"],
+  "exclude": ["node_modules", "dist", "dist-electron"]
+}
+```
+
+**Checklist:**
+- [ ] tsconfig.json created
+- [ ] jsx set to "react-jsx"
+- [ ] strict mode enabled
+
+---
+
+### 4. Create Directory Structure
 
 ```bash
 mkdir -p electron/ipc src/{components,utils,hooks,styles} \
-         resources/sample-games __tests__/{unit/components,integration,performance} public
+         __tests__/{unit/components,integration,performance} public resources/sample-games
 ```
 
-### 4. Create Vite Configuration
+---
 
-**File: `vite.config.js`**
+### 5. Create Vite Configuration
 
-```javascript
+**File: `vite.config.ts`**
+
+```typescript
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -98,31 +144,36 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: false,
+    reportCompressedSize: false,
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    port: 5173,
+  },
 })
 ```
 
 **Checklist:**
-- [ ] vite.config.js created
-- [ ] React plugin configured
+- [ ] vite.config.ts created (NOT .js)
+- [ ] reportCompressedSize: false for silent builds
 
 ---
 
-## 1.5 Create Tailwind CSS Configuration
+### 6. Create Tailwind CSS Configuration
 
-**File: `tailwind.config.js`**
+**File: `tailwind.config.ts`**
 
-```javascript
-/** @type {import('tailwindcss').Config} */
+```typescript
+import type { Config } from 'tailwindcss'
+
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
@@ -143,15 +194,15 @@ export default {
     },
   },
   plugins: [],
-}
+} satisfies Config
 ```
 
 **Checklist:**
-- [ ] tailwind.config.js created
+- [ ] tailwind.config.ts created (NOT .js)
 
 ---
 
-## 1.6 Create PostCSS Configuration
+### 7. Create PostCSS Configuration
 
 **File: `postcss.config.js`**
 
@@ -169,58 +220,64 @@ export default {
 
 ---
 
-## 1.7 Create Jest Configuration
+### 8. Create Vitest Configuration
 
-**File: `jest.config.js`**
+**File: `vitest.config.ts`**
 
-```javascript
-module.exports = {
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
-  transform: {
-    '^.+\\.(js|jsx)$': ['babel-jest', { 
-      presets: ['@babel/preset-react'] 
-    }],
-  },
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx}',
-    'electron/**/*.js',
-    '!**/*.test.{js,jsx}',
-    '!**/node_modules/**',
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 60,
-      functions: 60,
-      lines: 60,
-      statements: 60,
+```typescript
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+    setupFiles: ['./vitest.setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        '__tests__/',
+        '*.config.*',
+        'dist/',
+        'dist-electron/',
+      ],
+      thresholds: {
+        lines: 60,
+        functions: 60,
+        branches: 60,
+        statements: 60,
+      },
     },
   },
-}
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+})
+```
+
+**File: `vitest.setup.ts`**
+
+```typescript
+// Global test setup
+import { expect } from 'vitest'
+
+// Add custom matchers if needed
 ```
 
 **Checklist:**
-- [ ] jest.config.js created
+- [ ] vitest.config.ts created (NOT jest.config.js)
+- [ ] vitest.setup.ts created
+- [ ] happy-dom environment configured
 
 ---
 
-## 1.8 Create Jest Setup File
-
-**File: `jest.setup.js`**
-
-```javascript
-require('@testing-library/jest-dom')
-```
-
-**Checklist:**
-- [ ] jest.setup.js created
-
----
-
-## 1.9 Create Electron Builder Configuration
+### 9. Create Electron Builder Configuration
 
 **File: `electron-builder.json`**
 
@@ -235,36 +292,27 @@ require('@testing-library/jest-dom')
   "files": [
     "dist/**/*",
     "electron/**/*",
-    "resources/**/*",
     "package.json"
   ],
   "mac": {
-    "target": ["dmg"],
-    "category": "public.app-category.games",
-    "artifactName": "${productName}-${version}.${ext}"
+    "target": ["dir"],
+    "category": "public.app-category.games"
   },
   "win": {
-    "target": ["nsis", "portable"],
-    "certificateFile": null,
-    "artifactName": "${productName}-${version}.${ext}"
-  },
-  "nsis": {
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "createDesktopShortcut": true,
-    "createStartMenuShortcut": true
+    "target": ["dir"]
   }
 }
 ```
 
+**Note:** Simplified for local builds only (no installers, no code signing).
+
 **Checklist:**
 - [ ] electron-builder.json created
-- [ ] appId set to io.github.ligeon
-- [ ] productName set to ligeon
+- [ ] target set to "dir" for local testing
 
 ---
 
-## 1.10 Create HTML Entry Point
+### 10. Create HTML Entry Point
 
 **File: `public/index.html`**
 
@@ -278,19 +326,18 @@ require('@testing-library/jest-dom')
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/src/index.jsx"></script>
+  <script type="module" src="/src/index.tsx"></script>
 </body>
 </html>
 ```
 
 **Checklist:**
 - [ ] public/index.html created
-- [ ] Root div for React
-- [ ] Script points to src/index.jsx
+- [ ] Script points to src/index.tsx (NOT .jsx)
 
 ---
 
-## 1.11 Create CSS Stylesheet
+### 11. Create CSS Stylesheet
 
 **File: `src/styles/index.css`**
 
@@ -310,6 +357,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Import chessground CSS */
+@import '@lichess-org/chessground/assets/chessground.base.css';
+@import '@lichess-org/chessground/assets/chessground.brown.css';
+@import '@lichess-org/chessground/assets/chessground.cburnett.css';
 
 .move-list {
   font-family: 'Courier New', monospace;
@@ -333,7 +385,7 @@ body {
 }
 
 /* Chessground overrides */
-.cg-board {
+.cg-wrap {
   border-radius: 4px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
@@ -341,20 +393,18 @@ body {
 
 **Checklist:**
 - [ ] src/styles/index.css created
-- [ ] Tailwind directives included
-- [ ] Custom styles for move list
+- [ ] Chessground CSS imported
 
 ---
 
-## 1.12 Create .gitignore
+### 12. Create .gitignore
 
 **File: `.gitignore`**
 
 ```
 # Dependencies
 node_modules/
-package-lock.json
-yarn.lock
+pnpm-lock.yaml
 
 # Build output
 dist/
@@ -368,7 +418,6 @@ dist-electron/
 Thumbs.db
 *.log
 npm-debug.log*
-yarn-debug.log*
 
 # Editor
 .vscode/
@@ -379,47 +428,50 @@ yarn-debug.log*
 # Environment
 .env
 .env.local
-.env.*.local
 
 # Data
 .ligeon/
 games.db
 *.db
+
+# Logs
+.logs/
 ```
 
 **Checklist:**
 - [ ] .gitignore created
-- [ ] Includes node_modules, build output, IDE files, app data
+- [ ] Includes .logs/ directory
 
 ---
 
-## 1.13 Create Placeholder Components (Stubs)
+### 13. Create Placeholder Components (Stubs)
 
-Create minimal placeholder files so imports don't fail during setup:
+**File: `src/index.tsx`**
 
-**File: `src/index.jsx`**
-
-```javascript
+```typescript
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './styles/index.css'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-)
+const root = document.getElementById('root')
+if (root) {
+  ReactDOM.createRoot(root).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  )
+}
 ```
 
 **Checklist:**
-- [ ] src/index.jsx created
+- [ ] src/index.tsx created (NOT .jsx)
 
 ---
 
-**File: `src/App.jsx`**
+**File: `src/App.tsx`**
 
-```javascript
+```typescript
 import React from 'react'
 
 export default function App() {
@@ -427,24 +479,28 @@ export default function App() {
     <div className="min-h-screen bg-slate-900 text-white p-8">
       <h1 className="text-4xl font-bold mb-4">ligeon</h1>
       <p className="text-gray-400">Chess PGN Game Browser</p>
-      <p className="text-sm mt-4">Setting up...</p>
+      <p className="text-sm mt-4">Setting up with TypeScript + chessops...</p>
     </div>
   )
 }
 ```
 
 **Checklist:**
-- [ ] src/App.jsx created
+- [ ] src/App.tsx created (NOT .jsx)
 
 ---
 
-**File: `electron/main.js`**
+**File: `electron/main.ts`**
 
-```javascript
+```typescript
 import { app, BrowserWindow } from 'electron'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
-let mainWindow
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+let mainWindow: BrowserWindow | null = null
 
 // Determine if running in development
 const isDev = process.env.NODE_ENV === 'development' ||
@@ -457,6 +513,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js'),
     },
   })
 
@@ -491,13 +548,13 @@ app.on('activate', () => {
 ```
 
 **Checklist:**
-- [ ] electron/main.js created with basic window setup
+- [ ] electron/main.ts created (NOT .js)
 
 ---
 
-**File: `electron/preload.js`**
+**File: `electron/preload.ts`**
 
-```javascript
+```typescript
 import { contextBridge } from 'electron'
 
 contextBridge.exposeInMainWorld('electron', {
@@ -506,24 +563,67 @@ contextBridge.exposeInMainWorld('electron', {
 ```
 
 **Checklist:**
-- [ ] electron/preload.js created
+- [ ] electron/preload.ts created (NOT .js)
 
 ---
 
-### 15. Verify Setup Works
+### 14. Verify Setup Works
 
 ```bash
-npm install              # Install deps
-npm run build            # Build React
-npm run dev              # Start dev server (Ctrl+C to stop)
+pnpm install              # Install deps
+pnpm run typecheck        # TypeScript check
+pnpm run build:vite       # Build React
+pnpm run dev              # Start dev server (Ctrl+C to stop)
 ```
 
-Expected: Vite builds successfully, Electron window opens without errors.
+Expected output:
+- `pnpm install` completes without errors
+- `pnpm run typecheck` shows no TypeScript errors
+- `pnpm run build:vite` creates dist/ directory
+- `pnpm run dev` opens Electron window with "Setting up with TypeScript + chessops..."
 
-**Files Created (Summary):**
-- package.json, vite.config.js, tailwind.config.js, postcss.config.js
-- jest.config.js, jest.setup.js, electron-builder.json
-- public/index.html, src/{styles/index.css, index.jsx, App.jsx}
-- electron/{main.js, preload.js}, .gitignore
+**Checklist:**
+- [ ] All commands run successfully
+- [ ] Electron window opens
+- [ ] No TypeScript errors
+- [ ] DevTools accessible
+
+---
+
+## Files Created (Summary)
+
+**Configuration:**
+- package.json (with chessops, pnpm, Vitest)
+- tsconfig.json
+- vite.config.ts, tailwind.config.ts, postcss.config.js
+- vitest.config.ts, vitest.setup.ts
+- electron-builder.json
+- .gitignore
+
+**Source Files:**
+- public/index.html
+- src/index.tsx, src/App.tsx
+- src/styles/index.css (with chessground CSS)
+- electron/main.ts, electron/preload.ts
+
+**Directory Structure:**
+- electron/ipc/
+- src/{components, utils, hooks, styles}/
+- __tests__/{unit/components, integration, performance}/
+- resources/sample-games/
+
+---
+
+## Verification Checklist
+
+- [ ] `pnpm install` completes
+- [ ] `pnpm run typecheck` passes
+- [ ] `pnpm run build:vite` creates dist/
+- [ ] `pnpm run dev` starts Electron
+- [ ] No console errors
+- [ ] chessground CSS loaded
+- [ ] TypeScript compilation works
+
+---
 
 **Next:** Proceed to ligeon_02_electron_main.md
