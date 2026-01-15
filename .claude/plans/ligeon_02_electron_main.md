@@ -311,6 +311,8 @@ Expected console output: `Collections: []`
 
 Then remove the test code.
 
-**Summary:** Main process window created, collections dir initialized, IPC handlers registered
+---
 
-**Next:** Proceed to ligeon_03_database_io.md
+**Next:** 
+- Update completed items in `ligeon_00_master_checklist.md`
+- Proceed to `ligeon_03_database_io.md`

@@ -374,6 +374,8 @@ pnpm dev
 
 Expected: Tests pass (Vitest), import works correctly
 
-**Summary:** PGN parser, import handler with streaming, progress logging created
+---
 
-**Next:** Proceed to ligeon_05-1_react_components.md
+**Next:** 
+- Update completed items in `ligeon_00_master_checklist.md`
+- Proceed to `ligeon_05_react_components.md`

@@ -2,19 +2,20 @@
 
 **Goal:** Create project structure with TypeScript, pnpm, chessops, and correct dependencies
 
-**Prerequisites:** Node.js 22+, pnpm 8+, macOS 11+ or Windows 10+
+**Prerequisites:** Node.js 24+, pnpm 10+, macOS 11+ or Windows 10+
 
 ---
 
-## Actions to Complete
+## Implementation Tasks
 
-### 1. Initialize Project
+Complete the following tasks in order. Create a todo list to track each task.
 
+### Task 1: Initialize Project and Create package.json
+
+Run:
 ```bash
 pnpm init
 ```
-
-### 2. Create package.json
 
 Replace the generated package.json with this complete configuration:
 
@@ -37,44 +38,48 @@ Replace the generated package.json with this complete configuration:
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  },
   "dependencies": {
     "@lichess-org/chessground": "^9.9.0",
-    "better-sqlite3": "^12.5.0",
+    "better-sqlite3": "^12.6.0",
     "chessops": "^0.15.0",
-    "lucide-react": "^0.263.1",
+    "lucide-react": "^0.562.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.5",
-    "@types/node": "^20.0.0",
-    "@types/react": "^18.3.0",
-    "@types/react-dom": "^18.3.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^24.10.0",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/ui": "^3.2.0",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.2",
-    "electron": "^39.2.6",
+    "electron": "^39.2.7",
     "electron-builder": "^26.0.12",
     "happy-dom": "^15.0.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.9.0",
-    "vite": "^6.0.7",
-    "vitest": "^3.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^3.2.4",
     "wait-on": "^8.0.1"
   }
 }
 ```
 
-**Checklist:**
-- [ ] package.json created with correct dependencies
-- [ ] Run `pnpm install` successfully
-- [ ] Verify pnpm-lock.yaml created
+Then verify:
+- [ ] package.json created with dependencies
+- [ ] `pnpm install` completes successfully
+- [ ] pnpm-lock.yaml exists
 
 ---
 
-### 3. Create TypeScript Configuration
+### Task 2: Create TypeScript Configuration
 
 **File: `tsconfig.json`**
 
@@ -105,14 +110,13 @@ Replace the generated package.json with this complete configuration:
 }
 ```
 
-**Checklist:**
-- [ ] tsconfig.json created
-- [ ] jsx set to "react-jsx"
+Verify:
+- [ ] tsconfig.json created with jsx: "react-jsx"
 - [ ] strict mode enabled
 
 ---
 
-### 4. Create Directory Structure
+### Task 3: Create Directory Structure
 
 ```bash
 mkdir -p electron/ipc src/{components,utils,hooks,styles} \
@@ -121,7 +125,7 @@ mkdir -p electron/ipc src/{components,utils,hooks,styles} \
 
 ---
 
-### 5. Create Vite Configuration
+### Task 4: Create Vite Configuration
 
 **File: `vite.config.ts`**
 
@@ -149,13 +153,12 @@ export default defineConfig({
 })
 ```
 
-**Checklist:**
-- [ ] vite.config.ts created (NOT .js)
-- [ ] reportCompressedSize: false for silent builds
+Verify:
+- [ ] vite.config.ts created with reportCompressedSize: false
 
 ---
 
-### 6. Create Tailwind CSS Configuration
+### Task 5: Create Tailwind CSS Configuration
 
 **File: `tailwind.config.ts`**
 
@@ -189,12 +192,12 @@ export default {
 } satisfies Config
 ```
 
-**Checklist:**
+Verify:
 - [ ] tailwind.config.ts created
 
 ---
 
-### 7. Create PostCSS Configuration
+### Task 6: Create PostCSS Configuration
 
 **File: `postcss.config.js`**
 
@@ -207,12 +210,12 @@ export default {
 }
 ```
 
-**Checklist:**
+Verify:
 - [ ] postcss.config.js created
 
 ---
 
-### 8. Create Vitest Configuration
+### Task 7: Create Vitest Configuration
 
 **File: `vitest.config.ts`**
 
@@ -262,14 +265,13 @@ import { expect } from 'vitest'
 // Add custom matchers if needed
 ```
 
-**Checklist:**
-- [ ] vitest.config.ts created
+Verify:
+- [ ] vitest.config.ts created with happy-dom environment
 - [ ] vitest.setup.ts created
-- [ ] happy-dom environment configured
 
 ---
 
-### 9. Create Electron Builder Configuration
+### Task 8: Create Electron Builder Configuration
 
 **File: `electron-builder.json`**
 
@@ -296,15 +298,12 @@ import { expect } from 'vitest'
 }
 ```
 
-**Note:** Simplified for local builds only (no installers, no code signing).
-
-**Checklist:**
-- [ ] electron-builder.json created
-- [ ] target set to "dir" for local testing
+Verify:
+- [ ] electron-builder.json created with target: "dir"
 
 ---
 
-### 10. Create HTML Entry Point
+### Task 9: Create HTML Entry Point
 
 **File: `public/index.html`**
 
@@ -323,13 +322,13 @@ import { expect } from 'vitest'
 </html>
 ```
 
-**Checklist:**
+Verify:
 - [ ] public/index.html created
-- [ ] Script points to src/index.tsx
+- [ ] Script imports /src/index.tsx
 
 ---
 
-### 11. Create CSS Stylesheet
+### Task 10: Create CSS Stylesheet
 
 **File: `src/styles/index.css`**
 
@@ -383,17 +382,17 @@ body {
 }
 ```
 
-**Checklist:**
+Verify:
 - [ ] src/styles/index.css created
 - [ ] Chessground CSS imported
 
 ---
 
-### 12. Update .gitignore
+### Task 11: Update .gitignore
 
 **File: `.gitignore`**
 
-The project already has a .gitignore. Update/consolidate it with the below it to contain ignores relevant to the plan. Keep any custom ignores already in the existing file.
+Update the existing .gitignore to consolidate it with the entries below. Keep any custom ignores already present.
 
 ```
 # Dependencies
@@ -432,13 +431,13 @@ games.db
 .logs/
 ```
 
-**Checklist:**
-- [ ] .gitignore updated 
-- [ ] Includes .logs/ directory
+Verify:
+- [ ] .gitignore updated
+- [ ] .logs/ included in ignores
 
 ---
 
-### 13. Create Placeholder Components (Stubs)
+### Task 12: Create Placeholder Components
 
 **File: `src/index.tsx`**
 
@@ -458,7 +457,7 @@ if (root) {
 }
 ```
 
-**Checklist:**
+Verify:
 - [ ] src/index.tsx created
 
 ---
@@ -479,7 +478,7 @@ export default function App() {
 }
 ```
 
-**Checklist:**
+Verify:
 - [ ] src/App.tsx created
 
 ---
@@ -541,7 +540,7 @@ app.on('activate', () => {
 })
 ```
 
-**Checklist:**
+Verify:
 - [ ] electron/main.ts created
 
 ---
@@ -556,13 +555,14 @@ contextBridge.exposeInMainWorld('electron', {
 })
 ```
 
-**Checklist:**
+Verify:
 - [ ] electron/preload.ts created
 
 ---
 
-### 14. Verify Setup Works
+### Task 13: Verify Setup Works
 
+Run:
 ```bash
 pnpm install              # Install deps
 pnpm run typecheck        # TypeScript check
@@ -570,54 +570,17 @@ pnpm run build:vite       # Build React
 pnpm run dev              # Start dev server (Ctrl+C to stop)
 ```
 
-Expected output:
-- `pnpm install` completes without errors
-- `pnpm run typecheck` shows no TypeScript errors
-- `pnpm run build:vite` creates dist/ directory
-- `pnpm run dev` opens Electron window with "Setting up with TypeScript + chessops..."
-
-**Checklist:**
-- [ ] All commands run successfully
-- [ ] Electron window opens
-- [ ] No TypeScript errors
-- [ ] DevTools accessible
-
----
-
-## Files Created (Summary)
-
-**Configuration:**
-- package.json (with chessops, pnpm, Vitest)
-- tsconfig.json
-- vite.config.ts, tailwind.config.ts, postcss.config.js
-- vitest.config.ts, vitest.setup.ts
-- electron-builder.json
-- .gitignore
-
-**Source Files:**
-- public/index.html
-- src/index.tsx, src/App.tsx
-- src/styles/index.css (with chessground CSS)
-- electron/main.ts, electron/preload.ts
-
-**Directory Structure:**
-- electron/ipc/
-- src/{components, utils, hooks, styles}/
-- __tests__/{unit/components, integration, performance}/
-- resources/sample-games/
-
----
-
-## Verification Checklist
-
-- [ ] `pnpm install` completes
-- [ ] `pnpm run typecheck` passes
-- [ ] `pnpm run build:vite` creates dist/
-- [ ] `pnpm run dev` starts Electron
+Verify:
+- [ ] `pnpm install` completes without errors
+- [ ] `pnpm run typecheck` shows no errors
+- [ ] `pnpm run build:vite` creates dist/ directory
+- [ ] `pnpm run dev` opens Electron window
+- [ ] Window displays "Setting up with TypeScript + chessops..."
+- [ ] DevTools are accessible
 - [ ] No console errors
-- [ ] chessground CSS loaded
-- [ ] TypeScript compilation works
 
 ---
 
-**Next:** Proceed to ligeon_02_electron_main.md
+**Next:**
+- Update completed items in `ligeon_00_master_checklist.md`
+- Proceed to `ligeon_02_electron_main.md`

@@ -487,6 +487,8 @@ pnpm dev
 
 Expected: All components render without errors
 
-**Summary:** All reusable components created (board, moves, navigation, info, sidebar, dialog, selector, audio, chess logic)
+---
 
-**Next:** Proceed to ligeon_05-2_react_components.md for App.jsx
+**Next:** 
+- Update completed items in `ligeon_00_master_checklist.md`
+- Proceed to `ligeon_06_testing.md`

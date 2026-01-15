@@ -642,6 +642,8 @@ pnpm dev
 
 Expected: All tests pass (Vitest), app starts without errors
 
-**Summary:** Database wrapper, converters, collection & game handlers created and tested
+--- 
 
-**Next:** Proceed to ligeon_04_pgn_parsing.md
+**Next:** 
+- Update completed items in `ligeon_00_master_checklist.md`
+- Proceed to `ligeon_04_pgn_parsing.md`

@@ -144,19 +144,11 @@ dist-electron\*.exe
 
 ---
 
-## Summary
-
-**Completed:**
-- electron-builder installed
-- package.json configured with build scripts
-- Icons created (icns, ico)
-- DMG background created (macOS)
-- Entitlements file created (macOS)
-- LICENSE file in place
-- Installers built (dmg/exe in dist-electron/)
-
-**Build outputs:**
+**Execpted Build outputs:**
 - macOS: `.dmg` (installer) + `.zip` (portable)
 - Windows: `.exe` installer + portable executable
 
-**Manually upload dist-electron/ files to your distribution platform (GitHub Releases, website, etc.)**
+---
+
+DONE: Project is now done!
+

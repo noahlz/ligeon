@@ -236,6 +236,8 @@ If tests fail, debug and fix:
 - Re-run tests
 - Verify coverage > 60%
 
-**Summary:** All tests passing, coverage > 60% on all metrics
+---
 
-**Next:** Proceed to ligeon_08_build_dist.md
+**Next:** 
+- Update completed items in `ligeon_00_master_checklist.md`
+- Proceed to `ligeon_08_build_dist.md`
