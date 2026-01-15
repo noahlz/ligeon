@@ -7,6 +7,9 @@
 # Claude Code
 .claude/settings.local.json
 
+# Custom skill configuration
+.claude/settings.plugins.*.json
+
 # Node.js
 node_modules/
 npm-debug.log*
