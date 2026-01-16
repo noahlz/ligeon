@@ -91,7 +91,6 @@ pnpm test -- --testNamePattern="parses"
 **File: `__tests__/unit/components/BoardDisplay.test.tsx`**
 
 ```typescript
-import React from 'react'
 import { render } from '@testing-library/react'
 import BoardDisplay from '../../../src/components/BoardDisplay'
 

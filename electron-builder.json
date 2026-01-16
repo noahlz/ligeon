@@ -1,0 +1,20 @@
+{
+  "appId": "io.github.ligeon",
+  "productName": "ligeon",
+  "directories": {
+    "buildResources": "resources",
+    "output": "dist-electron"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "package.json"
+  ],
+  "mac": {
+    "target": ["dir"],
+    "category": "public.app-category.games"
+  },
+  "win": {
+    "target": ["dir"]
+  }
+}

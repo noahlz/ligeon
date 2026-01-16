@@ -16,20 +16,25 @@
 ### 1. Create src/index.tsx
 
 ```typescript
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles/index.css'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-)
+const root = document.getElementById('root')
+if (root) {
+  createRoot(root).render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  )
+}
 ```
 
+**Note**: With React 18's automatic JSX transform (configured in tsconfig.json), you don't need to import `React` explicitly. Only import specific items you use.
+
 **Checklist:**
-- [ ] Create src/index.tsx
+- [ ] Create src/index.tsx (already done in Phase 1)
 
 ---
 

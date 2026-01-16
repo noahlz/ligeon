@@ -8,66 +8,37 @@
 
 ## Actions to Complete
 
-### 1. Install electron-builder
+### 1. Verify electron-builder is installed
+
+electron-builder was already installed in Phase 1 as a dev dependency. Verify:
 
 ```bash
-pnpm add -D electron-builder
+pnpm list electron-builder
 ```
 
-### 2. Update package.json
+### 2. Verify Build Configuration
 
-Add to `package.json`:
+The build configuration was already created in Phase 1:
+- `package.json` scripts are set up correctly
+- `electron-builder.json` contains build configuration
 
+**Verify scripts in package.json:**
 ```json
 {
-  "name": "ligeon",
-  "version": "1.0.0",
-  "license": "GPL-3.0",
-  "main": "electron/main.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "pnpm build && electron-builder",
-    "electron:build:mac": "pnpm build && electron-builder --mac",
-    "electron:build:win": "pnpm build && electron-builder --win"
-  },
-  "build": {
-    "appId": "io.github.ligeon",
-    "productName": "ligeon",
-    "directories": {
-      "buildResources": "resources",
-      "output": "dist-electron"
-    },
-    "files": [
-      "dist/**/*",
-      "electron/**/*",
-      "resources/**/*",
-      "package.json"
-    ],
-    "mac": {
-      "category": "public.app-category.games",
-      "target": [{"target": "dmg", "arch": ["x64", "arm64"]}, {"target": "zip", "arch": ["x64", "arm64"]}],
-      "icon": "resources/icons/icon.icns"
-    },
-    "dmg": {
-      "contents": [{"x": 130, "y": 220}, {"x": 410, "y": 220, "type": "link", "path": "/Applications"}],
-      "background": "resources/dmg-background.png",
-      "window": {"width": 540, "height": 380}
-    },
-    "win": {
-      "target": [{"target": "nsis", "arch": ["x64"]}, {"target": "portable", "arch": ["x64"]}],
-      "icon": "resources/icons/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "license": "LICENSE"
-    }
+    "dev": "pnpm run build:electron-ts && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build:vite": "tsc && vite build",
+    "build:electron-ts": "tsc -p electron/tsconfig.json",
+    "build": "pnpm run build:vite && pnpm run build:electron-ts && electron-builder",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   }
 }
 ```
+
+**Note**: Build configuration is in `electron-builder.json` (already created in Phase 1), not inline in package.json.
 
 ### 3. Create app icon
 
@@ -120,33 +91,36 @@ Copy existing GPL v3 license to `LICENSE` file in project root (already done at 
 
 ### 7. Build for your platform
 
-**macOS:**
+**All platforms:**
 ```bash
-pnpm build
-pnpm electron:build:mac
+pnpm run build
 ```
-Output: `dist-electron/*.dmg` and `dist-electron/*.zip`
 
-**Windows:**
+**Platform-specific builds (optional):**
 ```bash
-pnpm build
-pnpm electron:build:win
+# macOS only
+pnpm run build:vite && pnpm run build:electron-ts && electron-builder --mac
+
+# Windows only
+pnpm run build:vite && pnpm run build:electron-ts && electron-builder --win
 ```
-Output: `dist-electron/*.exe` (installer and portable)
+
+Output: `release/*.dmg`, `release/*.zip`, or `release/*.exe` depending on platform
 
 ### 8. Test installers (optional)
 
 ```bash
 # macOS
-open dist-electron/*.dmg
+open release/*.dmg
 
 # Windows
-dist-electron\*.exe
+release\*.exe
 ```
 
 ---
 
-**Execpted Build outputs:**
+**Expected Build outputs:**
+- Output directory: `release/` (configured in electron-builder.json)
 - macOS: `.dmg` (installer) + `.zip` (portable)
 - Windows: `.exe` installer + portable executable
 

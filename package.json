@@ -1,0 +1,52 @@
+{
+  "name": "ligeon",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Browse and replay chess games from PGN databases",
+  "author": "",
+  "license": "GPL-3.0",
+  "main": "electron/main.js",
+  "homepage": "./",
+  "scripts": {
+    "dev": "pnpm run build:electron-ts && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build:vite": "tsc && vite build",
+    "build:electron-ts": "tsc -p electron/tsconfig.json",
+    "build": "pnpm run build:vite && pnpm run build:electron-ts && electron-builder",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "dependencies": {
+    "@lichess-org/chessground": "^9.9.0",
+    "better-sqlite3": "^12.6.0",
+    "chessops": "^0.15.0",
+    "lucide-react": "^0.562.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^24.10.0",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/ui": "^3.2.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.2",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
+    "happy-dom": "^15.0.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^3.2.4",
+    "wait-on": "^8.0.1"
+  },
+  "packageManager": "pnpm@10.28.0"
+}

@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Import chessground CSS */
+@import '@lichess-org/chessground/assets/chessground.base.css';
+@import '@lichess-org/chessground/assets/chessground.brown.css';
+@import '@lichess-org/chessground/assets/chessground.cburnett.css';
+
+.move-list {
+  font-family: 'Courier New', monospace;
+  line-height: 1.8;
+}
+
+.move-item {
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.move-item:hover {
+  background-color: #475569;
+}
+
+.move-item.current {
+  background-color: #d97706;
+  font-weight: bold;
+}
+
+/* Chessground overrides */
+.cg-wrap {
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}

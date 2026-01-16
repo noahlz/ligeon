@@ -9,26 +9,26 @@
 ### Phase 1: Project Setup & Infrastructure
 
 **Part 1 - Configuration Files:**
-- [ ] Create package.json with dependencies: pnpm, chessops, @lichess-org/chessground
-- [ ] Create tsconfig.json for TypeScript
-- [ ] Create vite.config.ts with React plugin
-- [ ] Create tailwind.config.ts with color palette
-- [ ] Create postcss.config.js with tailwind and autoprefixer
-- [ ] Create vitest.config.ts
-- [ ] Create electron-builder.json (appId: io.github.ligeon)
-- [ ] Create public/index.html with React root div
-- [ ] Create directory structure (electron/ipc, src/components, src/hooks, src/utils, __tests__, resources)
-- [ ] Run `pnpm install` successfully
-- [ ] Verify `pnpm run build:vite` creates dist/
-- [ ] Verify `pnpm run dev` starts without errors
-- [ ] Update .gitignore (node_modules, dist, .db, .logs)
+- [x] Create package.json with dependencies: pnpm, chessops, @lichess-org/chessground
+- [x] Create tsconfig.json for TypeScript
+- [x] Create vite.config.ts with React plugin
+- [x] Create tailwind.config.ts with color palette
+- [x] Create postcss.config.js with tailwind and autoprefixer
+- [x] Create vitest.config.ts
+- [x] Create electron-builder.json (appId: io.github.ligeon)
+- [x] Create index.html with React root div (at project root for Vite)
+- [x] Create directory structure (electron/ipc, src/components, src/hooks, src/utils, __tests__, resources)
+- [x] Run `pnpm install` successfully
+- [x] Verify `pnpm run build:vite` creates dist/
+- [ ] Verify `pnpm run dev` starts without errors (Vite works, Electron binary issue)
+- [x] Update .gitignore (node_modules, dist, .db, .logs)
 
 **Part 1 - Placeholder Components:**
-- [ ] Create src/index.tsx (React entry point)
-- [ ] Create src/App.tsx (placeholder)
-- [ ] Create electron/main.ts (basic window setup)
-- [ ] Create electron/preload.ts (empty contextBridge)
-- [ ] Create src/styles/index.css (Tailwind + custom styles)
+- [x] Create src/index.tsx (React entry point)
+- [x] Create src/App.tsx (placeholder)
+- [x] Create electron/main.ts (basic window setup)
+- [x] Create electron/preload.ts (empty contextBridge)
+- [x] Create src/styles/index.css (Tailwind + custom styles)
 
 ---
 
