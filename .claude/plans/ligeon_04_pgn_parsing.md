@@ -7,6 +7,8 @@
 - electron/ipc/importHandlers.ts (import with progress logging)
 - Tests for parser and import flow
 
+**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+
 ---
 
 ## Actions to Complete

@@ -133,20 +133,3 @@ Implement ligeon with this architecture:
 
 **Resource Caching:** Cache Lichess CDN audio in memory at runtime to avoid repeated downloads.
 
----
-
-## Performance Requirements
-
-- **Import:** Complete 60 games in <5 seconds
-- **Search:** Execute any query in <100ms
-- **Navigation:** Move navigation with <16ms latency (60fps smooth)
-- **Audio:** Play sound effects without lag using Web Audio API
-
----
-
-## Cross-Platform Implementation
-
-Build for both macOS and Windows using the same codebase:
-- macOS: Native Electron app with macOS-specific features
-- Windows: Native Electron app with Windows-specific features
-- Shared: Electron main process, React UI, and database logic are platform-agnostic

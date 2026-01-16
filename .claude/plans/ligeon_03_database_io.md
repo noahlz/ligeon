@@ -7,6 +7,8 @@
 - src/utils/{dateConverter,resultConverter}.ts (data conversion)
 - electron/ipc/{collectionHandlers,gameHandlers}.ts (CRUD operations)
 
+**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+
 ---
 
 ## Actions to Complete

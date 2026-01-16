@@ -7,6 +7,8 @@
 - Integration tests: importAndReplay, chessLogic
 - Component tests: BoardDisplay, MoveList, GameInfo
 
+**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+
 ---
 
 ## Actions to Complete

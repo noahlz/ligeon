@@ -7,6 +7,8 @@
 - GameListSidebar, ImportDialog, CollectionSelector
 - useAutoPlay hook, AudioManager, ChessManager
 
+**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+
 ---
 
 ## Actions to Complete

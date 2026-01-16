@@ -1,8 +1,11 @@
+---
 # ligeon Part 1: Project Setup
 
 **Goal:** Create project structure with TypeScript, pnpm, chessops, and correct dependencies
 
 **Prerequisites:** Node.js 24+, pnpm 10+, macOS 11+ or Windows 10+
+
+**READ for full context:** @TECHNOLOGY_OVERVIEW.md
 
 ---
 

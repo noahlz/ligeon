@@ -2,6 +2,8 @@
 
 **Goal:** Build installers for macOS (.dmg) and Windows (.exe)
 
+**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+
 ---
 
 ## Actions to Complete

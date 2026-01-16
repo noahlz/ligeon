@@ -6,6 +6,8 @@
 - electron/main.ts (window + IPC setup)
 - electron/preload.ts (security bridge)
 
+**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+
 ---
 
 ## Actions to Complete
