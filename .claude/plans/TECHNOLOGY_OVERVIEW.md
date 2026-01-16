@@ -16,6 +16,11 @@
 - **Package Manager:** pnpm 10+
 - **Testing:** Vitest 3.2
 
+**NOTE**: Actually, pnpm does not work with election.
+See: https://dev.to/yurirxmos/why-you-should-use-npm-and-not-pnpm-yet-to-build-electron-react-vite-tailwind-apps-4oc9
+
+This plan should be revised to use plain `npm`
+
 ---
 
 ## Core Technologies

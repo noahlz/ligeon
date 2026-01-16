@@ -20,7 +20,7 @@
 - [x] Create directory structure (electron/ipc, src/components, src/hooks, src/utils, __tests__, resources)
 - [x] Run `pnpm install` successfully
 - [x] Verify `pnpm run build:vite` creates dist/
-- [ ] Verify `pnpm run dev` starts without errors (Vite works, Electron binary issue)
+- [x] Verify `pnpm run dev` starts without errors - FAILED - switching to npm
 - [x] Update .gitignore (node_modules, dist, .db, .logs)
 
 **Part 1 - Placeholder Components:**
@@ -33,6 +33,12 @@
 ---
 
 ### Phase 2: Electron Main Process
+
+**Part 2.0 - Use npm for build**
+- [ ] Revise the project to use `npm` with vite. Remove `pnpm` from the project
+- [ ] Rebuild project
+- [ ] Verify `npm run dev` works
+- [ ] Remove references to `pnpm` from `TECHNOLOGY_OVERVIEW.md`, `CLAUDE.md`, other md files.
 
 **Part 2.1 - Main Process:**
 - [ ] Create electron/main.ts with full implementation
@@ -198,7 +204,7 @@
 
 **Part 6.4 - Performance & Quality:**
 - [ ] __tests__/performance/indexing.test.ts
-- [ ] Run `pnpm test` - all tests pass
+- [ ] Run `pdnpm test` - all tests pass
 - [ ] Run `pnpm test:coverage` - verify > 60% coverage on all metrics
 - [ ] No console errors in production build
 
@@ -289,7 +295,7 @@
 - [ ] Board updates smoothly on navigation
 - [ ] No memory leaks on long sessions
 - [ ] Audio plays without lag
-- [ ] All tests pass (`pnpm test`)
+- [ ] All tests pass (`npm test`)
 - [ ] Coverage > 60% on all metrics
 
 ---
@@ -297,7 +303,7 @@
 ## Implementation Guides (Detailed Steps)
 
 For detailed step-by-step implementation, refer to:
-- **ligeon_01_project_setup.md** - Init project with pnpm, TypeScript, chessops
+- **ligeon_01_project_setup.md** - Init project with npm, TypeScript, chessops
 - **ligeon_02_electron_main.md** - Create main process, IPC handlers, window setup
 - **ligeon_03_database_io.md** - SQLite schema, CRUD ops, data converters
 - **ligeon_04_chess_pgn.md** - Chess logic and PGN import with chessops
@@ -310,12 +316,12 @@ For detailed step-by-step implementation, refer to:
 ## Quick Reference: Core Commands
 
 ```bash
-pnpm install               # Setup: install all dependencies
-pnpm run dev               # Dev: start Vite + Electron
-pnpm test                  # Test: run all unit/integration tests
-pnpm test:coverage         # Test: generate coverage report
-pnpm run build:vite        # Build: create React bundle
-pnpm run build             # Build: package Electron app locally
+npm install               # Setup: install all dependencies
+npm run dev               # Dev: start Vite + Electron
+npm test                  # Test: run all unit/integration tests
+npm test:coverage         # Test: generate coverage report
+npm run build:vite        # Build: create React bundle
+npm run build             # Build: package Electron app locally
 ```
 
 ---
@@ -341,7 +347,7 @@ pnpm run build             # Build: package Electron app locally
 - **Language:** TypeScript for type safety
 - **Chess Logic:** chessops - Lichess standard
 - **PGN Parsing:** chessops parsePgn()
-- **Package Manager:** pnpm - Lichess standard
+- **Package Manager:** npm - Node.js standard (Lichess uses pnpm, but that tool doesn't work with electron apps) 
 - **Testing:** Vitest - fast with TypeScript support
 - **Audio:** Stream from Lichess CDN, cache in memory
 - **Board:** @lichess-org/chessground 

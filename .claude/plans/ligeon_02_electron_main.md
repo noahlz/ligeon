@@ -10,6 +10,18 @@
 
 ---
 
+**IMPORTANT**
+
+While implementing phase 1, we learned that electron apps cannot be built with `pnpm` due to its approach to symlinking dependencies.
+
+So, before completing actions in this phase, revise the project to build with `npm` instead. 
+
+See: https://dev.to/yurirxmos/why-you-should-use-npm-and-not-pnpm-yet-to-build-electron-react-vite-tailwind-apps-4oc9
+
+When done, proceed with the plan.
+
+---
+
 ## Actions to Complete
 
 ### 1. Create electron/main.ts
@@ -291,7 +303,7 @@ contextBridge.exposeInMainWorld('electron', {
 ### 3. Test Main Process
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 Expected: App starts, console shows "App ready", "Initializing ligeon...", "Ready for PGN imports"
