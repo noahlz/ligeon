@@ -1,14 +1,73 @@
-# ligeon Part 5.1: React Components - Core
+# ligeon Part 5: React Components
 
 **Goal:** Create all reusable React components and utilities
 
-**Components to create:**
+**Key components to create:**
 - BoardDisplay (Chessground), MoveList, MoveNavigation, GameInfo
 - GameListSidebar, ImportDialog, CollectionSelector
 - useAutoPlay hook, AudioManager, ChessManager
 
-**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+---
 
+## Implementation Checklist
+
+Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
+
+**Part 5 - Entry Point & Styles:**
+- [ ] Create src/index.tsx (React root entry)
+- [ ] Create src/styles/index.css (Tailwind + move-list styles + chessground CSS)
+- [ ] Import @lichess-org/chessground CSS
+- [ ] Test: React mounts to #root
+
+**Part 5.2 - Audio System:**
+- [ ] Create src/utils/audioManager.ts (AudioManager class)
+- [ ] Implement CDN streaming from Lichess
+- [ ] Implement in-memory buffer caching
+- [ ] Implement playMove(), playCapture(), playCastling()
+- [ ] Test: Sounds stream from Lichess CDN
+- [ ] Test: Sounds cached after first play
+- [ ] Test: Error handling for network failures
+
+**Part 5.3 - Chess & Board Components:**
+- [ ] Create src/components/BoardDisplay.tsx (Chessground integration)
+- [ ] Implement FEN-based board updates with lastMove highlighting
+- [ ] Create src/components/MoveList.tsx (move list with highlighting)
+- [ ] Implement click-to-jump and auto-scroll to current move
+- [ ] Create src/hooks/useAutoPlay.ts (timer-based auto-advance)
+- [ ] Test: Board updates correctly with FEN
+- [ ] Test: Moves highlight and scroll properly
+- [ ] Test: Auto-play advances at 3s and 10s speeds
+
+**Part 5.4 - Navigation & Game Info:**
+- [ ] Create src/components/MoveNavigation.tsx (⏮ ◀ ▶ ⏭ + play menu)
+- [ ] Implement keyboard shortcuts (Home, ←, →, End, Space)
+- [ ] Implement play button with speed menu (Fast/Slow)
+- [ ] Create src/components/GameInfo.tsx (game metadata + Lichess link)
+- [ ] Test: Navigation buttons and keyboard work
+- [ ] Test: Play menu shows and starts auto-play
+- [ ] Test: Lichess link sends full PGN
+
+**Part 5.5 - Game & Collection Browsing:**
+- [ ] Create src/components/GameListSidebar.tsx (search/filter/list)
+- [ ] Implement search by player name and result filter
+- [ ] Create src/components/CollectionSelector.tsx (dropdown + import)
+- [ ] Create src/components/ImportDialog.tsx (progress + logs)
+- [ ] Test: Search and filter games
+- [ ] Test: Collection selection works
+- [ ] Test: Import dialog shows progress
+
+**Part 5.6 - Main App Component:**
+- [ ] Create src/App.tsx (full orchestration)
+- [ ] Implement state management (collections, selectedGame, moveIndex, FEN)
+- [ ] Implement audio initialization on first click
+- [ ] Implement move handlers with sound detection
+- [ ] Implement capture detection (piece count comparison in FEN)
+- [ ] Implement castling detection (king distance in FEN)
+- [ ] Wire all components together
+- [ ] Create __tests__/unit/components/*.test.tsx
+- [ ] Test: App startup and collections load
+- [ ] Test: Game selection and move replay
+- [ ] Test: Sounds play (move, capture, castling)
 ---
 
 ## Actions to Complete
@@ -494,8 +553,3 @@ npm dev
 
 Expected: All components render without errors
 
----
-
-**Next:** 
-- Update completed items in `ligeon_00_master_checklist.md`
-- Proceed to `ligeon_06_testing.md`

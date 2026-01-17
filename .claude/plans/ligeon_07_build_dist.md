@@ -123,8 +123,3 @@ release\*.exe
 - Output directory: `release/` (configured in electron-builder.json)
 - macOS: `.dmg` (installer) + `.zip` (portable)
 - Windows: `.exe` installer + portable executable
-
----
-
-DONE: Project is now done!
-

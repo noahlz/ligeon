@@ -2,12 +2,42 @@
 
 **Goal:** Create PGN parser, import handler with streaming, progress logging
 
-**Files to create:**
+**Key files to create:**
 - src/utils/pgnParser.ts (parse metadata, moves)
 - electron/ipc/importHandlers.ts (import with progress logging)
 - Tests for parser and import flow
 
-**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+---
+
+## Implementation Checklist
+
+Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
+
+**Part 4.1 - Chess Manager:**
+- [ ] Create src/utils/chessManager.ts using chessops
+- [ ] Implement loadGame(), nextMove(), prevMove(), goToMove()
+- [ ] Implement goToStart(), goToEnd(), getCurrentFEN()
+- [ ] Implement getLastMove() for board highlighting
+- [ ] Use chessops/chess for move execution
+- [ ] Use chessops/fen for FEN generation
+- [ ] Create __tests__/unit/chessManager.test.ts
+- [ ] Test: All move operations work correctly
+
+**Part 4.2 - PGN Import Handler:**
+- [ ] Create electron/ipc/importHandlers.ts using chessops parsePgn()
+- [ ] Implement streaming import with chessops iterator
+- [ ] Implement result validation and skip logic
+- [ ] Implement progress logging every 10,000 games
+- [ ] Implement detailed skip reason logging
+- [ ] Implement final statistics summary
+- [ ] Create __tests__/integration/importAndReplay.test.ts
+- [ ] Test: Import sample PGN file successfully
+- [ ] Test: Progress events sent to renderer
+- [ ] Test: Skipped games logged with reasons
+
+**Part 4.3 - Import Complete:**
+- [ ] Wire importAndIndexPgn to electron/main.ts import-pgn handler
+- [ ] Test: Complete import workflow end-to-end
 
 ---
 
@@ -376,8 +406,3 @@ npm dev
 
 Expected: Tests pass (Vitest), import works correctly
 
----
-
-**Next:** 
-- Update completed items in `ligeon_00_master_checklist.md`
-- Proceed to `ligeon_05_react_components.md`

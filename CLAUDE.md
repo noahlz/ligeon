@@ -1,91 +1,64 @@
-# ligeon - LLM Development Guide
+# Ligeon
 
-**Tech Stack:** Electron, React 18, Tailwind CSS, SQLite, chess.js, Chessground
-**For details:** See `@.claude/plans/TECHNOLOGY_OVERVIEW.md`
+Ligeon is an Electron.js desktop application for viewing chess games (PGN format data).
 
----
+It is based on the JavaScript components used to build [Lichess](https://lichess.org). Example projects:
 
-## Build & Test: Silent Output Mode
+- [chessops](https://github.com/niklasf/chessops) - Logic for moving chess pieces
+- [chessground](https://github.com/lichess-org/chessground) - Chess game UI
+- [chessground examples](https://github.com/lichess-org/chessground-examples)
 
-All build and test commands produce **zero console output on success**. All output is logged to `.logs/` (gitignored, auto-cleaned).
+## Implementation Plan
 
-### Log Files
+Find the implementation plan under @.claude/plans/
 
-```
-.logs/
-├── build-vite.log       # React/Tailwind bundling (Vite)
-├── build-electron.log   # Electron packager (electron-builder)
-├── test-unit.log        # Jest unit tests
-└── test-integration.log # Jest integration tests
-```
+**NOTE** these are a plan, not strict instructions. Be flexible in adjusting the plans as you proceed through the implementation. Use AskUserQuestion when you need a decision from the User.
 
-### Core Commands
+The user will delete plan files after they are implemented.
+
+## Dev Commands
 
 ```bash
-npm run clean              # Remove all build outputs (dist, dist-electron, .logs, coverage, compiled JS)
-npm run build              # Full build: clean, bundle React, package Electron
-npm run build:vite         # React bundling only
-npm run build:electron     # Electron packaging only
-npm run build:mac          # macOS DMG installer
-npm run build:win          # Windows NSIS/portable installer
-
-npm test                   # Run all tests (unit + integration)
-npm run test:unit          # Unit tests only
-npm run test:integration   # Integration tests only
-npm run test:watch         # Watch mode (shows output—for development)
-npm run test:coverage      # Coverage report (silent, outputs to coverage/)
-
-npm run dev                # Start dev server + Electron window
+npm run build    # Full build
+npm run dev      # Start dev server and launch Electron window
+npm test         # Run all tests (unit + integration)
+npm run clean    # Remove all build outputs (dist, dist-electron, compiled JS)
 ```
 
-### Handling Build/Test Failures
+## Technology Stack
 
-When a command fails (non-zero exit code), extract only the relevant error lines:
+See `package.json` for current versions.
 
-**Vite build errors:**
-```bash
-grep -iE "(error|✘)" .logs/build-vite.log | head -20
-```
-
-**Electron build errors:**
-```bash
-grep -E "(error|Error|ERROR|✖|⨯)" .logs/build-electron.log | head -20
-```
-
-**Jest test failures:**
-```bash
-grep -E "(FAIL|●|Error:|Expected|Received)" .logs/test-unit.log | head -30
-```
-
-Full logs available: `cat .logs/filename.log`
-
-### Configuration Details
-
-| File | Key Setting | Purpose |
-|------|-------------|---------|
-| `package.json` | Scripts redirect to `.logs/` with `> .logs/name.log 2>&1` | Silent output redirection |
-| `vite.config.js` | `reportCompressedSize: false` | Suppresses Vite's build summary |
-| `jest.config.js` | `verbose: false` | Suppresses Jest's test name listing |
-| `.gitignore` | Includes `.logs/` | Prevents log files from being committed |
-
-### Error Extraction Helper
-
-**`scripts/extract-errors.sh`** - Reusable script for extracting tool-specific errors:
-
-```bash
-npm run build || ./scripts/extract-errors.sh .logs/build-vite.log "error|✘"
-npm run test || ./scripts/extract-errors.sh .logs/test-unit.log "FAIL|●|Error:"
-```
-
----
+- **Runtime:** Node.js
+- **Language:** TypeScript
+- **Main Application:** Electron, React, Tailwind CSS
+- **Database:** SQLite with better-sqlite3
+- **Chess Logic:** chessops
+- **Board UI:** chessground
+- **Package Manager:** npm 
+- **Build Tool:** Vite
+- **Testing:** Vitest
 
 ## Project Structure
 
-- `src/` - React components, utilities, styles
-- `electron/` - Main process, IPC handlers
-- `electron/ipc/` - Database, game handlers, import logic
-- `__tests__/` - Unit tests, integration tests, component tests
-- `resources/` - Icons, sample games
-- `public/` - Static assets, HTML entry point
+```
+├── __tests__           # test suite
+│   ├── integration
+│   ├── performance
+│   └── unit
+│       └── components
+├── dist                # Typescript javascript output
+├── electron            # electron files
+├── dist-electron       # electron application artifact
+├── electron            # electron files
+│   └── ipc
+├── public
+├── resources
+│   └── sample-games    # example chess games (pgn format)
+└── src                 # Project source code
+    ├── components
+    ├── hooks
+    ├── styles          # tailwind css files
+    └── utils
+```
 
-See master checklist: `@.claude/plans/ligeon_00_master_checklist.md`

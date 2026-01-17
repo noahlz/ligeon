@@ -1,12 +1,36 @@
 # ligeon Part 2: Electron Main Process
 
-**Goal:** Create main.ts with window management, collections dir init, and IPC handlers
+**Goal:** Basic project setup was completed in Part 1 - now, create main.ts with window management, collections dir init, and IPC handlers
 
 **Key files to create:**
 - electron/main.ts (window + IPC setup)
 - electron/preload.ts (security bridge)
 
-**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+---
+
+## Implementation Checklist
+
+Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
+
+**Part 2.1 - Main Process:**
+- [ ] Create electron/main.ts with full implementation
+- [ ] Implement createWindow() with min/max dimensions
+- [ ] Implement initializeApp() with collections directory setup
+- [ ] Implement setupIpcHandlers() with select-file, import-pgn, cancel-import
+- [ ] Handle list-collections, rename-collection, delete-collection
+- [ ] Handle search-games, get-game-moves (stubs)
+- [ ] Test: App opens without errors
+- [ ] Test: Collections directory created in ~/.ligeon/collections/
+- [ ] Test: DevTools opens in development mode
+
+**Part 2.2 - Security Bridge:**
+- [ ] Create electron/preload.ts with contextBridge
+- [ ] Expose selectFile, importPgn, cancelImport via IPC
+- [ ] Expose listCollections, renameCollection, deleteCollection
+- [ ] Expose searchGames, getGameMoves
+- [ ] Expose onImportProgress with event listeners
+- [ ] Test: window.electron object accessible in React
+- [ ] Test: IPC methods callable from React
 
 ---
 
@@ -312,9 +336,3 @@ window.electron.listCollections().then(cols => console.log('Collections:', cols)
 Expected console output: `Collections: []`
 
 Then remove the test code.
-
----
-
-**Next:** 
-- Update completed items in `ligeon_00_master_checklist.md`
-- Proceed to `ligeon_03_database_io.md`

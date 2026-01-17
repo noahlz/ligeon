@@ -1,6 +1,6 @@
 {
   "appId": "io.github.ligeon",
-  "productName": "ligeon",
+  "productName": "Ligeon",
   "directories": {
     "buildResources": "resources",
     "output": "dist-electron"

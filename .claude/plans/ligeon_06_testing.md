@@ -1,13 +1,43 @@
-# ligeon Part 7: Testing
+# ligeon Part 6: Testing
 
 **Goal:** Run complete test suite, verify coverage > 60%, fix failures
 
-**Test files already created in parts 3-6:**
+**Test files already created in parts 3-5:**
 - Unit tests: dateConverter, resultConverter, database, pgnParser, chessManager
 - Integration tests: importAndReplay, chessLogic
 - Component tests: BoardDisplay, MoveList, GameInfo
 
-**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+---
+
+## Implementation Checklist
+
+Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
+
+**Part 6.1 - Unit Tests (Core):**
+- [ ] __tests__/unit/dateConverter.test.ts
+- [ ] __tests__/unit/resultConverter.test.ts
+- [ ] __tests__/unit/gameDatabase.test.ts
+- [ ] __tests__/unit/chessManager.test.ts
+- [ ] Run all and verify coverage > 60%
+
+**Part 6.2 - Component Tests:**
+- [ ] __tests__/unit/components/BoardDisplay.test.tsx
+- [ ] __tests__/unit/components/MoveList.test.tsx
+- [ ] __tests__/unit/components/GameInfo.test.tsx
+- [ ] Setup mocks for window.electron IPC calls
+- [ ] Test: All components render without errors
+
+**Part 6.3 - Integration Tests:**
+- [ ] __tests__/integration/importAndReplay.test.ts
+- [ ] __tests__/integration/chessLogic.test.ts
+- [ ] Test: Import PGN → database queries → move replay
+- [ ] Test: Sound detection (capture, castling)
+
+**Part 6.4 - Performance & Quality:**
+- [ ] __tests__/performance/indexing.test.ts
+- [ ] Run `npm test` - all tests pass
+- [ ] Run `npm run test:coverage` - verify > 60% coverage on all metrics
+- [ ] No console errors in production build
 
 ---
 
@@ -237,8 +267,3 @@ If tests fail, debug and fix:
 - Re-run tests
 - Verify coverage > 60%
 
----
-
-**Next:** 
-- Update completed items in `ligeon_00_master_checklist.md`
-- Proceed to `ligeon_08_build_dist.md`

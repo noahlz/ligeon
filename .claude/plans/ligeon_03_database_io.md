@@ -2,12 +2,40 @@
 
 **Goal:** Create SQLite database wrapper, converters, and collection/game handlers
 
-**Files to create:**
+**Key files to create:**
 - electron/ipc/gameDatabase.ts (SQLite operations)
 - src/utils/{dateConverter,resultConverter}.ts (data conversion)
 - electron/ipc/{collectionHandlers,gameHandlers}.ts (CRUD operations)
 
-**READ for full context:** @TECHNOLOGY_OVERVIEW.md
+---
+
+## Implementation Checklist
+
+Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
+
+**Part 3.1 - SQLite Database:**
+- [ ] Create electron/ipc/gameDatabase.ts (GameDatabase class)
+- [ ] Implement createSchema() with 8 indices
+- [ ] Implement insertGame() and insertGamesBatch()
+- [ ] Implement searchGames() with dynamic filtering
+- [ ] Implement getGameWithMoves() and getGameCount()
+- [ ] Implement close() and clearGames()
+- [ ] Create unit tests for database operations
+- [ ] Test: All CRUD operations work correctly
+
+**Part 3.2 - Data Converters:**
+- [ ] Create src/utils/dateConverter.ts (pgnDateToTimestamp, timestampToDisplay)
+- [ ] Create src/utils/resultConverter.ts (convertResult, resultNumericToDisplay)
+- [ ] Create __tests__/unit/dateConverter.test.ts
+- [ ] Create __tests__/unit/resultConverter.test.ts
+- [ ] Test: All converters handle edge cases
+
+**Part 3.3 - Collection & Game Handlers:**
+- [ ] Create electron/ipc/collectionHandlers.ts (list, rename, delete)
+- [ ] Create electron/ipc/gameHandlers.ts (search, getGameMoves)
+- [ ] Update electron/main.ts to import and wire handlers
+- [ ] Test: Collection operations work
+- [ ] Test: Game queries return correct data
 
 ---
 
@@ -644,8 +672,3 @@ npm dev
 
 Expected: All tests pass (Vitest), app starts without errors
 
---- 
-
-**Next:** 
-- Update completed items in `ligeon_00_master_checklist.md`
-- Proceed to `ligeon_04_pgn_parsing.md`
