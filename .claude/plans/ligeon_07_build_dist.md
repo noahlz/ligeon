@@ -13,7 +13,7 @@
 electron-builder was already installed in Phase 1 as a dev dependency. Verify:
 
 ```bash
-pnpm list electron-builder
+npm list electron-builder
 ```
 
 ### 2. Verify Build Configuration
@@ -26,10 +26,10 @@ The build configuration was already created in Phase 1:
 ```json
 {
   "scripts": {
-    "dev": "pnpm run build:electron-ts && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "dev": "npm run build:electron-ts && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build:vite": "tsc && vite build",
     "build:electron-ts": "tsc -p electron/tsconfig.json",
-    "build": "pnpm run build:vite && pnpm run build:electron-ts && electron-builder",
+    "build": "npm run build:vite && npm run build:electron-ts && electron-builder",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -93,16 +93,16 @@ Copy existing GPL v3 license to `LICENSE` file in project root (already done at 
 
 **All platforms:**
 ```bash
-pnpm run build
+npm run build
 ```
 
 **Platform-specific builds (optional):**
 ```bash
 # macOS only
-pnpm run build:vite && pnpm run build:electron-ts && electron-builder --mac
+npm run build:vite && npm run build:electron-ts && electron-builder --mac
 
 # Windows only
-pnpm run build:vite && pnpm run build:electron-ts && electron-builder --win
+npm run build:vite && npm run build:electron-ts && electron-builder --win
 ```
 
 Output: `release/*.dmg`, `release/*.zip`, or `release/*.exe` depending on platform

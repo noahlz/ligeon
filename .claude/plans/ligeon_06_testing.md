@@ -64,23 +64,23 @@ export default defineConfig({
 
 ```bash
 # Run all tests once
-pnpm test
+npm test
 
 # Run in watch mode
-pnpm test:watch
+npm test:watch
 
 # Generate coverage report
-pnpm test:coverage
+npm test:coverage
 
 # Run specific test file
-pnpm test dateConverter.test
+npm test dateConverter.test
 
 # Run tests matching pattern
-pnpm test -- --testNamePattern="parses"
+npm test -- --testNamePattern="parses"
 ```
 
 **Checklist:**
-- [ ] `pnpm test` runs without errors (Vitest)
+- [ ] `npm test` runs without errors (Vitest)
 - [ ] All tests pass
 - [ ] Coverage meets thresholds
 
@@ -176,14 +176,14 @@ describe('GameInfo', () => {
 - [ ] Create __tests__/unit/components/BoardDisplay.test.tsx
 - [ ] Create __tests__/unit/components/MoveList.test.tsx
 - [ ] Create __tests__/unit/components/GameInfo.test.tsx
-- [ ] Run `pnpm test components` - all pass (Vitest)
+- [ ] Run `npm test components` - all pass (Vitest)
 
 ---
 
 ### 4. Run Coverage Report
 
 ```bash
-pnpm test:coverage
+npm test:coverage
 ```
 
 Check output for coverage on all metrics (should be > 60%)
@@ -228,7 +228,7 @@ describe('Performance', () => {
 ### 5. Fix Failures
 
 ```bash
-pnpm test 2>&1 | tee test-output.txt
+npm test 2>&1 | tee test-output.txt
 ```
 
 If tests fail, debug and fix:

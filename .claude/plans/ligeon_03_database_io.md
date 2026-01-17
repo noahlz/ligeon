@@ -356,7 +356,7 @@ describe('Result Converter', () => {
 **Checklist:**
 - [ ] Create __tests__/unit/dateConverter.test.ts
 - [ ] Create __tests__/unit/resultConverter.test.ts
-- [ ] Run `pnpm test` - all tests pass (Vitest compatible)
+- [ ] Run `npm test` - all tests pass (Vitest compatible)
 
 ---
 
@@ -490,7 +490,7 @@ describe('GameDatabase', () => {
 
 **Checklist:**
 - [ ] Create __tests__/unit/database.test.ts
-- [ ] Run `pnpm test` - all tests pass
+- [ ] Run `npm test` - all tests pass
 
 ---
 
@@ -636,10 +636,10 @@ ipcMain.handle('get-game-moves', async (event, { collectionId, gameId }) => getG
 ### 8. Test Database & I/O
 
 ```bash
-pnpm test dateConverter.test
-pnpm test resultConverter.test
-pnpm test database.test
-pnpm dev
+npm test dateConverter.test
+npm test resultConverter.test
+npm test database.test
+npm dev
 ```
 
 Expected: All tests pass (Vitest), app starts without errors

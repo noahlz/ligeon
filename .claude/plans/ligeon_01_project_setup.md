@@ -1,9 +1,9 @@
 ---
 # ligeon Part 1: Project Setup
 
-**Goal:** Create project structure with TypeScript, pnpm, chessops, and correct dependencies
+**Goal:** Create project structure with TypeScript, npm, chessops, and correct dependencies
 
-**Prerequisites:** Node.js 24+, pnpm 10+, macOS 11+ or Windows 10+
+**Prerequisites:** Node.js 24+, npm 10+, macOS 11+ or Windows 10+
 
 **READ for full context:** @TECHNOLOGY_OVERVIEW.md
 
@@ -17,7 +17,7 @@ Complete the following tasks in order. Create a todo list to track each task.
 
 Run:
 ```bash
-pnpm init
+npm init
 ```
 
 Replace the generated package.json with this complete configuration:
@@ -35,7 +35,7 @@ Replace the generated package.json with this complete configuration:
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build:vite": "tsc && vite build",
-    "build": "pnpm run build:vite && electron-builder",
+    "build": "npm run build:vite && electron-builder",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -43,7 +43,7 @@ Replace the generated package.json with this complete configuration:
   },
   "engines": {
     "node": ">=24.0.0",
-    "pnpm": ">=10.0.0"
+    "npm": ">=10.0.0"
   },
   "dependencies": {
     "@lichess-org/chessground": "^9.9.0",
@@ -77,8 +77,8 @@ Replace the generated package.json with this complete configuration:
 
 Then verify:
 - [ ] package.json created with dependencies
-- [ ] `pnpm install` completes successfully
-- [ ] pnpm-lock.yaml exists
+- [ ] `npm install` completes successfully
+- [ ] npm-lock.yaml exists
 
 ---
 
@@ -400,7 +400,7 @@ Update the existing .gitignore to consolidate it with the entries below. Keep an
 ```
 # Dependencies
 node_modules/
-pnpm-lock.yaml
+npm-lock.yaml
 
 # Build output
 dist/
@@ -567,17 +567,17 @@ Verify:
 
 Run:
 ```bash
-pnpm install              # Install deps
-pnpm run typecheck        # TypeScript check
-pnpm run build:vite       # Build React
-pnpm run dev              # Start dev server (Ctrl+C to stop)
+npm install              # Install deps
+npm run typecheck        # TypeScript check
+npm run build:vite       # Build React
+npm run dev              # Start dev server (Ctrl+C to stop)
 ```
 
 Verify:
-- [ ] `pnpm install` completes without errors
-- [ ] `pnpm run typecheck` shows no errors
-- [ ] `pnpm run build:vite` creates dist/ directory
-- [ ] `pnpm run dev` opens Electron window
+- [ ] `npm install` completes without errors
+- [ ] `npm run typecheck` shows no errors
+- [ ] `npm run build:vite` creates dist/ directory
+- [ ] `npm run dev` opens Electron window
 - [ ] Window displays "Setting up with TypeScript + chessops..."
 - [ ] DevTools are accessible
 - [ ] No console errors

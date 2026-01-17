@@ -22,6 +22,7 @@ All build and test commands produce **zero console output on success**. All outp
 ### Core Commands
 
 ```bash
+npm run clean              # Remove all build outputs (dist, dist-electron, .logs, coverage, compiled JS)
 npm run build              # Full build: clean, bundle React, package Electron
 npm run build:vite         # React bundling only
 npm run build:electron     # Electron packaging only

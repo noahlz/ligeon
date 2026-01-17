@@ -489,7 +489,7 @@ Methods needed:
 ### 12. Test Components
 
 ```bash
-pnpm dev
+npm dev
 ```
 
 Expected: All components render without errors

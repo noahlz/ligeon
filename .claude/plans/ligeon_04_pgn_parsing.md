@@ -276,7 +276,7 @@ describe('PGN Parser', () => {
 
 **Checklist:**
 - [ ] Create __tests__/unit/pgnParser.test.ts
-- [ ] Run `pnpm test` - all tests pass (Vitest)
+- [ ] Run `npm test` - all tests pass (Vitest)
 
 ---
 
@@ -354,14 +354,14 @@ describe('Import and Replay Integration', () => {
 
 **Checklist:**
 - [ ] Create __tests__/integration/importAndReplay.test.ts
-- [ ] Run `pnpm test` - integration tests pass
+- [ ] Run `npm test` - integration tests pass
 
 ---
 
 ### 4. Test Import Flow
 
 ```bash
-pnpm dev
+npm dev
 ```
 
 Then in UI: Click "Import New" → select PGN → watch progress → verify games indexed
@@ -369,9 +369,9 @@ Then in UI: Click "Import New" → select PGN → watch progress → verify game
 ### 5. Run Tests
 
 ```bash
-pnpm test pgnParser.test
-pnpm test importAndReplay.test
-pnpm dev
+npm test pgnParser.test
+npm test importAndReplay.test
+npm dev
 ```
 
 Expected: Tests pass (Vitest), import works correctly

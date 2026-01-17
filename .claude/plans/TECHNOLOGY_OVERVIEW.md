@@ -1,6 +1,6 @@
 # ligeon - Technology Stack & Implementation Guide
 
-**Use the Lichess technology stack for this project:** TypeScript, chessops, @lichess-org/chessground, pnpm, Vitest.
+**Use the Lichess technology stack for this project:** TypeScript, chessops, @lichess-org/chessground, Vitest.
 
 ---
 
@@ -13,13 +13,8 @@
 - **Board UI:** @lichess-org/chessground 9.9
 - **Database:** SQLite with better-sqlite3 12.6
 - **Build Tool:** Vite 7
-- **Package Manager:** pnpm 10+
+- **Package Manager:** npm 10+
 - **Testing:** Vitest 3.2
-
-**NOTE**: Actually, pnpm does not work with election.
-See: https://dev.to/yurirxmos/why-you-should-use-npm-and-not-pnpm-yet-to-build-electron-react-vite-tailwind-apps-4oc9
-
-This plan should be revised to use plain `npm`
 
 ---
 
@@ -78,12 +73,12 @@ Configure Vite as the React build tool:
 - Output to dist/ directory
 - Suppress build size reporting with reportCompressedSize: false
 
-### pnpm 10+
-Use pnpm exclusively for package management. All commands:
-- `pnpm install` - Install dependencies
-- `pnpm run dev` - Start development
-- `pnpm run build` - Build for production
-- `pnpm test` - Run tests
+### npm 10+
+Use npm for package management. All commands:
+- `npm install` - Install dependencies
+- `npm run dev` - Start development
+- `npm run build` - Build for production
+- `npm test` - Run tests
 
 ### Vitest 3.2
 Configure Vitest for unit and integration testing:

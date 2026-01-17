@@ -9,7 +9,7 @@
 ### Phase 1: Project Setup & Infrastructure
 
 **Part 1 - Configuration Files:**
-- [x] Create package.json with dependencies: pnpm, chessops, @lichess-org/chessground
+- [x] Create package.json with dependencies: chessops, @lichess-org/chessground
 - [x] Create tsconfig.json for TypeScript
 - [x] Create vite.config.ts with React plugin
 - [x] Create tailwind.config.ts with color palette
@@ -18,9 +18,9 @@
 - [x] Create electron-builder.json (appId: io.github.ligeon)
 - [x] Create index.html with React root div (at project root for Vite)
 - [x] Create directory structure (electron/ipc, src/components, src/hooks, src/utils, __tests__, resources)
-- [x] Run `pnpm install` successfully
-- [x] Verify `pnpm run build:vite` creates dist/
-- [x] Verify `pnpm run dev` starts without errors - FAILED - switching to npm
+- [x] Run `npm install` successfully
+- [x] Verify `npm run build:vite` creates dist/
+- [x] Verify `npm run dev` starts without errors
 - [x] Update .gitignore (node_modules, dist, .db, .logs)
 
 **Part 1 - Placeholder Components:**
@@ -35,10 +35,10 @@
 ### Phase 2: Electron Main Process
 
 **Part 2.0 - Use npm for build**
-- [ ] Revise the project to use `npm` with vite. Remove `pnpm` from the project
-- [ ] Rebuild project
-- [ ] Verify `npm run dev` works
-- [ ] Remove references to `pnpm` from `TECHNOLOGY_OVERVIEW.md`, `CLAUDE.md`, other md files.
+- [x] Revise the project to use `npm` with vite. Remove `pnpm` from the project
+- [x] Rebuild project
+- [x] Verify `npm run dev` works
+- [x] Remove references to `pnpm` from `TECHNOLOGY_OVERVIEW.md`, `CLAUDE.md`, other md files.
 
 **Part 2.1 - Main Process:**
 - [ ] Create electron/main.ts with full implementation
@@ -204,8 +204,8 @@
 
 **Part 6.4 - Performance & Quality:**
 - [ ] __tests__/performance/indexing.test.ts
-- [ ] Run `pdnpm test` - all tests pass
-- [ ] Run `pnpm test:coverage` - verify > 60% coverage on all metrics
+- [ ] Run `npm test` - all tests pass
+- [ ] Run `npm run test:coverage` - verify > 60% coverage on all metrics
 - [ ] No console errors in production build
 
 ---
@@ -214,8 +214,8 @@
 
 **Part 7 - Local Build Testing:**
 - [ ] Create LICENSE file (GPL v3)
-- [ ] Test: `pnpm run build:vite` completes and creates dist/
-- [ ] Test: `pnpm run build` packages Electron app locally
+- [ ] Test: `npm run build:vite` completes and creates dist/
+- [ ] Test: `npm run build` packages Electron app locally
 - [ ] Test: Packaged app runs without errors
 - [ ] Test: Import PGN, navigate games, play sounds
 
@@ -347,7 +347,7 @@ npm run build             # Build: package Electron app locally
 - **Language:** TypeScript for type safety
 - **Chess Logic:** chessops - Lichess standard
 - **PGN Parsing:** chessops parsePgn()
-- **Package Manager:** npm - Node.js standard (Lichess uses pnpm, but that tool doesn't work with electron apps) 
+- **Package Manager:** npm - Node.js standard 
 - **Testing:** Vitest - fast with TypeScript support
 - **Audio:** Stream from Lichess CDN, cache in memory
 - **Board:** @lichess-org/chessground 
