@@ -1,6 +1,6 @@
 # ligeon Part 2: Electron Main Process
 
-**Goal:** Basic project setup was completed in Part 1 - now, create main.ts with window management, collections dir init, and IPC handlers
+**Goal:** Basic project setup has been completed - now, create main.ts with window management, collections dir init, and IPC handlers
 
 **Key files to create:**
 - electron/main.ts (window + IPC setup)

@@ -13,17 +13,7 @@
 
 Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
 
-**Part 4.1 - Chess Manager:**
-- [ ] Create src/utils/chessManager.ts using chessops
-- [ ] Implement loadGame(), nextMove(), prevMove(), goToMove()
-- [ ] Implement goToStart(), goToEnd(), getCurrentFEN()
-- [ ] Implement getLastMove() for board highlighting
-- [ ] Use chessops/chess for move execution
-- [ ] Use chessops/fen for FEN generation
-- [ ] Create __tests__/unit/chessManager.test.ts
-- [ ] Test: All move operations work correctly
-
-**Part 4.2 - PGN Import Handler:**
+**Part 4.1 - PGN Import Handler:**
 - [ ] Create electron/ipc/importHandlers.ts using chessops parsePgn()
 - [ ] Implement streaming import with chessops iterator
 - [ ] Implement result validation and skip logic
@@ -35,7 +25,7 @@ Use these copyable lists with TodoWrite to track progress. Tick items as complet
 - [ ] Test: Progress events sent to renderer
 - [ ] Test: Skipped games logged with reasons
 
-**Part 4.3 - Import Complete:**
+**Part 4.2 - Import Complete:**
 - [ ] Wire importAndIndexPgn to electron/main.ts import-pgn handler
 - [ ] Test: Complete import workflow end-to-end
 
