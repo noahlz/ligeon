@@ -109,9 +109,9 @@ export function parsePgnGame(pgnText: string) {
 ```typescript
 import fs from 'fs'
 import { parsePgn } from 'chessops/pgn'
-import { GameDatabase } from './gameDatabase.js'
-import { convertResult } from '../../src/utils/resultConverter.js'
-import { pgnDateToTimestamp } from '../../src/utils/dateConverter.js'
+import { GameDatabase } from './gameDatabase'
+import { convertResult } from '../../src/utils/resultConverter'
+import { pgnDateToTimestamp } from '../../src/utils/dateConverter'
 
 export async function importAndIndexPgn(
   filePath: string,
@@ -180,7 +180,7 @@ export async function importAndIndexPgn(
           white: headers.get('White') || 'Unknown',
           black: headers.get('Black') || 'Unknown',
           event: headers.get('Event') || null,
-          date: pgnDateToTimestamp(headers.get('Date') || null),
+          date: pgnDateToTimestamp(headers.get('Date')),
           result: result.numeric,
           ecoCode: headers.get('ECO') || null,
           whiteElo: headers.get('WhiteElo') ? parseInt(headers.get('WhiteElo')!) : null,
@@ -188,7 +188,6 @@ export async function importAndIndexPgn(
           site: headers.get('Site') || null,
           round: headers.get('Round') || null,
           moveCount: moves.length,
-          pgn: content, // Store original PGN
         })
 
         stats.totalIndexed++

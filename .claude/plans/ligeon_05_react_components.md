@@ -340,7 +340,7 @@ export default function GameListSidebar({ collectionId, onGameSelect }) {
       setGames(results)
     }
     searchGames()
-  }, [searchTerm, filters])
+  }, [collectionId, searchTerm, filters])
 
   return (
     <div className="flex flex-col gap-4 h-full">

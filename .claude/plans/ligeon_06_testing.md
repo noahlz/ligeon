@@ -1,13 +1,6 @@
 # ligeon Part 6: Testing
 
-**Goal:** Run complete test suite, verify coverage > 60%, fix failures
-
-**Test files already created in parts 3-5:**
-- Unit tests: dateConverter, resultConverter, database, pgnParser, chessManager
-- Integration tests: importAndReplay, chessLogic
-- Component tests: BoardDisplay, MoveList, GameInfo
-
----
+**Goal:** Run complete test suite (already created in previous stages), verify coverage > 60%, fix failures
 
 ## Implementation Checklist
 

@@ -609,7 +609,7 @@ export async function deleteCollection(collectionId) {
 **File: `electron/ipc/gameHandlers.ts`**
 
 ```typescript
-import { GameDatabase } from './gameDatabase.js'
+import { GameDatabase } from './gameDatabase'
 
 export async function searchGames(collectionId, filters) {
   console.log('Searching games:', collectionId, filters)
@@ -648,8 +648,8 @@ export async function getGameMoves(collectionId, gameId) {
 
 Add imports to top of electron/main.ts:
 ```typescript
-import { listCollections, renameCollection, deleteCollection } from './ipc/collectionHandlers.js'
-import { searchGames, getGameMoves } from './ipc/gameHandlers.js'
+import { listCollections, renameCollection, deleteCollection } from './ipc/collectionHandlers'
+import { searchGames, getGameMoves } from './ipc/gameHandlers'
 ```
 
 Replace stubs in setupIpcHandlers():

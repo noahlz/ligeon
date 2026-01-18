@@ -1,4 +1,4 @@
-# ligeon Part 8: Build & Distribution
+# ligeon Part 7: Build & Distribution
 
 **Goal:** Build installers for macOS (.dmg) and Windows (.exe)
 
