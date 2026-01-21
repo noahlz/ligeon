@@ -13,24 +13,25 @@
 Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
 
 **Part 2.1 - Main Process:**
-- [ ] Create electron/main.ts with full implementation
-- [ ] Implement createWindow() with min/max dimensions
-- [ ] Implement initializeApp() with collections directory setup
-- [ ] Implement setupIpcHandlers() with select-file, import-pgn, cancel-import
-- [ ] Handle list-collections, rename-collection, delete-collection
-- [ ] Handle search-games, get-game-moves (stubs)
-- [ ] Test: App opens without errors
-- [ ] Test: Collections directory created in ~/.ligeon/collections/
-- [ ] Test: DevTools opens in development mode
+- [x] Create electron/main.ts with full implementation
+- [x] Implement createWindow() with min/max dimensions
+- [x] Implement initializeApp() with collections directory setup
+- [x] Implement setupIpcHandlers() with select-file, import-pgn, cancel-import
+- [x] Handle list-collections, rename-collection, delete-collection
+- [x] Handle search-games, get-game-moves (stubs)
+- [x] Test: App opens without errors
+- [x] Test: Collections directory created in ~/.ligeon/collections/
+- [x] Test: DevTools opens in development mode
 
 **Part 2.2 - Security Bridge:**
-- [ ] Create electron/preload.ts with contextBridge
-- [ ] Expose selectFile, importPgn, cancelImport via IPC
-- [ ] Expose listCollections, renameCollection, deleteCollection
-- [ ] Expose searchGames, getGameMoves
-- [ ] Expose onImportProgress with event listeners
-- [ ] Test: window.electron object accessible in React
-- [ ] Test: IPC methods callable from React
+- [x] Create electron/preload.ts with contextBridge
+- [x] Expose selectFile, importPgn, cancelImport via IPC
+- [x] Expose listCollections, renameCollection, deleteCollection
+- [x] Expose searchGames, getGameMoves
+- [x] Expose onImportProgress with event listeners
+- [x] Test: window.electron object accessible in React
+- [x] Test: IPC methods callable from React
+- [x] Added src/electron.d.ts with TypeScript type definitions for window.electron
 
 ---
 
@@ -234,9 +235,9 @@ process.on('uncaughtException', (error) => {
 ```
 
 **Checklist:**
-- [ ] Replace electron/main.ts with complete code above
-- [ ] Verify `import` statements work (ES modules)
-- [ ] Ensure collectionsPath includes 'ligeon' subdirectory
+- [x] Replace electron/main.ts with complete code above
+- [x] Verify `import` statements work (ES modules)
+- [x] Ensure collectionsPath includes 'ligeon' subdirectory (used ~/.ligeon/collections per user decision)
 
 ---
 
@@ -305,14 +306,14 @@ contextBridge.exposeInMainWorld('electron', {
 ```
 
 **Checklist:**
-- [ ] Replace electron/preload.ts with complete code above
-- [ ] All IPC methods exposed via contextBridge
-- [ ] Event listeners return unsubscribe functions
-- [ ] Security: nodeIntegration disabled, contextIsolation enabled
+- [x] Replace electron/preload.ts with complete code above
+- [x] All IPC methods exposed via contextBridge
+- [x] Event listeners return unsubscribe functions
+- [x] Security: nodeIntegration disabled, contextIsolation enabled
 
 ---
 
-### 3. Test Main Process
+### 3. Test Main Process ✅
 
 ```bash
 npm run dev
@@ -326,7 +327,13 @@ ls -la ~/.ligeon/collections/      # macOS
 dir %APPDATA%\..\Local\ligeon\     # Windows
 ```
 
-### 4. Test IPC (Temporary Test in src/App.tsx)
+**Status:** ✅ COMPLETED
+- App started successfully
+- Collections directory created at ~/.ligeon/collections/
+- DevTools opened in development mode
+- All IPC handlers registered
+
+### 4. Test IPC (Temporary Test in src/App.tsx) ✅
 
 Add to App.tsx useEffect:
 ```typescript
@@ -336,3 +343,9 @@ window.electron.listCollections().then(cols => console.log('Collections:', cols)
 Expected console output: `Collections: []`
 
 Then remove the test code.
+
+**Status:** ✅ COMPLETED
+- window.electron accessible from React
+- IPC methods callable without errors
+- Test code added and verified working
+- Test code removed from final implementation
