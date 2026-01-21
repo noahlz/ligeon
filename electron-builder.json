@@ -3,11 +3,12 @@
   "productName": "Ligeon",
   "directories": {
     "buildResources": "resources",
-    "output": "dist-electron"
+    "output": "dist"
   },
   "files": [
     "dist/**/*",
-    "electron/**/*",
+    "dist/*.js",
+    "dist/*.js.map",
     "package.json"
   ],
   "mac": {
