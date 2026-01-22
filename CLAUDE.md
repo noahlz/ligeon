@@ -19,10 +19,12 @@ The user will delete plan files after they are implemented.
 ## Dev Commands
 
 ```bash
-npm run build    # Full build
-npm run dev      # Start dev server and launch Electron window
-npm test         # Run all tests (unit + integration)
-npm run clean    # Remove all build outputs (dist, dist-electron, compiled JS)
+npm run dev              # Start dev server and launch Electron window
+npm run build            # Compile renderer + main process (no packaging)
+npm run package          # Build + create distributable in out/
+npm test                 # Run all tests (unit + integration)
+npm run clean            # Remove all build outputs (dist, dist-electron, out)
+npm run typecheck        # Check TypeScript types
 ```
 
 ## Technology Stack
@@ -35,7 +37,7 @@ See `package.json` for current versions.
 - **Database:** SQLite with better-sqlite3
 - **Chess Logic:** chessops
 - **Board UI:** chessground
-- **Package Manager:** npm 
+- **Package Manager:** npm
 - **Build Tool:** Vite
 - **Testing:** Vitest
 
@@ -43,22 +45,34 @@ See `package.json` for current versions.
 
 ```
 ├── __tests__           # test suite
-│   ├── integration
-│   ├── performance
-│   └── unit
-│       └── components
-├── dist                # Typescript javascript output
-├── electron            # electron files
-├── dist-electron       # electron application artifact
-├── electron            # electron files
-│   └── ipc
-├── public
-├── resources
-│   └── sample-games    # example chess games (pgn format)
-└── src                 # Project source code
-    ├── components
-    ├── hooks
-    ├── styles          # tailwind css files
-    └── utils
+│   ├── integration
+│   ├── performance
+│   └── unit
+├── dist/               # Renderer build output (React/Vite)
+├── dist-electron/      # Main process build output (Electron)
+├── out/                # Packaged applications (dmg, nsis, etc.)
+├── electron/           # Main process source
+│   ├── main.ts         # Electron app lifecycle, window creation, IPC
+│   ├── preload.ts      # Context bridge for secure IPC
+│   ├── ipc/            # IPC handler modules
+│   └── tsconfig.json   # Main process TypeScript config
+├── public/             # Static web assets (copied to dist/ by Vite)
+├── resources/          # App packaging assets
+│   ├── icons/          # App icons for electron-builder
+│   └── sample-games/   # Example chess games (PGN format)
+├── src/                # Renderer source (React app)
+│   ├── components/     # React components
+│   ├── hooks/          # React hooks
+│   ├── types/          # TypeScript type definitions
+│   ├── utils/          # Utility functions
+│   └── styles/         # Tailwind CSS files
+├── tsconfig.json       # Renderer TypeScript config (extends tsconfig.base.json)
+└── tsconfig.base.json  # Shared TypeScript settings
 ```
 
+### Asset Directories
+
+- **`public/`**: Static web assets served by Vite during dev, copied to `dist/` in production
+- **`resources/`**: App packaging assets including icons and example files
+  - `resources/icons/`: Application icons for electron-builder
+  - `resources/sample-games/`: Example PGN chess game files

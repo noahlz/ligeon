@@ -3,19 +3,18 @@
   "productName": "Ligeon",
   "directories": {
     "buildResources": "resources",
-    "output": "dist"
+    "output": "out"
   },
   "files": [
     "dist/**/*",
-    "dist/*.js",
-    "dist/*.js.map",
+    "dist-electron/**/*",
     "package.json"
   ],
   "mac": {
-    "target": ["dir"],
+    "target": ["dmg"],
     "category": "public.app-category.games"
   },
   "win": {
-    "target": ["dir"]
+    "target": ["nsis"]
   }
 }
