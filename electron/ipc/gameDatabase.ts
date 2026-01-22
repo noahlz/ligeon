@@ -1,0 +1,249 @@
+import Database from 'better-sqlite3'
+import path from 'path'
+import fs from 'fs'
+import type { GameData, GameRow, GameSearchResult, GameFilters } from './types'
+
+/**
+ * SQLite database wrapper for managing chess games in a collection
+ */
+export class GameDatabase {
+  private db: Database.Database
+  private collectionDir: string
+  private dbPath: string
+
+  /**
+   * Create or open a game database for a collection
+   *
+   * @param collectionId - Unique identifier for the collection
+   * @param collectionsBasePath - Base path for all collections (injectable for testing)
+   */
+  constructor(collectionId: string, collectionsBasePath: string) {
+    this.collectionDir = path.join(collectionsBasePath, collectionId)
+    this.dbPath = path.join(this.collectionDir, 'games.db')
+
+    if (!fs.existsSync(this.collectionDir)) {
+      fs.mkdirSync(this.collectionDir, { recursive: true })
+    }
+
+    try {
+      this.db = new Database(this.dbPath)
+      this.db.pragma('journal_mode = WAL')
+    } catch (error) {
+      console.error('Error opening database:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Create database schema with games table and indices
+   */
+  createSchema(): void {
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS games (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        white TEXT NOT NULL,
+        black TEXT NOT NULL,
+        event TEXT,
+        date INTEGER,
+        result REAL NOT NULL,
+        ecoCode TEXT,
+        whiteElo INTEGER,
+        blackElo INTEGER,
+        site TEXT,
+        round TEXT,
+        moveCount INTEGER,
+        pgn TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_white ON games(white);
+      CREATE INDEX IF NOT EXISTS idx_black ON games(black);
+      CREATE INDEX IF NOT EXISTS idx_event ON games(event);
+      CREATE INDEX IF NOT EXISTS idx_date ON games(date);
+      CREATE INDEX IF NOT EXISTS idx_result ON games(result);
+      CREATE INDEX IF NOT EXISTS idx_ecoCode ON games(ecoCode);
+      CREATE INDEX IF NOT EXISTS idx_whiteElo ON games(whiteElo);
+      CREATE INDEX IF NOT EXISTS idx_blackElo ON games(blackElo);
+    `)
+    console.log('✓ Database schema created')
+  }
+
+  /**
+   * Insert a single game
+   *
+   * @param gameData - Game data to insert
+   * @returns SQLite run result
+   */
+  insertGame(gameData: GameData): Database.RunResult {
+    const stmt = this.db.prepare(`
+      INSERT INTO games (white, black, event, date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, pgn)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+    return stmt.run(
+      gameData.white,
+      gameData.black,
+      gameData.event,
+      gameData.date,
+      gameData.result,
+      gameData.ecoCode,
+      gameData.whiteElo,
+      gameData.blackElo,
+      gameData.site,
+      gameData.round,
+      gameData.moveCount,
+      gameData.pgn
+    )
+  }
+
+  /**
+   * Insert multiple games in a transaction
+   *
+   * @param games - Array of games to insert
+   */
+  insertGamesBatch(games: GameData[]): void {
+    const stmt = this.db.prepare(`
+      INSERT INTO games (white, black, event, date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, pgn)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+    const insertMany = this.db.transaction((games: GameData[]) => {
+      for (const game of games) {
+        stmt.run(
+          game.white,
+          game.black,
+          game.event,
+          game.date,
+          game.result,
+          game.ecoCode,
+          game.whiteElo,
+          game.blackElo,
+          game.site,
+          game.round,
+          game.moveCount,
+          game.pgn
+        )
+      }
+    })
+    insertMany(games)
+  }
+
+  /**
+   * Search for games matching filters
+   *
+   * @param filters - Search filters
+   * @param limit - Maximum number of results (default: 1000)
+   * @returns Array of matching games
+   */
+  searchGames(filters: GameFilters, limit = 1000): GameSearchResult[] {
+    let query = 'SELECT id, white, black, event, date, result, whiteElo, blackElo, ecoCode FROM games WHERE 1=1'
+    const params: any[] = []
+
+    if (filters.white) {
+      query += ' AND white LIKE ?'
+      params.push(`%${filters.white}%`)
+    }
+    if (filters.black) {
+      query += ' AND black LIKE ?'
+      params.push(`%${filters.black}%`)
+    }
+    if (filters.event) {
+      query += ' AND event LIKE ?'
+      params.push(`%${filters.event}%`)
+    }
+    if (filters.dateFrom !== null && filters.dateFrom !== undefined) {
+      query += ' AND date >= ?'
+      params.push(filters.dateFrom)
+    }
+    if (filters.dateTo !== null && filters.dateTo !== undefined) {
+      query += ' AND date <= ?'
+      params.push(filters.dateTo)
+    }
+    if (filters.result !== null && filters.result !== undefined) {
+      query += ' AND result = ?'
+      params.push(filters.result)
+    }
+    if (filters.ecoCode) {
+      query += ' AND ecoCode = ?'
+      params.push(filters.ecoCode)
+    }
+    if (filters.whiteEloMin !== null && filters.whiteEloMin !== undefined) {
+      query += ' AND whiteElo >= ?'
+      params.push(filters.whiteEloMin)
+    }
+    if (filters.whiteEloMax !== null && filters.whiteEloMax !== undefined) {
+      query += ' AND whiteElo <= ?'
+      params.push(filters.whiteEloMax)
+    }
+    if (filters.blackEloMin !== null && filters.blackEloMin !== undefined) {
+      query += ' AND blackElo >= ?'
+      params.push(filters.blackEloMin)
+    }
+    if (filters.blackEloMax !== null && filters.blackEloMax !== undefined) {
+      query += ' AND blackElo <= ?'
+      params.push(filters.blackEloMax)
+    }
+
+    query += ' LIMIT ?'
+    params.push(limit)
+
+    try {
+      const stmt = this.db.prepare(query)
+      return stmt.all(...params) as GameSearchResult[]
+    } catch (error) {
+      console.error('Error searching games:', error)
+      return []
+    }
+  }
+
+  /**
+   * Get a single game with full PGN data
+   *
+   * @param gameId - Database ID of the game
+   * @returns Full game record or null
+   */
+  getGameWithMoves(gameId: number): GameRow | null {
+    try {
+      const stmt = this.db.prepare('SELECT * FROM games WHERE id = ?')
+      return stmt.get(gameId) as GameRow | undefined ?? null
+    } catch (error) {
+      console.error('Error getting game:', error)
+      return null
+    }
+  }
+
+  /**
+   * Get total count of games in the database
+   *
+   * @returns Number of games
+   */
+  getGameCount(): number {
+    try {
+      const stmt = this.db.prepare('SELECT COUNT(*) as count FROM games')
+      const result = stmt.get() as { count: number }
+      return result.count
+    } catch (error) {
+      console.error('Error getting game count:', error)
+      return 0
+    }
+  }
+
+  /**
+   * Close the database connection
+   */
+  close(): void {
+    try {
+      if (this.db) this.db.close()
+    } catch (error) {
+      console.error('Error closing database:', error)
+    }
+  }
+
+  /**
+   * Delete all games from the database
+   */
+  clearGames(): void {
+    try {
+      this.db.prepare('DELETE FROM games').run()
+      console.log('✓ Cleared all games')
+    } catch (error) {
+      console.error('Error clearing games:', error)
+    }
+  }
+}

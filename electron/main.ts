@@ -2,6 +2,12 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import {
+  listCollections,
+  renameCollection,
+  deleteCollection,
+} from './ipc/collectionHandlers'
+import { searchGames, getGameMoves } from './ipc/gameHandlers'
 
 // Get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -122,37 +128,27 @@ function setupIpcHandlers() {
   })
 
   // List all collections
-  ipcMain.handle('list-collections', async () => {
-    console.log('Listing collections...')
-    // Will be implemented in Part 3
-    return []
-  })
+  ipcMain.handle('list-collections', async () => listCollections())
 
   // Rename collection
-  ipcMain.handle('rename-collection', async (_event, { collectionId, newName }) => {
-    console.log('Renaming collection:', collectionId, '→', newName)
-    // Will be implemented in Part 3
-    return { success: true, metadata: { id: collectionId, name: newName } }
-  })
+  ipcMain.handle('rename-collection', async (_event, { collectionId, newName }) =>
+    renameCollection(collectionId, newName)
+  )
 
   // Delete collection
-  ipcMain.handle('delete-collection', async (_event, { collectionId }) => {
-    console.log('Deleting collection:', collectionId)
-    // Will be implemented in Part 3
-    return { success: true }
-  })
+  ipcMain.handle('delete-collection', async (_event, { collectionId }) =>
+    deleteCollection(collectionId)
+  )
 
-  // Search games (handler will be implemented in Part 4)
-  ipcMain.handle('search-games', async (_event, { collectionId, filters }) => {
-    console.log('Search requested for:', collectionId, filters)
-    return []
-  })
+  // Search games
+  ipcMain.handle('search-games', async (_event, { collectionId, filters }) =>
+    searchGames(collectionId, filters)
+  )
 
-  // Get game with moves (handler will be implemented in Part 4)
-  ipcMain.handle('get-game-moves', async (_event, { collectionId, gameId }) => {
-    console.log('Get game requested:', collectionId, gameId)
-    return null
-  })
+  // Get game with moves
+  ipcMain.handle('get-game-moves', async (_event, { collectionId, gameId }) =>
+    getGameMoves(collectionId, gameId)
+  )
 
   console.log('✓ IPC handlers set up')
 }
