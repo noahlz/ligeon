@@ -6,12 +6,12 @@ interface GameInfoProps {
     pgn?: string
     white: string
     black: string
-    whiteElo?: number
-    blackElo?: number
-    event?: string
-    date?: number
+    whiteElo?: number | null
+    blackElo?: number | null
+    event?: string | null
+    date?: number | null
     result?: number | null
-    ecoCode?: string
+    ecoCode?: string | null
   }
 }
 
