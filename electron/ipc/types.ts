@@ -1,20 +1,9 @@
+import type { GameData as LibGameData } from '../../lib/types/game.js'
+
 /**
- * Game data structure for inserting into database
+ * Re-export shared GameData interface from lib
  */
-export interface GameData {
-  white: string
-  black: string
-  event: string | null
-  date: number | null
-  result: number
-  ecoCode: string | null
-  whiteElo: number | null
-  blackElo: number | null
-  site: string | null
-  round: string | null
-  moveCount: number
-  pgn: string
-}
+export type GameData = LibGameData
 
 /**
  * Complete game record including database ID

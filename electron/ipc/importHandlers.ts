@@ -1,12 +1,10 @@
 import fs from 'fs'
 import path from 'path'
 import { BrowserWindow } from 'electron'
-import { parsePgn, makePgn } from 'chessops/pgn'
-import type { Game, PgnNodeData } from 'chessops/pgn'
+import { parsePgn } from 'chessops/pgn'
 import { GameDatabase } from './gameDatabase.js'
 import type { GameData, CollectionMetadata } from './types.js'
-import { convertResult } from './utils/resultConverter.js'
-import { pgnDateToTimestamp } from './utils/dateConverter.js'
+import { extractGameData } from '../../lib/pgn/gameExtractor.js'
 
 /**
  * Statistics for an import operation
@@ -44,63 +42,6 @@ export interface ImportProgress {
 
 const BATCH_SIZE = 1000
 const PROGRESS_LOG_INTERVAL = 10000
-
-/**
- * Extract game metadata and moves from a parsed PGN game
- */
-function extractGameData(game: Game<PgnNodeData>): GameData | null {
-  const headers = game.headers
-
-  // Extract result and validate
-  const resultStr = headers.get('Result') || '*'
-  const resultData = convertResult(resultStr)
-
-  if (resultData.skip) {
-    return null
-  }
-
-  // Extract player names (required fields)
-  const white = headers.get('White') || 'Unknown'
-  const black = headers.get('Black') || 'Unknown'
-
-  // Extract optional metadata
-  const event = headers.get('Event') || null
-  const dateStr = headers.get('Date')
-  const date = pgnDateToTimestamp(dateStr)
-  const ecoCode = headers.get('ECO') || null
-  const site = headers.get('Site') || null
-  const round = headers.get('Round') || null
-
-  // Parse ELO ratings
-  const whiteEloStr = headers.get('WhiteElo')
-  const blackEloStr = headers.get('BlackElo')
-  const whiteElo = whiteEloStr ? parseInt(whiteEloStr) : null
-  const blackElo = blackEloStr ? parseInt(blackEloStr) : null
-
-  // Count moves in mainline
-  let moveCount = 0
-  for (const node of game.moves.mainline()) {
-    if (node.san) moveCount++
-  }
-
-  // Reconstruct full PGN text
-  const pgn = makePgn(game)
-
-  return {
-    white,
-    black,
-    event,
-    date,
-    result: resultData.numeric!,
-    ecoCode,
-    whiteElo: whiteElo && !isNaN(whiteElo) ? whiteElo : null,
-    blackElo: blackElo && !isNaN(blackElo) ? blackElo : null,
-    site,
-    round,
-    moveCount,
-    pgn,
-  }
-}
 
 /**
  * Import and index a PGN file into a collection database
