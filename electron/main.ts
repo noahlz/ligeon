@@ -6,14 +6,16 @@ import {
   listCollections,
   renameCollection,
   deleteCollection,
-} from './ipc/collectionHandlers'
-import { searchGames, getGameMoves } from './ipc/gameHandlers'
+} from './ipc/collectionHandlers.js'
+import { searchGames, getGameMoves } from './ipc/gameHandlers.js'
+import { importAndIndexPgn } from './ipc/importHandlers.js'
 
 // Get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 let mainWindow: BrowserWindow | null = null
+let importCancelled = false
 
 // Determine if running in development
 const isDev = process.env.NODE_ENV === 'development' ||
@@ -101,30 +103,25 @@ function setupIpcHandlers() {
     return result.filePaths[0] || null
   })
 
-  // Import PGN file (actual import handled in separate handler)
+  // Import PGN file
   ipcMain.handle('import-pgn', async (_event, { filePath, collectionId, name }) => {
     console.log('Import requested:', { filePath, collectionId, name })
+    importCancelled = false
 
-    try {
-      // Import handler will be implemented in Part 4
-      // For now, just acknowledge the request
-      mainWindow!.webContents.send('import-progress', {
-        parsed: 0,
-        indexed: 0,
-        skipped: 0,
-      })
-
-      return { success: true }
-    } catch (error) {
-      console.error('Import error:', error)
-      return { success: false, error: (error as Error).message }
-    }
+    return await importAndIndexPgn(
+      filePath,
+      collectionId,
+      name,
+      collectionsPath,
+      mainWindow,
+      () => importCancelled
+    )
   })
 
   // Cancel import
   ipcMain.on('cancel-import', () => {
     console.log('Import cancelled by user')
-    // Cancel logic will be implemented in Part 4
+    importCancelled = true
   })
 
   // List all collections

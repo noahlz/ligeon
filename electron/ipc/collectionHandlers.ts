@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import { app } from 'electron'
-import type { CollectionMetadata } from './types'
+import type { CollectionMetadata } from './types.js'
 
 /**
  * Get the base path for all collections

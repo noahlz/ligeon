@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
-import type { GameData, GameRow, GameSearchResult, GameFilters } from './types'
+import type { GameData, GameRow, GameSearchResult, GameFilters } from './types.js'
 
 /**
  * SQLite database wrapper for managing chess games in a collection

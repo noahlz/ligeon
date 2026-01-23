@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import path from 'path'
-import { GameDatabase } from './gameDatabase'
-import type { GameFilters, GameSearchResult, GameRow } from './types'
+import { GameDatabase } from './gameDatabase.js'
+import type { GameFilters, GameSearchResult, GameRow } from './types.js'
 
 /**
  * Get the base path for all collections
