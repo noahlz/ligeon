@@ -74,9 +74,10 @@ sqlite3 dist/fischer-60-memorable.db "SELECT COUNT(*) FROM games"
 sqlite3 dist/fischer-60-memorable.db "SELECT white, black, event, result FROM games LIMIT 10"
 ```
 
-## Author
+## Authors
 
-[@noahlz](https://github.com/noahlz)
+[@noahlz](https://github.com/noahlz)  
+[Claude](https://claude.com/product/claude-code)  
 
 ## License
 
