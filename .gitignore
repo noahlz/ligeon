@@ -71,8 +71,9 @@ vite.config.ts.timestamp-*
 
 # Data
 .ligeon/
-games.db
 *.db
+*.db-shm
+*.db-wal
 
 # Logs
 .logs/
