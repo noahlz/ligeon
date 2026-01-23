@@ -82,3 +82,9 @@ sqlite3 dist/fischer-60-memorable.db "SELECT white, black, event, result FROM ga
 ## License
 
 [GPLv3](./LICENSE) (because it uses Chessground)
+
+## Sound Attribution
+
+Sound files in `public/sounds/` copied from [Lichess](https://github.com/lichess-org/lila), licenced under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) by EdinburghCollective.
+
+See: [lichess-org/lila/COPYING.md](https://github.com/lichess-org/lila/blob/master/COPYING.md)
