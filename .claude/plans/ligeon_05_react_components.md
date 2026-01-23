@@ -29,19 +29,19 @@ Use these copyable lists with TodoWrite to track progress. Tick items as complet
 - [ ] Test: Error handling for network failures
 
 **Part 5.3 - Chess & Board Components:**
-- [ ] Create src/components/BoardDisplay.tsx (Chessground integration)
-- [ ] Implement FEN-based board updates with lastMove highlighting
-- [ ] Create src/components/MoveList.tsx (move list with highlighting)
-- [ ] Implement click-to-jump and auto-scroll to current move
-- [ ] Create src/hooks/useAutoPlay.ts (timer-based auto-advance)
+- [x] Create src/components/BoardDisplay.tsx (Chessground integration) — src/components/BoardDisplay.tsx:1
+- [x] Implement FEN-based board updates with lastMove highlighting — Uses Key[] type from chessground
+- [x] Create src/components/MoveList.tsx (move list with highlighting) — src/components/MoveList.tsx:1
+- [x] Implement click-to-jump and auto-scroll to current move — scrollIntoView on currentMoveRef
+- [x] Create src/hooks/useAutoPlay.ts (timer-based auto-advance) — Completed in task #3
 - [ ] Test: Board updates correctly with FEN
 - [ ] Test: Moves highlight and scroll properly
 - [ ] Test: Auto-play advances at 3s and 10s speeds
 
 **Part 5.4 - Navigation & Game Info:**
-- [ ] Create src/components/MoveNavigation.tsx (⏮ ◀ ▶ ⏭ + play menu)
-- [ ] Implement keyboard shortcuts (Home, ←, →, End, Space)
-- [ ] Implement play button with speed menu (Fast/Slow)
+- [x] Create src/components/MoveNavigation.tsx (⏮ ◀ ▶ ⏭ + play menu) — src/components/MoveNavigation.tsx:1
+- [x] Implement keyboard shortcuts (Home, ←, →, End, Space) — Lines 37-68
+- [x] Implement play button with speed menu (Fast/Slow) — Lines 114-154
 - [ ] Create src/components/GameInfo.tsx (game metadata + Lichess link)
 - [ ] Test: Navigation buttons and keyboard work
 - [ ] Test: Play menu shows and starts auto-play
@@ -118,10 +118,10 @@ Key patterns:
 Props needed: `fen` (position), `lastMove` (array of 2 squares or null)
 
 **Checklist:**
-- [ ] Create src/components/BoardDisplay.tsx with FEN and lastMove props
-- [ ] Configure animation duration for smooth transitions
-- [ ] Disable drawable layer for view-only mode
-- [ ] Update board when either FEN or lastMove prop changes
+- [x] Create src/components/BoardDisplay.tsx with FEN and lastMove props — src/components/BoardDisplay.tsx:1
+- [x] Configure animation duration for smooth transitions — 300ms animation duration
+- [x] Disable drawable layer for view-only mode — drawable.visible: false
+- [x] Update board when either FEN or lastMove prop changes — useEffect on lines 38-47
 
 ---
 
@@ -160,7 +160,7 @@ export default function MoveList({ moves, currentMoveIndex, onMoveClick }) {
 ```
 
 **Checklist:**
-- [ ] Create src/components/MoveList.tsx
+- [x] Create src/components/MoveList.tsx — src/components/MoveList.tsx:1
 
 ---
 
@@ -263,7 +263,7 @@ export default function MoveNavigation({ moveIndex, totalMoves, onStart, onPrev,
 ```
 
 **Checklist:**
-- [ ] Create src/components/MoveNavigation.tsx
+- [x] Create src/components/MoveNavigation.tsx — src/components/MoveNavigation.tsx:1
 
 ---
 

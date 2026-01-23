@@ -385,6 +385,10 @@ npm dev
 
 Then in UI: Click "Import New" → select PGN → watch progress → verify games indexed
 
+**Checklist:**
+- [x] Launch app in dev mode — Running on http://localhost:5174
+- [ ] Manual UI test: Import PGN and verify functionality — Requires user testing
+
 ### 5. Run Tests
 
 ```bash
@@ -394,4 +398,9 @@ npm dev
 ```
 
 Expected: Tests pass (Vitest), import works correctly
+
+**Checklist:**
+- [x] Run all tests — 45 tests passing
+- [x] Run typecheck — Passed
+- [x] Launch dev app — Running successfully
 
