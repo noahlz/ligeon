@@ -11,6 +11,10 @@ Based on [Lichess](https://lichess.org) components:
 
 Check `.claude/plans/` for implementation tasks. These are guidelines, not strict rules. Use AskUserQuestion for decisions. If an earlier plan seems to be missing, it was already completed (check with the user to confirm).
 
+## Pre-release, Active Development
+
+This application has not yet been released - don't worry about making "backwards compatible" changes. Move fast and break things!
+
 ## Commands
 
 ```bash
@@ -141,16 +145,7 @@ Platform-agnostic code shared between electron/ and CLI scripts.
 
 ### Structure
 
-Each subdirectory has an `index.ts` barrel that re-exports contents:
-
-```
-lib/
-├── index.ts              # Re-exports all
-├── converters/           # Date, result converters
-├── database/             # Schema constant
-├── pgn/                  # Game extraction
-└── types/                # GameData interface
-```
+Each subdirectory has an `index.ts` barrel that re-exports contents.
 
 ### Import Patterns
 
@@ -167,6 +162,6 @@ import { extractGameData, GAMES_SCHEMA_SQL, type GameData } from '../lib/index.j
 
 ### Add New Code
 
-1. Create module in `lib/*/` (e.g., `lib/converters/myConverter.ts`)
+1. If appropriate, create module in `lib/*/` (e.g., `lib/converters/myConverter.ts`)
 2. Export from `lib/*/index.ts`
 3. Use `.js` extensions in imports

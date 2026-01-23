@@ -300,9 +300,7 @@ describe('PGN Import Handler', () => {
     db.close()
 
     expect(game).toBeTruthy()
-    expect(game!.pgn).toContain('Carlsen, Magnus')
-    expect(game!.pgn).toContain('Nakamura, Hikaru')
-    expect(game!.pgn).toContain('1. e4 e5')
+    expect(game!.moves).toContain('1. e4 e5')
     expect(game!.white).toBe('Carlsen, Magnus')
     expect(game!.black).toBe('Nakamura, Hikaru')
     expect(game!.event).toBe('Test Event')

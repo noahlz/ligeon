@@ -43,7 +43,7 @@ describe('GameDatabase', () => {
       site: 'Moscow',
       round: '1',
       moveCount: 42,
-      pgn: '1. e4 c5...',
+      moves: '1. e4 c5...',
     }
     const result = db.insertGame(game)
     expect(result.changes).toBe(1)
@@ -62,7 +62,7 @@ describe('GameDatabase', () => {
       site: null,
       round: null,
       moveCount: 1,
-      pgn: '1. e4',
+      moves: '1. e4',
     })
     const results = db.searchGames({ white: 'Kasparov' })
     expect(results.length).toBe(1)
@@ -82,7 +82,7 @@ describe('GameDatabase', () => {
       site: null,
       round: null,
       moveCount: 1,
-      pgn: '1. e4',
+      moves: '1. e4',
     })
     const results = db.searchGames({ black: 'Carlsen' })
     expect(results.length).toBe(1)
@@ -102,7 +102,7 @@ describe('GameDatabase', () => {
       site: null,
       round: null,
       moveCount: 1,
-      pgn: '1. e4',
+      moves: '1. e4',
     })
     const results = db.searchGames({ result: 1.0 })
     expect(results.length).toBe(1)
@@ -121,7 +121,7 @@ describe('GameDatabase', () => {
       site: null,
       round: null,
       moveCount: 1,
-      pgn: '1. e4',
+      moves: '1. e4',
     })
     const results = db.searchGames({ whiteEloMin: 2400, whiteEloMax: 2600 })
     expect(results.length).toBe(1)
@@ -141,11 +141,11 @@ describe('GameDatabase', () => {
       site: null,
       round: null,
       moveCount: 3,
-      pgn: '1. e4 c5 2. Nf3',
+      moves: '1. e4 c5 2. Nf3',
     })
     const game = db.getGameWithMoves(1)
     expect(game).not.toBeNull()
-    expect(game?.pgn).toBe('1. e4 c5 2. Nf3')
+    expect(game?.moves).toBe('1. e4 c5 2. Nf3')
   })
 
   test('returns null for non-existent game', () => {
@@ -168,7 +168,7 @@ describe('GameDatabase', () => {
         site: null,
         round: null,
         moveCount: 1,
-        pgn: '1. e4',
+        moves: '1. e4',
       }))
     db.insertGamesBatch(games)
     expect(db.getGameCount()).toBe(5)
@@ -188,7 +188,7 @@ describe('GameDatabase', () => {
         site: null,
         round: null,
         moveCount: 1,
-        pgn: '1. e4',
+        moves: '1. e4',
       },
       {
         white: 'Player3',
@@ -202,7 +202,7 @@ describe('GameDatabase', () => {
         site: null,
         round: null,
         moveCount: 1,
-        pgn: '1. d4',
+        moves: '1. d4',
       },
     ]
     db.insertGamesBatch(games)
@@ -222,7 +222,7 @@ describe('GameDatabase', () => {
       site: null,
       round: null,
       moveCount: 1,
-      pgn: '1. e4',
+      moves: '1. e4',
     })
     expect(db.getGameCount()).toBe(1)
     db.clearGames()

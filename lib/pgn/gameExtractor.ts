@@ -1,4 +1,3 @@
-import { makePgn } from 'chessops/pgn'
 import type { Game, PgnNodeData } from 'chessops/pgn'
 import type { GameData } from '../types/game.js'
 import { convertResult } from '../converters/resultConverter.js'
@@ -36,14 +35,28 @@ export function extractGameData(game: Game<PgnNodeData>): GameData | null {
   const whiteElo = whiteEloStr ? parseInt(whiteEloStr) : null
   const blackElo = blackEloStr ? parseInt(blackEloStr) : null
 
-  // Count moves in mainline
+  // Count moves in mainline and build moves text
   let moveCount = 0
+  const movesList: string[] = []
+  let moveNumber = 1
+
   for (const node of game.moves.mainline()) {
-    if (node.san) moveCount++
+    if (node.san) {
+      moveCount++
+      // Add move number before white's move
+      if (moveCount % 2 === 1) {
+        movesList.push(`${moveNumber}.`)
+      }
+      movesList.push(node.san)
+      // Increment move number after black's move
+      if (moveCount % 2 === 0) {
+        moveNumber++
+      }
+    }
   }
 
-  // Reconstruct full PGN text
-  const pgn = makePgn(game)
+  // Build moves text with result
+  const moves = movesList.join(' ') + (movesList.length > 0 ? ' ' : '') + resultStr
 
   return {
     white,
@@ -57,6 +70,6 @@ export function extractGameData(game: Game<PgnNodeData>): GameData | null {
     site,
     round,
     moveCount,
-    pgn,
+    moves,
   }
 }

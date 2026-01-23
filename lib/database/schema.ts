@@ -15,7 +15,7 @@ export const GAMES_SCHEMA_SQL = `
     site TEXT,
     round TEXT,
     moveCount INTEGER,
-    pgn TEXT NOT NULL
+    moves TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_white ON games(white);
   CREATE INDEX IF NOT EXISTS idx_black ON games(black);

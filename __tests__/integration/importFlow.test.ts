@@ -81,8 +81,8 @@ describe('PGN Import Flow - Integration Tests', () => {
     const gameWithMoves = db.getGameWithMoves(firstGame.id)
 
     expect(gameWithMoves).toBeTruthy()
-    expect(gameWithMoves!.pgn).toBeTruthy()
-    expect(gameWithMoves!.pgn.length).toBeGreaterThan(0)
+    expect(gameWithMoves!.moves).toBeTruthy()
+    expect(gameWithMoves!.moves.length).toBeGreaterThan(0)
 
     // Verify game has Fischer as white
     expect(gameWithMoves!.white).toContain('Fischer')

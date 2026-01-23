@@ -51,7 +51,7 @@ export class GameDatabase {
    */
   insertGame(gameData: GameData): Database.RunResult {
     const stmt = this.db.prepare(`
-      INSERT INTO games (white, black, event, date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, pgn)
+      INSERT INTO games (white, black, event, date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     return stmt.run(
@@ -66,7 +66,7 @@ export class GameDatabase {
       gameData.site,
       gameData.round,
       gameData.moveCount,
-      gameData.pgn
+      gameData.moves
     )
   }
 
@@ -77,7 +77,7 @@ export class GameDatabase {
    */
   insertGamesBatch(games: GameData[]): void {
     const stmt = this.db.prepare(`
-      INSERT INTO games (white, black, event, date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, pgn)
+      INSERT INTO games (white, black, event, date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     const insertMany = this.db.transaction((games: GameData[]) => {
@@ -94,7 +94,7 @@ export class GameDatabase {
           game.site,
           game.round,
           game.moveCount,
-          game.pgn
+          game.moves
         )
       }
     })

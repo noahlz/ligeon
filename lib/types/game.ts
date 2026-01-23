@@ -13,5 +13,5 @@ export interface GameData {
   site: string | null
   round: string | null
   moveCount: number
-  pgn: string
+  moves: string
 }
