@@ -42,16 +42,16 @@ Use these copyable lists with TodoWrite to track progress. Tick items as complet
 - [x] Create src/components/MoveNavigation.tsx (⏮ ◀ ▶ ⏭ + play menu) — src/components/MoveNavigation.tsx:1
 - [x] Implement keyboard shortcuts (Home, ←, →, End, Space) — Lines 37-68
 - [x] Implement play button with speed menu (Fast/Slow) — Lines 114-154
-- [ ] Create src/components/GameInfo.tsx (game metadata + Lichess link)
+- [x] Create src/components/GameInfo.tsx (game metadata + Lichess link) — src/components/GameInfo.tsx:1
 - [ ] Test: Navigation buttons and keyboard work
 - [ ] Test: Play menu shows and starts auto-play
 - [ ] Test: Lichess link sends full PGN
 
 **Part 5.5 - Game & Collection Browsing:**
-- [ ] Create src/components/GameListSidebar.tsx (search/filter/list)
-- [ ] Implement search by player name and result filter
-- [ ] Create src/components/CollectionSelector.tsx (dropdown + import)
-- [ ] Create src/components/ImportDialog.tsx (progress + logs)
+- [x] Create src/components/GameListSidebar.tsx (search/filter/list) — src/components/GameListSidebar.tsx:1
+- [x] Implement search by player name and result filter — Lines 28-40
+- [x] Create src/components/CollectionSelector.tsx (dropdown + import) — src/components/CollectionSelector.tsx:1
+- [x] Create src/components/ImportDialog.tsx (progress + logs) — src/components/ImportDialog.tsx:1
 - [ ] Test: Search and filter games
 - [ ] Test: Collection selection works
 - [ ] Test: Import dialog shows progress
