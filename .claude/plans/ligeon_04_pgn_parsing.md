@@ -14,20 +14,20 @@
 Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
 
 **Part 4.1 - PGN Import Handler:**
-- [ ] Create electron/ipc/importHandlers.ts using chessops parsePgn()
-- [ ] Implement streaming import with chessops iterator
-- [ ] Implement result validation and skip logic
-- [ ] Implement progress logging every 10,000 games
-- [ ] Implement detailed skip reason logging
-- [ ] Implement final statistics summary
-- [ ] Create __tests__/integration/importAndReplay.test.ts
-- [ ] Test: Import sample PGN file successfully
-- [ ] Test: Progress events sent to renderer
-- [ ] Test: Skipped games logged with reasons
+- [x] Create electron/ipc/importHandlers.ts using chessops parsePgn()
+- [x] Implement streaming import with chessops iterator — Uses batch processing (1000 games per batch)
+- [x] Implement result validation and skip logic
+- [x] Implement progress logging every 10,000 games — Implemented with import-progress events
+- [x] Implement detailed skip reason logging — Tracks noResult, invalidResult, parseError
+- [x] Implement final statistics summary
+- [x] Create __tests__/integration/importAndReplay.test.ts — Created as __tests__/integration/importFlow.test.ts with 7 passing tests
+- [x] Test: Import sample PGN file successfully — Tested with Fischer (60 games) and Tal (102 games) sample files
+- [x] Test: Progress events sent to renderer
+- [x] Test: Skipped games logged with reasons
 
 **Part 4.2 - Import Complete:**
-- [ ] Wire importAndIndexPgn to electron/main.ts import-pgn handler
-- [ ] Test: Complete import workflow end-to-end
+- [x] Wire importAndIndexPgn to electron/main.ts import-pgn handler — Lines 107-119
+- [x] Test: Complete import workflow end-to-end
 
 ---
 
@@ -98,9 +98,9 @@ export function parsePgnGame(pgnText: string) {
 ```
 
 **Checklist:**
-- [ ] Create src/utils/pgnParser.ts
-- [ ] Verify chessops/pgn imports correctly
-- [ ] Test with sample PGN data
+- [x] Create src/utils/pgnParser.ts — Implemented as lib/pgn/gameExtractor.ts (shared library pattern)
+- [x] Verify chessops/pgn imports correctly
+- [x] Test with sample PGN data
 
 ---
 
@@ -239,11 +239,11 @@ export async function importAndIndexPgn(
 ```
 
 **Checklist:**
-- [ ] Create electron/ipc/importHandlers.ts
-- [ ] Verify streaming works with chessops iterator
-- [ ] Progress logs every 10k games
-- [ ] Skips logged immediately
-- [ ] Final summary provided
+- [x] Create electron/ipc/importHandlers.ts
+- [x] Verify streaming works with chessops iterator — Uses batch processing (1000 games per batch)
+- [x] Progress logs every 10k games — Sends import-progress events
+- [x] Skips logged immediately — Sends import-progress-log events with reasons
+- [x] Final summary provided — Returns ImportStats with duration and breakdown
 
 ---
 
@@ -294,8 +294,8 @@ describe('PGN Parser', () => {
 ```
 
 **Checklist:**
-- [ ] Create __tests__/unit/pgnParser.test.ts
-- [ ] Run `npm test` - all tests pass (Vitest)
+- [x] Create __tests__/unit/pgnParser.test.ts — Implemented as __tests__/unit/importHandlers.test.ts with 10 passing tests
+- [x] Run `npm test` - all tests pass (Vitest)
 
 ---
 
@@ -372,8 +372,8 @@ describe('Import and Replay Integration', () => {
 ```
 
 **Checklist:**
-- [ ] Create __tests__/integration/importAndReplay.test.ts
-- [ ] Run `npm test` - integration tests pass
+- [x] Create __tests__/integration/importAndReplay.test.ts — Implemented as __tests__/integration/importFlow.test.ts with 7 passing tests
+- [x] Run `npm test` - integration tests pass
 
 ---
 

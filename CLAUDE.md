@@ -9,7 +9,12 @@ Based on [Lichess](https://lichess.org) components:
 
 ## Plans
 
-Check `.claude/plans/` for implementation tasks. These are guidelines, not strict rules. Use AskUserQuestion for decisions. If an earlier plan seems to be missing, it was already completed (check with the user to confirm).
+This project is in ongoing, active development:
+- Implementation plans are under `.claude/plans/` 
+- The Plans are guidelines, not strict rules - be flexible in changing them if it makes sense.
+- When implementing, use AskUserQuestion to check with the user on implementation decisions.
+- After implementation, be sure to check-off completed tasks in the plans as your final task.
+- If an earlier plan is missing, it was very likely already completed - check with the user to confirm.
 
 ## Pre-release, Active Development
 

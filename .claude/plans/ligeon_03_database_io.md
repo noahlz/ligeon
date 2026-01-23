@@ -14,28 +14,28 @@
 Use these copyable lists with TodoWrite to track progress. Tick items as complete after implementation.
 
 **Part 3.1 - SQLite Database:**
-- [ ] Create electron/ipc/gameDatabase.ts (GameDatabase class)
-- [ ] Implement createSchema() with 8 indices
-- [ ] Implement insertGame() and insertGamesBatch()
-- [ ] Implement searchGames() with dynamic filtering
-- [ ] Implement getGameWithMoves() and getGameCount()
-- [ ] Implement close() and clearGames()
-- [ ] Create unit tests for database operations
-- [ ] Test: All CRUD operations work correctly
+- [x] Create electron/ipc/gameDatabase.ts (GameDatabase class)
+- [x] Implement createSchema() with 8 indices — Schema extracted to lib/database/schema.ts (GAMES_SCHEMA_SQL)
+- [x] Implement insertGame() and insertGamesBatch()
+- [x] Implement searchGames() with dynamic filtering
+- [x] Implement getGameWithMoves() and getGameCount()
+- [x] Implement close() and clearGames()
+- [x] Create unit tests for database operations — __tests__/unit/database.test.ts with 13 passing tests
+- [x] Test: All CRUD operations work correctly
 
 **Part 3.2 - Data Converters:**
-- [ ] Create src/utils/dateConverter.ts (pgnDateToTimestamp, timestampToDisplay)
-- [ ] Create src/utils/resultConverter.ts (convertResult, resultNumericToDisplay)
-- [ ] Create __tests__/unit/dateConverter.test.ts
-- [ ] Create __tests__/unit/resultConverter.test.ts
-- [ ] Test: All converters handle edge cases
+- [x] Create src/utils/dateConverter.ts (pgnDateToTimestamp, timestampToDisplay) — Implemented in lib/converters/ and re-exported via src/utils/ (shared library pattern)
+- [x] Create src/utils/resultConverter.ts (convertResult, resultNumericToDisplay) — Implemented in lib/converters/ and re-exported via src/utils/ (shared library pattern)
+- [x] Create __tests__/unit/dateConverter.test.ts — 10 passing tests
+- [x] Create __tests__/unit/resultConverter.test.ts — 10 passing tests
+- [x] Test: All converters handle edge cases
 
 **Part 3.3 - Collection & Game Handlers:**
-- [ ] Create electron/ipc/collectionHandlers.ts (list, rename, delete)
-- [ ] Create electron/ipc/gameHandlers.ts (search, getGameMoves)
-- [ ] Update electron/main.ts to import and wire handlers
-- [ ] Test: Collection operations work
-- [ ] Test: Game queries return correct data
+- [x] Create electron/ipc/collectionHandlers.ts (list, rename, delete)
+- [x] Create electron/ipc/gameHandlers.ts (search, getGameMoves)
+- [x] Update electron/main.ts to import and wire handlers
+- [x] Test: Collection operations work
+- [x] Test: Game queries return correct data
 
 ---
 
@@ -221,9 +221,9 @@ export class GameDatabase {
 ```
 
 **Checklist:**
-- [ ] Create electron/ipc/gameDatabase.ts
-- [ ] Verify all methods present
-- [ ] Test with sample game data
+- [x] Create electron/ipc/gameDatabase.ts
+- [x] Verify all methods present
+- [x] Test with sample game data
 
 ---
 
@@ -267,10 +267,10 @@ export function timestampToDisplay(timestamp) {
 ```
 
 **Checklist:**
-- [ ] Create src/utils/dateConverter.ts
-- [ ] Test: "1985.01.15" converts to timestamp
-- [ ] Test: "1985.??.??" handles partial dates
-- [ ] Test: "?.?.?" returns null
+- [x] Create src/utils/dateConverter.ts — Implemented in lib/converters/dateConverter.ts, re-exported via src/utils/
+- [x] Test: "1985.01.15" converts to timestamp
+- [x] Test: "1985.??.??" handles partial dates
+- [x] Test: "?.?.?" returns null
 
 ---
 
@@ -309,10 +309,10 @@ export function resultNumericToDisplay(resultNumeric) {
 ```
 
 **Checklist:**
-- [ ] Create src/utils/resultConverter.ts
-- [ ] Test: "1-0" → 1.0, "White Wins"
-- [ ] Test: "1/2-1/2" → 0.5, "Draw"
-- [ ] Test: "*" → skip: true
+- [x] Create src/utils/resultConverter.ts — Implemented in lib/converters/resultConverter.ts, re-exported via src/utils/
+- [x] Test: "1-0" → 1.0, "White Wins"
+- [x] Test: "1/2-1/2" → 0.5, "Draw"
+- [x] Test: "*" → skip: true
 
 ---
 
@@ -382,9 +382,9 @@ describe('Result Converter', () => {
 ```
 
 **Checklist:**
-- [ ] Create __tests__/unit/dateConverter.test.ts
-- [ ] Create __tests__/unit/resultConverter.test.ts
-- [ ] Run `npm test` - all tests pass (Vitest compatible)
+- [x] Create __tests__/unit/dateConverter.test.ts — 10 passing tests
+- [x] Create __tests__/unit/resultConverter.test.ts — 10 passing tests
+- [x] Run `npm test` - all tests pass (Vitest compatible)
 
 ---
 
@@ -517,8 +517,8 @@ describe('GameDatabase', () => {
 ```
 
 **Checklist:**
-- [ ] Create __tests__/unit/database.test.ts
-- [ ] Run `npm test` - all tests pass
+- [x] Create __tests__/unit/database.test.ts — 13 passing tests
+- [x] Run `npm test` - all tests pass
 
 ---
 
@@ -599,8 +599,8 @@ export async function deleteCollection(collectionId) {
 ```
 
 **Checklist:**
-- [ ] Create electron/ipc/collectionHandlers.ts
-- [ ] All three methods implemented: list, rename, delete
+- [x] Create electron/ipc/collectionHandlers.ts
+- [x] All three methods implemented: list, rename, delete
 
 ---
 
@@ -639,8 +639,8 @@ export async function getGameMoves(collectionId, gameId) {
 ```
 
 **Checklist:**
-- [ ] Create electron/ipc/gameHandlers.ts
-- [ ] Both methods implemented: searchGames, getGameMoves
+- [x] Create electron/ipc/gameHandlers.ts
+- [x] Both methods implemented: searchGames, getGameMoves
 
 ---
 
