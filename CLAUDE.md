@@ -144,11 +144,14 @@ Electron's sandboxed preload scripts cannot use ES modules (`import`/`export`). 
 Native Node modules (like `better-sqlite3`) must be compiled for Electron's Node version, not system Node:
 
 ```bash
-npm rebuild better-sqlite3       # Rebuild for system Node
-npx electron-rebuild -f          # Rebuild for Electron
+npm rebuild better-sqlite3 --build-from-source   # Force rebuild for current Node
+npx electron-rebuild -f                          # Rebuild for Electron
 ```
 
-Run `electron-rebuild` after installing/updating native dependencies.
+**Note:** `electron-rebuild` sometimes claims success without actually rebuilding. If tests still fail with NODE_MODULE_VERSION mismatch, try:
+```bash
+rm -rf node_modules/better-sqlite3/build && npm rebuild better-sqlite3 --build-from-source
+```
 
 ### Ignore DevTools Warnings
 
