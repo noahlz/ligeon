@@ -1,6 +1,6 @@
 # Ligeon
 
-Chess game viewer built with Electron, React, and SQLite. Browse and replay PGN game files.
+Chess game viewer built with Electron, React, and SQLite. Import, browse and replay chess games from plaintext PGN game files.
 
 ## Development Setup
 
@@ -17,7 +17,7 @@ npm install
 
 ## Building & Running
 
-### Start Dev Server
+### Run Locally
 
 Launch the Electron app with hot-reload:
 
@@ -25,27 +25,15 @@ Launch the Electron app with hot-reload:
 npm run dev
 ```
 
-This starts:
-- Vite dev server on `localhost:5173`
-- Electron window (auto-reloads on code changes)
-
-### Build for Production
-
-```bash
-npm run build
-```
-
-Compiles TypeScript and bundles React. Output in `dist/` and `dist-electron/`.
-
-### Package Application
+### Package 
 
 ```bash
 npm run package
 ```
 
-Creates distributable app bundle in `out/`.
+Creates distributable app bundles in `out/`.
 
-## Import Script: PGN to SQLite
+## CLI Tool: PGN to SQLite
 
 Convert PGN files to SQLite databases for exploration and testing.
 
@@ -67,12 +55,7 @@ Convert Tal games to specific output directory:
 npm run pgn-to-sqlite -- resources/sample-games/tal-life-and-games.pgn ./output
 ```
 
-### Query Generated Database
-
-```bash
-sqlite3 dist/fischer-60-memorable.db "SELECT COUNT(*) FROM games"
-sqlite3 dist/fischer-60-memorable.db "SELECT white, black, event, result FROM games LIMIT 10"
-```
+Browse the database with `sqlite3` or other SQLite compatible tool.
 
 ## Authors
 
@@ -82,6 +65,10 @@ sqlite3 dist/fischer-60-memorable.db "SELECT white, black, event, result FROM ga
 ## License
 
 [GPLv3](./LICENSE) (because it uses Chessground)
+
+## Sample Games Attribution
+
+Sample games sourced from [brianerdelyi/ChessPGN](https://github.com/brianerdelyi/ChessPGN)
 
 ## Sound Attribution
 

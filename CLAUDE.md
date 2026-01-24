@@ -7,15 +7,6 @@ Based on [Lichess](https://lichess.org) components:
 - [chessground](https://github.com/lichess-org/chessground) — Board UI
 - [chessground examples](https://github.com/lichess-org/chessground-examples)
 
-## Plans
-
-This project is in ongoing, active development:
-- Implementation plans are under `.claude/plans/` 
-- The Plans are guidelines, not strict rules - be flexible in changing them if it makes sense.
-- When implementing, use AskUserQuestion to check with the user on implementation decisions.
-- After implementation, be sure to check-off completed tasks in the plans as your final task.
-- If an earlier plan is missing, it was very likely already completed - check with the user to confirm.
-
 ## Pre-release, Active Development
 
 This application has not yet been released - don't worry about making "backwards compatible" changes. Move fast and break things!
@@ -107,6 +98,12 @@ See `package.json` for versions.
 
 ## Gotchas
 
+**RULE: Update this section after non-trivial fixes.**
+
+When you fix a bug or solve a problem that required multiple attempts or significant reasoning:
+1. Propose adding a summary of the fix/approach to this section
+2. If existing content is inaccurate or obsolete, propose removing or revising it 
+
 ### Use `.js` Extensions in Imports
 
 ES modules require `.js` even for `.ts` imports (TypeScript compiles to `.js`).
@@ -131,10 +128,27 @@ SQLite doesn't work in renderer. Route all DB calls through IPC:
 3. electron/ipc/ handler executes
 4. Result returned to renderer
 
-### Two TypeScript Configs
+### Three TypeScript Configs
 
-- `electron/tsconfig.json` — Node.js (ES modules, no DOM)
-- `tsconfig.json` — Browser (DOM, React JSX)
+| Config | Purpose | Module | Target |
+|--------|---------|--------|--------|
+| `electron/tsconfig.json` | Main process + lib | ES modules | Node.js |
+| `electron/tsconfig.preload.json` | Preload script | CommonJS | Node.js (sandboxed) |
+| `tsconfig.json` | Renderer components | ES modules | Browser |
+
+**IMPORTANT: Preload must use CommonJS.**
+Electron's sandboxed preload scripts cannot use ES modules (`import`/`export`). They must use CommonJS (`require`/`module.exports`). The preload script is compiled separately with `module: "CommonJS"` and excluded from the main electron build. Do not use ES modules in preload scripts.
+
+### Native Modules Must Be Rebuilt for Electron
+
+Native Node modules (like `better-sqlite3`) must be compiled for Electron's Node version, not system Node:
+
+```bash
+npm rebuild better-sqlite3       # Rebuild for system Node
+npx electron-rebuild -f          # Rebuild for Electron
+```
+
+Run `electron-rebuild` after installing/updating native dependencies.
 
 ### Ignore DevTools Warnings
 

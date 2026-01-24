@@ -1,6 +1,6 @@
-# ligeon Part 7: Build & Distribution
+# Plan: Packaging for Distribution
 
-**Goal:** Build installers for macOS (.dmg) and Windows (.exe)
+**Goal:** Build distributable for macOS (.dmg) and Windows (.exe)
 
 ---
 
@@ -16,31 +16,15 @@ npm list electron-builder
 
 ### 2. Verify Build Configuration
 
-The build configuration was already created in Phase 1:
+The build configuration was already created:
 - `package.json` scripts are set up correctly
 - `electron-builder.json` contains build configuration
-
-**Verify scripts in package.json:**
-```json
-{
-  "scripts": {
-    "dev": "npm run build:electron-ts && concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "build:vite": "tsc && vite build",
-    "build:electron-ts": "tsc -p electron/tsconfig.json",
-    "build": "npm run build:vite && npm run build:electron-ts && electron-builder",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
-  }
-}
-```
 
 **Note**: Build configuration is in `electron-builder.json` (already created in Phase 1), not inline in package.json.
 
 ### 3. Create app icon
 
-- Create 1024x1024 PNG image → save as `resources/icons/icon-1024.png`
+- Prompt user to create 1024x1024 PNG image → location `resources/icons/icon-1024.png`
 - Generate icon.icns (macOS):
   ```bash
   mkdir resources/icons/icon.iconset
@@ -59,7 +43,7 @@ The build configuration was already created in Phase 1:
 
 ### 4. Create DMG background (macOS only)
 
-- Create 540x380 PNG image with your app icon/branding
+- Create 540x380 PNG image
 - Save as `resources/dmg-background.png`
 
 ### 5. Create entitlements file (macOS only)
@@ -83,11 +67,7 @@ Create `resources/entitlements.mac.plist`:
 </plist>
 ```
 
-### 6. Create LICENSE file
-
-Copy existing GPL v3 license to `LICENSE` file in project root (already done at /Users/noahlz/projects/ligeon/LICENSE)
-
-### 7. Build for your platform
+### 6. Build for your platform
 
 **All platforms:**
 ```bash
