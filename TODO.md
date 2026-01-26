@@ -2,7 +2,6 @@
 
 ## Game Replay / Navigation
 
-- chessManager.js - Do not try to parse moves 1-0, 0-1 or 1/2-1/2. It should not be a "move." Append it to the end of the moves display (but don't make it selectable).
 - "View on Lichess" button use external-link lucide and is to right of move navigation
 - Replay speed - no more pop up menu. Have slider to right of navigation. Replay speed: 1s[    | ]30s
 - Sound on/off button.

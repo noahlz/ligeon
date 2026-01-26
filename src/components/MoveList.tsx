@@ -26,29 +26,59 @@ export default function MoveList({ moves, currentPly, onJump }: MoveListProps) {
   const gameMoves = hasResult ? moves.slice(0, -1) : moves
   const result = hasResult ? lastElement : null
 
+  // Group moves into pairs (white, black)
+  const movePairs: Array<{ white: string; black?: string; moveNumber: number }> = []
+  for (let i = 0; i < gameMoves.length; i += 2) {
+    movePairs.push({
+      white: gameMoves[i],
+      black: gameMoves[i + 1],
+      moveNumber: Math.floor(i / 2) + 1,
+    })
+  }
+
   return (
     <div className="move-list overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded">
-      <div className="grid grid-cols-2 gap-1">
-        {gameMoves.map((move, plyIndex) => {
-          const moveNumber = Math.floor(plyIndex / 2) + 1
-          const isWhiteMove = plyIndex % 2 === 0
-          const isCurrent = plyIndex === currentPly - 1 // currentPly is 1-based
+      <div className="grid gap-1" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
+        {movePairs.map((pair, pairIndex) => {
+          const whitePly = pairIndex * 2
+          const blackPly = pairIndex * 2 + 1
+          const isWhiteCurrent = currentPly - 1 === whitePly
+          const isBlackCurrent = currentPly - 1 === blackPly
 
           return (
-            <span
-              key={plyIndex}
-              ref={isCurrent ? currentMoveRef : null}
-              onClick={() => onJump(plyIndex + 1)} // Jump to position after this move
-              className={`move-item block text-center px-2 py-0.5 rounded cursor-pointer hover:bg-ui-bg-hover ${
-                isCurrent ? 'current' : ''
-              }`}
-            >
-              {isWhiteMove && (
-                <span className="move-number text-ui-text-dimmer mr-1">{moveNumber}.</span>
-              )}
-              {move}
-              {!isWhiteMove && ' '}
-            </span>
+            <>
+              {/* Move number */}
+              <span
+                key={`num-${pairIndex}`}
+                className="text-ui-text-dimmer text-right pr-2"
+              >
+                {pair.moveNumber}.
+              </span>
+
+              {/* White move */}
+              <span
+                key={`white-${pairIndex}`}
+                ref={isWhiteCurrent ? currentMoveRef : null}
+                onClick={() => onJump(whitePly + 1)}
+                className={`move-item px-2 py-0.5 rounded cursor-pointer hover:bg-ui-bg-hover ${
+                  isWhiteCurrent ? 'current' : ''
+                }`}
+              >
+                {pair.white}
+              </span>
+
+              {/* Black move */}
+              <span
+                key={`black-${pairIndex}`}
+                ref={isBlackCurrent ? currentMoveRef : null}
+                onClick={pair.black ? () => onJump(blackPly + 1) : undefined}
+                className={`move-item px-2 py-0.5 rounded ${
+                  pair.black ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
+                } ${isBlackCurrent ? 'current' : ''}`}
+              >
+                {pair.black || ''}
+              </span>
+            </>
           )
         })}
       </div>
