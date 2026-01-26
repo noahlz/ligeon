@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { timestampToDisplay } from '../utils/dateConverter.js'
 import { resultNumericToDisplay } from '../utils/resultConverter.js'
+import CollectionSelector from './CollectionSelector.js'
 
 interface GameSearchResult {
   id: number
@@ -14,18 +15,38 @@ interface GameSearchResult {
   ecoCode: string | null
 }
 
-interface GameListSidebarProps {
-  collectionId: string
-  onGameSelect: (game: GameSearchResult) => void
+interface Collection {
+  id: string
+  name: string
 }
 
-export default function GameListSidebar({ collectionId, onGameSelect }: GameListSidebarProps) {
+interface GameListSidebarProps {
+  collectionId: string | null
+  onGameSelect: (game: GameSearchResult) => void
+  collections: Collection[]
+  selectedCollectionId: string | null
+  onSelectCollection: (id: string) => void
+  onImport: () => void
+}
+
+export default function GameListSidebar({
+  collectionId,
+  onGameSelect,
+  collections,
+  selectedCollectionId,
+  onSelectCollection,
+  onImport,
+}: GameListSidebarProps) {
   const [games, setGames] = useState<GameSearchResult[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<{ result: number | null }>({ result: null })
 
   useEffect(() => {
     const searchGames = async () => {
+      if (!collectionId) {
+        setGames([])
+        return
+      }
       const results = await window.electron.searchGames(collectionId, {
         white: searchTerm || undefined,
         black: searchTerm || undefined,
@@ -39,6 +60,12 @@ export default function GameListSidebar({ collectionId, onGameSelect }: GameList
 
   return (
     <div className="flex flex-col gap-2 h-full">
+      <CollectionSelector
+        collections={collections}
+        selectedId={selectedCollectionId}
+        onSelect={onSelectCollection}
+        onImport={onImport}
+      />
       <input
         type="text"
         placeholder="Search players..."

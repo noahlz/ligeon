@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LibraryBig } from 'lucide-react'
 
 interface Collection {
   id: string
@@ -26,12 +27,15 @@ export default function CollectionSelector({
 
   return (
     <div className="relative">
-      <button
-        onClick={() => setShowMenu(!showMenu)}
-        className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded text-sm"
-      >
-        {selected?.name || 'Select Collection'} ▼
-      </button>
+      <div className="flex items-center justify-between">
+        <span className="text-sm">{selected?.name || 'Select Collection'}</span>
+        <button
+          onClick={() => setShowMenu(!showMenu)}
+          className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded"
+        >
+          <LibraryBig size={18} />
+        </button>
+      </div>
       {showMenu && (
         <div className="absolute top-full mt-1 bg-ui-bg-element rounded shadow-lg z-50 min-w-full">
           {collections.map((col) => (

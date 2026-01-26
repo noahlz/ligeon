@@ -5,7 +5,6 @@ import MoveList from './components/MoveList.js'
 import MoveNavigation from './components/MoveNavigation.js'
 import GameInfo from './components/GameInfo.js'
 import GameListSidebar from './components/GameListSidebar.js'
-import CollectionSelector from './components/CollectionSelector.js'
 import ImportDialog from './components/ImportDialog.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { playMoveSound, preloadAllSounds } from './utils/audioManager.js'
@@ -196,27 +195,18 @@ export default function App() {
 
   return (
     <div className="h-screen bg-ui-bg-page text-ui-text flex flex-col">
-      {/* Header */}
-      <div className="bg-ui-bg-box border-b border-ui-border px-3 py-2 flex items-center justify-between">
-        <h1 className="text-xl font-bold">Ligeon</h1>
-        <CollectionSelector
-          collections={collections}
-          selectedId={selectedCollectionId}
-          onSelect={setSelectedCollectionId}
-          onImport={() => setShowImportDialog(true)}
-        />
-      </div>
-
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="w-72 bg-ui-bg-box border-r border-ui-border p-2 overflow-y-auto">
-          {selectedCollectionId && (
-            <GameListSidebar
-              collectionId={selectedCollectionId}
-              onGameSelect={handleGameSelect}
-            />
-          )}
+          <GameListSidebar
+            collectionId={selectedCollectionId}
+            onGameSelect={handleGameSelect}
+            collections={collections}
+            selectedCollectionId={selectedCollectionId}
+            onSelectCollection={setSelectedCollectionId}
+            onImport={() => setShowImportDialog(true)}
+          />
         </div>
 
         {/* Center: Board and navigation */}
