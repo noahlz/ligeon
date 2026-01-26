@@ -1,10 +1,17 @@
 # Ligeon TODOs
 
+## Game Info / Move List
+
+- Be able to mimimize game info box.
+  - When minized, just show "{Player} vs. {Player} with overflow as "..."
+  - Use lucide: square-plus and square-minus
+
 ## Game Replay / Navigation
 
-- "View on Lichess" button use external-link lucide and is to right of move navigation
-- Replay speed - no more pop up menu. Have slider to right of navigation. Replay speed: 1s[    | ]30s
 - Sound on/off button.
+- Mouse scroll should move forward/back like Lichess
+- "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
+- Replay speed - no more pop up menu. Have slider to right of navigation. Replay speed: 1s[    | ]30s
 
 ## Style
 
@@ -12,6 +19,7 @@
 
 ## Game Search
 
+- Hide filtering under Filter icon
 - Search by Name doesn't work...
 - Search by Opening: ECO or Name from https://github.com/lichess-org/chess-openings
 - Results game count: {x} games (of [{y max 100})
