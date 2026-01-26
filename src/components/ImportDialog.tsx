@@ -81,28 +81,28 @@ export default function ImportDialog({ isOpen, onComplete, onClose }: ImportDial
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-lg shadow-xl w-96 max-h-screen overflow-auto">
+      <div className="bg-ui-bg-box rounded-lg shadow-xl w-96 max-h-screen overflow-auto">
         {!isIndexing ? (
-          <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">Import Collection</h2>
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-3">Import Collection</h2>
             <input
               type="text"
               placeholder="Collection Name (optional)"
               value={collectionName}
               onChange={(e) => setCollectionName(e.target.value)}
-              className="w-full px-3 py-2 border rounded mb-4 bg-slate-700 border-slate-600 text-white placeholder-gray-400"
+              className="w-full px-2 py-1.5 border rounded mb-3 bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
             />
             <div className="flex gap-2">
               <button
                 onClick={handleImport}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+                className="flex-1 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
               >
                 Select PGN & Import
               </button>
               {onClose && (
                 <button
                   onClick={handleClose}
-                  className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded"
+                  className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover text-white rounded text-sm"
                 >
                   Cancel
                 </button>
@@ -110,23 +110,23 @@ export default function ImportDialog({ isOpen, onComplete, onClose }: ImportDial
             </div>
           </div>
         ) : (
-          <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">Indexing</h2>
-            <div className="w-full bg-slate-600 rounded-full h-3 mb-4">
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-3">Indexing</h2>
+            <div className="w-full bg-ui-bg-element rounded-full h-2 mb-3">
               <div
-                className="bg-blue-600 h-full transition-all rounded-full"
+                className="bg-ui-primary h-full transition-all rounded-full"
                 style={{ width: `${percent}%` }}
               />
             </div>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-xs text-ui-text-dim mb-3">
               Indexed: {progress.indexed.toLocaleString()} / {progress.parsed.toLocaleString()}
               {progress.skipped > 0 && ` (${progress.skipped} skipped)`}
             </p>
-            <div className="border rounded bg-slate-900 p-3 h-48 overflow-y-auto font-mono text-xs border-slate-700">
+            <div className="border rounded bg-ui-bg-page p-2 h-40 overflow-y-auto font-mono text-xs border-ui-border">
               {progress.logs?.map((log, idx) => (
                 <div
                   key={idx}
-                  className={log.type === 'error' ? 'text-red-500' : 'text-gray-300'}
+                  className={log.type === 'error' ? 'text-red-400' : 'text-ui-text-dim'}
                 >
                   {log.message}
                 </div>

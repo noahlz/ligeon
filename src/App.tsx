@@ -195,10 +195,10 @@ export default function App() {
     : []
 
   return (
-    <div className="h-screen bg-slate-900 text-white flex flex-col">
+    <div className="h-screen bg-ui-bg-page text-ui-text flex flex-col">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 p-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Ligeon</h1>
+      <div className="bg-ui-bg-box border-b border-ui-border px-3 py-2 flex items-center justify-between">
+        <h1 className="text-xl font-bold">Ligeon</h1>
         <CollectionSelector
           collections={collections}
           selectedId={selectedCollectionId}
@@ -210,7 +210,7 @@ export default function App() {
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="w-80 bg-slate-800 border-r border-slate-700 p-4 overflow-y-auto">
+        <div className="w-72 bg-ui-bg-box border-r border-ui-border p-2 overflow-y-auto">
           {selectedCollectionId && (
             <GameListSidebar
               collectionId={selectedCollectionId}
@@ -220,11 +220,11 @@ export default function App() {
         </div>
 
         {/* Center: Board and navigation */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <div className="flex-1 flex flex-col items-center justify-center p-4">
           {selectedGame && chessManager ? (
             <>
               {/* Board */}
-              <div className="w-full max-w-2xl aspect-square mb-4">
+              <div className="w-full max-w-2xl aspect-square mb-2">
                 <BoardDisplay fen={fen} lastMove={lastMove} />
               </div>
 
@@ -243,15 +243,15 @@ export default function App() {
               />
             </>
           ) : (
-            <div className="text-gray-400 text-center">
-              <p className="text-xl mb-2">No game selected</p>
+            <div className="text-ui-text-dim text-center">
+              <p className="text-lg mb-2">No game selected</p>
               <p className="text-sm">Select a game from the sidebar to begin</p>
             </div>
           )}
         </div>
 
         {/* Right panel: Game info and move list */}
-        <div className="w-96 bg-slate-800 border-l border-slate-700 p-4 flex flex-col gap-4 overflow-y-auto">
+        <div className="w-80 bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto">
           {selectedGame ? (
             <>
               <GameInfo game={selectedGame} />
@@ -264,7 +264,7 @@ export default function App() {
               )}
             </>
           ) : (
-            <div className="text-gray-400 text-sm">No game selected</div>
+            <div className="text-ui-text-dim text-sm">No game selected</div>
           )}
         </div>
       </div>

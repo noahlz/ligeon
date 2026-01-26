@@ -28,12 +28,12 @@ export default function CollectionSelector({
     <div className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded"
+        className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded text-sm"
       >
         {selected?.name || 'Select Collection'} ▼
       </button>
       {showMenu && (
-        <div className="absolute top-full mt-1 bg-slate-700 rounded shadow-lg z-50 min-w-full">
+        <div className="absolute top-full mt-1 bg-ui-bg-element rounded shadow-lg z-50 min-w-full">
           {collections.map((col) => (
             <button
               key={col.id}
@@ -41,20 +41,20 @@ export default function CollectionSelector({
                 onSelect(col.id)
                 setShowMenu(false)
               }}
-              className={`block w-full text-left px-4 py-2 hover:bg-slate-600 whitespace-nowrap ${
-                selectedId === col.id ? 'bg-slate-600' : ''
+              className={`block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover whitespace-nowrap text-sm ${
+                selectedId === col.id ? 'bg-ui-bg-hover' : ''
               }`}
             >
               {col.name}
             </button>
           ))}
-          <div className="border-t border-slate-600" />
+          <div className="border-t border-ui-border" />
           <button
             onClick={() => {
               onImport?.()
               setShowMenu(false)
             }}
-            className="block w-full text-left px-4 py-2 hover:bg-slate-600"
+            className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover text-sm"
           >
             + Import
           </button>

@@ -38,17 +38,17 @@ export default function GameListSidebar({ collectionId, onGameSelect }: GameList
   }, [collectionId, searchTerm, filters])
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-2 h-full">
       <input
         type="text"
         placeholder="Search players..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="px-3 py-2 bg-slate-600 rounded text-white placeholder-gray-400"
+        className="px-2 py-1.5 bg-ui-bg-element rounded text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border"
       />
 
-      <div className="text-xs space-y-2">
-        <label className="text-gray-400">Result</label>
+      <div className="text-xs space-y-1">
+        <label className="text-ui-text-dim">Result</label>
         <div className="flex gap-2">
           {[null, 1.0, 0.5, 0.0].map((val, i) => (
             <label key={i} className="flex items-center gap-1">
@@ -68,24 +68,24 @@ export default function GameListSidebar({ collectionId, onGameSelect }: GameList
           setSearchTerm('')
           setFilters({ result: null })
         }}
-        className="px-3 py-2 bg-slate-600 hover:bg-slate-500 rounded text-sm"
+        className="px-2 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded text-sm"
       >
         Reset
       </button>
 
-      <div className="text-gray-400 text-sm">{games.length} games</div>
+      <div className="text-ui-text-dim text-xs">{games.length} games</div>
 
       <div className="overflow-y-auto flex-1">
         {games.map((game) => (
           <div
             key={game.id}
             onClick={() => onGameSelect(game)}
-            className="p-2 mb-2 bg-slate-600 hover:bg-slate-500 rounded cursor-pointer text-sm"
+            className="p-2 mb-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded cursor-pointer text-sm"
           >
             <p className="font-semibold">
               {game.white} vs {game.black}
             </p>
-            <p className="text-gray-400 text-xs">
+            <p className="text-ui-text-dim text-xs">
               {timestampToDisplay(game.date)} - {resultNumericToDisplay(game.result)}
             </p>
           </div>

@@ -23,45 +23,45 @@ export default function GameInfo({ game }: GameInfoProps) {
   }
 
   return (
-    <div className="bg-slate-700 rounded p-4 space-y-3 text-sm">
-      <div className="grid grid-cols-2 gap-4">
+    <div className="bg-ui-bg-element rounded p-2 space-y-2 text-sm">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-2">
         <div>
-          <p className="text-gray-400">White</p>
+          <p className="text-ui-text-dim text-xs">White</p>
           <p className="font-semibold">
             {game.white}
             {game.whiteElo ? ` (${game.whiteElo})` : ''}
           </p>
         </div>
         <div>
-          <p className="text-gray-400">Black</p>
+          <p className="text-ui-text-dim text-xs">Black</p>
           <p className="font-semibold">
             {game.black}
             {game.blackElo ? ` (${game.blackElo})` : ''}
           </p>
         </div>
         <div>
-          <p className="text-gray-400">Event</p>
-          <p>{game.event || 'Unknown'}</p>
+          <p className="text-ui-text-dim text-xs">Event</p>
+          <p className="text-xs">{game.event || '?'}</p>
         </div>
         <div>
-          <p className="text-gray-400">Date</p>
-          <p>{timestampToDisplay(game.date)}</p>
+          <p className="text-ui-text-dim text-xs">Date</p>
+          <p className="text-xs">{timestampToDisplay(game.date)}</p>
         </div>
         <div>
-          <p className="text-gray-400">Result</p>
-          <p>{resultNumericToDisplay(game.result ?? null)}</p>
+          <p className="text-ui-text-dim text-xs">Result</p>
+          <p className="text-xs">{resultNumericToDisplay(game.result ?? null)}</p>
         </div>
         {game.ecoCode && (
           <div>
-            <p className="text-gray-400">ECO</p>
-            <p>{game.ecoCode}</p>
+            <p className="text-ui-text-dim text-xs">ECO</p>
+            <p className="text-xs">{game.ecoCode}</p>
           </div>
         )}
       </div>
       <button
         onClick={handleViewOnLichess}
         disabled={!game.pgn}
-        className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed rounded font-semibold"
+        className="w-full px-3 py-1.5 bg-ui-primary hover:bg-blue-600 disabled:bg-ui-bg-box disabled:text-ui-text-dimmer disabled:cursor-not-allowed rounded text-sm font-medium"
       >
         View on Lichess
       </button>
