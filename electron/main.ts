@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
@@ -101,6 +101,11 @@ function setupIpcHandlers() {
 
     console.log('File dialog result:', result.filePaths[0] || 'cancelled')
     return result.filePaths[0] || null
+  })
+
+  // Open external URL in system browser
+  ipcMain.handle('open-external', async (_event, url: string) => {
+    await shell.openExternal(url)
   })
 
   // Import PGN file

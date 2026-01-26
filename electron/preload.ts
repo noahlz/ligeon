@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('electron', {
   // === File Operations ===
   selectFile: () => ipcRenderer.invoke('select-file'),
 
+  openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
+
   importPgn: (filePath: string, collectionId: string, name: string) =>
     ipcRenderer.invoke('import-pgn', { filePath, collectionId, name }),
 

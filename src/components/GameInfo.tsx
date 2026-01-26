@@ -3,7 +3,6 @@ import { resultNumericToDisplay } from '../utils/resultConverter.js'
 
 interface GameInfoProps {
   game: {
-    pgn?: string
     white: string
     black: string
     whiteElo?: number | null
@@ -16,12 +15,6 @@ interface GameInfoProps {
 }
 
 export default function GameInfo({ game }: GameInfoProps) {
-  const handleViewOnLichess = () => {
-    if (!game.pgn) return
-    const encoded = encodeURIComponent(game.pgn)
-    window.open(`https://lichess.org/api/import?pgn=${encoded}`, '_blank')
-  }
-
   return (
     <div className="bg-ui-bg-element rounded p-2 space-y-2 text-sm">
       <div className="grid grid-cols-2 gap-x-3 gap-y-2">
@@ -58,13 +51,6 @@ export default function GameInfo({ game }: GameInfoProps) {
           </div>
         )}
       </div>
-      <button
-        onClick={handleViewOnLichess}
-        disabled={!game.pgn}
-        className="w-full px-3 py-1.5 bg-ui-primary hover:bg-blue-600 disabled:bg-ui-bg-box disabled:text-ui-text-dimmer disabled:cursor-not-allowed rounded text-sm font-medium"
-      >
-        View on Lichess
-      </button>
     </div>
   )
 }

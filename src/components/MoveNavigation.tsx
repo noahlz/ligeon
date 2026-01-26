@@ -6,6 +6,7 @@ import {
   ChevronsRight,
   Play,
   Pause,
+  ExternalLink,
 } from 'lucide-react'
 
 interface MoveNavigationProps {
@@ -19,6 +20,7 @@ interface MoveNavigationProps {
   onSpeedChange: (speed: 'fast' | 'slow') => void
   currentPly: number
   totalPlies: number
+  pgn?: string
 }
 
 export default function MoveNavigation({
@@ -32,8 +34,15 @@ export default function MoveNavigation({
   onSpeedChange,
   currentPly,
   totalPlies,
+  pgn,
 }: MoveNavigationProps) {
   const [showSpeedMenu, setShowSpeedMenu] = useState(false)
+
+  const handleViewOnLichess = () => {
+    if (!pgn) return
+    const encoded = encodeURIComponent(pgn)
+    window.electron.openExternal(`https://lichess.org/paste?pgn=${encoded}`)
+  }
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -77,98 +86,116 @@ export default function MoveNavigation({
         Move {currentPly} / {totalPlies}
       </div>
 
-      {/* Navigation buttons */}
-      <div className="flex gap-1.5 items-center">
-        <button
-          onClick={onFirst}
-          disabled={isAtStart}
-          className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
-          title="First (Home)"
-        >
-          <ChevronsLeft size={18} />
-        </button>
+      {/* Navigation buttons - 3 column grid */}
+      <div className="grid grid-cols-3 items-center w-full">
+        {/* Left column - empty */}
+        <div />
 
-        <button
-          onClick={onPrev}
-          disabled={isAtStart}
-          className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
-          title="Previous (←)"
-        >
-          <ChevronLeft size={18} />
-        </button>
-
-        {/* Play/Pause with speed menu */}
-        <div className="relative">
+        {/* Center column - navigation buttons */}
+        <div className="flex gap-1.5 items-center justify-center">
           <button
-            onClick={() => {
-              if (isPlaying) {
-                onTogglePlay()
-              } else {
-                setShowSpeedMenu(!showSpeedMenu)
-              }
-            }}
-            disabled={isAtEnd && !isPlaying}
-            className={`p-1.5 rounded ${
-              isPlaying
-                ? 'bg-ui-accent hover:bg-orange-600'
-                : 'bg-ui-bg-element hover:bg-ui-bg-hover'
-            } disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed`}
-            title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+            onClick={onFirst}
+            disabled={isAtStart}
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            title="First (Home)"
           >
-            {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+            <ChevronsLeft size={18} />
           </button>
 
-          {/* Speed menu (when not playing) */}
-          {showSpeedMenu && !isPlaying && (
-            <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-ui-bg-element rounded shadow-lg z-50 min-w-[100px]">
-              <button
-                onClick={() => {
-                  onSpeedChange('fast')
-                  setShowSpeedMenu(false)
-                  onTogglePlay()
-                }}
-                className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover rounded-t text-sm"
-              >
-                Fast (3s)
-              </button>
-              <button
-                onClick={() => {
-                  onSpeedChange('slow')
-                  setShowSpeedMenu(false)
-                  onTogglePlay()
-                }}
-                className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover rounded-b text-sm"
-              >
-                Slow (10s)
-              </button>
-            </div>
-          )}
+          <button
+            onClick={onPrev}
+            disabled={isAtStart}
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            title="Previous (←)"
+          >
+            <ChevronLeft size={18} />
+          </button>
 
-          {/* Current speed indicator (when playing) */}
-          {isPlaying && (
-            <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-ui-bg-element rounded text-xs text-ui-text-dim whitespace-nowrap">
-              {speed === 'fast' ? 'Fast (3s)' : 'Slow (10s)'}
-            </div>
-          )}
+          {/* Play/Pause with speed menu */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                if (isPlaying) {
+                  onTogglePlay()
+                } else {
+                  setShowSpeedMenu(!showSpeedMenu)
+                }
+              }}
+              disabled={isAtEnd && !isPlaying}
+              className={`p-1.5 rounded ${
+                isPlaying
+                  ? 'bg-ui-accent hover:bg-orange-600'
+                  : 'bg-ui-bg-element hover:bg-ui-bg-hover'
+              } disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+            >
+              {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+            </button>
+
+            {/* Speed menu (when not playing) */}
+            {showSpeedMenu && !isPlaying && (
+              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-ui-bg-element rounded shadow-lg z-50 min-w-[100px]">
+                <button
+                  onClick={() => {
+                    onSpeedChange('fast')
+                    setShowSpeedMenu(false)
+                    onTogglePlay()
+                  }}
+                  className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover rounded-t text-sm"
+                >
+                  Fast (3s)
+                </button>
+                <button
+                  onClick={() => {
+                    onSpeedChange('slow')
+                    setShowSpeedMenu(false)
+                    onTogglePlay()
+                  }}
+                  className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover rounded-b text-sm"
+                >
+                  Slow (10s)
+                </button>
+              </div>
+            )}
+
+            {/* Current speed indicator (when playing) */}
+            {isPlaying && (
+              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-ui-bg-element rounded text-xs text-ui-text-dim whitespace-nowrap">
+                {speed === 'fast' ? 'Fast (3s)' : 'Slow (10s)'}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={onNext}
+            disabled={isAtEnd}
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            title="Next (→)"
+          >
+            <ChevronRight size={18} />
+          </button>
+
+          <button
+            onClick={onLast}
+            disabled={isAtEnd}
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            title="Last (End)"
+          >
+            <ChevronsRight size={18} />
+          </button>
         </div>
 
-        <button
-          onClick={onNext}
-          disabled={isAtEnd}
-          className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
-          title="Next (→)"
-        >
-          <ChevronRight size={18} />
-        </button>
-
-        <button
-          onClick={onLast}
-          disabled={isAtEnd}
-          className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
-          title="Last (End)"
-        >
-          <ChevronsRight size={18} />
-        </button>
+        {/* Right column - View on Lichess */}
+        <div className="flex justify-end">
+          <button
+            onClick={handleViewOnLichess}
+            disabled={!pgn}
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            title="View on Lichess"
+          >
+            <ExternalLink size={18} />
+          </button>
+        </div>
       </div>
     </div>
   )

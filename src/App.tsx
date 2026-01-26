@@ -230,6 +230,7 @@ export default function App() {
                 onSpeedChange={handleSpeedChange}
                 currentPly={currentPly}
                 totalPlies={chessManager.getTotalPlies()}
+                pgn={selectedGame.moves}
               />
             </>
           ) : (

@@ -3,6 +3,7 @@
 export interface ElectronAPI {
   // File Operations
   selectFile: () => Promise<string | null>
+  openExternal: (url: string) => Promise<void>
   importPgn: (filePath: string, collectionId: string, name: string) => Promise<{
     success: boolean
     error?: string
