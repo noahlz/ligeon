@@ -46,6 +46,8 @@ export default function MoveNavigation({
 
   // Keyboard shortcuts
   useEffect(() => {
+    const lastScrollTime = { current: 0 }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't interfere if typing in an input
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
@@ -72,8 +74,32 @@ export default function MoveNavigation({
       }
     }
 
+    const handleWheel = (e: WheelEvent) => {
+      // Don't interfere if scrolling in an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+
+      // Debounce: 50ms between scroll actions
+      const now = Date.now()
+      if (now - lastScrollTime.current < 50) return
+
+      if (e.deltaY > 0) {
+        e.preventDefault()
+        onNext()
+      } else if (e.deltaY < 0) {
+        e.preventDefault()
+        onPrev()
+      }
+      lastScrollTime.current = now
+    }
+
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('wheel', handleWheel, { passive: false })
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('wheel', handleWheel)
+    }
   }, [onFirst, onPrev, onNext, onLast, onTogglePlay])
 
   const isAtStart = currentPly === 0
