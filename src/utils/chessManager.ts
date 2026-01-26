@@ -63,6 +63,33 @@ function squareToAlgebraic(square: number): string {
   return `${file}${rank}`
 }
 
+const GAME_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'] as const
+
+/**
+ * Check if a string is a game result
+ */
+export function isGameResult(str: string): boolean {
+  return GAME_RESULTS.includes(str as any)
+}
+
+/**
+ * Get display text for a game result
+ */
+export function getResultDisplay(result: string): string {
+  switch (result) {
+    case '1-0':
+      return '1-0 (White Wins)'
+    case '0-1':
+      return '0-1 (Black Wins)'
+    case '1/2-1/2':
+      return '1/2-1/2 (Draw)'
+    case '*':
+      return '* (Unfinished)'
+    default:
+      return result
+  }
+}
+
 /**
  * Create a chess manager for replaying and navigating through a game
  */
