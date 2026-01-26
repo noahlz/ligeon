@@ -17,7 +17,7 @@ GameListSidebar.tsx:36 Uncaught (in promise) Error: Error invoking remote method
 
 ## UI
 
-- Display games as first 10 in colection, with progressive search (rather than all games)
+- Progressive search (rather than all games)
 - Display moves as two columns
 - Match style to Lichess light/dark styles.
 - Add theme picker (light/dark/device)

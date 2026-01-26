@@ -195,7 +195,7 @@ export default function App() {
     : []
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex flex-col">
+    <div className="h-screen bg-slate-900 text-white flex flex-col">
       {/* Header */}
       <div className="bg-slate-800 border-b border-slate-700 p-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Ligeon</h1>
