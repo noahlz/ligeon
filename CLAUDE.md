@@ -96,6 +96,35 @@ See `package.json` for versions.
 └── out/                # BUILD: Packaged app
 ```
 
+## Code Navigation
+
+### Start from Key Files
+
+Start explortation / refactoring / feature changes from standard Electron/React and from the below top-level entry point files that define app-specific logic:
+
+| Area | Entry Point | Purpose |
+|------|-------------|---------|
+| Types | `lib/types/game.ts` | Central `GameData` interface |
+| Database | `electron/ipc/gameDatabase.ts` | SQLite wrapper for games |
+| PGN parsing | `lib/pgn/gameExtractor.ts` | Parse PGN → GameData |
+| Import | `electron/ipc/importHandlers.ts` | PGN file import orchestration |
+| Board UI | `src/components/BoardDisplay.tsx` | Chessground integration |
+| Game browsing | `src/components/GameListSidebar.tsx` | Search/filter games |
+
+### Prefer LSP Over Text Search
+
+When exploring or refactoring code:
+- Start wth LSP tools i.e. `typescript-lsp` plugin
+- Fall back to of Glob, Grep, Search, or Task(Explore) — if LSP yields no results.
+- **NOTE:** For text (comments, strings, config values, other non-LSP symbols) — use Glob/Grep/Search.
+
+Useful LSP tools available via `typescript-lsp`:
+- `findReferences` — Find all usages
+- `documentSymbol` — List symbols in a file
+- `incomingCalls`/`outgoingCalls` — Trace call hierarchy
+- `goToDefinition` — Jump to symbol definition
+- `hover` — Get type info
+
 ## Gotchas
 
 **RULE: Update this section after non-trivial fixes.**
