@@ -72,30 +72,40 @@ html {
 
 /* Position coordinates outside the board (override default positioning) */
 .cg-wrap coords {
-  font-size: 13px !important;
+  font-weight: bolder;
+  font-size: 14px !important;
 }
 
 .cg-wrap coords.ranks {
-  right: -15px;
+  right: -22px;
   left: auto;
   top: 0;
   bottom: 0;
   height: 100%;
-  flex-flow: column-reverse;
+  width: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2px 0;
 }
 
 .cg-wrap coords.files {
-  bottom: -20px;
+  bottom: -14px;
   left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
 }
 
 /* Coordinate visibility - background for dark theme */
 .cg-wrap coords coord {
-  background-color: #2b2b2b !important;
-  color: #ccc !important;
+  color: #cccccc !important;
   border-radius: 2px;
   padding: 2px 3px;
-  flex: 1 1 auto;
+}
+
+.cg-wrap coords.files coord {
+  margin-bottom: 2px;
 }
 
 /* Override uppercase transform for file coordinates */
@@ -103,15 +113,12 @@ html {
   text-transform: none;
 }
 
-/* Fix rank coordinate vertical alignment within each square */
-.cg-wrap coords.ranks coord {
-  transform: translateY(39%);
-}
-
 /* Board wrapper with padding for outside coordinates */
 .board-coords-wrapper {
   padding-right: 20px;
   padding-bottom: 20px;
+  background: #4a4848;
+  border-radius: 12px;
 }
 
 /* Dark theme scrollbars */
