@@ -258,7 +258,7 @@ export default function App() {
         </div>
 
         {/* Right panel: Game info and move list */}
-        <div className="w-80 bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto">
+        <div className="w-80 bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto" data-testid="move-list-panel">
           {selectedGame ? (
             <>
               <GameInfo game={selectedGame} />

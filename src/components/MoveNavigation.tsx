@@ -77,6 +77,12 @@ export default function MoveNavigation({
         return
       }
 
+      // Skip if hovering over move list panel (let it scroll natively)
+      const moveListPanel = document.querySelector('[data-testid="move-list-panel"]')
+      if (moveListPanel?.contains(e.target as Node)) {
+        return
+      }
+
       // Debounce: 50ms between scroll actions
       const now = Date.now()
       if (now - lastScrollTime.current < 50) return
