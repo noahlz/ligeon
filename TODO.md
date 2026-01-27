@@ -1,19 +1,10 @@
 # Ligeon TODOs
 
-## Game Info / Move List
-
-- Be able to mimimize game info box.
-  - When minized, just show "{Player} vs. {Player} with overflow as "..."
-  - Use lucide: square-plus and square-minus
-
 ## Game Replay / Navigation
 
+- Align buttons under center of chessboard. Should not overlap with chessboard (stack div under chessboard)
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
 - Replay speed - no more pop up menu. Have slider to right of navigation. Replay speed: 1s[    | ]30s
-
-## Style
-
-- Add "light" theme and add theme picker (light/dark/system)
 
 ## Game Search
 
@@ -29,3 +20,8 @@
 - Picker should default to resources/sample-games/ in dev mode, home directory when deployed
 - Package game with sample-games pre-loaded
 - Some game got imported as "? / ?" and only had the game result: 1/2-1/2 as the only "move." Track down this bug.
+
+## Style
+
+- Add "light" theme and add theme picker (light/dark/system) (on control strip)
+
