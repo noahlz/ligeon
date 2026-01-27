@@ -7,9 +7,10 @@ interface BoardDisplayProps {
   fen: string
   lastMove?: Key[] | null
   orientation?: 'white' | 'black'
+  check?: boolean
 }
 
-export default function BoardDisplay({ fen, lastMove, orientation = 'white' }: BoardDisplayProps) {
+export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false }: BoardDisplayProps) {
   const boardRef = useRef<HTMLDivElement>(null)
   const cgRef = useRef<Api | null>(null)
 
@@ -29,6 +30,9 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white' }: B
       drawable: {
         visible: false,
       },
+      highlight: {
+        check: true,
+      },
     })
 
     return () => {
@@ -44,8 +48,9 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white' }: B
       fen,
       lastMove: lastMove || undefined,
       orientation,
+      check,
     })
-  }, [fen, lastMove, orientation])
+  }, [fen, lastMove, orientation, check])
 
   return (
     <div

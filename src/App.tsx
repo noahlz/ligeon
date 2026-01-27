@@ -228,8 +228,13 @@ export default function App() {
               {/* Board and Navigation wrapper */}
               <div className="flex-1 flex flex-col items-center">
                 {/* Board */}
-                <div className="w-full max-w-4xl aspect-square">
-                  <BoardDisplay fen={fen} lastMove={lastMove} orientation={boardOrientation} />
+                <div className="w-full max-w-4xl aspect-square board-coords-wrapper">
+                  <BoardDisplay
+                    fen={fen}
+                    lastMove={lastMove}
+                    orientation={boardOrientation}
+                    check={chessManager.getMoveType(currentPly) === 'check'}
+                  />
                 </div>
 
                 {/* Navigation (below board) */}

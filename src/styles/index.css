@@ -70,6 +70,50 @@ html {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
+/* Position coordinates outside the board (override default positioning) */
+.cg-wrap coords {
+  font-size: 13px !important;
+}
+
+.cg-wrap coords.ranks {
+  right: -15px;
+  left: auto;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  flex-flow: column-reverse;
+}
+
+.cg-wrap coords.files {
+  bottom: -20px;
+  left: 0;
+}
+
+/* Coordinate visibility - background for dark theme */
+.cg-wrap coords coord {
+  background-color: #2b2b2b !important;
+  color: #ccc !important;
+  border-radius: 2px;
+  padding: 2px 3px;
+  flex: 1 1 auto;
+}
+
+/* Override uppercase transform for file coordinates */
+.cg-wrap coords.files {
+  text-transform: none;
+}
+
+/* Fix rank coordinate vertical alignment within each square */
+.cg-wrap coords.ranks coord {
+  transform: translateY(39%);
+}
+
+/* Board wrapper with padding for outside coordinates */
+.board-coords-wrapper {
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+
 /* Dark theme scrollbars */
 ::-webkit-scrollbar {
   width: 10px;
