@@ -104,18 +104,8 @@ export default function MoveNavigation({
 
   return (
     <div className="flex flex-col gap-1 items-center py-2">
-      {/* Position indicator */}
-      <div className="text-xs text-ui-text-dim">
-        Move {currentPly} / {totalPlies}
-      </div>
-
-      {/* Navigation buttons - 3 column grid */}
-      <div className="grid grid-cols-3 items-center w-full">
-        {/* Left column - empty */}
-        <div />
-
-        {/* Center column - navigation buttons */}
-        <div className="flex gap-1.5 items-center justify-center">
+      {/* Navigation buttons */}
+      <div className="flex gap-1.5 items-center justify-center">
           <button
             onClick={onFirst}
             disabled={isAtStart}
@@ -207,7 +197,6 @@ export default function MoveNavigation({
             <ChevronsRight size={18} />
           </button>
         </div>
-      </div>
     </div>
   )
 }

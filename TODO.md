@@ -11,9 +11,8 @@ Read config documentation and figure out what we could reuse / add toggles for:
 
 ## Game Replay / Navigation
 
-- Align buttons under center of chessboard. Should not overlap with chessboard (stack div under chessboard)
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
-- Replay speed - no more pop up menu. Have slider to right of navigation. Replay speed: 1s[    | ]30s
+- Replay speed - no more pop up menu. Have slider under navigation. Replay speed: 1s[    | ]30s
 
 ## Game Import / Picker
 
@@ -32,7 +31,6 @@ Read config documentation and figure out what we could reuse / add toggles for:
 ## Sideline Mode
 
 Allow pieces clickable / draggable / moveable - but do not modify game pgn. Moving a piece enters a "sideline mode" where you can move pieces legally (play chess) - you can either exit that mode or view FEN on lichess.
-
 
 ## Style
 

@@ -212,38 +212,42 @@ export default function App() {
         </div>
 
         {/* Center: Board area with control strip */}
-        <div className="flex-1 flex flex-row items-start justify-center p-4 gap-2">
+        <div className="flex-1 flex flex-row items-start justify-center px-2 pt-10 pb-2 gap-2">
           {selectedGame && chessManager ? (
             <>
-              {/* Board */}
-              <div className="w-full max-w-2xl aspect-square">
-                <BoardDisplay fen={fen} lastMove={lastMove} />
+              {/* Left spacer (matches control strip width) */}
+              <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start" style={{ width: '38px' }} />
+
+              {/* Board and Navigation wrapper */}
+              <div className="flex-1 flex flex-col items-center">
+                {/* Board */}
+                <div className="w-full max-w-4xl aspect-square">
+                  <BoardDisplay fen={fen} lastMove={lastMove} />
+                </div>
+
+                {/* Navigation (below board) */}
+                <div className="mt-4">
+                  <MoveNavigation
+                    onFirst={handleFirst}
+                    onPrev={handlePrev}
+                    onNext={() => handleNext()}
+                    onLast={handleLast}
+                    onTogglePlay={handleTogglePlay}
+                    isPlaying={autoPlay.isPlaying}
+                    speed={autoPlay.speed}
+                    onSpeedChange={handleSpeedChange}
+                    currentPly={currentPly}
+                    totalPlies={chessManager.getTotalPlies()}
+                  />
+                </div>
               </div>
 
               {/* Control Strip */}
-              <div className="h-full pt-2">
-                <ControlStrip
-                  pgn={selectedGame.moves}
-                  soundEnabled={soundEnabled}
-                  onToggleSound={() => setSoundEnabled(!soundEnabled)}
-                />
-              </div>
-
-              {/* Navigation (below board) */}
-              <div className="absolute bottom-4">
-                <MoveNavigation
-                  onFirst={handleFirst}
-                  onPrev={handlePrev}
-                  onNext={() => handleNext()}
-                  onLast={handleLast}
-                  onTogglePlay={handleTogglePlay}
-                  isPlaying={autoPlay.isPlaying}
-                  speed={autoPlay.speed}
-                  onSpeedChange={handleSpeedChange}
-                  currentPly={currentPly}
-                  totalPlies={chessManager.getTotalPlies()}
-                />
-              </div>
+              <ControlStrip
+                pgn={selectedGame.moves}
+                soundEnabled={soundEnabled}
+                onToggleSound={() => setSoundEnabled(!soundEnabled)}
+              />
             </>
           ) : (
             <div className="text-ui-text-dim text-center">
