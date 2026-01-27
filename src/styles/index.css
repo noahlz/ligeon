@@ -68,6 +68,7 @@ html {
 .cg-wrap {
   border-radius: 4px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Position coordinates outside the board (override default positioning) */
@@ -90,7 +91,7 @@ html {
 }
 
 .cg-wrap coords.files {
-  bottom: -14px;
+  bottom: -16px;
   left: 0;
   right: 0;
   display: flex;
@@ -115,8 +116,10 @@ html {
 
 /* Board wrapper with padding for outside coordinates */
 .board-coords-wrapper {
+  padding-left: 20px;
   padding-right: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 24px;
+  padding-top: 16px;
   background: #4a4848;
   border-radius: 12px;
 }
