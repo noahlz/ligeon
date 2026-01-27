@@ -6,6 +6,7 @@ import MoveNavigation from './components/MoveNavigation.js'
 import GameInfo from './components/GameInfo.js'
 import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
+import ControlStrip from './components/ControlStrip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { playMoveSound, preloadAllSounds } from './utils/audioManager.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
@@ -56,8 +57,9 @@ export default function App() {
   const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
   const [lastMove, setLastMove] = useState<Key[] | undefined>(undefined)
 
-  // Audio initialization flag
+  // Audio state
   const audioInitialized = useRef(false)
+  const [soundEnabled, setSoundEnabled] = useState(true)
 
   // Load collections on mount
   useEffect(() => {
@@ -117,14 +119,14 @@ export default function App() {
     setLastMove(move ? move as Key[] : undefined)
     setCurrentPly(ply)
 
-    // Play sound for the move (if not at initial position)
-    if (ply > 0 && audioInitialized.current) {
+    // Play sound for the move (if not at initial position and sound is enabled)
+    if (ply > 0 && soundEnabled && audioInitialized.current) {
       const moveType = manager.getMoveType(ply)
       if (moveType) {
         playMoveSound(moveType)
       }
     }
-  }, [])
+  }, [soundEnabled])
 
   // Navigation handlers
   const handleFirst = useCallback(() => {
@@ -209,29 +211,39 @@ export default function App() {
           />
         </div>
 
-        {/* Center: Board and navigation */}
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
+        {/* Center: Board area with control strip */}
+        <div className="flex-1 flex flex-row items-start justify-center p-4 gap-2">
           {selectedGame && chessManager ? (
             <>
               {/* Board */}
-              <div className="w-full max-w-2xl aspect-square mb-2">
+              <div className="w-full max-w-2xl aspect-square">
                 <BoardDisplay fen={fen} lastMove={lastMove} />
               </div>
 
-              {/* Navigation */}
-              <MoveNavigation
-                onFirst={handleFirst}
-                onPrev={handlePrev}
-                onNext={() => handleNext()}
-                onLast={handleLast}
-                onTogglePlay={handleTogglePlay}
-                isPlaying={autoPlay.isPlaying}
-                speed={autoPlay.speed}
-                onSpeedChange={handleSpeedChange}
-                currentPly={currentPly}
-                totalPlies={chessManager.getTotalPlies()}
-                pgn={selectedGame.moves}
-              />
+              {/* Control Strip */}
+              <div className="h-full pt-2">
+                <ControlStrip
+                  pgn={selectedGame.moves}
+                  soundEnabled={soundEnabled}
+                  onToggleSound={() => setSoundEnabled(!soundEnabled)}
+                />
+              </div>
+
+              {/* Navigation (below board) */}
+              <div className="absolute bottom-4">
+                <MoveNavigation
+                  onFirst={handleFirst}
+                  onPrev={handlePrev}
+                  onNext={() => handleNext()}
+                  onLast={handleLast}
+                  onTogglePlay={handleTogglePlay}
+                  isPlaying={autoPlay.isPlaying}
+                  speed={autoPlay.speed}
+                  onSpeedChange={handleSpeedChange}
+                  currentPly={currentPly}
+                  totalPlies={chessManager.getTotalPlies()}
+                />
+              </div>
             </>
           ) : (
             <div className="text-ui-text-dim text-center">

@@ -8,7 +8,6 @@
 
 ## Game Replay / Navigation
 
-- Sound on/off button.
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
 - Replay speed - no more pop up menu. Have slider to right of navigation. Replay speed: 1s[    | ]30s
 
