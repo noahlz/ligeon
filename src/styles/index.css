@@ -90,6 +90,11 @@ html {
   padding: 2px 0;
 }
 
+/* When orientation is black, reverse the rank order */
+.cg-wrap[data-orientation="black"] coords.ranks {
+  flex-direction: column-reverse;
+}
+
 .cg-wrap coords.files {
   bottom: -16px;
   left: 0;

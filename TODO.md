@@ -5,9 +5,6 @@
 Read config documentation and figure out what we could reuse / add toggles for:
 - https://github.com/lichess-org/chessground/blob/master/src/config.ts
 
-- Display algebraic cooridnates outside board edges 
-- Highlight king in check
-
 ## Game Replay / Navigation
 
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
