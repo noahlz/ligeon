@@ -29,7 +29,7 @@ export default function GameInfo({ game }: GameInfoProps) {
           className="ml-auto flex items-center justify-center"
           title={minimized ? 'Expand' : 'Minimize'}
         >
-          {minimized ? <SquareChevronDown size={14} /> : <SquareMinus size={14} />}
+          {minimized ? <SquareChevronDown size={20} /> : <SquareMinus size={20} />}
         </button>
       </div>
 
