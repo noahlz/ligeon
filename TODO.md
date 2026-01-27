@@ -7,7 +7,6 @@ Read config documentation and figure out what we could reuse / add toggles for:
 
 - Display algebraic cooridnates outside board edges 
 - Highlight king in check
-- Board orientation - add control strip button
 
 ## Game Replay / Navigation
 

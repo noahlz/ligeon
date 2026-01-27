@@ -1,12 +1,13 @@
-import { ExternalLink, Volume2, VolumeX } from 'lucide-react'
+import { ExternalLink, Volume2, VolumeX, RefreshCcw } from 'lucide-react'
 
 interface ControlStripProps {
   pgn?: string
   soundEnabled: boolean
   onToggleSound: () => void
+  onFlipBoard: () => void
 }
 
-export default function ControlStrip({ pgn, soundEnabled, onToggleSound }: ControlStripProps) {
+export default function ControlStrip({ pgn, soundEnabled, onToggleSound, onFlipBoard }: ControlStripProps) {
   const handleViewOnLichess = () => {
     if (!pgn) return
     const encoded = encodeURIComponent(pgn)
@@ -33,6 +34,16 @@ export default function ControlStrip({ pgn, soundEnabled, onToggleSound }: Contr
       >
         {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
       </button>
+
+      {/* Flip board */}
+      <button
+        onClick={onFlipBoard}
+        className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded"
+        title="Flip Board"
+      >
+        <RefreshCcw size={18} />
+      </button>
+
     </div>
   )
 }

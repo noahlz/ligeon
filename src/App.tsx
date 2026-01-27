@@ -61,6 +61,9 @@ export default function App() {
   const audioInitialized = useRef(false)
   const [soundEnabled, setSoundEnabled] = useState(true)
 
+  // Board orientation
+  const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
+
   // Load collections on mount
   useEffect(() => {
     const loadCollections = async () => {
@@ -179,6 +182,10 @@ export default function App() {
     autoPlay.setSpeed(speed)
   }
 
+  const handleFlipBoard = () => {
+    setBoardOrientation(prev => prev === 'white' ? 'black' : 'white')
+  }
+
   // Handle import completion
   const handleImportComplete = async () => {
     setShowImportDialog(false)
@@ -222,7 +229,7 @@ export default function App() {
               <div className="flex-1 flex flex-col items-center">
                 {/* Board */}
                 <div className="w-full max-w-4xl aspect-square">
-                  <BoardDisplay fen={fen} lastMove={lastMove} />
+                  <BoardDisplay fen={fen} lastMove={lastMove} orientation={boardOrientation} />
                 </div>
 
                 {/* Navigation (below board) */}
@@ -247,6 +254,7 @@ export default function App() {
                 pgn={selectedGame.moves}
                 soundEnabled={soundEnabled}
                 onToggleSound={() => setSoundEnabled(!soundEnabled)}
+                onFlipBoard={handleFlipBoard}
               />
             </>
           ) : (
