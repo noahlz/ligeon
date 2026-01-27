@@ -12,10 +12,10 @@ Read config documentation and figure out what we could reuse / add toggles for:
 
 ## Game Import / Picker
 
-- If no name specified, use the file name (minus .pgn) NOT "Untitled"
+- BUG: After importing, you have to close and re-open app for collection to appear in list.
+- Add delete button next to list button in game picker (can't delete loaded game)
 - Some game got imported as "? / ?" and only had the game result: 1/2-1/2 as the only "move." Track down this bug.
 - Import date field values "?" as NULLs, and in game list item only display the values available i.e. only year, or only month year ("Jan 1959")
-- Add delete button next to list button in game picker (can't delete loaded game)
 
 ## Game Filtering 
 

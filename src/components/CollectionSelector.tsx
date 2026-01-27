@@ -27,17 +27,17 @@ export default function CollectionSelector({
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between">
-        <span className="text-sm">{selected?.name || 'Select Collection'}</span>
-        <button
-          onClick={() => setShowMenu(!showMenu)}
-          className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded"
-        >
+      <div className="flex items-center justify-between border border-ui-border rounded cursor-pointer"
+        onClick={() => setShowMenu(!showMenu)} >
+        <span className="text-sm cursor-pointer select-none">
+          {selected?.name || 'Select Collection'}
+        </span>
+        <button className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded" >
           <LibraryBig size={18} />
         </button>
       </div>
       {showMenu && (
-        <div className="absolute top-full mt-1 bg-ui-bg-element rounded shadow-lg z-50 min-w-full">
+        <div className="absolute top-full mt-1 bg-ui-bg-element rounded shadow-lg z-50 min-w-full border-2 border-ui-text-dimmer">
           {collections.map((col) => (
             <button
               key={col.id}
@@ -45,9 +45,8 @@ export default function CollectionSelector({
                 onSelect(col.id)
                 setShowMenu(false)
               }}
-              className={`block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover whitespace-nowrap text-sm ${
-                selectedId === col.id ? 'bg-ui-bg-hover' : ''
-              }`}
+              className={`block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover whitespace-nowrap text-sm ${selectedId === col.id ? 'bg-ui-bg-hover' : ''
+                }`}
             >
               {col.name}
             </button>
@@ -60,7 +59,7 @@ export default function CollectionSelector({
             }}
             className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover text-sm"
           >
-            + Import
+            Import...
           </button>
         </div>
       )}
