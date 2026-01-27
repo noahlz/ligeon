@@ -6,6 +6,7 @@ Based on [Lichess](https://lichess.org) components:
 - [chessops](https://github.com/niklasf/chessops) — Chess move logic
 - [chessground](https://github.com/lichess-org/chessground) — Board UI
 - [chessground examples](https://github.com/lichess-org/chessground-examples)
+- [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) — Config options reference
 
 ## Pre-release, Active Development
 
@@ -124,6 +125,33 @@ Useful LSP tools available via `typescript-lsp`:
 - `incomingCalls`/`outgoingCalls` — Trace call hierarchy
 - `goToDefinition` — Jump to symbol definition
 - `hover` — Get type info
+
+## UI Layout Guidelines
+
+### Main Board Area (App.tsx)
+
+The center playing area follows this structure:
+
+```
+Center flex-row container
+├── Board + Navigation wrapper (flex-1 flex-col items-center)
+│   ├── BoardDisplay (w-full max-w-4xl aspect-square)
+│   └── MoveNavigation (mt-4, naturally positioned below board)
+└── ControlStrip (pt-2, aligned to right)
+```
+
+**Key principles:**
+- **Avoid absolute positioning** for components that should stack/flow naturally — use flex containers to maintain proper layout during window resize
+- **Group related components** — Board and MoveNavigation are wrapped together so they stay grouped as a unit
+- **Natural flow** — Navigation buttons sit below the board in document flow, not positioned relative to viewport
+
+**Alignment and spacing:**
+- Board wrapper uses `items-center` to horizontally center both board and navigation buttons
+- Board sizing: `max-w-4xl` constrains maximum width while `aspect-square` maintains 1:1 ratio
+- Navigation spacing: `mt-4` (1rem) provides consistent gap below board
+- ControlStrip spacing: `pt-2` (0.5rem) for top padding alignment
+
+**Anti-pattern:** Using `absolute bottom-4` for MoveNavigation caused overlap issues when resizing. The fix removed absolute positioning and wrapped board+nav in a flex-column container with `items-center` for proper alignment.
 
 ## Gotchas
 
