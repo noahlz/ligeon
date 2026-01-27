@@ -59,7 +59,7 @@ export default function GameListSidebar({
   }, [collectionId, searchTerm, filters])
 
   return (
-    <div className="flex flex-col gap-2 h-full">
+    <div data-testid="game-list-sidebar" className="flex flex-col gap-2 h-full">
       <CollectionSelector
         collections={collections}
         selectedId={selectedCollectionId}

@@ -80,6 +80,12 @@ export default function MoveNavigation({
         return
       }
 
+      // Skip if hovering over game list sidebar (let it scroll natively)
+      const gameListSidebar = document.querySelector('[data-testid="game-list-sidebar"]')
+      if (gameListSidebar?.contains(e.target as Node)) {
+        return
+      }
+
       // Debounce: 50ms between scroll actions
       const now = Date.now()
       if (now - lastScrollTime.current < 50) return
