@@ -290,7 +290,7 @@ export default function App() {
       </div>
 
       {/* Import dialog */}
-      <ImportDialog isOpen={showImportDialog} onComplete={handleImportComplete} />
+      <ImportDialog isOpen={showImportDialog} onComplete={handleImportComplete} onClose={() => setShowImportDialog(false)} />
     </div>
   )
 }
