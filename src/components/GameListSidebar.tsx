@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Filter, SquareChevronDown } from 'lucide-react'
 import { timestampToDisplay } from '../utils/dateConverter.js'
-import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../utils/resultConverter.js'
+import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../lib/converters/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
 
 interface GameSearchResult {

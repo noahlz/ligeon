@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {  SquareChevronDown, SquareMinus } from 'lucide-react'
 import { timestampToDisplay } from '../utils/dateConverter.js'
-import { resultNumericToDisplay } from '../utils/resultConverter.js'
+import { resultNumericToDisplay } from '../../lib/converters/resultConverter.js'
 
 interface GameInfoProps {
   game: {

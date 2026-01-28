@@ -2,9 +2,10 @@ import fs from 'fs'
 import path from 'path'
 import { WebContents } from 'electron'
 import { parsePgn } from 'chessops/pgn'
-import { GameDatabase } from './gameDatabase.js'
+import { GameDatabase, DatabaseManager } from './gameDatabase.js'
 import type { GameData, CollectionMetadata } from './types.js'
 import { extractGameData } from '../../lib/pgn/gameExtractor.js'
+import { validateCollectionId, validateFilePath, validateCollectionName } from './validators.js'
 
 /**
  * Statistics for an import operation
@@ -76,6 +77,45 @@ export async function importAndIndexPgn(
     duration: 0,
   }
 
+  // TODO: Refactor error handling to a function
+
+  // Validate inputs
+  if (!validateFilePath(filePath)) {
+    const errorMsg = `Invalid file path: ${filePath}`
+    sendProgressLog(sender, 'error', errorMsg)
+    stats.duration = Date.now() - startTime
+    return {
+      success: false,
+      cancelled: false,
+      error: errorMsg,
+      stats,
+    }
+  }
+
+  if (!validateCollectionId(collectionId)) {
+    const errorMsg = `Invalid collection ID: ${collectionId}`
+    sendProgressLog(sender, 'error', errorMsg)
+    stats.duration = Date.now() - startTime
+    return {
+      success: false,
+      cancelled: false,
+      error: errorMsg,
+      stats,
+    }
+  }
+
+  if (!validateCollectionName(collectionName)) {
+    const errorMsg = `Invalid collection name: ${collectionName}`
+    sendProgressLog(sender, 'error', errorMsg)
+    stats.duration = Date.now() - startTime
+    return {
+      success: false,
+      cancelled: false,
+      error: errorMsg,
+      stats,
+    }
+  }
+
   let db: GameDatabase | null = null
 
   try {
@@ -84,7 +124,7 @@ export async function importAndIndexPgn(
     const fileContent = fs.readFileSync(filePath, 'utf-8')
 
     // Initialize database
-    db = new GameDatabase(collectionId, collectionsBasePath)
+    db = DatabaseManager.getInstance(collectionId, collectionsBasePath)
     db.createSchema()
     sendProgressLog(sender, 'info', 'Database initialized')
 
@@ -96,7 +136,6 @@ export async function importAndIndexPgn(
       // Check for cancellation
       if (checkCancelled()) {
         sendProgressLog(sender, 'warning', 'Import cancelled by user')
-        if (db) db.close()
         stats.duration = Date.now() - startTime
         return {
           success: false,
@@ -187,7 +226,6 @@ export async function importAndIndexPgn(
       JSON.stringify(metadata, null, 2)
     )
 
-    db.close()
     stats.duration = Date.now() - startTime
 
     sendProgressLog(
@@ -203,7 +241,6 @@ export async function importAndIndexPgn(
       stats,
     }
   } catch (error) {
-    if (db) db.close()
     stats.duration = Date.now() - startTime
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
