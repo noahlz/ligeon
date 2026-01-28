@@ -28,7 +28,7 @@ contextBridge.exposeInMainWorld('electron', {
   searchGames: (collectionId: string, filters: any) =>
     ipcRenderer.invoke('search-games', { collectionId, filters }),
 
-  getGameMoves: (collectionId: string, gameId: string) =>
+  getGameMoves: (collectionId: string, gameId: number) =>
     ipcRenderer.invoke('get-game-moves', { collectionId, gameId }),
 
   // === Settings ===

@@ -9,6 +9,7 @@ import ImportDialog from './components/ImportDialog.js'
 import ControlStrip from './components/ControlStrip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { playMoveSound, preloadAllSounds } from './utils/audioManager.js'
+import { separateResultFromMoves } from './utils/moveFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 
 interface Collection {
@@ -101,13 +102,19 @@ export default function App() {
     if (!selectedCollectionId) return
 
     // Fetch full game data with moves
-    const fullGame = await window.electron.getGameMoves(selectedCollectionId, game.id.toString())
+    const fullGame = await window.electron.getGameMoves(selectedCollectionId, game.id)
     if (!fullGame) return
 
     setSelectedGame(fullGame)
 
-    // Create chess manager with the game's moves
-    const manager = createChessManager(fullGame.moves)
+    // Create chess manager with the game's moves (filter out result notation)
+    const movesArray = fullGame.moves
+      .replace(/\d+\./g, '') // Remove move numbers
+      .split(/\s+/)
+      .filter(m => m.length > 0)
+    const { gameMoves } = separateResultFromMoves(movesArray)
+    const movesString = gameMoves.join(' ')
+    const manager = createChessManager(movesString)
     setChessManager(manager)
 
     // Reset to initial position

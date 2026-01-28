@@ -8,6 +8,7 @@
 
 ## Game Replay / Navigation
 
+- BUG: only white king is ever in check. see ~/Screenshots/check-bug.png
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
 - Replay speed - no more pop up menu. Have slider under navigation. Replay speed: 1s[    | ]30s
 

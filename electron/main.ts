@@ -161,7 +161,7 @@ function setupIpcHandlers() {
 
   // Get game with moves
   ipcMain.handle('get-game-moves', async (_event, { collectionId, gameId }) =>
-    getGameMoves(collectionId, gameId)
+    getGameMoves(collectionId, parseInt(gameId, 10))
   )
 
   // Settings handlers

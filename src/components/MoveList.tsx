@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { getResultDisplay } from '../utils/chessManager.js'
 import { separateResultFromMoves, groupMovesIntoPairs } from '../utils/moveFormatter.js'
 
@@ -34,7 +34,7 @@ export default function MoveList({ moves, currentPly, onJump }: MoveListProps) {
           const isBlackCurrent = currentPly - 1 === blackPly
 
           return (
-            <>
+            <React.Fragment key={pairIndex}>
               {/* Move number */}
               <span
                 key={`num-${pairIndex}`}
@@ -66,7 +66,7 @@ export default function MoveList({ moves, currentPly, onJump }: MoveListProps) {
               >
                 {pair.black || ''}
               </span>
-            </>
+            </React.Fragment>
           )
         })}
       </div>

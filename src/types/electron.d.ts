@@ -78,7 +78,7 @@ export interface ElectronAPI {
 
   // Games
   searchGames: (collectionId: string, filters: GameFilters) => Promise<GameSearchResult[]>
-  getGameMoves: (collectionId: string, gameId: string) => Promise<GameRow | null>
+  getGameMoves: (collectionId: string, gameId: number) => Promise<GameRow | null>
 
   // Settings
   getSettings: () => Promise<AppSettings>
