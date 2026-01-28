@@ -4,6 +4,21 @@ import fs from 'fs'
 import type { GameData, GameRow, GameSearchResult, GameFilters } from './types.js'
 import { GAMES_SCHEMA_SQL } from '../../lib/database/schema.js'
 
+const isDev = process.env.NODE_ENV === 'development'
+
+/**
+ * Log structured error with context for debugging
+ */
+function logError(operation: string, context: Record<string, unknown>, error: unknown): void {
+  const errorObj = {
+    operation,
+    ...context,
+    error: error instanceof Error ? error.message : String(error),
+    ...(isDev && error instanceof Error && { stack: error.stack }),
+  }
+  console.error('Database operation failed:', errorObj)
+}
+
 /**
  * SQLite database wrapper for managing chess games in a collection
  */
@@ -30,7 +45,7 @@ export class GameDatabase {
       this.db = new Database(this.dbPath)
       this.db.pragma('journal_mode = WAL')
     } catch (error) {
-      console.error('Error opening database:', error)
+      logError('constructor', { dbPath: this.dbPath, collectionDir: this.collectionDir }, error)
       throw error
     }
   }
@@ -109,6 +124,7 @@ export class GameDatabase {
    * @returns Array of matching games
    */
   searchGames(filters: GameFilters, limit = 1000): GameSearchResult[] {
+    const startTime = Date.now()
     let query = 'SELECT id, white, black, event, date, result, whiteElo, blackElo, ecoCode FROM games WHERE 1=1'
     const params: any[] = []
 
@@ -162,9 +178,16 @@ export class GameDatabase {
 
     try {
       const stmt = this.db.prepare(query)
-      return stmt.all(...params) as GameSearchResult[]
+      const results = stmt.all(...params) as GameSearchResult[]
+
+      const duration = Date.now() - startTime
+      if (duration > 1000) {
+        console.warn(`Slow query detected (${duration}ms):`, { filters, limit, resultCount: results.length })
+      }
+
+      return results
     } catch (error) {
-      console.error('Error searching games:', error)
+      logError('searchGames', { dbPath: this.dbPath, filters, limit }, error)
       return []
     }
   }
@@ -180,7 +203,7 @@ export class GameDatabase {
       const stmt = this.db.prepare('SELECT * FROM games WHERE id = ?')
       return stmt.get(gameId) as GameRow | undefined ?? null
     } catch (error) {
-      console.error('Error getting game:', error)
+      logError('getGameWithMoves', { dbPath: this.dbPath, gameId }, error)
       return null
     }
   }
@@ -196,7 +219,7 @@ export class GameDatabase {
       const result = stmt.get() as { count: number }
       return result.count
     } catch (error) {
-      console.error('Error getting game count:', error)
+      logError('getGameCount', { dbPath: this.dbPath }, error)
       return 0
     }
   }
@@ -208,7 +231,7 @@ export class GameDatabase {
     try {
       if (this.db) this.db.close()
     } catch (error) {
-      console.error('Error closing database:', error)
+      logError('close', { dbPath: this.dbPath }, error)
     }
   }
 
@@ -220,7 +243,64 @@ export class GameDatabase {
       this.db.prepare('DELETE FROM games').run()
       console.log('✓ Cleared all games')
     } catch (error) {
-      console.error('Error clearing games:', error)
+      logError('clearGames', { dbPath: this.dbPath }, error)
     }
+  }
+}
+
+/**
+ * Singleton manager for GameDatabase instances
+ * Maintains one database connection per collection to prevent connection conflicts
+ */
+export class DatabaseManager {
+  private static instances: Map<string, GameDatabase> = new Map()
+
+  /**
+   * Get or create a GameDatabase instance for a collection
+   *
+   * @param collectionId - Unique identifier for the collection
+   * @param basePath - Base path for all collections
+   * @returns Singleton GameDatabase instance for this collection
+   */
+  static getInstance(collectionId: string, basePath: string): GameDatabase {
+    const key = `${collectionId}@${basePath}`
+
+    if (!this.instances.has(key)) {
+      const db = new GameDatabase(collectionId, basePath)
+      this.instances.set(key, db)
+      console.log(`✓ Created database instance for collection: ${collectionId}`)
+    }
+
+    return this.instances.get(key)!
+  }
+
+  /**
+   * Close and remove database instance for a collection
+   * Use this when deleting a collection or during cleanup
+   *
+   * @param collectionId - Unique identifier for the collection
+   * @param basePath - Base path for all collections
+   */
+  static closeCollection(collectionId: string, basePath: string): void {
+    const key = `${collectionId}@${basePath}`
+    const db = this.instances.get(key)
+
+    if (db) {
+      db.close()
+      this.instances.delete(key)
+      console.log(`✓ Closed database instance for collection: ${collectionId}`)
+    }
+  }
+
+  /**
+   * Close all database connections
+   * Use this during application shutdown
+   */
+  static closeAll(): void {
+    for (const [key, db] of this.instances.entries()) {
+      db.close()
+      console.log(`✓ Closed database instance: ${key}`)
+    }
+    this.instances.clear()
   }
 }

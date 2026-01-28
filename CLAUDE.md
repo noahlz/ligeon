@@ -80,7 +80,8 @@ See `package.json` for versions.
 │   ├── performance
 │   └── unit
 ├── electron            # Main process (Node.js, .ts only, no .js)
-│   └── ipc             # IPC handlers
+│   ├── config          # Centralized configuration (paths)
+│   └── ipc             # IPC handlers + validators
 ├── lib/                # Shared code (PGN parsing, converters, schema, types)
 │   ├── converters/     # Date, result converters
 │   ├── database/       # Schema
@@ -107,10 +108,13 @@ See `package.json` for versions.
 |------|-------------|---------|
 | **Main Process** | | |
 | Types | `lib/types/game.ts` | Central `GameData` interface |
-| Database | `electron/ipc/gameDatabase.ts` | SQLite wrapper for games |
+| Database | `electron/ipc/gameDatabase.ts` | SQLite wrapper + `DatabaseManager` singleton |
+| Validation | `electron/ipc/validators.ts` | IPC input validation (security) |
+| Config | `electron/config/paths.ts` | Centralized path configuration |
 | PGN parsing | `lib/pgn/gameExtractor.ts` | Parse PGN → GameData |
 | Import | `electron/ipc/importHandlers.ts` | PGN file import orchestration |
 | IPC bridge | `electron/preload.ts` | Exposes `window.electron.*` API |
+| IPC types | `src/types/electron.d.ts` | Type definitions for IPC API |
 | **Renderer** | | |
 | App root | `src/App.tsx` | Main layout, state management |
 | Board UI | `src/components/BoardDisplay.tsx` | Chessground integration |
@@ -120,7 +124,7 @@ See `package.json` for versions.
 | Chess logic | `src/utils/chessManager.ts` | Move parsing, FEN, ply navigation |
 | Audio | `src/utils/audioManager.ts` | Move sounds (capture, check, etc.) |
 | Date converter | `src/utils/dateConverter.ts` | Timestamp ↔ display format |
-| Result converter | `src/utils/resultConverter.ts` | Numeric result ↔ display |
+| Result converter | `lib/converters/resultConverter.ts` | Numeric result ↔ display (single source)
 
 ### Prefer LSP Over Text Search
 
@@ -239,6 +243,33 @@ SQLite doesn't work in renderer. Route all DB calls through IPC:
 3. electron/ipc/ handler executes
 4. Result returned to renderer
 
+
+### Validate IPC Inputs
+
+All IPC handlers must validate inputs using `electron/ipc/validators.ts`:
+
+```typescript
+if (!validateCollectionId(collectionId)) {
+  logError('searchGames', { collectionId, reason: 'invalid' }, new Error('Validation failed'))
+  return []
+}
+const sanitizedFilters = validateSearchFilters(filters)
+```
+
+- `validateCollectionId()` — blocks path traversal, limits length
+- `validateFilePath()` — checks existence, file type, size
+- `validateSearchFilters()` — trims strings, clamps numeric ranges
+- `validateCollectionName()` — non-empty, max 200 chars
+
+### Shared Code in lib/ (Single Source)
+
+Place shared utilities in `lib/` not `src/utils/`. Renderer can import from lib:
+
+```typescript
+// From renderer component
+import { resultNumericToDisplay } from '../../lib/converters/resultConverter.js'
+```
+
 ### Three TypeScript Configs
 
 | Config | Purpose | Module | Target |
@@ -272,10 +303,6 @@ Request Autofill.enable failed
 Request Autofill.setAddresses failed
 ```
 
-## Shared Library (`lib/`)
-
-Platform-agnostic code shared between electron/ and CLI scripts.
-
 ### Structure
 
 Each subdirectory has an `index.ts` barrel that re-exports contents.
@@ -292,9 +319,3 @@ From CLI (relative to `scripts/`):
 ```typescript
 import { extractGameData, GAMES_SCHEMA_SQL, type GameData } from '../lib/index.js'
 ```
-
-### Add New Code
-
-1. If appropriate, create module in `lib/*/` (e.g., `lib/converters/myConverter.ts`)
-2. Export from `lib/*/index.ts`
-3. Use `.js` extensions in imports

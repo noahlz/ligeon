@@ -9,6 +9,7 @@ import {
 } from './ipc/collectionHandlers.js'
 import { searchGames, getGameMoves } from './ipc/gameHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
+import { getCollectionsPath } from './config/paths.js'
 
 // Get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -22,7 +23,7 @@ const isDev = process.env.NODE_ENV === 'development' ||
               process.env.ELECTRON_IS_DEV === 'true'
 
 // Collections path: ~/.ligeon/collections
-const collectionsPath = path.join(app.getPath('home'), '.ligeon', 'collections')
+const collectionsPath = getCollectionsPath()
 
 /**
  * Create the main browser window

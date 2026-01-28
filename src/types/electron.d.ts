@@ -8,6 +8,54 @@ export interface CollectionMetadata {
   lastModified?: string
 }
 
+export interface GameFilters {
+  white?: string
+  black?: string
+  event?: string
+  dateFrom?: number | null
+  dateTo?: number | null
+  result?: number | null
+  ecoCode?: string
+  whiteEloMin?: number | null
+  whiteEloMax?: number | null
+  blackEloMin?: number | null
+  blackEloMax?: number | null
+  limit?: number
+}
+
+export interface GameSearchResult {
+  id: number
+  white: string
+  black: string
+  event: string | null
+  date: number | null
+  result: number
+  whiteElo: number | null
+  blackElo: number | null
+  ecoCode: string | null
+}
+
+export interface GameRow {
+  id: number
+  white: string
+  black: string
+  event: string | null
+  site: string | null
+  date: number | null
+  round: string | null
+  result: number
+  whiteElo: number | null
+  blackElo: number | null
+  ecoCode: string | null
+  moveCount: number
+  moves: string
+}
+
+export type ImportProgressData =
+  | { type: 'progress'; parsed: number; indexed: number; skipped: number }
+  | { type: 'log'; logs: Array<{ type: string; message: string; timestamp: number }> }
+  | { type: 'complete'; success?: boolean; error?: string }
+
 export interface ElectronAPI {
   // File Operations
   selectFile: () => Promise<string | null>
@@ -24,11 +72,11 @@ export interface ElectronAPI {
   deleteCollection: (collectionId: string) => Promise<{ success: boolean }>
 
   // Games
-  searchGames: (collectionId: string, filters: any) => Promise<any[]>
-  getGameMoves: (collectionId: string, gameId: string) => Promise<any>
+  searchGames: (collectionId: string, filters: GameFilters) => Promise<GameSearchResult[]>
+  getGameMoves: (collectionId: string, gameId: string) => Promise<GameRow | null>
 
   // Event Listeners
-  onImportProgress: (callback: (data: any) => void) => () => void
+  onImportProgress: (callback: (data: ImportProgressData) => void) => () => void
 }
 
 declare global {
