@@ -6,7 +6,8 @@ Based on [Lichess](https://lichess.org) components:
 - [chessops](https://github.com/niklasf/chessops) — Chess move logic
 - [chessground](https://github.com/lichess-org/chessground) — Board UI
 - [chessground examples](https://github.com/lichess-org/chessground-examples)
-- [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) — Config options reference
+
+**TIP:** See [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) — for chessboard display options reference
 
 ## Pre-release, Active Development
 
@@ -39,9 +40,9 @@ Always validate with:
 
 - Node.js, TypeScript
 - Electron, React, Tailwind CSS
-- SQLite (better-sqlite3)
 - chessops, chessground
 - lucide-react (icons)
+- SQLite (better-sqlite3)
 - Vite, Vitest
 
 See `package.json` for versions.
@@ -100,59 +101,111 @@ See `package.json` for versions.
 
 ## Code Navigation
 
-### Start from Key Files
-
-Start explortation / refactoring / feature changes from standard Electron/React and from the below top-level entry point files that define app-specific logic:
+### Key Entry Points
 
 | Area | Entry Point | Purpose |
 |------|-------------|---------|
+| **Main Process** | | |
 | Types | `lib/types/game.ts` | Central `GameData` interface |
 | Database | `electron/ipc/gameDatabase.ts` | SQLite wrapper for games |
 | PGN parsing | `lib/pgn/gameExtractor.ts` | Parse PGN → GameData |
 | Import | `electron/ipc/importHandlers.ts` | PGN file import orchestration |
+| IPC bridge | `electron/preload.ts` | Exposes `window.electron.*` API |
+| **Renderer** | | |
+| App root | `src/App.tsx` | Main layout, state management |
 | Board UI | `src/components/BoardDisplay.tsx` | Chessground integration |
 | Game browsing | `src/components/GameListSidebar.tsx` | Search/filter games |
+| Move navigation | `src/components/MoveNavigation.tsx` | Nav buttons + keyboard shortcuts |
+| **Utilities** | | |
+| Chess logic | `src/utils/chessManager.ts` | Move parsing, FEN, ply navigation |
+| Audio | `src/utils/audioManager.ts` | Move sounds (capture, check, etc.) |
+| Date converter | `src/utils/dateConverter.ts` | Timestamp ↔ display format |
+| Result converter | `src/utils/resultConverter.ts` | Numeric result ↔ display |
 
 ### Prefer LSP Over Text Search
 
 When exploring or refactoring code:
-- Start wth LSP tools i.e. `typescript-lsp` plugin
-- Fall back to of Glob, Grep, Search, or Task(Explore) — if LSP yields no results.
-- **NOTE:** For text (comments, strings, config values, other non-LSP symbols) — use Glob/Grep/Search.
+- Start with LSP tools i.e. `typescript-lsp` plugin
+- Fall back to Glob, Grep, Search, or Task(Explore) — if LSP yields no results
+- **NOTE:** For text (comments, strings, config values, other non-LSP symbols) — use Glob/Grep/Search
 
-Useful LSP tools available via `typescript-lsp`:
+Useful LSP operations:
 - `findReferences` — Find all usages
 - `documentSymbol` — List symbols in a file
 - `incomingCalls`/`outgoingCalls` — Trace call hierarchy
 - `goToDefinition` — Jump to symbol definition
 - `hover` — Get type info
 
-## UI Layout Guidelines
-
-### Main Board Area (App.tsx)
-
-The center playing area follows this structure:
+## Application Layout
 
 ```
-Center flex-row container
-├── Board + Navigation wrapper (flex-1 flex-col items-center)
-│   ├── BoardDisplay (w-full max-w-4xl aspect-square)
-│   └── MoveNavigation (mt-4, naturally positioned below board)
-└── ControlStrip (pt-2, aligned to right)
+┌────────────────────────────────────────────────────────────────────────────┐
+│                              App.tsx (root)                                │
+├────────────────┬────────────────────────────────────┬──────────────────────┤
+│ Left Sidebar   │         Center Board Area          │   Right Panel        │
+│ (w-72)         │         (flex-1)                   │   (w-80)             │
+│ ┌────────────┐ │  ┌──────┐ ┌─────────────┐ ┌──────┐ │ ┌──────────────────┐ │
+│ │Collection- │ │  │Spacer│ │ BoardDisplay│ │Ctrl- │ │ │GameInfo (collaps-│ │
+│ │Selector    │ │  │      │ │ + coords    │ │Strip │ │ │ible header)      │ │
+│ └────────────┘ │  │      │ └─────────────┘ │      │ │ └──────────────────┘ │
+│ ┌────────────┐ │  │      │ ┌─────────────┐ │      │ │ ┌───────────────────┐│
+│ │Filter panel│ │  │      │ │MoveNav      │ │      │ │ │MoveList (scroll-  ││
+│ │(collapsible│ │  │      │ └─────────────┘ │      │ │ │able grid)         ││
+│ └────────────┘ │  └──────┘                 └──────┘ │ │                   ││
+│ ┌────────────┐ │                                    │ │ # │ White │ Black ││
+│ │Game list   │ │                                    │ │ 1.│ e4    │ c5    ││
+│ │(scrollable)│ │                                    │ │ 2.│ Nf3   │ e6    ││
+│ │            │ │                                    │ │...│       │       ││
+│ └────────────┘ │                                    │ └───────────────────┘│
+└────────────────┴────────────────────────────────────┴──────────────────────┘
 ```
 
-**Key principles:**
-- **Avoid absolute positioning** for components that should stack/flow naturally — use flex containers to maintain proper layout during window resize
-- **Group related components** — Board and MoveNavigation are wrapped together so they stay grouped as a unit
-- **Natural flow** — Navigation buttons sit below the board in document flow, not positioned relative to viewport
+### Component → File Mapping
 
-**Alignment and spacing:**
-- Board wrapper uses `items-center` to horizontally center both board and navigation buttons
-- Board sizing: `max-w-4xl` constrains maximum width while `aspect-square` maintains 1:1 ratio
-- Navigation spacing: `mt-4` (1rem) provides consistent gap below board
-- ControlStrip spacing: `pt-2` (0.5rem) for top padding alignment
+| UI Element | Component | File |
+|------------|-----------|------|
+| Collection dropdown + rename/delete | `CollectionSelector` | `src/components/CollectionSelector.tsx` |
+| Filter panel (search, result radio) | `GameListSidebar` | `src/components/GameListSidebar.tsx` |
+| Game list items | `GameListSidebar` | `src/components/GameListSidebar.tsx` |
+| Chess board | `BoardDisplay` | `src/components/BoardDisplay.tsx` |
+| Navigation buttons (`|<  <  ▶  >  >|`) | `MoveNavigation` | `src/components/MoveNavigation.tsx` |
+| Control strip (Lichess, sound, flip) | `ControlStrip` | `src/components/ControlStrip.tsx` |
+| Game title header (collapsible) | `GameInfo` | `src/components/GameInfo.tsx` |
+| Move list grid | `MoveList` | `src/components/MoveList.tsx` |
+| PGN import dialog | `ImportDialog` | `src/components/ImportDialog.tsx` |
+| Delete confirmation dialog | `ConfirmDialog` | `src/components/ConfirmDialog.tsx` |
 
-**Anti-pattern:** Using `absolute bottom-4` for MoveNavigation caused overlap issues when resizing. The fix removed absolute positioning and wrapped board+nav in a flex-column container with `items-center` for proper alignment.
+### Keyboard Shortcuts (MoveNavigation.tsx)
+
+| Key | Action |
+|-----|--------|
+| `←` | Previous move |
+| `→` | Next move |
+| `Home` | First position |
+| `End` | Last position |
+| `Space` | Toggle auto-play |
+| Mouse wheel | Prev/next move (when not over sidebar/move list) |
+
+### Styling
+
+**Color tokens** (`tailwind.config.ts` + `src/styles/index.css`):
+- `ui-bg-page` — darkest background (main page)
+- `ui-bg-box` — panel backgrounds
+- `ui-bg-element` — buttons, list items
+- `ui-bg-hover` — hover state
+- `ui-text` / `ui-text-dim` / `ui-text-dimmer` — text hierarchy
+- `ui-accent` — orange highlight (current move, active play button)
+
+**Chessground CSS** (`src/styles/index.css`):
+- Board uses `.board-coords-wrapper` for coordinate padding
+- Coords positioned outside board via `.cg-wrap coords.ranks/files`
+- Board orientation handled via `data-orientation="black"` attribute
+
+### Layout Principles
+
+- **Avoid absolute positioning** — use flex containers for resize behavior
+- **Group related components** — Board + MoveNavigation wrapped together in flex-col
+- **Symmetric spacing** — left spacer div matches ControlStrip width for centering
 
 ## Gotchas
 
