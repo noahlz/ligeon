@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { LibraryBig } from 'lucide-react'
 
 interface Collection {
@@ -24,9 +24,24 @@ export default function CollectionSelector({
 }: CollectionSelectorProps) {
   const [showMenu, setShowMenu] = useState(false)
   const selected = collections.find((c) => c.id === selectedId)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!showMenu) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showMenu])
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div className="flex items-center justify-between border border-ui-border rounded cursor-pointer"
         onClick={() => setShowMenu(!showMenu)} >
         <span className="text-sm cursor-pointer select-none">

@@ -49,6 +49,7 @@ export default function App() {
   const [collections, setCollections] = useState<Collection[]>([])
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null)
   const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importFilePath, setImportFilePath] = useState<string | null>(null)
 
   // Game state
   const [selectedGame, setSelectedGame] = useState<GameRow | null>(null)
@@ -186,12 +187,28 @@ export default function App() {
     setBoardOrientation(prev => prev === 'white' ? 'black' : 'white')
   }
 
+  // Handle import menu click - open file picker first
+  const handleImportClick = async () => {
+    const filePath = await window.electron.selectFile()
+    if (filePath) {
+      setImportFilePath(filePath)
+      setShowImportDialog(true)
+    }
+  }
+
   // Handle import completion
   const handleImportComplete = async () => {
     setShowImportDialog(false)
+    setImportFilePath(null)
     // Reload collections
     const cols = await window.electron.listCollections()
     setCollections(cols)
+  }
+
+  // Handle import dialog close (cancelled)
+  const handleImportClose = () => {
+    setShowImportDialog(false)
+    setImportFilePath(null)
   }
 
   // Parse moves for MoveList component
@@ -214,7 +231,7 @@ export default function App() {
             collections={collections}
             selectedCollectionId={selectedCollectionId}
             onSelectCollection={setSelectedCollectionId}
-            onImport={() => setShowImportDialog(true)}
+            onImport={handleImportClick}
           />
         </div>
 
@@ -290,7 +307,12 @@ export default function App() {
       </div>
 
       {/* Import dialog */}
-      <ImportDialog isOpen={showImportDialog} onComplete={handleImportComplete} onClose={() => setShowImportDialog(false)} />
+      <ImportDialog
+        isOpen={showImportDialog}
+        filePath={importFilePath}
+        onComplete={handleImportComplete}
+        onClose={handleImportClose}
+      />
     </div>
   )
 }

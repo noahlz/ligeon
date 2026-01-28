@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { BrowserWindow } from 'electron'
+import { WebContents } from 'electron'
 import { parsePgn } from 'chessops/pgn'
 import { GameDatabase } from './gameDatabase.js'
 import type { GameData, CollectionMetadata } from './types.js'
@@ -50,7 +50,7 @@ const PROGRESS_LOG_INTERVAL = 10000
  * @param collectionId - Unique identifier for the collection
  * @param collectionName - Display name for the collection
  * @param collectionsBasePath - Base directory for all collections
- * @param mainWindow - Main browser window for sending progress events
+ * @param sender - WebContents for sending progress events
  * @param checkCancelled - Function to check if import has been cancelled
  * @returns Import result with statistics
  */
@@ -59,7 +59,7 @@ export async function importAndIndexPgn(
   collectionId: string,
   collectionName: string,
   collectionsBasePath: string,
-  mainWindow: BrowserWindow | null,
+  sender: WebContents | null,
   checkCancelled: () => boolean
 ): Promise<ImportResult> {
   const startTime = Date.now()
@@ -80,13 +80,13 @@ export async function importAndIndexPgn(
 
   try {
     // Read PGN file
-    sendProgressLog(mainWindow, 'info', `Reading PGN file: ${path.basename(filePath)}`)
+    sendProgressLog(sender, 'info', `Reading PGN file: ${path.basename(filePath)}`)
     const fileContent = fs.readFileSync(filePath, 'utf-8')
 
     // Initialize database
     db = new GameDatabase(collectionId, collectionsBasePath)
     db.createSchema()
-    sendProgressLog(mainWindow, 'info', 'Database initialized')
+    sendProgressLog(sender, 'info', 'Database initialized')
 
     // Parse and insert games in batches
     let batch: GameData[] = []
@@ -95,7 +95,7 @@ export async function importAndIndexPgn(
     for (const game of parsePgn(fileContent)) {
       // Check for cancellation
       if (checkCancelled()) {
-        sendProgressLog(mainWindow, 'warning', 'Import cancelled by user')
+        sendProgressLog(sender, 'warning', 'Import cancelled by user')
         if (db) db.close()
         stats.duration = Date.now() - startTime
         return {
@@ -120,7 +120,7 @@ export async function importAndIndexPgn(
           const black = game.headers.get('Black') || 'Unknown'
           const result = game.headers.get('Result') || '*'
           sendProgressLog(
-            mainWindow,
+            sender,
             'debug',
             `Skipped game ${stats.totalParsed}: ${white} vs ${black} (result: ${result})`
           )
@@ -135,7 +135,7 @@ export async function importAndIndexPgn(
           stats.totalIndexed += batch.length
           batch = []
 
-          sendProgressUpdate(mainWindow, {
+          sendProgressUpdate(sender, {
             parsed: stats.totalParsed,
             indexed: stats.totalIndexed,
             skipped: stats.totalSkipped,
@@ -145,7 +145,7 @@ export async function importAndIndexPgn(
         // Log progress every N games
         if (stats.totalParsed - lastProgressLog >= PROGRESS_LOG_INTERVAL) {
           sendProgressLog(
-            mainWindow,
+            sender,
             'info',
             `Progress: ${stats.totalParsed} parsed, ${stats.totalIndexed} indexed, ${stats.totalSkipped} skipped`
           )
@@ -155,7 +155,7 @@ export async function importAndIndexPgn(
         stats.totalSkipped++
         stats.skippedReasons.parseError++
         sendProgressLog(
-          mainWindow,
+          sender,
           'error',
           `Parse error at game ${stats.totalParsed}: ${error instanceof Error ? error.message : 'Unknown error'}`
         )
@@ -166,7 +166,7 @@ export async function importAndIndexPgn(
     if (batch.length > 0) {
       db.insertGamesBatch(batch)
       stats.totalIndexed += batch.length
-      sendProgressUpdate(mainWindow, {
+      sendProgressUpdate(sender, {
         parsed: stats.totalParsed,
         indexed: stats.totalIndexed,
         skipped: stats.totalSkipped,
@@ -191,7 +191,7 @@ export async function importAndIndexPgn(
     stats.duration = Date.now() - startTime
 
     sendProgressLog(
-      mainWindow,
+      sender,
       'success',
       `Import complete: ${stats.totalIndexed} games indexed in ${(stats.duration / 1000).toFixed(1)}s`
     )
@@ -207,7 +207,7 @@ export async function importAndIndexPgn(
     stats.duration = Date.now() - startTime
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    sendProgressLog(mainWindow, 'error', `Import failed: ${errorMessage}`)
+    sendProgressLog(sender, 'error', `Import failed: ${errorMessage}`)
 
     return {
       success: false,
@@ -221,9 +221,9 @@ export async function importAndIndexPgn(
 /**
  * Send progress update to renderer process
  */
-function sendProgressUpdate(mainWindow: BrowserWindow | null, progress: ImportProgress): void {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('import-progress', progress)
+function sendProgressUpdate(sender: WebContents | null, progress: ImportProgress): void {
+  if (sender && !sender.isDestroyed()) {
+    sender.send('import-progress', progress)
   }
 }
 
@@ -231,12 +231,12 @@ function sendProgressUpdate(mainWindow: BrowserWindow | null, progress: ImportPr
  * Send progress log message to renderer process
  */
 function sendProgressLog(
-  mainWindow: BrowserWindow | null,
+  sender: WebContents | null,
   type: 'info' | 'success' | 'warning' | 'error' | 'debug',
   message: string
 ): void {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('import-progress-log', {
+  if (sender && !sender.isDestroyed()) {
+    sender.send('import-progress-log', {
       timestamp: new Date().toISOString(),
       type,
       message,

@@ -109,18 +109,28 @@ function setupIpcHandlers() {
   })
 
   // Import PGN file
-  ipcMain.handle('import-pgn', async (_event, { filePath, collectionId, name }) => {
+  ipcMain.handle('import-pgn', async (event, { filePath, collectionId, name }) => {
     console.log('Import requested:', { filePath, collectionId, name })
     importCancelled = false
 
-    return await importAndIndexPgn(
+    const result = await importAndIndexPgn(
       filePath,
       collectionId,
       name,
       collectionsPath,
-      mainWindow,
+      event.sender,
       () => importCancelled
     )
+
+    // Send completion event to renderer
+    event.sender.send('import-complete', {
+      success: result.success,
+      collectionId,
+      gamesIndexed: result.stats.totalIndexed,
+      error: result.error
+    })
+
+    return result
   })
 
   // Cancel import

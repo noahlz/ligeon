@@ -9,13 +9,27 @@ interface ImportProgress {
 
 interface ImportDialogProps {
   isOpen: boolean
+  filePath: string | null
   onComplete?: () => void
   onClose?: () => void
 }
 
-export default function ImportDialog({ isOpen, onComplete, onClose }: ImportDialogProps) {
-  const [selectedFile, setSelectedFile] = useState<string | null>(null)
-  const [suggestedName, setSuggestedName] = useState<string>('')
+/**
+ * Derive a suggested collection name from a file path
+ */
+function deriveSuggestedName(filePath: string): string {
+  const baseName = filePath.split('/').pop() ?? ''
+  const nameWithoutExt = baseName.replace(/\.(pgn|PGN)$/, '')
+  // Convert to title case and replace special characters with spaces
+  return nameWithoutExt
+    .replace(/[-._\s]+/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+    .trim()
+}
+
+export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: ImportDialogProps) {
   const [collectionName, setCollectionName] = useState('')
   const [isIndexing, setIsIndexing] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
@@ -26,6 +40,18 @@ export default function ImportDialog({ isOpen, onComplete, onClose }: ImportDial
     logs: [],
   })
   const logEndRef = useRef<HTMLDivElement>(null)
+
+  const suggestedName = filePath ? deriveSuggestedName(filePath) : ''
+
+  // Reset state when dialog opens with a new file
+  useEffect(() => {
+    if (isOpen && filePath) {
+      setCollectionName('')
+      setIsIndexing(false)
+      setIsComplete(false)
+      setProgress({ parsed: 0, indexed: 0, skipped: 0, logs: [] })
+    }
+  }, [isOpen, filePath])
 
   useEffect(() => {
     const unsubscribe = window.electron.onImportProgress((data: any) => {
@@ -42,65 +68,41 @@ export default function ImportDialog({ isOpen, onComplete, onClose }: ImportDial
           logs: [...prev.logs, ...data.logs],
         }))
       } else if (data.type === 'complete') {
-        setIsIndexing(false)
+        // Keep isIndexing=true so we stay in the progress/complete view
+        // isIndexing will be reset when handleClose() is called
         setIsComplete(true)
       }
     })
     return unsubscribe
-  }, [onComplete])
+  }, [])
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [progress.logs])
 
-  const handleSelectFile = async () => {
-    const filePath = await window.electron.selectFile()
-    if (filePath) {
-      setSelectedFile(filePath)
-      // Extract filename without extension as suggested name
-      const baseName = filePath.split('/').pop() ?? ''
-      const nameWithoutExt = baseName.replace(/\.(pgn|PGN)$/, '')
-      // Convert to title case and replace special characters with spaces
-      const titleCase = nameWithoutExt
-        .replace(/[-._\s]+/g, ' ')
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ')
-        .trim()
-      setSuggestedName(titleCase)
-      setCollectionName('')
-    }
-  }
-
-  const handleChangeFile = () => {
-    setSelectedFile(null)
-    setSuggestedName('')
-    setCollectionName('')
-  }
-
   const handleImport = async () => {
-    if (!selectedFile) return
+    if (!filePath) return
     setIsIndexing(true)
     setProgress({ parsed: 0, indexed: 0, skipped: 0, logs: [] })
     const collectionId = crypto.randomUUID()
     const finalName = collectionName || suggestedName
-    await window.electron.importPgn(selectedFile, collectionId, finalName)
+    await window.electron.importPgn(filePath, collectionId, finalName)
   }
 
   const handleClose = () => {
-    setSelectedFile(null)
-    setSuggestedName('')
     setCollectionName('')
     setProgress({ parsed: 0, indexed: 0, skipped: 0, logs: [] })
+    setIsIndexing(false)
+    const wasComplete = isComplete
     setIsComplete(false)
-    if (isComplete) {
+    if (wasComplete) {
       onComplete?.()
     } else {
       onClose?.()
     }
   }
 
-  if (!isOpen) return null
+  if (!isOpen || !filePath) return null
 
   const percent =
     progress.parsed > 0 ? Math.round((progress.indexed / progress.parsed) * 100) : 0
@@ -111,58 +113,37 @@ export default function ImportDialog({ isOpen, onComplete, onClose }: ImportDial
         {!isIndexing ? (
           <div className="p-4">
             <h2 className="text-lg font-bold mb-3">Import Collection</h2>
-            {!selectedFile ? (
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSelectFile}
-                  className="flex-1 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
-                >
-                  Select PGN File
-                </button>
-                {onClose && (
-                  <button
-                    onClick={handleClose}
-                    className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover text-white rounded text-sm"
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            ) : (
-              <>
-                <input
-                  type="text"
-                  placeholder={suggestedName}
-                  value={collectionName}
-                  onChange={(e) => setCollectionName(e.target.value)}
-                  onFocus={() => {
-                    if (!collectionName && suggestedName) {
-                      setCollectionName(suggestedName)
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleImport()
-                    }
-                  }}
-                  className="w-full px-2 py-1.5 border rounded mb-3 bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleImport}
-                    className="flex-1 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
-                  >
-                    Import
-                  </button>
-                  <button
-                    onClick={handleChangeFile}
-                    className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover text-white rounded text-sm"
-                  >
-                    Change File
-                  </button>
-                </div>
-              </>
-            )}
+            <input
+              type="text"
+              placeholder={suggestedName}
+              value={collectionName}
+              onChange={(e) => setCollectionName(e.target.value)}
+              onFocus={() => {
+                if (!collectionName && suggestedName) {
+                  setCollectionName(suggestedName)
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleImport()
+                }
+              }}
+              className="w-full px-2 py-1.5 border rounded mb-3 bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleImport}
+                className="flex-1 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
+              >
+                Import
+              </button>
+              <button
+                onClick={handleClose}
+                className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover text-white rounded text-sm"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         ) : (
           <div className="p-4">
