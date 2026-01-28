@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react'
-import { isGameResult, getResultDisplay } from '../utils/chessManager.js'
+import { getResultDisplay } from '../utils/chessManager.js'
+import { separateResultFromMoves, groupMovesIntoPairs } from '../utils/moveFormatter.js'
 
 interface MoveListProps {
   moves: string[]
@@ -20,21 +21,8 @@ export default function MoveList({ moves, currentPly, onJump }: MoveListProps) {
     }
   }, [currentPly])
 
-  // Separate game result from moves
-  const lastElement = moves[moves.length - 1]
-  const hasResult = lastElement && isGameResult(lastElement)
-  const gameMoves = hasResult ? moves.slice(0, -1) : moves
-  const result = hasResult ? lastElement : null
-
-  // Group moves into pairs (white, black)
-  const movePairs: Array<{ white: string; black?: string; moveNumber: number }> = []
-  for (let i = 0; i < gameMoves.length; i += 2) {
-    movePairs.push({
-      white: gameMoves[i],
-      black: gameMoves[i + 1],
-      moveNumber: Math.floor(i / 2) + 1,
-    })
-  }
+  const { gameMoves, result } = separateResultFromMoves(moves)
+  const movePairs = groupMovesIntoPairs(gameMoves)
 
   return (
     <div className="move-list overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded">

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { deriveSuggestedName } from '../utils/filenameConverter.js'
 
 interface ImportProgress {
   parsed: number
@@ -12,21 +13,6 @@ interface ImportDialogProps {
   filePath: string | null
   onComplete?: () => void
   onClose?: () => void
-}
-
-/**
- * Derive a suggested collection name from a file path
- */
-function deriveSuggestedName(filePath: string): string {
-  const baseName = filePath.split('/').pop() ?? ''
-  const nameWithoutExt = baseName.replace(/\.(pgn|PGN)$/, '')
-  // Convert to title case and replace special characters with spaces
-  return nameWithoutExt
-    .replace(/[-._\s]+/g, ' ')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ')
-    .trim()
 }
 
 export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: ImportDialogProps) {

@@ -51,3 +51,32 @@ export function resultNumericToDisplay(resultNumeric: number | null): string {
       return 'Unknown'
   }
 }
+
+/**
+ * Convert numeric result value to abbreviated display string
+ *
+ * @param resultNumeric - Numeric result (1.0, 0.5, 0.0, or null)
+ * @returns Abbreviated string ('W', 'D', 'B', or 'Any')
+ */
+export function resultNumericToAbbreviation(resultNumeric: number | null): string {
+  switch (resultNumeric) {
+    case 1.0:
+      return 'W'
+    case 0.5:
+      return 'D'
+    case 0.0:
+      return 'B'
+    default:
+      return 'Any'
+  }
+}
+
+/**
+ * Result filter options for UI
+ */
+export const RESULT_FILTER_OPTIONS: Array<{ value: number | null; label: string }> = [
+  { value: null, label: 'Any' },
+  { value: 1.0, label: 'W' },
+  { value: 0.5, label: 'D' },
+  { value: 0.0, label: 'B' },
+]

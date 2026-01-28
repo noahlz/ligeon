@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Filter, SquareChevronDown } from 'lucide-react'
 import { timestampToDisplay } from '../utils/dateConverter.js'
-import { resultNumericToDisplay } from '../utils/resultConverter.js'
+import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../utils/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
 
 interface GameSearchResult {
@@ -103,14 +103,14 @@ export default function GameListSidebar({
           <div className="text-xs space-y-1">
             <label className="text-ui-text-dim">Result</label>
             <div className="flex gap-2">
-              {[null, 1.0, 0.5, 0.0].map((val, i) => (
+              {RESULT_FILTER_OPTIONS.map((option, i) => (
                 <label key={i} className="flex items-center gap-1">
                   <input
                     type="radio"
-                    checked={filters.result === val}
-                    onChange={() => setFilters({ result: val })}
+                    checked={filters.result === option.value}
+                    onChange={() => setFilters({ result: option.value })}
                   />
-                  <span>{val === null ? 'Any' : val === 1.0 ? 'W' : val === 0.5 ? 'D' : 'B'}</span>
+                  <span>{option.label}</span>
                 </label>
               ))}
             </div>

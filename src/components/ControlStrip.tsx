@@ -1,4 +1,5 @@
 import { ExternalLink, Volume2, VolumeX, RefreshCcw } from 'lucide-react'
+import { buildLichessURL } from '../utils/externalLinks.js'
 
 interface ControlStripProps {
   pgn?: string
@@ -10,8 +11,7 @@ interface ControlStripProps {
 export default function ControlStrip({ pgn, soundEnabled, onToggleSound, onFlipBoard }: ControlStripProps) {
   const handleViewOnLichess = () => {
     if (!pgn) return
-    const encoded = encodeURIComponent(pgn)
-    window.electron.openExternal(`https://lichess.org/paste?pgn=${encoded}`)
+    window.electron.openExternal(buildLichessURL(pgn))
   }
 
   return (

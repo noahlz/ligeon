@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { LibraryBig, Trash2, Pencil, Check, X } from 'lucide-react'
 import ConfirmDialog from './ConfirmDialog.js'
+import { validateCollectionName } from '../utils/collectionValidator.js'
 
 interface Collection {
   id: string
@@ -81,23 +82,13 @@ export default function CollectionSelector({
   const handleSaveEdit = async () => {
     if (!editingCollectionId) return
 
-    const trimmed = editValue.trim()
-
-    // Validation: empty name
-    if (!trimmed) {
-      return
-    }
-
-    // Validation: duplicate name (case-insensitive)
-    const duplicate = collections.find(
-      (c) => c.id !== editingCollectionId && c.name.toLowerCase() === trimmed.toLowerCase()
-    )
-    if (duplicate) {
+    const validation = validateCollectionName(editValue, collections, editingCollectionId)
+    if (!validation.valid) {
       return
     }
 
     try {
-      await window.electron.renameCollection(editingCollectionId, trimmed)
+      await window.electron.renameCollection(editingCollectionId, editValue.trim())
       setEditingCollectionId(null)
       setEditValue('')
       onRename?.()

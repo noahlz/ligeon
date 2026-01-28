@@ -184,15 +184,13 @@ describe('PGN Import Flow - Integration Tests', () => {
 
     const progressUpdates: any[] = []
 
-    // Mock mainWindow to capture progress events
-    const mockWindow = {
+    // Mock WebContents to capture progress events
+    const mockWebContents = {
       isDestroyed: () => false,
-      webContents: {
-        send: (channel: string, data: any) => {
-          if (channel === 'import-progress') {
-            progressUpdates.push(data)
-          }
-        },
+      send: (channel: string, data: any) => {
+        if (channel === 'import-progress') {
+          progressUpdates.push(data)
+        }
       },
     } as any
 
@@ -201,7 +199,7 @@ describe('PGN Import Flow - Integration Tests', () => {
       'progress-collection',
       'Progress Collection',
       collectionsPath,
-      mockWindow,
+      mockWebContents,
       () => false
     )
 

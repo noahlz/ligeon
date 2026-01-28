@@ -1,5 +1,10 @@
 import { describe, test, expect } from 'vitest'
-import { convertResult, resultNumericToDisplay } from '../../src/utils/resultConverter'
+import {
+  convertResult,
+  resultNumericToDisplay,
+  resultNumericToAbbreviation,
+  RESULT_FILTER_OPTIONS,
+} from '../../src/utils/resultConverter'
 
 describe('Result Converter', () => {
   test('converts white win', () => {
@@ -49,5 +54,30 @@ describe('Result Converter', () => {
 
   test('converts numeric to display - null', () => {
     expect(resultNumericToDisplay(null)).toBe('Unknown')
+  })
+
+  test('converts numeric to abbreviation - white wins', () => {
+    expect(resultNumericToAbbreviation(1.0)).toBe('W')
+  })
+
+  test('converts numeric to abbreviation - draw', () => {
+    expect(resultNumericToAbbreviation(0.5)).toBe('D')
+  })
+
+  test('converts numeric to abbreviation - black wins', () => {
+    expect(resultNumericToAbbreviation(0.0)).toBe('B')
+  })
+
+  test('converts numeric to abbreviation - null', () => {
+    expect(resultNumericToAbbreviation(null)).toBe('Any')
+  })
+
+  test('RESULT_FILTER_OPTIONS contains expected values', () => {
+    expect(RESULT_FILTER_OPTIONS).toEqual([
+      { value: null, label: 'Any' },
+      { value: 1.0, label: 'W' },
+      { value: 0.5, label: 'D' },
+      { value: 0.0, label: 'B' },
+    ])
   })
 })
