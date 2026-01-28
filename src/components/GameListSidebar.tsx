@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Filter, SquareChevronDown } from 'lucide-react'
 import { timestampToDisplay } from '../utils/dateConverter.js'
 import { resultNumericToDisplay } from '../utils/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
@@ -44,6 +45,7 @@ export default function GameListSidebar({
   const [games, setGames] = useState<GameSearchResult[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<{ result: number | null }>({ result: null })
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
 
   useEffect(() => {
     const searchGames = async () => {
@@ -72,41 +74,59 @@ export default function GameListSidebar({
         onDelete={onDeleteCollection}
         onRename={onRenameCollection}
       />
-      <input
-        type="text"
-        placeholder="Search players..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="px-2 py-1.5 bg-ui-bg-element rounded text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border"
-      />
-
-      <div className="text-xs space-y-1">
-        <label className="text-ui-text-dim">Result</label>
-        <div className="flex gap-2">
-          {[null, 1.0, 0.5, 0.0].map((val, i) => (
-            <label key={i} className="flex items-center gap-1">
-              <input
-                type="radio"
-                checked={filters.result === val}
-                onChange={() => setFilters({ result: val })}
-              />
-              <span>{val === null ? 'Any' : val === 1.0 ? 'W' : val === 0.5 ? 'D' : 'B'}</span>
-            </label>
-          ))}
-        </div>
+      {/* Filter Panel */}
+      <div className="flex items-center justify-between">
+        <span className="text-ui-text-dim text-xs">{games.length} games</span>
+        <button
+          onClick={() => setFiltersExpanded(!filtersExpanded)}
+          className="p-1 rounded border border-ui-border hover:bg-ui-bg-hover"
+          title={filtersExpanded ? 'Collapse filters' : 'Expand filters'}
+        >
+          {filtersExpanded ? (
+            <SquareChevronDown size={16} className="text-ui-text-dim" />
+          ) : (
+            <Filter size={16} className="text-ui-text-dim" />
+          )}
+        </button>
       </div>
 
-      <button
-        onClick={() => {
-          setSearchTerm('')
-          setFilters({ result: null })
-        }}
-        className="px-2 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded text-sm"
-      >
-        Reset
-      </button>
+      {filtersExpanded && (
+        <div className="space-y-2 p-2 border border-ui-border rounded bg-ui-bg-element/50">
+          <input
+            type="text"
+            placeholder="Search players..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-2 py-1.5 bg-ui-bg-element rounded text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border"
+          />
 
-      <div className="text-ui-text-dim text-xs">{games.length} games</div>
+          <div className="text-xs space-y-1">
+            <label className="text-ui-text-dim">Result</label>
+            <div className="flex gap-2">
+              {[null, 1.0, 0.5, 0.0].map((val, i) => (
+                <label key={i} className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    checked={filters.result === val}
+                    onChange={() => setFilters({ result: val })}
+                  />
+                  <span>{val === null ? 'Any' : val === 1.0 ? 'W' : val === 0.5 ? 'D' : 'B'}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              setSearchTerm('')
+              setFilters({ result: null })
+            }}
+            className="px-2 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded text-sm"
+          >
+            Reset
+          </button>
+        </div>
+      )}
 
       <div className="overflow-y-auto flex-1">
         {games.map((game) => (

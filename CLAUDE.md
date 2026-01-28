@@ -41,6 +41,7 @@ Always validate with:
 - Electron, React, Tailwind CSS
 - SQLite (better-sqlite3)
 - chessops, chessground
+- lucide-react (icons)
 - Vite, Vitest
 
 See `package.json` for versions.

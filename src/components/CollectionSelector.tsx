@@ -120,7 +120,7 @@ export default function CollectionSelector({
     <div className="relative" ref={containerRef}>
       <div className="flex items-center border border-ui-border rounded cursor-pointer"
         onClick={() => setShowMenu(!showMenu)} >
-        <span className="text-sm cursor-pointer select-none truncate px-2 flex-1 min-w-0" title={selected?.name}>
+        <span className="text-sm cursor-pointer select-none truncate font-bold flex-1 min-w-0" title={selected?.name}>
           {selected?.name || 'Select Collection'}
         </span>
         <button className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded flex-shrink-0" >

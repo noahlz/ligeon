@@ -1,9 +1,10 @@
 # Ligeon TODOs
 
-## ChessGround Featuers
+## Game Filtering 
 
-Read config documentation and figure out what we could reuse / add toggles for:
-- https://github.com/lichess-org/chessground/blob/master/src/config.ts
+- Search by Name doesn't work...
+- Results game count: {x} games (of [{y max 100})
+- Search by Opening: ECO or Name from https://github.com/lichess-org/chess-openings
 
 ## Game Replay / Navigation
 
@@ -15,12 +16,6 @@ Read config documentation and figure out what we could reuse / add toggles for:
 - Some game got imported as "? / ?" and only had the game result: 1/2-1/2 as the only "move." Track down this bug.
 - Import date field values "?" as NULLs, and in game list item only display the values available i.e. only year, or only month year ("Jan 1959")
 
-## Game Filtering 
-
-- Minimize / show with lucide Filter icon button.
-- Search by Name doesn't work...
-- Search by Opening: ECO or Name from https://github.com/lichess-org/chess-openings
-- Results game count: {x} games (of [{y max 100})
 
 ## Sideline Mode
 
