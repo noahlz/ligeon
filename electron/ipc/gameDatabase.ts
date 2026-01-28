@@ -4,6 +4,7 @@ import fs from 'fs'
 import type { GameData, GameRow, GameSearchResult, GameFilters } from './types.js'
 import { GAMES_SCHEMA_SQL } from '../../lib/database/schema.js'
 
+// TODO: Refactor this to global settings object
 const isDev = process.env.NODE_ENV === 'development'
 
 /**

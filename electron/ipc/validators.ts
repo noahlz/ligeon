@@ -8,6 +8,10 @@ import type { GameFilters } from './types.js'
  * @returns True if valid, false otherwise
  */
 export function validateCollectionId(id: string): boolean {
+
+  // TODO: return error object (or null - no error) rather than boolean.
+  // TODO: Actually, use a validation library here (i.e. Zod or Yup).
+
   // Must be non-empty
   if (!id || id.length === 0) {
     console.warn('Validation failed: empty collection ID')

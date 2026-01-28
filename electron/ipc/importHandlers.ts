@@ -77,6 +77,8 @@ export async function importAndIndexPgn(
     duration: 0,
   }
 
+  // TODO: Refactor error handling to a function
+
   // Validate inputs
   if (!validateFilePath(filePath)) {
     const errorMsg = `Invalid file path: ${filePath}`
