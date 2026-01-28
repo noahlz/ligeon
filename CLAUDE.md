@@ -21,9 +21,12 @@ npm run build            # Compile renderer + main (no packaging)
 npm run build:main       # Compile main process only
 npm run build:renderer   # Compile renderer only
 npm run package          # Build + package (out/)
-npm test                 # Run all tests
+npm test                 # Run all tests (auto-rebuilds better-sqlite3)
+npm run test:coverage    # Run tests with coverage report
 npm run clean            # Delete dist, dist-electron, out
 npm run typecheck        # Check types
+npm run rebuild:sqlite   # Rebuild better-sqlite3 for Node.js
+npm run rebuild:electron # Rebuild better-sqlite3 for Electron
 ```
 
 ## After Changes
@@ -283,17 +286,21 @@ Electron's sandboxed preload scripts cannot use ES modules (`import`/`export`). 
 
 ### Native Modules Must Be Rebuilt for Electron
 
-Native Node modules (like `better-sqlite3`) must be compiled for Electron's Node version, not system Node:
+`better-sqlite3` must be compiled for both Node.js (tests) and Electron (app), but can't have both binaries simultaneously.
 
-```bash
-npm rebuild better-sqlite3 --build-from-source   # Force rebuild for current Node
-npx electron-rebuild -f                          # Rebuild for Electron
-```
+**Automatic handling:**
+- `npm test` / `npm run test:coverage` — auto-rebuilds for Node.js before tests, then for Electron after
 
-**Note:** `electron-rebuild` sometimes claims success without actually rebuilding. If tests still fail with NODE_MODULE_VERSION mismatch, try:
-```bash
-rm -rf node_modules/better-sqlite3/build && npm rebuild better-sqlite3 --build-from-source
-```
+**Manual rebuilds (if needed):**
+- `npm run rebuild:sqlite` — clean + rebuild for Node.js (tests)
+- `npm run rebuild:electron` — rebuild for Electron (app)
+
+**Troubleshooting NODE_MODULE_VERSION errors:**
+1. Identify context: tests (Node.js) or app (Electron)
+2. Run appropriate rebuild script above
+3. If `electron-rebuild` fails silently: `rm -rf node_modules/better-sqlite3/build` then rebuild
+
+**Why clean build directory:** `electron-rebuild` sometimes claims success without actually rebuilding.
 
 ### Ignore DevTools Warnings
 

@@ -35,7 +35,6 @@ Allow pieces clickable / draggable / moveable - but do not modify game pgn. Movi
 ## Misc
 
 - Introduce logging library winston and log to both console and file.
-- Get code coverage working.
 
 ## Packaging
 
