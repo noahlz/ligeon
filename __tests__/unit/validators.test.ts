@@ -7,6 +7,10 @@ import {
   validateFilePath,
   validateSearchFilters,
   validateCollectionName,
+  validateCollectionIdResult,
+  validateFilePathResult,
+  validateSearchFiltersResult,
+  validateCollectionNameResult,
 } from '../../electron/ipc/validators.js'
 import type { GameFilters } from '../../electron/ipc/types.js'
 
@@ -310,6 +314,178 @@ describe('validators', () => {
       expect(validateCollectionName('Carlsen vs. Kasparov')).toBe(true)
       expect(validateCollectionName('Tournoi français')).toBe(true)
       expect(validateCollectionName('Chess ♟️ Games')).toBe(true)
+    })
+  })
+
+  describe('validateCollectionIdResult', () => {
+    test('returns valid result for valid IDs', () => {
+      const result = validateCollectionIdResult('test-collection-123')
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.value).toBe('test-collection-123')
+      }
+    })
+
+    test('returns all errors for invalid ID', () => {
+      const result = validateCollectionIdResult('../test@collection with spaces')
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors.length).toBeGreaterThan(0)
+        const codes = result.errors.map(e => e.code)
+        expect(codes).toContain('PATH_TRAVERSAL')
+        expect(codes).toContain('INVALID_CHARACTERS')
+      }
+    })
+
+    test('returns EMPTY error for empty string', () => {
+      const result = validateCollectionIdResult('')
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors.length).toBe(1)
+        expect(result.errors[0].code).toBe('EMPTY')
+      }
+    })
+
+    test('returns TOO_LONG error for strings over 100 chars', () => {
+      const result = validateCollectionIdResult('a'.repeat(101))
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors.some(e => e.code === 'TOO_LONG')).toBe(true)
+      }
+    })
+  })
+
+  describe('validateFilePathResult', () => {
+    let tempDir: string
+    let validFile: string
+
+    beforeAll(() => {
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ligeon-test-'))
+      validFile = path.join(tempDir, 'test.txt')
+      fs.writeFileSync(validFile, 'test content')
+    })
+
+    afterAll(() => {
+      fs.rmSync(tempDir, { recursive: true })
+    })
+
+    test('returns valid result for existing file', () => {
+      const result = validateFilePathResult(validFile)
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.value).toBe(validFile)
+      }
+    })
+
+    test('returns NOT_FOUND error for non-existent file', () => {
+      const result = validateFilePathResult(path.join(tempDir, 'nonexistent.txt'))
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors[0].code).toBe('NOT_FOUND')
+      }
+    })
+
+    test('returns EMPTY error for empty path', () => {
+      const result = validateFilePathResult('')
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors[0].code).toBe('EMPTY')
+      }
+    })
+
+    test('returns NOT_A_FILE error for directory', () => {
+      const result = validateFilePathResult(tempDir)
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors.some(e => e.code === 'NOT_A_FILE')).toBe(true)
+      }
+    })
+  })
+
+  describe('validateCollectionNameResult', () => {
+    test('returns valid result for valid names', () => {
+      const result = validateCollectionNameResult('My Chess Games')
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.value).toBe('My Chess Games')
+      }
+    })
+
+    test('returns EMPTY error for empty string', () => {
+      const result = validateCollectionNameResult('')
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors[0].code).toBe('EMPTY')
+      }
+    })
+
+    test('returns TOO_LONG error for strings over 200 chars', () => {
+      const result = validateCollectionNameResult('a'.repeat(201))
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors.some(e => e.code === 'TOO_LONG')).toBe(true)
+      }
+    })
+
+    test('returns multiple errors when applicable', () => {
+      // Empty string only triggers EMPTY, but we can verify the pattern works
+      const result = validateCollectionNameResult('')
+      expect(result.valid).toBe(false)
+      if (!result.valid) {
+        expect(result.errors.length).toBeGreaterThan(0)
+      }
+    })
+  })
+
+  describe('validateSearchFiltersResult', () => {
+    test('returns valid result with sanitized filters', () => {
+      const filters: GameFilters = {
+        white: 'Magnus Carlsen',
+        black: 'Hikaru Nakamura',
+        result: 1.0,
+      }
+      const result = validateSearchFiltersResult(filters)
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.value.white).toBe('Magnus Carlsen')
+        expect(result.value.black).toBe('Hikaru Nakamura')
+        expect(result.value.result).toBe(1.0)
+      }
+    })
+
+    test('truncates long strings', () => {
+      const filters: GameFilters = {
+        white: 'a'.repeat(150),
+      }
+      const result = validateSearchFiltersResult(filters)
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.value.white?.length).toBe(100)
+      }
+    })
+
+    test('clamps ELO values to valid range', () => {
+      const filters: GameFilters = {
+        whiteEloMin: -100,
+        whiteEloMax: 5000,
+      }
+      const result = validateSearchFiltersResult(filters)
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.value.whiteEloMin).toBe(0)
+        expect(result.value.whiteEloMax).toBe(4000)
+      }
+    })
+
+    test('removes invalid result values', () => {
+      const filters: GameFilters = {
+        result: 0.75, // Invalid result
+      }
+      const result = validateSearchFiltersResult(filters)
+      expect(result.valid).toBe(true)
+      if (result.valid) {
+        expect(result.value.result).toBeUndefined()
+      }
     })
   })
 })

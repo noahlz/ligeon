@@ -3,22 +3,7 @@ import path from 'path'
 import fs from 'fs'
 import type { GameData, GameRow, GameSearchResult, GameFilters } from './types.js'
 import { GAMES_SCHEMA_SQL } from '../../lib/database/schema.js'
-
-// TODO: Refactor this to global settings object
-const isDev = process.env.NODE_ENV === 'development'
-
-/**
- * Log structured error with context for debugging
- */
-function logError(operation: string, context: Record<string, unknown>, error: unknown): void {
-  const errorObj = {
-    operation,
-    ...context,
-    error: error instanceof Error ? error.message : String(error),
-    ...(isDev && error instanceof Error && { stack: error.stack }),
-  }
-  console.error('Database operation failed:', errorObj)
-}
+import { logError } from '../utils/logger.js'
 
 /**
  * SQLite database wrapper for managing chess games in a collection
@@ -46,7 +31,7 @@ export class GameDatabase {
       this.db = new Database(this.dbPath)
       this.db.pragma('journal_mode = WAL')
     } catch (error) {
-      logError('constructor', { dbPath: this.dbPath, collectionDir: this.collectionDir }, error)
+      logError('GameDatabase', 'constructor', { dbPath: this.dbPath, collectionDir: this.collectionDir }, error)
       throw error
     }
   }
@@ -188,7 +173,7 @@ export class GameDatabase {
 
       return results
     } catch (error) {
-      logError('searchGames', { dbPath: this.dbPath, filters, limit }, error)
+      logError('GameDatabase', 'searchGames', { dbPath: this.dbPath, filters, limit }, error)
       return []
     }
   }
@@ -204,7 +189,7 @@ export class GameDatabase {
       const stmt = this.db.prepare('SELECT * FROM games WHERE id = ?')
       return stmt.get(gameId) as GameRow | undefined ?? null
     } catch (error) {
-      logError('getGameWithMoves', { dbPath: this.dbPath, gameId }, error)
+      logError('GameDatabase', 'getGameWithMoves', { dbPath: this.dbPath, gameId }, error)
       return null
     }
   }
@@ -220,7 +205,7 @@ export class GameDatabase {
       const result = stmt.get() as { count: number }
       return result.count
     } catch (error) {
-      logError('getGameCount', { dbPath: this.dbPath }, error)
+      logError('GameDatabase', 'getGameCount', { dbPath: this.dbPath }, error)
       return 0
     }
   }
@@ -232,7 +217,7 @@ export class GameDatabase {
     try {
       if (this.db) this.db.close()
     } catch (error) {
-      logError('close', { dbPath: this.dbPath }, error)
+      logError('GameDatabase', 'close', { dbPath: this.dbPath }, error)
     }
   }
 
@@ -244,7 +229,7 @@ export class GameDatabase {
       this.db.prepare('DELETE FROM games').run()
       console.log('✓ Cleared all games')
     } catch (error) {
-      logError('clearGames', { dbPath: this.dbPath }, error)
+      logError('GameDatabase', 'clearGames', { dbPath: this.dbPath }, error)
     }
   }
 }

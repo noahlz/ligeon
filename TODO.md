@@ -31,6 +31,11 @@ Allow pieces clickable / draggable / moveable - but do not modify game pgn. Movi
   - Plan file: ~/.claude/plans/ligeon-headlessui-refactor.md
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
 
+## Misc
+
+- Introduce logging library winston and log to both console and file.
+- Get code coverage working.
+
 ## Packaging
 
 - Package game with sample-games pre-loaded

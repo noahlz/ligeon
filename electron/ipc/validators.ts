@@ -2,41 +2,142 @@ import fs from 'fs'
 import type { GameFilters } from './types.js'
 
 /**
+ * Validation error details
+ */
+export interface ValidationError {
+  code: string
+  message: string
+  field?: string
+}
+
+/**
+ * Result of a validation operation
+ * Returns either a valid value or an array of all validation errors
+ */
+export type ValidationResult<T = void> =
+  | { valid: true; value: T }
+  | { valid: false; errors: ValidationError[] }
+
+/**
+ * Validate collection ID and return detailed error information
+ *
+ * @param id - Collection ID to validate
+ * @returns ValidationResult with either valid ID or array of all errors
+ */
+export function validateCollectionIdResult(id: string): ValidationResult<string> {
+  const errors: ValidationError[] = []
+
+  // Check ALL conditions, don't return early
+  if (!id || id.length === 0) {
+    errors.push({
+      code: 'EMPTY',
+      message: 'Collection ID is required',
+      field: 'collectionId',
+    })
+  }
+
+  if (id.length > 100) {
+    errors.push({
+      code: 'TOO_LONG',
+      message: 'Collection ID must be 100 characters or less',
+      field: 'collectionId',
+    })
+  }
+
+  if (id.includes('..') || id.includes('/') || id.includes('\\')) {
+    errors.push({
+      code: 'PATH_TRAVERSAL',
+      message: 'Collection ID contains invalid path characters',
+      field: 'collectionId',
+    })
+  }
+
+  if (id && !/^[a-zA-Z0-9_-]+$/.test(id)) {
+    errors.push({
+      code: 'INVALID_CHARACTERS',
+      message: 'Collection ID must contain only alphanumeric characters, hyphens, and underscores',
+      field: 'collectionId',
+    })
+  }
+
+  return errors.length > 0 ? { valid: false, errors } : { valid: true, value: id }
+}
+
+/**
  * Validate collection ID to prevent path traversal and ensure safe format
  *
  * @param id - Collection ID to validate
  * @returns True if valid, false otherwise
  */
 export function validateCollectionId(id: string): boolean {
+  const result = validateCollectionIdResult(id)
+  if (!result.valid) {
+    console.warn('Validation failed:', result.errors[0].message.toLowerCase())
+  }
+  return result.valid
+}
 
-  // TODO: return error object (or null - no error) rather than boolean.
-  // TODO: Actually, use a validation library here (i.e. Zod or Yup).
+/**
+ * Validate file path and return detailed error information
+ *
+ * @param filePath - File path to validate
+ * @param maxSizeMB - Maximum file size in MB (default 100)
+ * @returns ValidationResult with either valid path or array of all errors
+ */
+export function validateFilePathResult(filePath: string, maxSizeMB = 100): ValidationResult<string> {
+  const errors: ValidationError[] = []
 
-  // Must be non-empty
-  if (!id || id.length === 0) {
-    console.warn('Validation failed: empty collection ID')
-    return false
+  // Check ALL conditions, don't return early
+  if (!filePath || filePath.length === 0) {
+    errors.push({
+      code: 'EMPTY',
+      message: 'File path is required',
+      field: 'filePath',
+    })
+    // Can't continue validation without a path
+    return { valid: false, errors }
   }
 
-  // Max length check
-  if (id.length > 100) {
-    console.warn('Validation failed: collection ID too long:', id.length)
-    return false
+  if (!fs.existsSync(filePath)) {
+    errors.push({
+      code: 'NOT_FOUND',
+      message: `File does not exist: ${filePath}`,
+      field: 'filePath',
+    })
+    // Can't continue validation if file doesn't exist
+    return { valid: false, errors }
   }
 
-  // No path traversal sequences
-  if (id.includes('..') || id.includes('/') || id.includes('\\')) {
-    console.warn('Validation failed: invalid characters in collection ID:', id)
-    return false
+  let stats
+  try {
+    stats = fs.statSync(filePath)
+  } catch (error) {
+    errors.push({
+      code: 'READ_ERROR',
+      message: `Cannot read file: ${error instanceof Error ? error.message : String(error)}`,
+      field: 'filePath',
+    })
+    return { valid: false, errors }
   }
 
-  // Alphanumeric, hyphens, and underscores only
-  if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
-    console.warn('Validation failed: collection ID contains invalid characters:', id)
-    return false
+  if (!stats.isFile()) {
+    errors.push({
+      code: 'NOT_A_FILE',
+      message: 'Path must be a file, not a directory',
+      field: 'filePath',
+    })
   }
 
-  return true
+  const maxSizeBytes = maxSizeMB * 1024 * 1024
+  if (stats.size > maxSizeBytes) {
+    errors.push({
+      code: 'FILE_TOO_LARGE',
+      message: `File size (${stats.size} bytes) exceeds maximum (${maxSizeBytes} bytes)`,
+      field: 'filePath',
+    })
+  }
+
+  return errors.length > 0 ? { valid: false, errors } : { valid: true, value: filePath }
 }
 
 /**
@@ -47,33 +148,176 @@ export function validateCollectionId(id: string): boolean {
  * @returns True if valid, false otherwise
  */
 export function validateFilePath(filePath: string, maxSizeMB = 100): boolean {
-  // Must be non-empty
-  if (!filePath || filePath.length === 0) {
-    console.warn('Validation failed: empty file path')
-    return false
+  const result = validateFilePathResult(filePath, maxSizeMB)
+  if (!result.valid) {
+    console.warn('Validation failed:', result.errors[0].message.toLowerCase())
+  }
+  return result.valid
+}
+
+/**
+ * Validate and sanitize search filters with detailed error reporting
+ *
+ * @param filters - Search filters to validate
+ * @returns ValidationResult with either sanitized filters or array of warnings
+ */
+export function validateSearchFiltersResult(filters: GameFilters): ValidationResult<GameFilters> {
+  const sanitized: GameFilters = {}
+  const warnings: ValidationError[] = []
+
+  // Sanitize string fields - trim and limit length
+  const MAX_STRING_LENGTH = 100
+
+  if (filters.white !== undefined) {
+    const trimmed = filters.white.trim()
+    if (trimmed.length > MAX_STRING_LENGTH) {
+      warnings.push({
+        code: 'STRING_TRUNCATED',
+        message: `White player name truncated to ${MAX_STRING_LENGTH} characters`,
+        field: 'white',
+      })
+    }
+    sanitized.white = trimmed.slice(0, MAX_STRING_LENGTH)
+  }
+  if (filters.black !== undefined) {
+    const trimmed = filters.black.trim()
+    if (trimmed.length > MAX_STRING_LENGTH) {
+      warnings.push({
+        code: 'STRING_TRUNCATED',
+        message: `Black player name truncated to ${MAX_STRING_LENGTH} characters`,
+        field: 'black',
+      })
+    }
+    sanitized.black = trimmed.slice(0, MAX_STRING_LENGTH)
+  }
+  if (filters.event !== undefined) {
+    const trimmed = filters.event.trim()
+    if (trimmed.length > MAX_STRING_LENGTH) {
+      warnings.push({
+        code: 'STRING_TRUNCATED',
+        message: `Event name truncated to ${MAX_STRING_LENGTH} characters`,
+        field: 'event',
+      })
+    }
+    sanitized.event = trimmed.slice(0, MAX_STRING_LENGTH)
+  }
+  if (filters.ecoCode !== undefined) {
+    const trimmed = filters.ecoCode.trim()
+    if (trimmed.length > 10) {
+      warnings.push({
+        code: 'STRING_TRUNCATED',
+        message: 'ECO code truncated to 10 characters',
+        field: 'ecoCode',
+      })
+    }
+    sanitized.ecoCode = trimmed.slice(0, 10)
   }
 
-  // Must exist
-  if (!fs.existsSync(filePath)) {
-    console.warn('Validation failed: file does not exist:', filePath)
-    return false
+  // Copy numeric fields with range validation
+  if (filters.result !== undefined && filters.result !== null) {
+    // Result must be 0.0, 0.5, or 1.0
+    if ([0.0, 0.5, 1.0].includes(filters.result)) {
+      sanitized.result = filters.result
+    } else {
+      warnings.push({
+        code: 'INVALID_RESULT',
+        message: 'Result must be 0.0 (loss), 0.5 (draw), or 1.0 (win)',
+        field: 'result',
+      })
+    }
   }
 
-  // Must be a file (not directory)
-  const stats = fs.statSync(filePath)
-  if (!stats.isFile()) {
-    console.warn('Validation failed: path is not a file:', filePath)
-    return false
+  // Date timestamps - must be reasonable (after 1900, before 2100)
+  const MIN_TIMESTAMP = new Date('1900-01-01').getTime()
+  const MAX_TIMESTAMP = new Date('2100-01-01').getTime()
+
+  if (filters.dateFrom !== undefined && filters.dateFrom !== null) {
+    const clamped = Math.max(MIN_TIMESTAMP, Math.min(MAX_TIMESTAMP, filters.dateFrom))
+    if (clamped !== filters.dateFrom) {
+      warnings.push({
+        code: 'VALUE_CLAMPED',
+        message: 'Date from value clamped to valid range (1900-2100)',
+        field: 'dateFrom',
+      })
+    }
+    sanitized.dateFrom = clamped
+  }
+  if (filters.dateTo !== undefined && filters.dateTo !== null) {
+    const clamped = Math.max(MIN_TIMESTAMP, Math.min(MAX_TIMESTAMP, filters.dateTo))
+    if (clamped !== filters.dateTo) {
+      warnings.push({
+        code: 'VALUE_CLAMPED',
+        message: 'Date to value clamped to valid range (1900-2100)',
+        field: 'dateTo',
+      })
+    }
+    sanitized.dateTo = clamped
   }
 
-  // Size check
-  const maxSizeBytes = maxSizeMB * 1024 * 1024
-  if (stats.size > maxSizeBytes) {
-    console.warn('Validation failed: file too large:', stats.size, 'bytes (max:', maxSizeBytes, ')')
-    return false
+  // ELO ranges - must be 0-4000
+  const MIN_ELO = 0
+  const MAX_ELO = 4000
+
+  if (filters.whiteEloMin !== undefined && filters.whiteEloMin !== null) {
+    const clamped = Math.max(MIN_ELO, Math.min(MAX_ELO, filters.whiteEloMin))
+    if (clamped !== filters.whiteEloMin) {
+      warnings.push({
+        code: 'VALUE_CLAMPED',
+        message: 'White ELO min clamped to valid range (0-4000)',
+        field: 'whiteEloMin',
+      })
+    }
+    sanitized.whiteEloMin = clamped
+  }
+  if (filters.whiteEloMax !== undefined && filters.whiteEloMax !== null) {
+    const clamped = Math.max(MIN_ELO, Math.min(MAX_ELO, filters.whiteEloMax))
+    if (clamped !== filters.whiteEloMax) {
+      warnings.push({
+        code: 'VALUE_CLAMPED',
+        message: 'White ELO max clamped to valid range (0-4000)',
+        field: 'whiteEloMax',
+      })
+    }
+    sanitized.whiteEloMax = clamped
+  }
+  if (filters.blackEloMin !== undefined && filters.blackEloMin !== null) {
+    const clamped = Math.max(MIN_ELO, Math.min(MAX_ELO, filters.blackEloMin))
+    if (clamped !== filters.blackEloMin) {
+      warnings.push({
+        code: 'VALUE_CLAMPED',
+        message: 'Black ELO min clamped to valid range (0-4000)',
+        field: 'blackEloMin',
+      })
+    }
+    sanitized.blackEloMin = clamped
+  }
+  if (filters.blackEloMax !== undefined && filters.blackEloMax !== null) {
+    const clamped = Math.max(MIN_ELO, Math.min(MAX_ELO, filters.blackEloMax))
+    if (clamped !== filters.blackEloMax) {
+      warnings.push({
+        code: 'VALUE_CLAMPED',
+        message: 'Black ELO max clamped to valid range (0-4000)',
+        field: 'blackEloMax',
+      })
+    }
+    sanitized.blackEloMax = clamped
   }
 
-  return true
+  // Limit - must be 1-10000
+  if (filters.limit !== undefined) {
+    const clamped = Math.max(1, Math.min(10000, filters.limit))
+    if (clamped !== filters.limit) {
+      warnings.push({
+        code: 'VALUE_CLAMPED',
+        message: 'Limit clamped to valid range (1-10000)',
+        field: 'limit',
+      })
+    }
+    sanitized.limit = clamped
+  }
+
+  // Always return valid with sanitized filters; warnings are informational
+  return { valid: true, value: sanitized }
 }
 
 /**
@@ -83,66 +327,37 @@ export function validateFilePath(filePath: string, maxSizeMB = 100): boolean {
  * @returns Sanitized filters
  */
 export function validateSearchFilters(filters: GameFilters): GameFilters {
-  const sanitized: GameFilters = {}
+  const result = validateSearchFiltersResult(filters)
+  return result.valid ? result.value : {}
+}
 
-  // Sanitize string fields - trim and limit length
-  const MAX_STRING_LENGTH = 100
+/**
+ * Validate collection name and return detailed error information
+ *
+ * @param name - Collection name to validate
+ * @returns ValidationResult with either valid name or array of all errors
+ */
+export function validateCollectionNameResult(name: string): ValidationResult<string> {
+  const errors: ValidationError[] = []
 
-  if (filters.white !== undefined) {
-    sanitized.white = filters.white.trim().slice(0, MAX_STRING_LENGTH)
-  }
-  if (filters.black !== undefined) {
-    sanitized.black = filters.black.trim().slice(0, MAX_STRING_LENGTH)
-  }
-  if (filters.event !== undefined) {
-    sanitized.event = filters.event.trim().slice(0, MAX_STRING_LENGTH)
-  }
-  if (filters.ecoCode !== undefined) {
-    sanitized.ecoCode = filters.ecoCode.trim().slice(0, 10) // ECO codes are short
-  }
-
-  // Copy numeric fields with range validation
-  if (filters.result !== undefined && filters.result !== null) {
-    // Result must be 0.0, 0.5, or 1.0
-    if ([0.0, 0.5, 1.0].includes(filters.result)) {
-      sanitized.result = filters.result
-    }
+  // Check ALL conditions, don't return early
+  if (!name || name.trim().length === 0) {
+    errors.push({
+      code: 'EMPTY',
+      message: 'Collection name is required',
+      field: 'collectionName',
+    })
   }
 
-  // Date timestamps - must be reasonable (after 1900, before 2100)
-  const MIN_TIMESTAMP = new Date('1900-01-01').getTime()
-  const MAX_TIMESTAMP = new Date('2100-01-01').getTime()
-
-  if (filters.dateFrom !== undefined && filters.dateFrom !== null) {
-    sanitized.dateFrom = Math.max(MIN_TIMESTAMP, Math.min(MAX_TIMESTAMP, filters.dateFrom))
-  }
-  if (filters.dateTo !== undefined && filters.dateTo !== null) {
-    sanitized.dateTo = Math.max(MIN_TIMESTAMP, Math.min(MAX_TIMESTAMP, filters.dateTo))
+  if (name.length > 200) {
+    errors.push({
+      code: 'TOO_LONG',
+      message: 'Collection name must be 200 characters or less',
+      field: 'collectionName',
+    })
   }
 
-  // ELO ranges - must be 0-4000
-  const MIN_ELO = 0
-  const MAX_ELO = 4000
-
-  if (filters.whiteEloMin !== undefined && filters.whiteEloMin !== null) {
-    sanitized.whiteEloMin = Math.max(MIN_ELO, Math.min(MAX_ELO, filters.whiteEloMin))
-  }
-  if (filters.whiteEloMax !== undefined && filters.whiteEloMax !== null) {
-    sanitized.whiteEloMax = Math.max(MIN_ELO, Math.min(MAX_ELO, filters.whiteEloMax))
-  }
-  if (filters.blackEloMin !== undefined && filters.blackEloMin !== null) {
-    sanitized.blackEloMin = Math.max(MIN_ELO, Math.min(MAX_ELO, filters.blackEloMin))
-  }
-  if (filters.blackEloMax !== undefined && filters.blackEloMax !== null) {
-    sanitized.blackEloMax = Math.max(MIN_ELO, Math.min(MAX_ELO, filters.blackEloMax))
-  }
-
-  // Limit - must be 1-10000
-  if (filters.limit !== undefined) {
-    sanitized.limit = Math.max(1, Math.min(10000, filters.limit))
-  }
-
-  return sanitized
+  return errors.length > 0 ? { valid: false, errors } : { valid: true, value: name }
 }
 
 /**
@@ -152,17 +367,9 @@ export function validateSearchFilters(filters: GameFilters): GameFilters {
  * @returns True if valid, false otherwise
  */
 export function validateCollectionName(name: string): boolean {
-  // Must be non-empty
-  if (!name || name.trim().length === 0) {
-    console.warn('Validation failed: empty collection name')
-    return false
+  const result = validateCollectionNameResult(name)
+  if (!result.valid) {
+    console.warn('Validation failed:', result.errors[0].message.toLowerCase())
   }
-
-  // Max length check
-  if (name.length > 200) {
-    console.warn('Validation failed: collection name too long:', name.length)
-    return false
-  }
-
-  return true
+  return result.valid
 }

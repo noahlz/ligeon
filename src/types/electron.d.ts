@@ -56,6 +56,11 @@ export type ImportProgressData =
   | { type: 'log'; logs: Array<{ type: string; message: string; timestamp: number }> }
   | { type: 'complete'; success?: boolean; error?: string }
 
+export interface AppSettings {
+  collectionsPath: string
+  collectionsPathCustomized: boolean
+}
+
 export interface ElectronAPI {
   // File Operations
   selectFile: () => Promise<string | null>
@@ -74,6 +79,11 @@ export interface ElectronAPI {
   // Games
   searchGames: (collectionId: string, filters: GameFilters) => Promise<GameSearchResult[]>
   getGameMoves: (collectionId: string, gameId: string) => Promise<GameRow | null>
+
+  // Settings
+  getSettings: () => Promise<AppSettings>
+  updateSettings: (updates: Partial<AppSettings>) => Promise<AppSettings>
+  selectCollectionsDirectory: () => Promise<string | null>
 
   // Event Listeners
   onImportProgress: (callback: (data: ImportProgressData) => void) => () => void

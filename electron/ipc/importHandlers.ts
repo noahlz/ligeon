@@ -77,43 +77,20 @@ export async function importAndIndexPgn(
     duration: 0,
   }
 
-  // TODO: Refactor error handling to a function
-
   // Validate inputs
   if (!validateFilePath(filePath)) {
-    const errorMsg = `Invalid file path: ${filePath}`
-    sendProgressLog(sender, 'error', errorMsg)
     stats.duration = Date.now() - startTime
-    return {
-      success: false,
-      cancelled: false,
-      error: errorMsg,
-      stats,
-    }
+    return createValidationErrorResult(`Invalid file path: ${filePath}`, stats, sender)
   }
 
   if (!validateCollectionId(collectionId)) {
-    const errorMsg = `Invalid collection ID: ${collectionId}`
-    sendProgressLog(sender, 'error', errorMsg)
     stats.duration = Date.now() - startTime
-    return {
-      success: false,
-      cancelled: false,
-      error: errorMsg,
-      stats,
-    }
+    return createValidationErrorResult(`Invalid collection ID: ${collectionId}`, stats, sender)
   }
 
   if (!validateCollectionName(collectionName)) {
-    const errorMsg = `Invalid collection name: ${collectionName}`
-    sendProgressLog(sender, 'error', errorMsg)
     stats.duration = Date.now() - startTime
-    return {
-      success: false,
-      cancelled: false,
-      error: errorMsg,
-      stats,
-    }
+    return createValidationErrorResult(`Invalid collection name: ${collectionName}`, stats, sender)
   }
 
   let db: GameDatabase | null = null
@@ -283,4 +260,21 @@ function sendProgressLog(
   // Also log to console for debugging
   const prefix = `[${type.toUpperCase()}]`
   console.log(`${prefix} ${message}`)
+}
+
+/**
+ * Helper function to create validation error result
+ */
+function createValidationErrorResult(
+  errorMsg: string,
+  stats: ImportStats,
+  sender: WebContents | null
+): ImportResult {
+  sendProgressLog(sender, 'error', errorMsg)
+  return {
+    success: false,
+    cancelled: false,
+    error: errorMsg,
+    stats,
+  }
 }

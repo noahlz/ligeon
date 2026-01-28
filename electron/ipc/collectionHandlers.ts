@@ -4,21 +4,7 @@ import type { CollectionMetadata } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
 import { DatabaseManager } from './gameDatabase.js'
 import { validateCollectionId, validateCollectionName } from './validators.js'
-
-const isDev = process.env.NODE_ENV === 'development'
-
-/**
- * Log structured error with context for debugging
- */
-function logError(operation: string, context: Record<string, unknown>, error: unknown): void {
-  const errorObj = {
-    operation,
-    ...context,
-    error: error instanceof Error ? error.message : String(error),
-    ...(isDev && error instanceof Error && { stack: error.stack }),
-  }
-  console.error('Collection handler failed:', errorObj)
-}
+import { logError } from '../utils/logger.js'
 
 /**
  * List all collections with their metadata
@@ -48,13 +34,13 @@ export async function listCollections(): Promise<CollectionMetadata[]> {
           const metadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
           collections.push(metadata)
         } catch (error) {
-          logError('readMetadata', { metaPath, dir }, error)
+          logError('collectionHandlers', 'readMetadata', { metaPath, dir }, error)
         }
       }
     }
     return collections
   } catch (error) {
-    logError('listCollections', { collectionsPath }, error)
+    logError('collectionHandlers', 'listCollections', { collectionsPath }, error)
     return []
   }
 }
@@ -73,13 +59,13 @@ export async function renameCollection(
   // Validate inputs
   if (!validateCollectionId(collectionId)) {
     const error = new Error('Invalid collection ID')
-    logError('renameCollection', { collectionId, reason: 'invalid collection ID' }, error)
+    logError('collectionHandlers', 'renameCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     throw error
   }
 
   if (!validateCollectionName(newName)) {
     const error = new Error('Invalid collection name')
-    logError('renameCollection', { newName, reason: 'invalid collection name' }, error)
+    logError('collectionHandlers', 'renameCollection', { newName, reason: 'invalid collection name' }, new Error('Validation failed'))
     throw error
   }
 
@@ -98,7 +84,7 @@ export async function renameCollection(
     fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2))
     return metadata
   } catch (error) {
-    logError('renameCollection', { collectionId, newName }, error)
+    logError('collectionHandlers', 'renameCollection', { collectionId, newName }, error)
     throw error
   }
 }
@@ -115,7 +101,7 @@ export async function deleteCollection(
   // Validate input
   if (!validateCollectionId(collectionId)) {
     const error = new Error('Invalid collection ID')
-    logError('deleteCollection', { collectionId, reason: 'invalid collection ID' }, error)
+    logError('collectionHandlers', 'deleteCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     throw error
   }
 
@@ -133,7 +119,7 @@ export async function deleteCollection(
     fs.rmSync(collDir, { recursive: true, force: true })
     return { success: true }
   } catch (error) {
-    logError('deleteCollection', { collectionId }, error)
+    logError('collectionHandlers', 'deleteCollection', { collectionId }, error)
     throw error
   }
 }

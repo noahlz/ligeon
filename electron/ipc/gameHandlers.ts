@@ -2,21 +2,7 @@ import { DatabaseManager } from './gameDatabase.js'
 import type { GameFilters, GameSearchResult, GameRow } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
 import { validateCollectionId, validateSearchFilters } from './validators.js'
-
-const isDev = process.env.NODE_ENV === 'development'
-
-/**
- * Log structured error with context for debugging
- */
-function logError(operation: string, context: Record<string, unknown>, error: unknown): void {
-  const errorObj = {
-    operation,
-    ...context,
-    error: error instanceof Error ? error.message : String(error),
-    ...(isDev && error instanceof Error && { stack: error.stack }),
-  }
-  console.error('IPC handler failed:', errorObj)
-}
+import { logError } from '../utils/logger.js'
 
 /**
  * Search for games in a collection
@@ -31,7 +17,7 @@ export async function searchGames(
 ): Promise<GameSearchResult[]> {
   // Validate inputs
   if (!validateCollectionId(collectionId)) {
-    logError('searchGames', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
+    logError('gameHandlers', 'searchGames', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
   }
 
@@ -41,7 +27,7 @@ export async function searchGames(
   try {
     return db.searchGames(sanitizedFilters, sanitizedFilters.limit ?? 1000)
   } catch (error) {
-    logError('searchGames', { collectionId, filters: sanitizedFilters }, error)
+    logError('gameHandlers', 'searchGames', { collectionId, filters: sanitizedFilters }, error)
     return []
   }
 }
@@ -59,13 +45,13 @@ export async function getGameMoves(
 ): Promise<GameRow | null> {
   // Validate inputs
   if (!validateCollectionId(collectionId)) {
-    logError('getGameMoves', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
+    logError('gameHandlers', 'getGameMoves', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return null
   }
 
   // Validate gameId is a positive number
   if (!Number.isInteger(gameId) || gameId <= 0) {
-    logError('getGameMoves', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
+    logError('gameHandlers', 'getGameMoves', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
     return null
   }
 
@@ -73,7 +59,7 @@ export async function getGameMoves(
   try {
     return db.getGameWithMoves(gameId)
   } catch (error) {
-    logError('getGameMoves', { collectionId, gameId }, error)
+    logError('gameHandlers', 'getGameMoves', { collectionId, gameId }, error)
     return null
   }
 }

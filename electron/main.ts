@@ -10,6 +10,7 @@ import {
 import { searchGames, getGameMoves } from './ipc/gameHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
+import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
 
 // Get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -162,6 +163,11 @@ function setupIpcHandlers() {
   ipcMain.handle('get-game-moves', async (_event, { collectionId, gameId }) =>
     getGameMoves(collectionId, gameId)
   )
+
+  // Settings handlers
+  ipcMain.handle('get-settings', async () => getSettings())
+  ipcMain.handle('update-settings', async (_event, { updates }) => updateSettings(updates))
+  ipcMain.handle('select-collections-directory', async () => selectCollectionsDirectory())
 
   console.log('✓ IPC handlers set up')
 }

@@ -1,10 +1,9 @@
-import { app } from 'electron'
-import path from 'path'
+import { getCollectionsPath as getCollectionsPathFromSettings } from './settingsStore.js'
 
 /**
  * Get the base path for all collections
+ * Delegates to settings store for configured path
  */
 export function getCollectionsPath(): string {
-  // TODO: Make this configurable
-  return path.join(app.getPath('home'), '.ligeon', 'collections')
+  return getCollectionsPathFromSettings()
 }

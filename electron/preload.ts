@@ -31,6 +31,14 @@ contextBridge.exposeInMainWorld('electron', {
   getGameMoves: (collectionId: string, gameId: string) =>
     ipcRenderer.invoke('get-game-moves', { collectionId, gameId }),
 
+  // === Settings ===
+  getSettings: () => ipcRenderer.invoke('get-settings'),
+
+  updateSettings: (updates: any) =>
+    ipcRenderer.invoke('update-settings', { updates }),
+
+  selectCollectionsDirectory: () => ipcRenderer.invoke('select-collections-directory'),
+
   // === Event Listeners ===
   /**
    * Listen for import progress events
