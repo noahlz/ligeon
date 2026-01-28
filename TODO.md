@@ -10,9 +10,8 @@ Read config documentation and figure out what we could reuse / add toggles for:
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
 - Replay speed - no more pop up menu. Have slider under navigation. Replay speed: 1s[    | ]30s
 
-## Game Import / Picker
+## Game Import
 
-- Add delete button next to list button in game picker (can't delete loaded game)
 - Some game got imported as "? / ?" and only had the game result: 1/2-1/2 as the only "move." Track down this bug.
 - Import date field values "?" as NULLs, and in game list item only display the values available i.e. only year, or only month year ("Jan 1959")
 
@@ -30,6 +29,7 @@ Allow pieces clickable / draggable / moveable - but do not modify game pgn. Movi
 ## Style
 
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
+- Maybe revise entire app to use an OSS free widget library?
 
 ## Packaging
 

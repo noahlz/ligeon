@@ -1,5 +1,13 @@
 // Type definitions for Electron IPC bridge exposed via preload.ts
 
+export interface CollectionMetadata {
+  id: string
+  name: string
+  gameCount?: number
+  createdAt?: string
+  lastModified?: string
+}
+
 export interface ElectronAPI {
   // File Operations
   selectFile: () => Promise<string | null>
@@ -11,11 +19,8 @@ export interface ElectronAPI {
   cancelImport: () => void
 
   // Collections
-  listCollections: () => Promise<any[]>
-  renameCollection: (collectionId: string, newName: string) => Promise<{
-    success: boolean
-    metadata: { id: string; name: string }
-  }>
+  listCollections: () => Promise<CollectionMetadata[]>
+  renameCollection: (collectionId: string, newName: string) => Promise<CollectionMetadata>
   deleteCollection: (collectionId: string) => Promise<{ success: boolean }>
 
   // Games

@@ -211,6 +211,27 @@ export default function App() {
     setImportFilePath(null)
   }
 
+  // Handle collection deletion
+  const handleDeleteCollection = async (collectionId: string) => {
+    await window.electron.deleteCollection(collectionId)
+    // Reload collections
+    const cols = await window.electron.listCollections()
+    setCollections(cols)
+    // Clear selection if deleted collection was selected
+    if (selectedCollectionId === collectionId) {
+      setSelectedCollectionId(cols.length > 0 ? cols[0].id : null)
+      setSelectedGame(null)
+      setChessManager(null)
+    }
+  }
+
+  // Handle collection rename
+  const handleRenameCollection = async () => {
+    // Reload collections to get updated name
+    const cols = await window.electron.listCollections()
+    setCollections(cols)
+  }
+
   // Parse moves for MoveList component
   const moves = selectedGame?.moves
     ? selectedGame.moves
@@ -232,6 +253,8 @@ export default function App() {
             selectedCollectionId={selectedCollectionId}
             onSelectCollection={setSelectedCollectionId}
             onImport={handleImportClick}
+            onDeleteCollection={handleDeleteCollection}
+            onRenameCollection={handleRenameCollection}
           />
         </div>
 

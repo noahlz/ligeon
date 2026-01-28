@@ -27,6 +27,8 @@ interface GameListSidebarProps {
   selectedCollectionId: string | null
   onSelectCollection: (id: string) => void
   onImport: () => void
+  onDeleteCollection: (id: string) => void
+  onRenameCollection?: () => void
 }
 
 export default function GameListSidebar({
@@ -36,6 +38,8 @@ export default function GameListSidebar({
   selectedCollectionId,
   onSelectCollection,
   onImport,
+  onDeleteCollection,
+  onRenameCollection,
 }: GameListSidebarProps) {
   const [games, setGames] = useState<GameSearchResult[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -65,6 +69,8 @@ export default function GameListSidebar({
         selectedId={selectedCollectionId}
         onSelect={onSelectCollection}
         onImport={onImport}
+        onDelete={onDeleteCollection}
+        onRename={onRenameCollection}
       />
       <input
         type="text"
