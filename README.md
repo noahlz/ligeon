@@ -76,6 +76,3 @@ Sound files in `public/sounds/` copied from [Lichess](https://github.com/lichess
 
 See: [lichess-org/lila/COPYING.md](https://github.com/lichess-org/lila/blob/master/COPYING.md)
 
-## Chess Openings Data
-
-Opening names and ECO codes from [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings)
