@@ -7,6 +7,7 @@ import path from 'path'
 import os from 'os'
 import type { AppSettings } from './settings.js'
 import { getDefaultSettings, getDefaultCollectionsPath } from './settings.js'
+import { logger } from './logger.js'
 
 const SETTINGS_DIR = path.join(os.homedir(), '.ligeon')
 const SETTINGS_FILE = path.join(SETTINGS_DIR, 'settings.json')
@@ -26,7 +27,7 @@ export function loadSettings(): AppSettings {
 
       if (fs.existsSync(defaultPath)) {
         // Existing collections found - use that path
-        console.log('✓ Detected existing collections at:', defaultPath)
+        logger.info('✓ Detected existing collections at:', defaultPath)
         settings.collectionsPath = defaultPath
         settings.collectionsPathCustomized = false
       }
@@ -41,13 +42,13 @@ export function loadSettings(): AppSettings {
 
     // Validate required fields
     if (!settings.collectionsPath) {
-      console.warn('Invalid settings file - missing collectionsPath. Using defaults.')
+      logger.warn('Invalid settings file - missing collectionsPath. Using defaults.')
       return getDefaultSettings()
     }
 
     return settings
   } catch (error) {
-    console.error('Failed to load settings:', error)
+    logger.error('Failed to load settings:', error)
     return getDefaultSettings()
   }
 }
@@ -66,9 +67,9 @@ export function saveSettings(settings: AppSettings): void {
 
     const content = JSON.stringify(settings, null, 2)
     fs.writeFileSync(SETTINGS_FILE, content, 'utf-8')
-    console.log('✓ Settings saved')
+    logger.info('✓ Settings saved')
   } catch (error) {
-    console.error('Failed to save settings:', error)
+    logger.error('Failed to save settings:', error)
     throw error
   }
 }

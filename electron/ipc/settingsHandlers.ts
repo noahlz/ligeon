@@ -6,7 +6,7 @@ import { dialog } from 'electron'
 import fs from 'fs'
 import type { AppSettings } from '../config/settings.js'
 import { loadSettings, saveSettings, setCollectionsPath } from '../config/settingsStore.js'
-import { logError } from '../utils/logger.js'
+import { logError } from '../config/logger.js'
 
 /**
  * Get current application settings

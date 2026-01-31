@@ -6,6 +6,7 @@ import { GameDatabase, DatabaseManager } from './gameDatabase.js'
 import type { GameData, CollectionMetadata } from './types.js'
 import { extractGameData } from '../../lib/pgn/gameExtractor.js'
 import { validateCollectionId, validateFilePath, validateCollectionName } from './validators.js'
+import { logger } from '../config/logger.js'
 
 /**
  * Statistics for an import operation
@@ -257,9 +258,9 @@ function sendProgressLog(
     })
   }
 
-  // Also log to console for debugging
-  const prefix = `[${type.toUpperCase()}]`
-  console.log(`${prefix} ${message}`)
+  // Also log to file for debugging
+  const logLevel = type === 'error' ? 'error' : type === 'warning' ? 'warn' : 'info'
+  logger[logLevel](message, { importLog: true })
 }
 
 /**

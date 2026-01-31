@@ -1,5 +1,6 @@
 import fs from 'fs'
 import type { GameFilters } from './types.js'
+import { logger } from '../config/logger.js'
 
 /**
  * Validation error details
@@ -72,7 +73,7 @@ export function validateCollectionIdResult(id: string): ValidationResult<string>
 export function validateCollectionId(id: string): boolean {
   const result = validateCollectionIdResult(id)
   if (!result.valid) {
-    console.warn('Validation failed:', result.errors[0].message.toLowerCase())
+    logger.warn('Validation failed:', result.errors[0].message.toLowerCase())
   }
   return result.valid
 }
@@ -150,7 +151,7 @@ export function validateFilePathResult(filePath: string, maxSizeMB = 100): Valid
 export function validateFilePath(filePath: string, maxSizeMB = 100): boolean {
   const result = validateFilePathResult(filePath, maxSizeMB)
   if (!result.valid) {
-    console.warn('Validation failed:', result.errors[0].message.toLowerCase())
+    logger.warn('Validation failed:', result.errors[0].message.toLowerCase())
   }
   return result.valid
 }
@@ -369,7 +370,7 @@ export function validateCollectionNameResult(name: string): ValidationResult<str
 export function validateCollectionName(name: string): boolean {
   const result = validateCollectionNameResult(name)
   if (!result.valid) {
-    console.warn('Validation failed:', result.errors[0].message.toLowerCase())
+    logger.warn('Validation failed:', result.errors[0].message.toLowerCase())
   }
   return result.valid
 }

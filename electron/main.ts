@@ -11,6 +11,7 @@ import { searchGames, getGameMoves } from './ipc/gameHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
 import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
+import { logger } from './config/logger.js'
 
 // Get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -73,23 +74,23 @@ function createWindow() {
  * - Create collections directory if missing
  */
 async function initializeApp() {
-  console.log('Initializing ligeon...')
-  console.log('Collections path:', collectionsPath)
+  logger.info('Initializing ligeon...')
+  logger.info('Collections path:', collectionsPath)
 
   // Ensure collections directory exists
   if (!fs.existsSync(collectionsPath)) {
-    console.log('Creating collections directory...')
+    logger.info('Creating collections directory...')
     fs.mkdirSync(collectionsPath, { recursive: true })
   }
 
-  console.log('Ready for PGN imports')
+  logger.info('Ready for PGN imports')
 }
 
 /**
  * Set up IPC handlers for communication between renderer and main process
  */
 function setupIpcHandlers() {
-  console.log('Setting up IPC handlers...')
+  logger.info('Setting up IPC handlers...')
 
   // File dialog for selecting PGN file
   ipcMain.handle('select-file', async () => {
@@ -101,7 +102,7 @@ function setupIpcHandlers() {
       ],
     })
 
-    console.log('File dialog result:', result.filePaths[0] || 'cancelled')
+    logger.debug('File dialog result:', result.filePaths[0] || 'cancelled')
     return result.filePaths[0] || null
   })
 
@@ -112,7 +113,7 @@ function setupIpcHandlers() {
 
   // Import PGN file
   ipcMain.handle('import-pgn', async (event, { filePath, collectionId, name }) => {
-    console.log('Import requested:', { filePath, collectionId, name })
+    logger.info('Import requested:', { filePath, collectionId, name })
     importCancelled = false
 
     const result = await importAndIndexPgn(
@@ -137,7 +138,7 @@ function setupIpcHandlers() {
 
   // Cancel import
   ipcMain.on('cancel-import', () => {
-    console.log('Import cancelled by user')
+    logger.info('Import cancelled by user')
     importCancelled = true
   })
 
@@ -169,21 +170,21 @@ function setupIpcHandlers() {
   ipcMain.handle('update-settings', async (_event, { updates }) => updateSettings(updates))
   ipcMain.handle('select-collections-directory', async () => selectCollectionsDirectory())
 
-  console.log('✓ IPC handlers set up')
+  logger.info('✓ IPC handlers set up')
 }
 
 /**
  * App lifecycle events
  */
 app.on('ready', async () => {
-  console.log('App ready')
+  logger.info('App ready')
   createWindow()
   await initializeApp()
   setupIpcHandlers()
 })
 
 app.on('window-all-closed', () => {
-  console.log('All windows closed')
+  logger.info('All windows closed')
   // On macOS, apps stay active until explicitly quit
   if (process.platform !== 'darwin') {
     app.quit()
@@ -191,7 +192,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  console.log('App activated')
+  logger.info('App activated')
   // On macOS, re-create window when dock icon is clicked
   if (mainWindow === null) {
     createWindow()
@@ -200,5 +201,5 @@ app.on('activate', () => {
 
 // Handle any uncaught exceptions
 process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error)
+  logger.error('Uncaught Exception:', error)
 })

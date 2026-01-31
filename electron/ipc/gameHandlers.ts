@@ -2,7 +2,7 @@ import { DatabaseManager } from './gameDatabase.js'
 import type { GameFilters, GameSearchResult, GameRow } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
 import { validateCollectionId, validateSearchFilters } from './validators.js'
-import { logError } from '../utils/logger.js'
+import { logError } from '../config/logger.js'
 
 /**
  * Search for games in a collection

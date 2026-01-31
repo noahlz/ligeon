@@ -3,7 +3,7 @@ import path from 'path'
 import fs from 'fs'
 import type { GameData, GameRow, GameSearchResult, GameFilters } from './types.js'
 import { GAMES_SCHEMA_SQL } from '../../lib/database/schema.js'
-import { logError } from '../utils/logger.js'
+import { logError, logger } from '../config/logger.js'
 
 /**
  * SQLite database wrapper for managing chess games in a collection
@@ -41,7 +41,7 @@ export class GameDatabase {
    */
   createSchema(): void {
     this.db.exec(GAMES_SCHEMA_SQL)
-    console.log('✓ Database schema created')
+    logger.info('✓ Database schema created')
   }
 
   /**
@@ -168,7 +168,7 @@ export class GameDatabase {
 
       const duration = Date.now() - startTime
       if (duration > 1000) {
-        console.warn(`Slow query detected (${duration}ms):`, { filters, limit, resultCount: results.length })
+        logger.warn(`Slow query detected (${duration}ms):`, { filters, limit, resultCount: results.length })
       }
 
       return results
@@ -227,7 +227,7 @@ export class GameDatabase {
   clearGames(): void {
     try {
       this.db.prepare('DELETE FROM games').run()
-      console.log('✓ Cleared all games')
+      logger.info('✓ Cleared all games')
     } catch (error) {
       logError('GameDatabase', 'clearGames', { dbPath: this.dbPath }, error)
     }
@@ -254,7 +254,7 @@ export class DatabaseManager {
     if (!this.instances.has(key)) {
       const db = new GameDatabase(collectionId, basePath)
       this.instances.set(key, db)
-      console.log(`✓ Created database instance for collection: ${collectionId}`)
+      logger.info(`✓ Created database instance for collection: ${collectionId}`)
     }
 
     return this.instances.get(key)!
@@ -274,7 +274,7 @@ export class DatabaseManager {
     if (db) {
       db.close()
       this.instances.delete(key)
-      console.log(`✓ Closed database instance for collection: ${collectionId}`)
+      logger.info(`✓ Closed database instance for collection: ${collectionId}`)
     }
   }
 
@@ -285,7 +285,7 @@ export class DatabaseManager {
   static closeAll(): void {
     for (const [key, db] of this.instances.entries()) {
       db.close()
-      console.log(`✓ Closed database instance: ${key}`)
+      logger.info(`✓ Closed database instance: ${key}`)
     }
     this.instances.clear()
   }

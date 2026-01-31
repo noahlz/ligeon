@@ -2,7 +2,6 @@
 
 # Priority
 
-- Introduce logging library winston and log to both console and file.
 - BUG: only white king is ever in check. see ~/Screenshots/check-bug.png
 - Filter Games doesn't (by name or otherwise)
 

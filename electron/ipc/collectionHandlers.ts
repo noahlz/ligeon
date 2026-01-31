@@ -4,7 +4,7 @@ import type { CollectionMetadata } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
 import { DatabaseManager } from './gameDatabase.js'
 import { validateCollectionId, validateCollectionName } from './validators.js'
-import { logError } from '../utils/logger.js'
+import { logError, logger } from '../config/logger.js'
 
 /**
  * List all collections with their metadata
@@ -12,7 +12,7 @@ import { logError } from '../utils/logger.js'
  * @returns Array of collection metadata objects
  */
 export async function listCollections(): Promise<CollectionMetadata[]> {
-  console.log('Listing collections...')
+  logger.debug('Listing collections...')
   const collectionsPath = getCollectionsPath()
 
   try {
