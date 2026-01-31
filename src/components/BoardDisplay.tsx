@@ -7,7 +7,7 @@ interface BoardDisplayProps {
   fen: string
   lastMove?: Key[] | null
   orientation?: 'white' | 'black'
-  check?: boolean
+  check?: 'white' | 'black' | false
 }
 
 export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false }: BoardDisplayProps) {

@@ -280,7 +280,7 @@ export default function App() {
                     fen={fen}
                     lastMove={lastMove}
                     orientation={boardOrientation}
-                    check={chessManager.getMoveType(currentPly) === 'check'}
+                    check={chessManager.getMoveType(currentPly) === 'check' ? (currentPly % 2 === 1 ? 'black' : 'white') : false}
                   />
                 </div>
 

@@ -2,7 +2,6 @@
 
 # Priority
 
-- BUG: only white king is ever in check. see ~/Screenshots/check-bug.png
 - Filter Games doesn't (by name or otherwise)
 
 ## Game Filtering 
