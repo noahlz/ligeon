@@ -9,6 +9,7 @@ export interface CollectionMetadata {
 }
 
 export interface GameFilters {
+  player?: string
   white?: string
   black?: string
   event?: string

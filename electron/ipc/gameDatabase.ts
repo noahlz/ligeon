@@ -114,6 +114,10 @@ export class GameDatabase {
     let query = 'SELECT id, white, black, event, date, result, whiteElo, blackElo, ecoCode FROM games WHERE 1=1'
     const params: any[] = []
 
+    if (filters.player) {
+      query += ' AND (white LIKE ? OR black LIKE ?)'
+      params.push(`%${filters.player}%`, `%${filters.player}%`)
+    }
     if (filters.white) {
       query += ' AND white LIKE ?'
       params.push(`%${filters.white}%`)

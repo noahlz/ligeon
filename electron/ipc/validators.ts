@@ -169,6 +169,17 @@ export function validateSearchFiltersResult(filters: GameFilters): ValidationRes
   // Sanitize string fields - trim and limit length
   const MAX_STRING_LENGTH = 100
 
+  if (filters.player !== undefined) {
+    const trimmed = filters.player.trim()
+    if (trimmed.length > MAX_STRING_LENGTH) {
+      warnings.push({
+        code: 'STRING_TRUNCATED',
+        message: `Player name truncated to ${MAX_STRING_LENGTH} characters`,
+        field: 'player',
+      })
+    }
+    sanitized.player = trimmed.slice(0, MAX_STRING_LENGTH)
+  }
   if (filters.white !== undefined) {
     const trimmed = filters.white.trim()
     if (trimmed.length > MAX_STRING_LENGTH) {

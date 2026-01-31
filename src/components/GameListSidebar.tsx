@@ -54,8 +54,7 @@ export default function GameListSidebar({
         return
       }
       const results = await window.electron.searchGames(collectionId, {
-        white: searchTerm || undefined,
-        black: searchTerm || undefined,
+        player: searchTerm || undefined,
         result: filters.result ?? undefined,
         limit: 1000,
       })
@@ -101,7 +100,7 @@ export default function GameListSidebar({
           />
 
           <div className="text-xs space-y-1">
-            <label className="text-ui-text-dim">Result</label>
+            <label className="text-ui-text-dim">Winner:</label>
             <div className="flex gap-2">
               {RESULT_FILTER_OPTIONS.map((option, i) => (
                 <label key={i} className="flex items-center gap-1">

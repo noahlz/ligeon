@@ -31,6 +31,7 @@ export interface GameSearchResult {
  * Filters for searching games
  */
 export interface GameFilters {
+  player?: string
   white?: string
   black?: string
   event?: string

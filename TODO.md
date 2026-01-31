@@ -1,12 +1,9 @@
 # Ligeon TODOs
 
-# Priority
-
-- Filter Games doesn't (by name or otherwise)
-
 ## Game Filtering 
 
 - Results game count: {x} games (of [{y max 100})
+- Search by Year range
 - Search by Opening: ECO or Name from https://github.com/lichess-org/chess-openings
 
 ## Game Import

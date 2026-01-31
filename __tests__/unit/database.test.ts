@@ -89,6 +89,55 @@ describe('GameDatabase', () => {
     expect(results[0].black).toBe('Carlsen')
   })
 
+  test('searches by player (white or black)', () => {
+    db.insertGame({
+      white: 'Fischer',
+      black: 'Spassky',
+      event: 'Test 1',
+      date: 1,
+      result: 1.0,
+      ecoCode: null,
+      whiteElo: 2700,
+      blackElo: 2650,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. e4',
+    })
+    db.insertGame({
+      white: 'Tal',
+      black: 'Fischer',
+      event: 'Test 2',
+      date: 2,
+      result: 0.0,
+      ecoCode: null,
+      whiteElo: 2680,
+      blackElo: 2700,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. d4',
+    })
+    db.insertGame({
+      white: 'Petrosian',
+      black: 'Korchnoi',
+      event: 'Test 3',
+      date: 3,
+      result: 0.5,
+      ecoCode: null,
+      whiteElo: 2650,
+      blackElo: 2640,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. c4',
+    })
+    const results = db.searchGames({ player: 'Fischer' })
+    expect(results.length).toBe(2)
+    expect(results.some(r => r.white === 'Fischer')).toBe(true)
+    expect(results.some(r => r.black === 'Fischer')).toBe(true)
+  })
+
   test('searches by result', () => {
     db.insertGame({
       white: 'A',

@@ -75,8 +75,8 @@ export function resultNumericToAbbreviation(resultNumeric: number | null): strin
  * Result filter options for UI
  */
 export const RESULT_FILTER_OPTIONS: Array<{ value: number | null; label: string }> = [
-  { value: null, label: 'Any' },
-  { value: 1.0, label: 'W' },
-  { value: 0.5, label: 'D' },
-  { value: 0.0, label: 'B' },
+  { value: null, label: 'All' },
+  { value: 1.0, label: 'White' },
+  { value: 0.0, label: 'Black' },
+  { value: 0.5, label: 'Draw' }
 ]
