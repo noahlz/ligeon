@@ -31,6 +31,15 @@ contextBridge.exposeInMainWorld('electron', {
   getGameMoves: (collectionId: string, gameId: number) =>
     ipcRenderer.invoke('get-game-moves', { collectionId, gameId }),
 
+  getGameCount: (collectionId: string) =>
+    ipcRenderer.invoke('get-game-count', { collectionId }),
+
+  getGameDateRange: (collectionId: string) =>
+    ipcRenderer.invoke('get-game-date-range', { collectionId }),
+
+  getAvailableYears: (collectionId: string) =>
+    ipcRenderer.invoke('get-available-years', { collectionId }),
+
   // === Settings ===
   getSettings: () => ipcRenderer.invoke('get-settings'),
 

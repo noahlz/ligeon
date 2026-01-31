@@ -215,6 +215,49 @@ export class GameDatabase {
   }
 
   /**
+   * Get date range (min/max) of games in the database
+   *
+   * @returns Object with minDate and maxDate timestamps, or null if no games
+   */
+  getDateRange(): { minDate: number; maxDate: number } | null {
+    try {
+      const stmt = this.db.prepare('SELECT MIN(date) as minDate, MAX(date) as maxDate FROM games WHERE date IS NOT NULL')
+      const result = stmt.get() as { minDate: number | null; maxDate: number | null }
+
+      if (result.minDate === null || result.maxDate === null) {
+        return null
+      }
+
+      return { minDate: result.minDate, maxDate: result.maxDate }
+    } catch (error) {
+      logError('GameDatabase', 'getDateRange', { dbPath: this.dbPath }, error)
+      return null
+    }
+  }
+
+  /**
+   * Get distinct years that have games in the database
+   *
+   * @returns Array of years sorted ascending
+   */
+  getAvailableYears(): number[] {
+    try {
+      // Extract year from timestamp and get distinct values
+      const stmt = this.db.prepare(`
+        SELECT DISTINCT CAST(strftime('%Y', date / 1000, 'unixepoch') AS INTEGER) as year
+        FROM games
+        WHERE date IS NOT NULL AND date > 0
+        ORDER BY year ASC
+      `)
+      const results = stmt.all() as { year: number }[]
+      return results.map((r) => r.year).filter((y) => y > 1800 && y < 2100)
+    } catch (error) {
+      logError('GameDatabase', 'getAvailableYears', { dbPath: this.dbPath }, error)
+      return []
+    }
+  }
+
+  /**
    * Close the database connection
    */
   close(): void {

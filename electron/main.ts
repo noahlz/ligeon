@@ -7,7 +7,7 @@ import {
   renameCollection,
   deleteCollection,
 } from './ipc/collectionHandlers.js'
-import { searchGames, getGameMoves } from './ipc/gameHandlers.js'
+import { searchGames, getGameMoves, getGameCount, getGameDateRange, getAvailableYears } from './ipc/gameHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
 import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
@@ -163,6 +163,21 @@ function setupIpcHandlers() {
   // Get game with moves
   ipcMain.handle('get-game-moves', async (_event, { collectionId, gameId }) =>
     getGameMoves(collectionId, parseInt(gameId, 10))
+  )
+
+  // Get game count
+  ipcMain.handle('get-game-count', async (_event, { collectionId }) =>
+    getGameCount(collectionId)
+  )
+
+  // Get game date range
+  ipcMain.handle('get-game-date-range', async (_event, { collectionId }) =>
+    getGameDateRange(collectionId)
+  )
+
+  // Get available years
+  ipcMain.handle('get-available-years', async (_event, { collectionId }) =>
+    getAvailableYears(collectionId)
   )
 
   // Settings handlers

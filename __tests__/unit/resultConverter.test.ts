@@ -74,10 +74,10 @@ describe('Result Converter', () => {
 
   test('RESULT_FILTER_OPTIONS contains expected values', () => {
     expect(RESULT_FILTER_OPTIONS).toEqual([
-      { value: null, label: 'Any' },
-      { value: 1.0, label: 'W' },
-      { value: 0.5, label: 'D' },
-      { value: 0.0, label: 'B' },
+      { value: null, label: 'All' },
+      { value: 1.0, label: 'White' },
+      { value: 0.0, label: 'Black' },
+      { value: 0.5, label: 'Draw' },
     ])
   })
 })
