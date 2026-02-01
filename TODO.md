@@ -3,7 +3,6 @@
 ## Priority
 
 - BUG: Search by Date range - Picker currently broken.
-- Display opening name in the Game Info
 
 ## Game Import
 

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {  SquareChevronDown, SquareMinus } from 'lucide-react'
 import { timestampToDisplay } from '../utils/dateConverter.js'
 import { resultNumericToDisplay } from '../../lib/converters/resultConverter.js'
+import { getOpeningByEco } from '../utils/openings.js'
 
 interface GameInfoProps {
   game: {
@@ -18,6 +19,7 @@ interface GameInfoProps {
 
 export default function GameInfo({ game }: GameInfoProps) {
   const [minimized, setMinimized] = useState(true)
+  const openingName = game.ecoCode ? getOpeningByEco(game.ecoCode)?.name : null
 
   return (
     <div className="bg-ui-bg-element rounded p-2 space-y-2 text-sm">
@@ -64,8 +66,10 @@ export default function GameInfo({ game }: GameInfoProps) {
         </div>
         {game.ecoCode && (
           <div>
-            <p className="text-ui-text-dim text-xs">ECO</p>
-            <p className="text-xs">{game.ecoCode}</p>
+            <p className="text-ui-text-dim text-xs">Opening</p>
+            <p className="text-xs">
+              {game.ecoCode}{openingName ? ` ${openingName}` : ''}
+            </p>
           </div>
         )}
         </div>
