@@ -100,7 +100,7 @@ export default function GameListSidebar({
         dateFrom: filters.dateFrom ?? undefined,
         dateTo: filters.dateTo ?? undefined,
         ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
-        limit: 1000,
+        limit: 200,
       })
       setGames(results)
     }
@@ -128,7 +128,7 @@ export default function GameListSidebar({
       {/* Filter Panel */}
       <div className="flex items-center justify-between">
         <span className="text-ui-text-dim text-xs">
-          {hasActiveFilters ? `${games.length} of ${totalGameCount} games` : `${totalGameCount} games`}
+          {games.length < totalGameCount ? `${games.length} of ${totalGameCount} games` : `${totalGameCount} games`}
         </span>
         <button
           onClick={() => setFiltersExpanded(!filtersExpanded)}

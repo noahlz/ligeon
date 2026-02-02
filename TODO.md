@@ -2,10 +2,7 @@
 
 ## Game Import / Browsing
 
-- Restrict ECO codes in filter to those actually in game collection.
 - Have count of games in dim text next to each game code list item.
-- Clicking off the drop down list of ECO codes closes the list.
-- If game collection exceeds limit, reflect that in the count text.
 - After importing a collection, immediately select that game collection.
 
 ## Style
