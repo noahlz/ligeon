@@ -1,10 +1,6 @@
 # Ligeon TODOs
 
-## Game Import / Browsing
-
-- After importing a collection, immediately select that game collection.
-
-## Style
+## Style / UI
 
 - Upgrade to Tailwind 4
 - Refactor app to use [HeadlessUI](https://headlessui.com/) for components.
