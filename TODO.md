@@ -2,11 +2,11 @@
 
 ## Game Import / Browsing
 
-- Have count of games in dim text next to each game code list item.
 - After importing a collection, immediately select that game collection.
 
 ## Style
 
+- Upgrade to Tailwind 4
 - Refactor app to use [HeadlessUI](https://headlessui.com/) for components.
   - Plan file: ~/.claude/plans/ligeon-headlessui-refactor.md
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
@@ -14,7 +14,10 @@
 ## Game Replay / Navigation
 
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
-- Replay speed - no more pop up menu. Have slider under navigation. Replay speed: 1s[    | ]30s
+- Replay:
+  - No more pop up menu for speed. Put slider under navigation. Replay speed: 1s[    | ]30s
+  - Allow changing replay speed during play
+  - Any manual navigation stops "play"
 
 ## Sideline Mode / Analysis
 

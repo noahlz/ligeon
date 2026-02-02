@@ -107,14 +107,6 @@ export default function GameListSidebar({
     searchGames()
   }, [collectionId, searchTerm, filters])
 
-  // Check if any filter is active
-  const hasActiveFilters =
-    searchTerm.length > 0 ||
-    filters.result !== null ||
-    filters.dateFrom !== null ||
-    filters.dateTo !== null ||
-    filters.ecoCodes.length > 0
-
   return (
     <div data-testid="game-list-sidebar" className="flex flex-col gap-2 h-full">
       <CollectionSelector

@@ -242,19 +242,20 @@ export class GameDatabase {
   }
 
   /**
-   * Get distinct ECO codes that have games in the database.
-   * @returns  Array of ECO codes sorted ascending (e.g., ['A00', 'B01', 'C45'])
+   * Get distinct ECO codes with game counts.
+   * @returns  Array of ECO codes with counts, sorted ascending (e.g., [{eco: 'A00', count: 5}, ...])
    */
-  getAvailableEcoCodes(): string[] {
+  getAvailableEcoCodes(): { eco: string; count: number }[] {
     try {
       const stmt = this.db.prepare(`
-        SELECT DISTINCT ecoCode
+        SELECT ecoCode, COUNT(*) as count
         FROM games
         WHERE ecoCode IS NOT NULL AND ecoCode != ''
+        GROUP BY ecoCode
         ORDER BY ecoCode ASC
       `)
-      const results = stmt.all() as { ecoCode: string }[]
-      return results.map((r) => r.ecoCode)
+      const results = stmt.all() as { ecoCode: string; count: number }[]
+      return results.map((r) => ({ eco: r.ecoCode, count: r.count }))
     } catch (error) {
       logError('GameDatabase', 'getAvailableEcoCodes', { dbPath: this.dbPath }, error)
       return []

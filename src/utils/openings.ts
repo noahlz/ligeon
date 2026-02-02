@@ -6,6 +6,7 @@ import openingsData from '../data/openings.json' with { type: 'json' }
 export interface Opening {
   eco: string
   name: string
+  count?: number
 }
 
 const openings: Opening[] = openingsData
@@ -22,25 +23,26 @@ const ecoToNameMap: Map<string, string> = new Map(
  * Returns openings that match the query AND are in availableEcoCodes
  *
  * @param query - Search query (matches ECO prefix or name substring)
- * @param availableEcoCodes - ECO codes that exist in the collection
+ * @param availableEcoCodes - ECO codes with counts that exist in the collection
  * @returns Array of matching openings
  */
 export function searchAvailableOpenings(
   query: string,
-  availableEcoCodes: string[]
+  availableEcoCodes: Array<{ eco: string; count: number }>
 ): Opening[] {
   const normalizedQuery = query.trim().toLowerCase()
 
-  // If no query, return all available openings with their names
+  // If no query, return all available openings with their names and counts
   if (normalizedQuery.length === 0) {
-    return availableEcoCodes.map((eco) => ({
+    return availableEcoCodes.map(({ eco, count }) => ({
       eco,
       name: ecoToNameMap.get(eco) || 'Unknown Opening',
+      count,
     }))
   }
 
   return availableEcoCodes
-    .filter((eco) => {
+    .filter(({ eco }) => {
       // ECO code prefix match
       if (eco.toLowerCase().startsWith(normalizedQuery)) {
         return true
@@ -52,9 +54,10 @@ export function searchAvailableOpenings(
       }
       return false
     })
-    .map((eco) => ({
+    .map(({ eco, count }) => ({
       eco,
       name: ecoToNameMap.get(eco) || 'Unknown Opening',
+      count,
     }))
 }
 

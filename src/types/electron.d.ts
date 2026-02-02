@@ -62,6 +62,11 @@ export interface AppSettings {
   collectionsPathCustomized: boolean
 }
 
+export interface EcoCodeWithCount {
+  eco: string
+  count: number
+}
+
 export interface ElectronAPI {
   // File Operations
   selectFile: () => Promise<string | null>
@@ -82,7 +87,7 @@ export interface ElectronAPI {
   getGameMoves: (collectionId: string, gameId: number) => Promise<GameRow | null>
   getGameCount: (collectionId: string) => Promise<number>
   getAvailableDates: (collectionId: string) => Promise<number[]>
-  getAvailableEcoCodes: (collectionId: string) => Promise<string[]>
+  getAvailableEcoCodes: (collectionId: string) => Promise<EcoCodeWithCount[]>
 
   // Settings
   getSettings: () => Promise<AppSettings>

@@ -105,7 +105,7 @@ export async function getAvailableDates(collectionId: string): Promise<number[]>
   }
 }
 
-export async function getAvailableEcoCodes(collectionId: string): Promise<string[]> {
+export async function getAvailableEcoCodes(collectionId: string): Promise<{ eco: string; count: number }[]> {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getAvailableEcoCodes', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []

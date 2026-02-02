@@ -12,7 +12,7 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
   const [results, setResults] = useState<Opening[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [availableEcoCodes, setAvailableEcoCodes] = useState<string[]>([])
+  const [availableEcoCodes, setAvailableEcoCodes] = useState<Array<{ eco: string; count: number }>>([])
   const [isLoading, setIsLoading] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -134,7 +134,10 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
           type="text"
           placeholder="Search openings..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value)
+            setShowDropdown(true)
+          }}
           onKeyDown={handleKeyDown}
           onFocus={() => setShowDropdown(true)}
           onMouseDown={handleInputMouseDown}
@@ -162,6 +165,7 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
                 >
                   <span className="font-semibold text-ui-accent">{opening.eco}</span>
                   <span className="text-ui-text-dim">{opening.name}</span>
+                  <span className="ml-auto text-ui-text-dimmer">{opening.count}</span>
                 </div>
               ))
             )}
