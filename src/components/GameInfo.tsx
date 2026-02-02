@@ -24,15 +24,19 @@ export default function GameInfo({ game }: GameInfoProps) {
   return (
     <div className="bg-ui-bg-element rounded p-2 space-y-2 text-sm">
       {/* Header with toggle */}
-      <div className="flex items-center -m-1">
-        <span className={`font-semibold truncate rounded`}>{minimized ? `${game.white} vs ${game.black}` : 'Game Info'}</span>
-        <button
-          onClick={() => setMinimized(!minimized)}
-          className="ml-auto flex items-center justify-center"
-          title={minimized ? 'Expand' : 'Minimize'}
-        >
-          {minimized ? <SquareChevronDown size={20} /> : <SquareMinus size={20} />}
-        </button>
+      <div onClick={() => setMinimized(!minimized)} className="flex flex-col -m-1 gap-1 cursor-pointer">
+        <div className="flex items-center gap-2">
+          <p className={`truncate font-semibold rounded`}>{minimized ? `${game.white} vs ${game.black}` : 'Game Info'}</p>
+          <span
+            className="ml-auto flex items-center justify-center flex-shrink-0"
+            title={minimized ? 'Expand' : 'Minimize'}
+          >
+            {minimized ? <SquareChevronDown size={20} /> : <SquareMinus size={20} />}
+          </span>
+        </div>
+        {minimized && 
+          <p className={`truncate text-ui-text-dim`}>{yyyymmToDisplay(game.date)} - {game.ecoCode}{openingName ? ` ${openingName}` : ''}</p>
+        }
       </div>
 
       {/* Content - hidden when minimized */}
