@@ -1,19 +1,15 @@
 # Ligeon TODOs
 
-## Game Import
-
-- Some game got imported as "? / ?" and only had the game result: 1/2-1/2 as the only "move." Track down this bug.
-
-## Game Replay / Navigation
-
-- "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
-- Replay speed - no more pop up menu. Have slider under navigation. Replay speed: 1s[    | ]30s
-
 ## Style
 
 - Refactor app to use [HeadlessUI](https://headlessui.com/) for components.
   - Plan file: ~/.claude/plans/ligeon-headlessui-refactor.md
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
+
+## Game Replay / Navigation
+
+- "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
+- Replay speed - no more pop up menu. Have slider under navigation. Replay speed: 1s[    | ]30s
 
 ## Sideline Mode / Analysis
 

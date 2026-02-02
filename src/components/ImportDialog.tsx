@@ -147,7 +147,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
                 ? 'Import finished successfully.'
                 : `Indexed: ${progress.indexed.toLocaleString()} / ${progress.parsed.toLocaleString()}${progress.skipped > 0 ? ` (${progress.skipped} skipped)` : ''}`}
             </p>
-            <div className="border rounded bg-ui-bg-page p-2 h-40 overflow-y-auto font-mono text-xs border-ui-border">
+            <div className="border rounded bg-ui-bg-page p-2 h-48 overflow-y-auto font-mono text-sm border-ui-border whitespace-pre-wrap">
               {progress.logs?.map((log, idx) => (
                 <div
                   key={idx}

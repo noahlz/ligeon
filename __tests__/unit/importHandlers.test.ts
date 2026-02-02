@@ -3,8 +3,9 @@ import { parsePgn } from 'chessops/pgn'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { importAndIndexPgn } from '../../electron/ipc/importHandlers'
-import { GameDatabase } from '../../electron/ipc/gameDatabase'
+import { importAndIndexPgn } from '../../electron/ipc/importHandlers.js'
+import { GameDatabase } from '../../electron/ipc/gameDatabase.js'
+import { extractGameData } from '../../lib/pgn/gameExtractor.js'
 
 describe('PGN Import Handler', () => {
   let tempDir: string
@@ -271,6 +272,30 @@ describe('PGN Import Handler', () => {
 
     expect(result.success).toBe(false)
     expect(result.error).toBeTruthy()
+  })
+
+  test('skips games with both players unknown (malformed headers)', () => {
+    const pgn = `[Event "Test"]
+[White "Player1"]
+[Black "Player2"]
+[Result "1-0"]
+
+1. e4 1-0
+
+[Site "Malformed"]
+[Result "1/2-1/2"]
+
+1. d4 1/2-1/2`
+
+    // Second game has no White/Black headers - should be skipped
+    const games = Array.from(parsePgn(pgn))
+    expect(games).toHaveLength(2)
+
+    const game1 = extractGameData(games[0])
+    const game2 = extractGameData(games[1])
+
+    expect(game1).not.toBeNull()
+    expect(game2).toBeNull() // Rejected due to missing player names
   })
 
   test('stores full PGN text in database', async () => {

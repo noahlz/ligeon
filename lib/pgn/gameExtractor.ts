@@ -18,8 +18,15 @@ export function extractGameData(game: Game<PgnNodeData>): GameData | null {
   }
 
   // Extract player names (required fields)
-  const white = headers.get('White') || 'Unknown'
-  const black = headers.get('Black') || 'Unknown'
+  const whiteRaw = headers.get('White')
+  const blackRaw = headers.get('Black')
+  const white = (whiteRaw && whiteRaw !== '?') ? whiteRaw : 'Unknown'
+  const black = (blackRaw && blackRaw !== '?') ? blackRaw : 'Unknown'
+
+  // Reject games with both players unknown (malformed headers)
+  if (white === 'Unknown' && black === 'Unknown') {
+    return null
+  }
 
   // Extract optional metadata
   const event = headers.get('Event') || null
