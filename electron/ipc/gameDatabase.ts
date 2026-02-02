@@ -190,7 +190,7 @@ export class GameDatabase {
    */
   getGameWithMoves(gameId: number): GameRow | null {
     try {
-      const stmt = this.db.prepare('SELECT * FROM games WHERE id = ?')
+      const stmt = this.db.prepare('SELECT id, white, black, event, dateYYYYMM as date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves FROM games WHERE id = ?')
       return stmt.get(gameId) as GameRow | undefined ?? null
     } catch (error) {
       logError('GameDatabase', 'getGameWithMoves', { dbPath: this.dbPath, gameId }, error)
