@@ -7,7 +7,7 @@ import {
   renameCollection,
   deleteCollection,
 } from './ipc/collectionHandlers.js'
-import { searchGames, getGameMoves, getGameCount, getAvailableDates } from './ipc/gameHandlers.js'
+import { searchGames, getGameMoves, getGameCount, getAvailableDates, getAvailableEcoCodes } from './ipc/gameHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
 import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
@@ -170,9 +170,12 @@ function setupIpcHandlers() {
     getGameCount(collectionId)
   )
 
-  // Get available dates
   ipcMain.handle('get-available-dates', async (_event, { collectionId }) =>
     getAvailableDates(collectionId)
+  )
+
+  ipcMain.handle('get-available-eco-codes', async (_event, { collectionId }) =>
+    getAvailableEcoCodes(collectionId)
   )
 
   // Settings handlers

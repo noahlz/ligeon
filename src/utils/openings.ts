@@ -44,9 +44,6 @@ export function searchOpenings(query: string, limit = 20): Opening[] {
   return results
 }
 
-/**
- * Get all openings (for reference/debugging)
- */
 export function getAllOpenings(): Opening[] {
   return openings
 }

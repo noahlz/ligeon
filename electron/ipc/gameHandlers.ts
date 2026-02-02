@@ -15,7 +15,6 @@ export async function searchGames(
   collectionId: string,
   filters: GameFilters
 ): Promise<GameSearchResult[]> {
-  // Validate inputs
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'searchGames', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
@@ -71,7 +70,6 @@ export async function getGameMoves(
  * @returns Number of games in the collection
  */
 export async function getGameCount(collectionId: string): Promise<number> {
-  // Validate inputs
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getGameCount', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return 0
@@ -93,7 +91,6 @@ export async function getGameCount(collectionId: string): Promise<number> {
  * @returns Array of YYYYMM integers sorted ascending (e.g., [195601, 195603, 195712])
  */
 export async function getAvailableDates(collectionId: string): Promise<number[]> {
-  // Validate inputs
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getAvailableDates', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
@@ -104,6 +101,22 @@ export async function getAvailableDates(collectionId: string): Promise<number[]>
     return db.getAvailableDates()
   } catch (error) {
     logError('gameHandlers', 'getAvailableDates', { collectionId }, error)
+    return []
+  }
+}
+
+export async function getAvailableEcoCodes(collectionId: string): Promise<string[]> {
+  if (!validateCollectionId(collectionId)) {
+    logError('gameHandlers', 'getAvailableEcoCodes', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
+    return []
+  }
+
+  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
+
+  try {
+    return db.getAvailableEcoCodes()
+  } catch (error) {
+    logError('gameHandlers', 'getAvailableEcoCodes', { collectionId }, error)
     return []
   }
 }

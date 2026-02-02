@@ -242,6 +242,26 @@ export class GameDatabase {
   }
 
   /**
+   * Get distinct ECO codes that have games in the database.
+   * @returns  Array of ECO codes sorted ascending (e.g., ['A00', 'B01', 'C45'])
+   */
+  getAvailableEcoCodes(): string[] {
+    try {
+      const stmt = this.db.prepare(`
+        SELECT DISTINCT ecoCode
+        FROM games
+        WHERE ecoCode IS NOT NULL AND ecoCode != ''
+        ORDER BY ecoCode ASC
+      `)
+      const results = stmt.all() as { ecoCode: string }[]
+      return results.map((r) => r.ecoCode)
+    } catch (error) {
+      logError('GameDatabase', 'getAvailableEcoCodes', { dbPath: this.dbPath }, error)
+      return []
+    }
+  }
+
+  /**
    * Close the database connection
    */
   close(): void {
