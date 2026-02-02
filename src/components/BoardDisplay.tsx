@@ -55,7 +55,7 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
   return (
     <div
       ref={boardRef}
-      className="chessground-board"
+      className="chessground-board board-appear-animation"
       data-orientation={orientation}
       style={{ width: '100%', height: '100%' }}
     />

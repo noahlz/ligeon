@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import type { Key } from '@lichess-org/chessground/types'
+import { ChessKnight } from 'lucide-react'
 import BoardDisplay from './components/BoardDisplay.js'
 import MoveList from './components/MoveList.js'
 import MoveNavigation from './components/MoveNavigation.js'
@@ -262,6 +263,7 @@ export default function App() {
             onImport={handleImportClick}
             onDeleteCollection={handleDeleteCollection}
             onRenameCollection={handleRenameCollection}
+            selectedGame={selectedGame}
           />
         </div>
 
@@ -277,6 +279,7 @@ export default function App() {
                 {/* Board */}
                 <div className="w-full max-w-4xl aspect-square board-coords-wrapper">
                   <BoardDisplay
+                    key={selectedGame?.id}
                     fen={fen}
                     lastMove={lastMove}
                     orientation={boardOrientation}
@@ -310,9 +313,9 @@ export default function App() {
               />
             </>
           ) : (
-            <div className="text-ui-text-dim text-center">
-              <p className="text-lg mb-2">No game selected</p>
-              <p className="text-sm">Select a game from the sidebar to begin</p>
+            <div className="flex flex-col items-center justify-center h-full">
+              <ChessKnight size={200} className="text-ui-text-dimmer mb-4" strokeWidth={1} />
+              <p className="text-lg text-ui-text-dim">Please select a game...</p>
             </div>
           )}
         </div>
@@ -331,7 +334,28 @@ export default function App() {
               )}
             </>
           ) : (
-            <div className="text-ui-text-dim text-sm">No game selected</div>
+            <div className="flex flex-col gap-2">
+              {/* Skeleton GameInfo header */}
+              <div className="bg-ui-bg-element rounded p-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 bg-ui-bg-hover rounded flex-1" />
+                  <div className="h-5 w-5 bg-ui-bg-hover rounded" />
+                </div>
+              </div>
+
+              {/* Skeleton MoveList */}
+              <div className="bg-ui-bg-element rounded p-2 flex-1">
+                <div className="space-y-2">
+                  {[...Array(12)].map((_, i) => (
+                    <div key={i} className="grid gap-2" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
+                      <div className="h-6 w-6 bg-ui-bg-hover rounded" />
+                      <div className="h-6 bg-ui-bg-hover rounded" />
+                      <div className="h-6 bg-ui-bg-hover rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>

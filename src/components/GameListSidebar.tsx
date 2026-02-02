@@ -23,6 +23,22 @@ interface Collection {
   name: string
 }
 
+interface GameRow {
+  id: number
+  white: string
+  black: string
+  event: string | null
+  date: number | null
+  result: number
+  whiteElo: number | null
+  blackElo: number | null
+  ecoCode: string | null
+  site: string | null
+  round: string | null
+  moveCount: number
+  moves: string
+}
+
 interface GameListSidebarProps {
   collectionId: string | null
   onGameSelect: (game: GameSearchResult) => void
@@ -32,6 +48,7 @@ interface GameListSidebarProps {
   onImport: () => void
   onDeleteCollection: (id: string) => void
   onRenameCollection?: () => void
+  selectedGame: GameRow | null
 }
 
 export default function GameListSidebar({
@@ -43,6 +60,7 @@ export default function GameListSidebar({
   onImport,
   onDeleteCollection,
   onRenameCollection,
+  selectedGame,
 }: GameListSidebarProps) {
   const [games, setGames] = useState<GameSearchResult[]>([])
   const [totalGameCount, setTotalGameCount] = useState(0)
@@ -240,7 +258,11 @@ export default function GameListSidebar({
           <div
             key={game.id}
             onClick={() => onGameSelect(game)}
-            className="p-2 mb-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded cursor-pointer text-sm"
+            className={`p-2 mb-1.5 rounded cursor-pointer text-sm ${
+              selectedGame?.id === game.id
+                ? 'border-2 border-ui-accent bg-ui-bg-element'
+                : 'bg-ui-bg-element hover:bg-ui-bg-hover'
+            }`}
           >
             <p className="font-semibold">
               {game.white} vs {game.black}

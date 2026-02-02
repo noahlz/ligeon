@@ -155,3 +155,17 @@ html {
   scrollbar-width: thin;
   scrollbar-color: hsl(37, 7%, 18%) hsl(37, 7%, 14%); /* thumb track */
 }
+
+/* Board appearance animation */
+@keyframes board-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.board-appear-animation {
+  animation: board-appear 350ms ease-out;
+}
