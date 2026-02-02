@@ -4,6 +4,7 @@ import { yyyymmToDisplay } from '../../lib/converters/dateConverter.js'
 import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../lib/converters/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
 import OpeningFilter from './OpeningFilter.js'
+import { getOpeningByEco } from '../utils/openings.js'
 
 interface GameSearchResult {
   id: number
@@ -51,12 +52,12 @@ export default function GameListSidebar({
     result: number | null
     dateFrom: number | null
     dateTo: number | null
-    ecoCode: string
+    ecoCodes: string[]
   }>({
     result: null,
     dateFrom: null,
     dateTo: null,
-    ecoCode: '',
+    ecoCodes: [],
   })
   const [filtersExpanded, setFiltersExpanded] = useState(false)
 
@@ -70,7 +71,7 @@ export default function GameListSidebar({
           result: null,
           dateFrom: null,
           dateTo: null,
-          ecoCode: '',
+          ecoCodes: [],
         })
         return
       }
@@ -98,7 +99,7 @@ export default function GameListSidebar({
         result: filters.result ?? undefined,
         dateFrom: filters.dateFrom ?? undefined,
         dateTo: filters.dateTo ?? undefined,
-        ecoCode: filters.ecoCode || undefined,
+        ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
         limit: 1000,
       })
       setGames(results)
@@ -112,7 +113,7 @@ export default function GameListSidebar({
     filters.result !== null ||
     filters.dateFrom !== null ||
     filters.dateTo !== null ||
-    filters.ecoCode.length > 0
+    filters.ecoCodes.length > 0
 
   return (
     <div data-testid="game-list-sidebar" className="flex flex-col gap-2 h-full">
@@ -219,8 +220,8 @@ export default function GameListSidebar({
           <div className="text-xs space-y-1">
             <label className="text-ui-text-dim">Opening:</label>
             <OpeningFilter
-              value={filters.ecoCode}
-              onChange={(eco) => setFilters({ ...filters, ecoCode: eco })}
+              value={filters.ecoCodes}
+              onChange={(ecos) => setFilters({ ...filters, ecoCodes: ecos })}
             />
           </div>
 
@@ -231,7 +232,7 @@ export default function GameListSidebar({
                 result: null,
                 dateFrom: null,
                 dateTo: null,
-                ecoCode: '',
+                ecoCodes: [],
               })
             }}
             className="w-full px-2 py-1.5 bg-ui-bg-hover hover:bg-ui-bg-element rounded text-sm"
@@ -251,8 +252,18 @@ export default function GameListSidebar({
             <p className="font-semibold">
               {game.white} vs {game.black}
             </p>
-            <p className="text-ui-text-dim text-xs">
-              {yyyymmToDisplay(game.date)} - {resultNumericToDisplay(game.result)}
+            <p className="text-ui-text-dim text-xs flex gap-1 whitespace-nowrap">
+              <span>
+                {yyyymmToDisplay(game.date)} - {resultNumericToDisplay(game.result)}
+              </span>
+              {game.ecoCode && (
+                <span
+                  className="truncate"
+                  title={`${game.ecoCode}${getOpeningByEco(game.ecoCode) ? ` ${getOpeningByEco(game.ecoCode)?.name}` : ''}`}
+                >
+                  - {game.ecoCode} {getOpeningByEco(game.ecoCode)?.name}
+                </span>
+              )}
             </p>
           </div>
         ))}

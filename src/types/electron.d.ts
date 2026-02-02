@@ -16,7 +16,7 @@ export interface GameFilters {
   dateFrom?: number | null
   dateTo?: number | null
   result?: number | null
-  ecoCode?: string
+  ecoCodes?: string[]
   whiteEloMin?: number | null
   whiteEloMax?: number | null
   blackEloMin?: number | null

@@ -124,13 +124,13 @@ describe('validators', () => {
         white: '  Carlsen  ',
         black: '  Kasparov  ',
         event: '  World Championship  ',
-        ecoCode: '  B90  ',
+        ecoCodes: ['  B90  ', '  C45  '],
       }
       const result = validateSearchFilters(filters)
       expect(result.white).toBe('Carlsen')
       expect(result.black).toBe('Kasparov')
       expect(result.event).toBe('World Championship')
-      expect(result.ecoCode).toBe('B90')
+      expect(result.ecoCodes).toEqual(['B90', 'C45'])
     })
 
     test('limits string field lengths', () => {
@@ -139,13 +139,13 @@ describe('validators', () => {
         white: longString,
         black: longString,
         event: longString,
-        ecoCode: longString,
+        ecoCodes: [longString],
       }
       const result = validateSearchFilters(filters)
       expect(result.white).toHaveLength(100)
       expect(result.black).toHaveLength(100)
       expect(result.event).toHaveLength(100)
-      expect(result.ecoCode).toHaveLength(10)
+      expect(result.ecoCodes).toEqual(['a'.repeat(10)])
     })
 
     test('validates result values', () => {
@@ -256,7 +256,7 @@ describe('validators', () => {
         whiteEloMax: 2900,
         blackEloMin: 2700,
         blackEloMax: 2800,
-        ecoCode: 'B90',
+        ecoCodes: ['B90', 'C45'],
         limit: 50,
       }
 
@@ -272,7 +272,7 @@ describe('validators', () => {
       expect(sanitized.whiteEloMax).toBe(2900)
       expect(sanitized.blackEloMin).toBe(2700)
       expect(sanitized.blackEloMax).toBe(2800)
-      expect(sanitized.ecoCode).toBe('B90')
+      expect(sanitized.ecoCodes).toEqual(['B90', 'C45'])
       expect(sanitized.limit).toBe(50)
     })
   })

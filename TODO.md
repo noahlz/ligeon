@@ -2,10 +2,11 @@
 
 ## Game Import / Browsing
 
-- If game collection is trucacted, reflect that in the count text.
+- Restrict ECO codes in filter to those actually in game collection.
+- Have count of games in dim text next to each game code list item.
+- Clicking off the drop down list of ECO codes closes the list.
+- If game collection exceeds limit, reflect that in the count text.
 - After importing a collection, immediately select that game collection.
-- Display game code and name in the game card (overflow with ...).
-- Support filtering by multiple game codes. Game code filtering is a combo list (supporting progressive search and browsing drop-down list).
 
 ## Style
 

@@ -213,16 +213,22 @@ export function validateSearchFiltersResult(filters: GameFilters): ValidationRes
     }
     sanitized.event = trimmed.slice(0, MAX_STRING_LENGTH)
   }
-  if (filters.ecoCode !== undefined) {
-    const trimmed = filters.ecoCode.trim()
-    if (trimmed.length > 10) {
-      warnings.push({
-        code: 'STRING_TRUNCATED',
-        message: 'ECO code truncated to 10 characters',
-        field: 'ecoCode',
-      })
+  if (filters.ecoCodes !== undefined && Array.isArray(filters.ecoCodes)) {
+    const validCodes: string[] = []
+    for (const code of filters.ecoCodes) {
+      const trimmed = code.trim()
+      if (trimmed.length > 10) {
+        warnings.push({
+          code: 'STRING_TRUNCATED',
+          message: `ECO code '${trimmed}' truncated to 10 characters`,
+          field: 'ecoCodes',
+        })
+      }
+      if (trimmed.length > 0) {
+        validCodes.push(trimmed.slice(0, 10))
+      }
     }
-    sanitized.ecoCode = trimmed.slice(0, 10)
+    sanitized.ecoCodes = validCodes.length > 0 ? validCodes : undefined
   }
 
   // Copy numeric fields with range validation

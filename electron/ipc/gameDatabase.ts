@@ -142,9 +142,10 @@ export class GameDatabase {
       query += ' AND result = ?'
       params.push(filters.result)
     }
-    if (filters.ecoCode) {
-      query += ' AND ecoCode = ?'
-      params.push(filters.ecoCode)
+    if (filters.ecoCodes && filters.ecoCodes.length > 0) {
+      const placeholders = filters.ecoCodes.map(() => '?').join(',')
+      query += ` AND ecoCode IN (${placeholders})`
+      params.push(...filters.ecoCodes)
     }
     if (filters.whiteEloMin !== null && filters.whiteEloMin !== undefined) {
       query += ' AND whiteElo >= ?'
