@@ -2,6 +2,8 @@
 
 Chess game viewer built with Electron, React, and SQLite. Import, browse and replay chess games from plaintext PGN game files.
 
+[![Node.js CI](https://github.com/noahlz/ligeon/actions/workflows/ci.yml/badge.svg)](https://github.com/noahlz/ligeon/actions/workflows/ci.yml)
+
 ## Development Setup
 
 ### Prerequisites
