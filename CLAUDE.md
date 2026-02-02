@@ -52,15 +52,15 @@ See `package.json` for versions.
 
 ## Architecture
 
-**Main Process** (Node.js): `electron/` + `lib/` → `tsc` → `dist-electron/`
+**Main Process** (Node.js): `src/main/` + `src/shared/` → `tsc` → `dist-src/main/`
 - App lifecycle, native APIs, SQLite, IPC handlers
 
 **Renderer** (Browser): `src/` → `Vite` → `dist/`
 - React components, Chessground board, IPC calls via `window.electron.*`
 
-**Shared Library**: `lib/`
+**Shared Library**: `src/shared/`
 - PGN parsing, date/result converters, database schema, GameData type
-- Used by electron/ and CLI scripts
+- Used by src/main/ and CLI scripts
 
 **Dev:** Vite on `localhost:5173`, Electron loads from dev server
 **Prod:** Electron loads from `dist/index.html`
@@ -68,11 +68,11 @@ See `package.json` for versions.
 **Build:**
 | Source | Compiler | Output | Entry |
 |--------|----------|--------|-------|
-| `electron/*.ts` + `lib/*.ts` | TypeScript | `dist-electron/` | `electron/main.js` |
+| `src/main/*.ts` + `src/shared/*.ts` | TypeScript | `dist-src/main/` | `src/main/main.js` |
 | `src/*.tsx` | Vite | `dist/` | `index.html` |
 
 **TypeScript configs:**
-- `electron/tsconfig.json` — Main + lib (Node.js, rootDir=`..`)
+- `src/main/tsconfig.json` — Main + lib (Node.js, rootDir=`..`)
 - `tsconfig.json` — Renderer (Browser)
 
 ## Project Structure
@@ -85,7 +85,7 @@ See `package.json` for versions.
 ├── electron            # Main process (Node.js, .ts only, no .js)
 │   ├── config          # Centralized configuration (paths)
 │   └── ipc             # IPC handlers + validators
-├── lib/                # Shared code (PGN parsing, converters, schema, types)
+├── src/shared/                # Shared code (PGN parsing, converters, schema, types)
 │   ├── converters/     # Date, result converters
 │   ├── database/       # Schema
 │   ├── pgn/            # Game extraction
@@ -99,7 +99,7 @@ See `package.json` for versions.
 │   ├── types/          # Types
 │   └── utils/          # Utilities
 ├── dist/               # BUILD: Compiled renderer
-├── dist-electron/      # BUILD: Compiled main + lib
+├── dist-src/main/      # BUILD: Compiled main + lib
 └── out/                # BUILD: Packaged app
 ```
 
@@ -110,13 +110,13 @@ See `package.json` for versions.
 | Area | Entry Point | Purpose |
 |------|-------------|---------|
 | **Main Process** | | |
-| Types | `lib/types/game.ts` | Central `GameData` interface |
-| Database | `electron/ipc/gameDatabase.ts` | SQLite wrapper + `DatabaseManager` singleton |
-| Validation | `electron/ipc/validators.ts` | IPC input validation (security) |
-| Config | `electron/config/paths.ts` | Centralized path configuration |
-| PGN parsing | `lib/pgn/gameExtractor.ts` | Parse PGN → GameData |
-| Import | `electron/ipc/importHandlers.ts` | PGN file import orchestration |
-| IPC bridge | `electron/preload.ts` | Exposes `window.electron.*` API |
+| Types | `src/shared/types/game.ts` | Central `GameData` interface |
+| Database | `src/main/ipc/gameDatabase.ts` | SQLite wrapper + `DatabaseManager` singleton |
+| Validation | `src/main/ipc/validators.ts` | IPC input validation (security) |
+| Config | `src/main/config/paths.ts` | Centralized path configuration |
+| PGN parsing | `src/shared/pgn/gameExtractor.ts` | Parse PGN → GameData |
+| Import | `src/main/ipc/importHandlers.ts` | PGN file import orchestration |
+| IPC bridge | `src/main/preload.ts` | Exposes `window.electron.*` API |
 | IPC types | `src/types/electron.d.ts` | Type definitions for IPC API |
 | **Renderer** | | |
 | App root | `src/App.tsx` | Main layout, state management |
@@ -127,7 +127,7 @@ See `package.json` for versions.
 | Chess logic | `src/utils/chessManager.ts` | Move parsing, FEN, ply navigation |
 | Audio | `src/utils/audioManager.ts` | Move sounds (capture, check, etc.) |
 | Date converter | `src/utils/dateConverter.ts` | Timestamp ↔ display format |
-| Result converter | `lib/converters/resultConverter.ts` | Numeric result ↔ display (single source)
+| Result converter | `src/shared/converters/resultConverter.ts` | Numeric result ↔ display (single source)
 
 ### Prefer LSP Over Text Search
 
@@ -234,22 +234,22 @@ import { GameDatabase } from './gameDatabase.js'
 import { GameDatabase } from './gameDatabase'
 ```
 
-### No `.js` Files in `electron/`
+### No `.js` Files in `src/main/`
 
-Only `.ts` source in `electron/`. Compiled output `.js` goes into `dist-electron/`. 
+Only `.ts` source in `src/main/`. Compiled output `.js` goes into `dist-src/main/`. 
 
 ### Database is Main-Process Only
 
 SQLite doesn't work in renderer. Route all DB calls through IPC:
 1. Renderer: `window.electron.searchGames(...)`
 2. preload.ts → ipcRenderer.invoke()
-3. electron/ipc/ handler executes
+3. src/main/ipc/ handler executes
 4. Result returned to renderer
 
 
 ### Validate IPC Inputs
 
-All IPC handlers must validate inputs using `electron/ipc/validators.ts`:
+All IPC handlers must validate inputs using `src/main/ipc/validators.ts`:
 
 ```typescript
 if (!validateCollectionId(collectionId)) {
@@ -264,9 +264,9 @@ const sanitizedFilters = validateSearchFilters(filters)
 - `validateSearchFilters()` — trims strings, clamps numeric ranges
 - `validateCollectionName()` — non-empty, max 200 chars
 
-### Shared Code in lib/ (Single Source)
+### Shared Code in src/shared/ (Single Source)
 
-Place shared utilities in `lib/` not `src/utils/`. Renderer can import from lib:
+Place shared utilities in `src/shared/` not `src/utils/`. Renderer can import from lib:
 
 ```typescript
 // From renderer component
@@ -277,8 +277,8 @@ import { resultNumericToDisplay } from '../../lib/converters/resultConverter.js'
 
 | Config | Purpose | Module | Target |
 |--------|---------|--------|--------|
-| `electron/tsconfig.json` | Main process + lib | ES modules | Node.js |
-| `electron/tsconfig.preload.json` | Preload script | CommonJS | Node.js (sandboxed) |
+| `src/main/tsconfig.json` | Main process + lib | ES modules | Node.js |
+| `src/main/tsconfig.preload.json` | Preload script | CommonJS | Node.js (sandboxed) |
 | `tsconfig.json` | Renderer components | ES modules | Browser |
 
 **IMPORTANT: Preload must use CommonJS.**
@@ -316,7 +316,7 @@ Each subdirectory has an `index.ts` barrel that re-exports contents.
 
 ### Import Patterns
 
-From electron (relative to `electron/ipc/`):
+From electron (relative to `src/main/ipc/`):
 ```typescript
 import { extractGameData, GAMES_SCHEMA_SQL } from '../../lib/pgn/gameExtractor.js'
 import { GAMES_SCHEMA_SQL } from '../../lib/database/schema.js'

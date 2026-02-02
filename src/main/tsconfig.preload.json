@@ -1,12 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../dist-electron/electron",
+    "outDir": "../../dist-electron",
     "rootDir": ".",
     "sourceMap": true,
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "tsBuildInfoFile": "../dist-electron/.tsbuildinfo.preload",
+    "tsBuildInfoFile": "../../dist-electron/.tsbuildinfo.preload",
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },

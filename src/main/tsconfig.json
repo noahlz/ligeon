@@ -13,11 +13,10 @@
     "noUnusedParameters": true,
     "sourceMap": true,
     "noEmit": false,
-    "outDir": "../dist-electron",
-    "rootDir": "..",
+    "outDir": "../../dist-electron",
     "incremental": true,
-    "tsBuildInfoFile": "../dist-electron/.tsbuildinfo"
+    "tsBuildInfoFile": "../../dist-electron/.tsbuildinfo"
   },
-  "include": ["./**/*.ts", "../lib/**/*.ts"],
+  "include": ["./**/*.ts", "../shared/**/*.ts"],
   "exclude": ["node_modules"]
 }

@@ -1,42 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Filter, SquareChevronDown } from 'lucide-react'
-import { yyyymmToDisplay } from '../../lib/converters/dateConverter.js'
-import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../lib/converters/resultConverter.js'
+import { yyyymmToDisplay } from '../../shared/converters/dateConverter.js'
+import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../shared/converters/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
 import OpeningFilter from './OpeningFilter.js'
 import { getOpeningByEco } from '../utils/openings.js'
-
-interface GameSearchResult {
-  id: number
-  white: string
-  black: string
-  event: string | null
-  date: number | null
-  result: number
-  whiteElo: number | null
-  blackElo: number | null
-  ecoCode: string | null
-}
+import type { GameRow, GameSearchResult } from '../../shared/types/game.js'
 
 interface Collection {
   id: string
   name: string
-}
-
-interface GameRow {
-  id: number
-  white: string
-  black: string
-  event: string | null
-  date: number | null
-  result: number
-  whiteElo: number | null
-  blackElo: number | null
-  ecoCode: string | null
-  site: string | null
-  round: string | null
-  moveCount: number
-  moves: string
 }
 
 interface GameListSidebarProps {

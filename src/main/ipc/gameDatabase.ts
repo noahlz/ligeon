@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
 import type { GameData, GameRow, GameSearchResult, GameFilters } from './types.js'
-import { GAMES_SCHEMA_SQL } from '../../lib/database/schema.js'
+import { GAMES_SCHEMA_SQL } from '../shared/database/schema.js'
 import { logError, logger } from '../config/logger.js'
 
 /**

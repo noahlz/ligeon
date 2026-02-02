@@ -1,31 +1,17 @@
-import type { GameData as LibGameData } from '../../lib/types/game.js'
+import type {
+  GameData as LibGameData,
+  GameRow as LibGameRow,
+  GameSearchResult as LibGameSearchResult,
+  AppSettings as LibAppSettings,
+} from '../shared/types/game.js'
 
 /**
- * Re-export shared GameData interface from lib
+ * Re-export shared types from lib (single source of truth)
  */
 export type GameData = LibGameData
-
-/**
- * Complete game record including database ID
- */
-export interface GameRow extends GameData {
-  id: number
-}
-
-/**
- * Game search result (subset of fields for list display)
- */
-export interface GameSearchResult {
-  id: number
-  white: string
-  black: string
-  event: string | null
-  date: number | null
-  result: number
-  whiteElo: number | null
-  blackElo: number | null
-  ecoCode: string | null
-}
+export type GameRow = LibGameRow
+export type GameSearchResult = LibGameSearchResult
+export type AppSettings = LibAppSettings
 
 /**
  * Filters for searching games

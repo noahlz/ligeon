@@ -1,5 +1,7 @@
 // Type definitions for Electron IPC bridge exposed via preload.ts
 
+import type { GameRow, GameSearchResult, AppSettings } from '../../shared/types/game.js'
+
 export interface CollectionMetadata {
   id: string
   name: string
@@ -24,43 +26,13 @@ export interface GameFilters {
   limit?: number
 }
 
-export interface GameSearchResult {
-  id: number
-  white: string
-  black: string
-  event: string | null
-  date: number | null
-  result: number
-  whiteElo: number | null
-  blackElo: number | null
-  ecoCode: string | null
-}
-
-export interface GameRow {
-  id: number
-  white: string
-  black: string
-  event: string | null
-  site: string | null
-  date: number | null
-  round: string | null
-  result: number
-  whiteElo: number | null
-  blackElo: number | null
-  ecoCode: string | null
-  moveCount: number
-  moves: string
-}
-
 export type ImportProgressData =
   | { type: 'progress'; parsed: number; indexed: number; skipped: number }
   | { type: 'log'; logs: Array<{ type: string; message: string; timestamp: number }> }
   | { type: 'complete'; success?: boolean; collectionId: string; gamesIndexed: number; error?: string }
 
-export interface AppSettings {
-  collectionsPath: string
-  collectionsPathCustomized: boolean
-}
+// Re-export types from lib
+export type { GameRow, GameSearchResult, AppSettings }
 
 export interface EcoCodeWithCount {
   eco: string

@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import type { GameFilters, AppSettings } from './ipc/types.js'
 
 /**
  * Expose safe IPC methods to React renderer
@@ -25,7 +26,7 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.invoke('delete-collection', { collectionId }),
 
   // === Games ===
-  searchGames: (collectionId: string, filters: any) =>
+  searchGames: (collectionId: string, filters: GameFilters) =>
     ipcRenderer.invoke('search-games', { collectionId, filters }),
 
   getGameMoves: (collectionId: string, gameId: number) =>
@@ -43,7 +44,7 @@ contextBridge.exposeInMainWorld('electron', {
   // === Settings ===
   getSettings: () => ipcRenderer.invoke('get-settings'),
 
-  updateSettings: (updates: any) =>
+  updateSettings: (updates: Partial<AppSettings>) =>
     ipcRenderer.invoke('update-settings', { updates }),
 
   selectCollectionsDirectory: () => ipcRenderer.invoke('select-collections-directory'),

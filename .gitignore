@@ -79,4 +79,4 @@ vite.config.ts.timestamp-*
 .logs/
 
 # Compiled Electron files
-electron/*.js
+src/main/*.js

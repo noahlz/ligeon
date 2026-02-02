@@ -5,7 +5,7 @@
   "description": "Browse and replay chess games from PGN databases",
   "author": "",
   "license": "GPL-3.0",
-  "main": "dist-electron/electron/main.js",
+  "main": "dist-electron/main.js",
   "homepage": "./",
   "scripts": {
     "clean": "rimraf dist dist-electron out .logs coverage",
@@ -15,11 +15,11 @@
     "test": "npm run rebuild:sqlite && vitest run; npm run rebuild:electron",
     "test:watch": "npm run rebuild:sqlite && vitest run --watch; npm run rebuild:electron",
     "test:coverage": "npm run rebuild:sqlite && vitest run --coverage; npm run rebuild:electron",
-    "build:renderer": "tsc -p src/tsconfig.json && vite build",
-    "build:main": "tsc -p electron/tsconfig.json && tsc -p electron/tsconfig.preload.json",
+    "build:renderer": "tsc -p src/renderer/tsconfig.json && vite build",
+    "build:main": "tsc -p src/main/tsconfig.json && tsc -p src/main/tsconfig.preload.json",
     "build": "npm run build:renderer && npm run build:main",
     "package": "npm run build && electron-builder",
-    "typecheck": "tsc -p src/tsconfig.json --noEmit && tsc -p electron/tsconfig.json --noEmit && tsc -p electron/tsconfig.preload.json --noEmit",
+    "typecheck": "tsc -p src/renderer/tsconfig.json --noEmit && tsc -p src/main/tsconfig.json --noEmit && tsc -p src/main/tsconfig.preload.json --noEmit",
     "pgn-to-sqlite": "tsx scripts/pgn-to-sqlite.ts"
   },
   "engines": {
