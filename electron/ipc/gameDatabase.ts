@@ -52,7 +52,7 @@ export class GameDatabase {
    */
   insertGame(gameData: GameData): Database.RunResult {
     const stmt = this.db.prepare(`
-      INSERT INTO games (white, black, event, date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
+      INSERT INTO games (white, black, event, dateYYYYMM, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     return stmt.run(
@@ -78,7 +78,7 @@ export class GameDatabase {
    */
   insertGamesBatch(games: GameData[]): void {
     const stmt = this.db.prepare(`
-      INSERT INTO games (white, black, event, date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
+      INSERT INTO games (white, black, event, dateYYYYMM, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     const insertMany = this.db.transaction((games: GameData[]) => {
@@ -111,7 +111,7 @@ export class GameDatabase {
    */
   searchGames(filters: GameFilters, limit = 1000): GameSearchResult[] {
     const startTime = Date.now()
-    let query = 'SELECT id, white, black, event, date, result, whiteElo, blackElo, ecoCode FROM games WHERE 1=1'
+    let query = 'SELECT id, white, black, event, dateYYYYMM as date, result, whiteElo, blackElo, ecoCode FROM games WHERE 1=1'
     const params: any[] = []
 
     if (filters.player) {
@@ -131,11 +131,11 @@ export class GameDatabase {
       params.push(`%${filters.event}%`)
     }
     if (filters.dateFrom !== null && filters.dateFrom !== undefined) {
-      query += ' AND date >= ?'
+      query += ' AND (dateYYYYMM IS NULL OR dateYYYYMM >= ?)'
       params.push(filters.dateFrom)
     }
     if (filters.dateTo !== null && filters.dateTo !== undefined) {
-      query += ' AND date <= ?'
+      query += ' AND (dateYYYYMM IS NULL OR dateYYYYMM <= ?)'
       params.push(filters.dateTo)
     }
     if (filters.result !== null && filters.result !== undefined) {
@@ -215,44 +215,22 @@ export class GameDatabase {
   }
 
   /**
-   * Get date range (min/max) of games in the database
+   * Get distinct dates (YYYYMM) that have games in the database
    *
-   * @returns Object with minDate and maxDate timestamps, or null if no games
+   * @returns Array of YYYYMM integers sorted ascending (e.g., [195601, 195603, 195712])
    */
-  getDateRange(): { minDate: number; maxDate: number } | null {
+  getAvailableDates(): number[] {
     try {
-      const stmt = this.db.prepare('SELECT MIN(date) as minDate, MAX(date) as maxDate FROM games WHERE date IS NOT NULL')
-      const result = stmt.get() as { minDate: number | null; maxDate: number | null }
-
-      if (result.minDate === null || result.maxDate === null) {
-        return null
-      }
-
-      return { minDate: result.minDate, maxDate: result.maxDate }
-    } catch (error) {
-      logError('GameDatabase', 'getDateRange', { dbPath: this.dbPath }, error)
-      return null
-    }
-  }
-
-  /**
-   * Get distinct years that have games in the database
-   *
-   * @returns Array of years sorted ascending
-   */
-  getAvailableYears(): number[] {
-    try {
-      // Extract year from timestamp and get distinct values
       const stmt = this.db.prepare(`
-        SELECT DISTINCT CAST(strftime('%Y', date / 1000, 'unixepoch') AS INTEGER) as year
+        SELECT DISTINCT dateYYYYMM
         FROM games
-        WHERE date IS NOT NULL AND date > 0
-        ORDER BY year ASC
+        WHERE dateYYYYMM IS NOT NULL
+        ORDER BY dateYYYYMM ASC
       `)
-      const results = stmt.all() as { year: number }[]
-      return results.map((r) => r.year).filter((y) => y > 1800 && y < 2100)
+      const results = stmt.all() as { dateYYYYMM: number }[]
+      return results.map((r) => r.dateYYYYMM)
     } catch (error) {
-      logError('GameDatabase', 'getAvailableYears', { dbPath: this.dbPath }, error)
+      logError('GameDatabase', 'getAvailableDates', { dbPath: this.dbPath }, error)
       return []
     }
   }

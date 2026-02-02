@@ -35,7 +35,7 @@ describe('GameDatabase', () => {
       white: 'Kasparov',
       black: 'Karpov',
       event: 'Championship',
-      date: 474633600,
+      date: 198503,
       result: 1.0,
       ecoCode: 'C95',
       whiteElo: 2740,
@@ -54,7 +54,7 @@ describe('GameDatabase', () => {
       white: 'Kasparov',
       black: 'Karpov',
       event: 'Test',
-      date: 1,
+      date: 195601,
       result: 1.0,
       ecoCode: null,
       whiteElo: 2740,
@@ -74,7 +74,7 @@ describe('GameDatabase', () => {
       white: 'Anand',
       black: 'Carlsen',
       event: 'Test',
-      date: 1,
+      date: 195601,
       result: 0.0,
       ecoCode: null,
       whiteElo: 2800,
@@ -94,7 +94,7 @@ describe('GameDatabase', () => {
       white: 'Fischer',
       black: 'Spassky',
       event: 'Test 1',
-      date: 1,
+      date: 195601,
       result: 1.0,
       ecoCode: null,
       whiteElo: 2700,
@@ -108,7 +108,7 @@ describe('GameDatabase', () => {
       white: 'Tal',
       black: 'Fischer',
       event: 'Test 2',
-      date: 2,
+      date: 195603,
       result: 0.0,
       ecoCode: null,
       whiteElo: 2680,
@@ -122,7 +122,7 @@ describe('GameDatabase', () => {
       white: 'Petrosian',
       black: 'Korchnoi',
       event: 'Test 3',
-      date: 3,
+      date: 195712,
       result: 0.5,
       ecoCode: null,
       whiteElo: 2650,
@@ -143,7 +143,7 @@ describe('GameDatabase', () => {
       white: 'A',
       black: 'B',
       event: 'E',
-      date: 1,
+      date: 195601,
       result: 1.0,
       ecoCode: null,
       whiteElo: null,
@@ -162,7 +162,7 @@ describe('GameDatabase', () => {
       white: 'Player1',
       black: 'Player2',
       event: 'Test',
-      date: 1,
+      date: 195601,
       result: 0.5,
       ecoCode: null,
       whiteElo: 2500,
@@ -182,7 +182,7 @@ describe('GameDatabase', () => {
       white: 'Test',
       black: 'Player',
       event: 'Event',
-      date: 1,
+      date: 195601,
       result: 1.0,
       ecoCode: null,
       whiteElo: null,
@@ -209,7 +209,7 @@ describe('GameDatabase', () => {
         white: `P${i}`,
         black: 'O',
         event: 'T',
-        date: i,
+        date: 200001 + i,
         result: 1.0,
         ecoCode: null,
         whiteElo: null,
@@ -229,7 +229,7 @@ describe('GameDatabase', () => {
         white: 'Player1',
         black: 'Player2',
         event: 'Game1',
-        date: 1,
+        date: 195601,
         result: 1.0,
         ecoCode: null,
         whiteElo: null,
@@ -243,7 +243,7 @@ describe('GameDatabase', () => {
         white: 'Player3',
         black: 'Player4',
         event: 'Game2',
-        date: 2,
+        date: 195603,
         result: 0.5,
         ecoCode: null,
         whiteElo: null,
@@ -263,7 +263,7 @@ describe('GameDatabase', () => {
       white: 'A',
       black: 'B',
       event: 'E',
-      date: 1,
+      date: 195601,
       result: 1.0,
       ecoCode: null,
       whiteElo: null,
@@ -276,5 +276,117 @@ describe('GameDatabase', () => {
     expect(db.getGameCount()).toBe(1)
     db.clearGames()
     expect(db.getGameCount()).toBe(0)
+  })
+
+  test('returns available dates (YYYYMM)', () => {
+    db.insertGame({
+      white: 'A',
+      black: 'B',
+      event: 'E1',
+      date: 195601,
+      result: 1.0,
+      ecoCode: null,
+      whiteElo: null,
+      blackElo: null,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. e4',
+    })
+    db.insertGame({
+      white: 'C',
+      black: 'D',
+      event: 'E2',
+      date: 195603,
+      result: 0.5,
+      ecoCode: null,
+      whiteElo: null,
+      blackElo: null,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. d4',
+    })
+    db.insertGame({
+      white: 'E',
+      black: 'F',
+      event: 'E3',
+      date: 195712,
+      result: 0.0,
+      ecoCode: null,
+      whiteElo: null,
+      blackElo: null,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. c4',
+    })
+    db.insertGame({
+      white: 'G',
+      black: 'H',
+      event: 'E4',
+      date: 195603, // Duplicate date
+      result: 1.0,
+      ecoCode: null,
+      whiteElo: null,
+      blackElo: null,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. Nf3',
+    })
+    const dates = db.getAvailableDates()
+    expect(dates).toEqual([195601, 195603, 195712]) // Sorted, distinct
+  })
+
+  test('filters games by date range with null dates included', () => {
+    db.insertGame({
+      white: 'A',
+      black: 'B',
+      event: 'E1',
+      date: 195601,
+      result: 1.0,
+      ecoCode: null,
+      whiteElo: null,
+      blackElo: null,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. e4',
+    })
+    db.insertGame({
+      white: 'C',
+      black: 'D',
+      event: 'E2',
+      date: 195603,
+      result: 0.5,
+      ecoCode: null,
+      whiteElo: null,
+      blackElo: null,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. d4',
+    })
+    db.insertGame({
+      white: 'E',
+      black: 'F',
+      event: 'E3',
+      date: null, // Unknown date
+      result: 0.0,
+      ecoCode: null,
+      whiteElo: null,
+      blackElo: null,
+      site: null,
+      round: null,
+      moveCount: 1,
+      moves: '1. c4',
+    })
+    // Filter for dates >= 195603
+    const results = db.searchGames({ dateFrom: 195603 })
+    // Should include both 195603 and null date game
+    expect(results.length).toBe(2)
+    expect(results.some(r => r.date === 195603)).toBe(true)
+    expect(results.some(r => r.date === null)).toBe(true)
   })
 })

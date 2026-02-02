@@ -87,47 +87,23 @@ export async function getGameCount(collectionId: string): Promise<number> {
 }
 
 /**
- * Get date range (min/max) of games in a collection
+ * Get distinct dates (YYYYMM) that have games in a collection
  *
  * @param collectionId - ID of the collection
- * @returns Object with minDate and maxDate timestamps, or null if no games
+ * @returns Array of YYYYMM integers sorted ascending (e.g., [195601, 195603, 195712])
  */
-export async function getGameDateRange(
-  collectionId: string
-): Promise<{ minDate: number; maxDate: number } | null> {
+export async function getAvailableDates(collectionId: string): Promise<number[]> {
   // Validate inputs
   if (!validateCollectionId(collectionId)) {
-    logError('gameHandlers', 'getGameDateRange', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return null
-  }
-
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
-  try {
-    return db.getDateRange()
-  } catch (error) {
-    logError('gameHandlers', 'getGameDateRange', { collectionId }, error)
-    return null
-  }
-}
-
-/**
- * Get distinct years that have games in a collection
- *
- * @param collectionId - ID of the collection
- * @returns Array of years sorted ascending
- */
-export async function getAvailableYears(collectionId: string): Promise<number[]> {
-  // Validate inputs
-  if (!validateCollectionId(collectionId)) {
-    logError('gameHandlers', 'getAvailableYears', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
+    logError('gameHandlers', 'getAvailableDates', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
   }
 
   const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
   try {
-    return db.getAvailableYears()
+    return db.getAvailableDates()
   } catch (error) {
-    logError('gameHandlers', 'getAvailableYears', { collectionId }, error)
+    logError('gameHandlers', 'getAvailableDates', { collectionId }, error)
     return []
   }
 }

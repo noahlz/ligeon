@@ -1,11 +1,16 @@
 /**
- * Convert PGN date format (YYYY.MM.DD) to Unix timestamp
+ * Convert PGN date format (YYYY.MM.DD) to YYYYMM integer format
  * Handles partial dates like "1985.??.??" and unknown dates "?.?.?"
  *
- * @param pgnDate - PGN date string (e.g., "1985.01.15")
- * @returns Unix timestamp in seconds, or null if date is unknown
+ * @param pgnDate - PGN date string (e.g., "1985.03.15")
+ * @returns YYYYMM integer (e.g., 198503), or null if date is unknown
+ *
+ * Examples:
+ * - "1985.03.15" → 198503
+ * - "1985.??.??" → 198501 (default to January)
+ * - "?.?.?" → null
  */
-export function pgnDateToTimestamp(pgnDate: string | null | undefined): number | null {
+export function pgnDateToYYYYMM(pgnDate: string | null | undefined): number | null {
   if (!pgnDate || pgnDate === '?.?.?') return null
 
   try {
@@ -13,11 +18,11 @@ export function pgnDateToTimestamp(pgnDate: string | null | undefined): number |
     const year = parseInt(parts[0])
     if (isNaN(year)) return null
 
-    const month = parts[1] === '??' ? 0 : parseInt(parts[1]) - 1
-    const day = parts[2] === '??' ? 1 : parseInt(parts[2])
+    // Default to January if month is unknown
+    const month = parts[1] === '??' ? 1 : parseInt(parts[1])
+    if (isNaN(month) || month < 1 || month > 12) return null
 
-    const date = new Date(year, month, day)
-    return Math.floor(date.getTime() / 1000)
+    return year * 100 + month
   } catch (error) {
     console.warn('Error parsing date:', pgnDate, error)
     return null
@@ -25,23 +30,29 @@ export function pgnDateToTimestamp(pgnDate: string | null | undefined): number |
 }
 
 /**
- * Convert Unix timestamp to human-readable display format
+ * Convert YYYYMM integer to human-readable display format
  *
- * @param timestamp - Unix timestamp in seconds
- * @returns Formatted date string or "Unknown"
+ * @param yyyymm - YYYYMM integer (e.g., 198503)
+ * @returns Formatted date string (e.g., "Mar 1985") or "Unknown"
+ *
+ * Examples:
+ * - 198503 → "Mar 1985"
+ * - null → "Unknown"
  */
-export function timestampToDisplay(timestamp: number | null | undefined): string {
-  if (!timestamp) return 'Unknown'
+export function yyyymmToDisplay(yyyymm: number | null | undefined): string {
+  if (!yyyymm) return 'Unknown'
 
   try {
-    const date = new Date(timestamp * 1000)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
+    const year = Math.floor(yyyymm / 100)
+    const month = yyyymm % 100
+
+    if (month < 1 || month > 12) return 'Unknown'
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    return `${monthNames[month - 1]} ${year}`
   } catch (error) {
-    console.warn('Error formatting timestamp:', timestamp, error)
+    console.warn('Error formatting YYYYMM:', yyyymm, error)
     return 'Unknown'
   }
 }

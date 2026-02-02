@@ -81,8 +81,7 @@ export interface ElectronAPI {
   searchGames: (collectionId: string, filters: GameFilters) => Promise<GameSearchResult[]>
   getGameMoves: (collectionId: string, gameId: number) => Promise<GameRow | null>
   getGameCount: (collectionId: string) => Promise<number>
-  getGameDateRange: (collectionId: string) => Promise<{ minDate: number; maxDate: number } | null>
-  getAvailableYears: (collectionId: string) => Promise<number[]>
+  getAvailableDates: (collectionId: string) => Promise<number[]>
 
   // Settings
   getSettings: () => Promise<AppSettings>

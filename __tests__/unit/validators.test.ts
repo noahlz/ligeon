@@ -160,22 +160,21 @@ describe('validators', () => {
       expect(validateSearchFilters({ result: -1.0 }).result).toBeUndefined()
     })
 
-    test('clamps date timestamps to valid range', () => {
-      const tooEarly = new Date('1800-01-01').getTime()
-      const tooLate = new Date('2200-01-01').getTime()
-      const valid = new Date('2020-01-01').getTime()
+    test('clamps date YYYYMM to valid range', () => {
+      const tooEarly = 180001 // Before 1900
+      const tooLate = 220001 // After 2100
 
       const result = validateSearchFilters({
         dateFrom: tooEarly,
         dateTo: tooLate,
       })
 
-      expect(result.dateFrom).toBeGreaterThanOrEqual(new Date('1900-01-01').getTime())
-      expect(result.dateTo).toBeLessThanOrEqual(new Date('2100-01-01').getTime())
+      expect(result.dateFrom).toBe(190001) // Clamped to MIN_YYYYMM
+      expect(result.dateTo).toBe(210012) // Clamped to MAX_YYYYMM
     })
 
-    test('preserves valid date timestamps', () => {
-      const validDate = new Date('2020-01-01').getTime()
+    test('preserves valid date YYYYMM', () => {
+      const validDate = 202001 // January 2020
       const result = validateSearchFilters({
         dateFrom: validDate,
         dateTo: validDate,
@@ -251,8 +250,8 @@ describe('validators', () => {
         black: 'Hikaru Nakamura',
         event: 'Speed Chess Championship',
         result: 1.0,
-        dateFrom: new Date('2023-01-01').getTime(),
-        dateTo: new Date('2023-12-31').getTime(),
+        dateFrom: 202301,
+        dateTo: 202312,
         whiteEloMin: 2800,
         whiteEloMax: 2900,
         blackEloMin: 2700,

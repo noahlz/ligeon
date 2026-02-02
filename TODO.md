@@ -1,14 +1,8 @@
 # Ligeon TODOs
 
-## Priority
-
-- BUG: Search by Date range - Picker currently broken.
-
 ## Game Import
 
-- Just import month and year, drop day. If Month is not known then import as Jan of year.
 - Some game got imported as "? / ?" and only had the game result: 1/2-1/2 as the only "move." Track down this bug.
-- Import date field values "?" as NULLs, and in game list item only display the values available i.e. only year, or only month year ("Jan 1959")
 
 ## Game Replay / Navigation
 

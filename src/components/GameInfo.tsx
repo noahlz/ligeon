@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {  SquareChevronDown, SquareMinus } from 'lucide-react'
-import { timestampToDisplay } from '../utils/dateConverter.js'
+import { yyyymmToDisplay } from '../../lib/converters/dateConverter.js'
 import { resultNumericToDisplay } from '../../lib/converters/resultConverter.js'
 import { getOpeningByEco } from '../utils/openings.js'
 
@@ -58,7 +58,7 @@ export default function GameInfo({ game }: GameInfoProps) {
         </div>
         <div>
           <p className="text-ui-text-dim text-xs">Date</p>
-          <p className="text-xs">{timestampToDisplay(game.date)}</p>
+          <p className="text-xs">{yyyymmToDisplay(game.date)}</p>
         </div>
         <div>
           <p className="text-ui-text-dim text-xs">Result</p>

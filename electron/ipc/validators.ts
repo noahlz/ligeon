@@ -239,27 +239,27 @@ export function validateSearchFiltersResult(filters: GameFilters): ValidationRes
     }
   }
 
-  // Date timestamps - must be reasonable (after 1900, before 2100)
-  const MIN_TIMESTAMP = new Date('1900-01-01').getTime()
-  const MAX_TIMESTAMP = new Date('2100-01-01').getTime()
+  // Date YYYYMM - must be reasonable (190001 to 210012)
+  const MIN_YYYYMM = 190001
+  const MAX_YYYYMM = 210012
 
   if (filters.dateFrom !== undefined && filters.dateFrom !== null) {
-    const clamped = Math.max(MIN_TIMESTAMP, Math.min(MAX_TIMESTAMP, filters.dateFrom))
+    const clamped = Math.max(MIN_YYYYMM, Math.min(MAX_YYYYMM, filters.dateFrom))
     if (clamped !== filters.dateFrom) {
       warnings.push({
         code: 'VALUE_CLAMPED',
-        message: 'Date from value clamped to valid range (1900-2100)',
+        message: 'Date from value clamped to valid range (190001-210012)',
         field: 'dateFrom',
       })
     }
     sanitized.dateFrom = clamped
   }
   if (filters.dateTo !== undefined && filters.dateTo !== null) {
-    const clamped = Math.max(MIN_TIMESTAMP, Math.min(MAX_TIMESTAMP, filters.dateTo))
+    const clamped = Math.max(MIN_YYYYMM, Math.min(MAX_YYYYMM, filters.dateTo))
     if (clamped !== filters.dateTo) {
       warnings.push({
         code: 'VALUE_CLAMPED',
-        message: 'Date to value clamped to valid range (1900-2100)',
+        message: 'Date to value clamped to valid range (190001-210012)',
         field: 'dateTo',
       })
     }
