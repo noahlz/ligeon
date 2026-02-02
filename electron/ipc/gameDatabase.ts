@@ -130,13 +130,18 @@ export class GameDatabase {
       query += ' AND event LIKE ?'
       params.push(`%${filters.event}%`)
     }
-    if (filters.dateFrom !== null && filters.dateFrom !== undefined) {
-      query += ' AND (dateYYYYMM IS NULL OR dateYYYYMM >= ?)'
-      params.push(filters.dateFrom)
-    }
-    if (filters.dateTo !== null && filters.dateTo !== undefined) {
-      query += ' AND (dateYYYYMM IS NULL OR dateYYYYMM <= ?)'
-      params.push(filters.dateTo)
+    if (filters.dateFrom != null && filters.dateTo != null) {
+        query += ' AND dateYYYYMM BETWEEN ? AND ?';
+        params.push(filters.dateFrom, filters.dateTo);
+    } else {
+      if (filters.dateFrom != null) {
+          query += ' AND (dateYYYYMM IS NULL OR dateYYYYMM >= ?)';
+          params.push(filters.dateFrom);
+      }
+      if (filters.dateTo != null) {
+          query += ' AND (dateYYYYMM IS NULL OR dateYYYYMM <= ?)';
+          params.push(filters.dateTo);
+      }
     }
     if (filters.result !== null && filters.result !== undefined) {
       query += ' AND result = ?'
@@ -164,7 +169,7 @@ export class GameDatabase {
       params.push(filters.blackEloMax)
     }
 
-    query += ' LIMIT ?'
+    query += ' ORDER BY dateYYYYMM, white, black LIMIT ?'
     params.push(limit)
 
     try {
