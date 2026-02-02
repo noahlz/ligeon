@@ -9,10 +9,15 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "isolatedModules": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "sourceMap": true,
     "noEmit": false,
     "outDir": "../dist-electron",
+    "rootDir": "..",
     "incremental": true,
-    "tsBuildInfoFile": "../dist/.tsbuildinfo"
+    "tsBuildInfoFile": "../dist-electron/.tsbuildinfo"
   },
-  "include": ["./**/*"],
+  "include": ["./**/*.ts", "../lib/**/*.ts"],
+  "exclude": ["node_modules"]
 }
