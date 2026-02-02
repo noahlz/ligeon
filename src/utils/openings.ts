@@ -11,6 +11,54 @@ export interface Opening {
 const openings: Opening[] = openingsData
 
 /**
+ * Build a lookup map from ECO code to opening name
+ */
+const ecoToNameMap: Map<string, string> = new Map(
+  openings.map((o) => [o.eco, o.name])
+)
+
+/**
+ * Search available ECO codes by query (ECO prefix or name substring)
+ * Returns openings that match the query AND are in availableEcoCodes
+ *
+ * @param query - Search query (matches ECO prefix or name substring)
+ * @param availableEcoCodes - ECO codes that exist in the collection
+ * @returns Array of matching openings
+ */
+export function searchAvailableOpenings(
+  query: string,
+  availableEcoCodes: string[]
+): Opening[] {
+  const normalizedQuery = query.trim().toLowerCase()
+
+  // If no query, return all available openings with their names
+  if (normalizedQuery.length === 0) {
+    return availableEcoCodes.map((eco) => ({
+      eco,
+      name: ecoToNameMap.get(eco) || 'Unknown Opening',
+    }))
+  }
+
+  return availableEcoCodes
+    .filter((eco) => {
+      // ECO code prefix match
+      if (eco.toLowerCase().startsWith(normalizedQuery)) {
+        return true
+      }
+      // Name substring match
+      const name = ecoToNameMap.get(eco)
+      if (name && name.toLowerCase().includes(normalizedQuery)) {
+        return true
+      }
+      return false
+    })
+    .map((eco) => ({
+      eco,
+      name: ecoToNameMap.get(eco) || 'Unknown Opening',
+    }))
+}
+
+/**
  * Search openings by ECO code (prefix match) or name (substring match)
  *
  * @param query - Search query

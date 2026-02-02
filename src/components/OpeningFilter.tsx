@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { searchOpenings, getAllOpenings, type Opening } from '../utils/openings.js'
+import { searchAvailableOpenings, type Opening } from '../utils/openings.js'
 
 interface OpeningFilterProps {
   collectionId: string
@@ -13,6 +13,7 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
   const [showDropdown, setShowDropdown] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [availableEcoCodes, setAvailableEcoCodes] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -20,32 +21,27 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
   // Fetch available ECO codes when collection changes
   useEffect(() => {
     const fetchAvailableEcoCodes = async () => {
+      setIsLoading(true)
       const codes = await window.electron.getAvailableEcoCodes(collectionId)
       setAvailableEcoCodes(codes)
+      setIsLoading(false)
     }
     fetchAvailableEcoCodes()
   }, [collectionId])
 
-  // Filter openings by available ECO codes
-  const filterByAvailableEcos = (openings: Opening[]) => {
-    if (availableEcoCodes.length === 0) return []
-    return openings.filter((opening) => availableEcoCodes.includes(opening.eco))
-  }
-
   // Search openings as user types (show all if query is empty)
   useEffect(() => {
-    if (query.length === 0) {
-      // Show all openings when dropdown is focused with empty query
-      const matches = filterByAvailableEcos(getAllOpenings())
-      setResults(matches)
-      setSelectedIndex(0)
+    // Don't search while loading
+    if (isLoading) {
+      setResults([])
       return
     }
 
-    const matches = filterByAvailableEcos(searchOpenings(query, 20))
+    // Use new search function that operates on collection ECO codes
+    const matches = searchAvailableOpenings(query, availableEcoCodes)
     setResults(matches)
     setSelectedIndex(0)
-  }, [query, availableEcoCodes])
+  }, [query, availableEcoCodes, isLoading])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -151,7 +147,9 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
             ref={dropdownRef}
             className="absolute z-10 w-full mt-1 bg-ui-bg-box border border-ui-border rounded shadow-lg max-h-60 overflow-y-auto"
           >
-            {results.length === 0 ? (
+            {isLoading ? (
+              <div className="px-2 py-1.5 text-sm text-ui-text-dim">Loading openings...</div>
+            ) : results.length === 0 ? (
               <div className="px-2 py-1.5 text-sm text-ui-text-dim">No openings found</div>
             ) : (
               results.map((opening, idx) => (
