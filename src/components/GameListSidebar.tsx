@@ -234,7 +234,7 @@ export default function GameListSidebar({
                 ecoCode: '',
               })
             }}
-            className="px-2 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded text-sm"
+            className="w-full px-2 py-1.5 bg-ui-bg-hover hover:bg-ui-bg-element rounded text-sm"
           >
             Reset
           </button>

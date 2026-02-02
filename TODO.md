@@ -1,5 +1,12 @@
 # Ligeon TODOs
 
+## Game Import / Browsing
+
+- If game collection is trucacted, reflect that in the count text.
+- After importing a collection, immediately select that game collection.
+- Display game code and name in the game card (overflow with ...).
+- Support filtering by multiple game codes. Game code filtering is a combo list (supporting progressive search and browsing drop-down list).
+
 ## Style
 
 - Refactor app to use [HeadlessUI](https://headlessui.com/) for components.
