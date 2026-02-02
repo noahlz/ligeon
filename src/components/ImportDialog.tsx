@@ -11,7 +11,7 @@ interface ImportProgress {
 interface ImportDialogProps {
   isOpen: boolean
   filePath: string | null
-  onComplete?: () => void
+  onComplete?: (collectionId: string) => void
   onClose?: () => void
 }
 
@@ -25,6 +25,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
     skipped: 0,
     logs: [],
   })
+  const [importedCollectionId, setImportedCollectionId] = useState<string | null>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
 
   const suggestedName = filePath ? deriveSuggestedName(filePath) : ''
@@ -35,6 +36,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
       setCollectionName('')
       setIsIndexing(false)
       setIsComplete(false)
+      setImportedCollectionId(null)
       setProgress({ parsed: 0, indexed: 0, skipped: 0, logs: [] })
     }
   }, [isOpen, filePath])
@@ -54,6 +56,10 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
           logs: [...prev.logs, ...data.logs],
         }))
       } else if (data.type === 'complete') {
+        // Extract collectionId from the event (only if successful)
+        if (data.success && data.collectionId) {
+          setImportedCollectionId(data.collectionId)
+        }
         // Keep isIndexing=true so we stay in the progress/complete view
         // isIndexing will be reset when handleClose() is called
         setIsComplete(true)
@@ -80,9 +86,11 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
     setProgress({ parsed: 0, indexed: 0, skipped: 0, logs: [] })
     setIsIndexing(false)
     const wasComplete = isComplete
+    const collectionId = importedCollectionId
     setIsComplete(false)
-    if (wasComplete) {
-      onComplete?.()
+    setImportedCollectionId(null)
+    if (wasComplete && collectionId) {
+      onComplete?.(collectionId)
     } else {
       onClose?.()
     }

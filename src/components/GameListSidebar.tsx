@@ -49,6 +49,7 @@ interface GameListSidebarProps {
   onDeleteCollection: (id: string) => void
   onRenameCollection?: () => void
   selectedGame: GameRow | null
+  selectedGameCollectionId: string | null
 }
 
 export default function GameListSidebar({
@@ -61,6 +62,7 @@ export default function GameListSidebar({
   onDeleteCollection,
   onRenameCollection,
   selectedGame,
+  selectedGameCollectionId,
 }: GameListSidebarProps) {
   const [games, setGames] = useState<GameSearchResult[]>([])
   const [totalGameCount, setTotalGameCount] = useState(0)
@@ -259,7 +261,7 @@ export default function GameListSidebar({
             key={game.id}
             onClick={() => onGameSelect(game)}
             className={`p-2 mb-1.5 rounded cursor-pointer text-sm ${
-              selectedGame?.id === game.id
+              selectedGame?.id === game.id && selectedGameCollectionId === collectionId
                 ? 'border-2 border-ui-accent bg-ui-bg-element'
                 : 'bg-ui-bg-element hover:bg-ui-bg-hover'
             }`}

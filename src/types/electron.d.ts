@@ -55,7 +55,7 @@ export interface GameRow {
 export type ImportProgressData =
   | { type: 'progress'; parsed: number; indexed: number; skipped: number }
   | { type: 'log'; logs: Array<{ type: string; message: string; timestamp: number }> }
-  | { type: 'complete'; success?: boolean; error?: string }
+  | { type: 'complete'; success?: boolean; collectionId: string; gamesIndexed: number; error?: string }
 
 export interface AppSettings {
   collectionsPath: string

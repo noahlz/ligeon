@@ -55,6 +55,7 @@ export default function App() {
 
   // Game state
   const [selectedGame, setSelectedGame] = useState<GameRow | null>(null)
+  const [selectedGameCollectionId, setSelectedGameCollectionId] = useState<string | null>(null)
   const [chessManager, setChessManager] = useState<ChessManager | null>(null)
   const [currentPly, setCurrentPly] = useState(0)
   const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
@@ -107,6 +108,7 @@ export default function App() {
     if (!fullGame) return
 
     setSelectedGame(fullGame)
+    setSelectedGameCollectionId(selectedCollectionId)
 
     // Create chess manager with the game's moves (filter out result notation)
     const movesArray = fullGame.moves
@@ -205,12 +207,16 @@ export default function App() {
   }
 
   // Handle import completion
-  const handleImportComplete = async () => {
+  const handleImportComplete = async (collectionId: string) => {
     setShowImportDialog(false)
     setImportFilePath(null)
     // Reload collections
     const cols = await window.electron.listCollections()
     setCollections(cols)
+    // Switch to the newly imported collection
+    setSelectedCollectionId(collectionId)
+    // Note: selectedGame state is intentionally NOT cleared
+    // This allows the user to keep viewing the current game
   }
 
   // Handle import dialog close (cancelled)
@@ -264,6 +270,7 @@ export default function App() {
             onDeleteCollection={handleDeleteCollection}
             onRenameCollection={handleRenameCollection}
             selectedGame={selectedGame}
+            selectedGameCollectionId={selectedGameCollectionId}
           />
         </div>
 
