@@ -37,6 +37,9 @@ contextBridge.exposeInMainWorld('electron', {
   getAvailableDates: (collectionId: string) =>
     ipcRenderer.invoke('get-available-dates', { collectionId }),
 
+  getAvailableEcoCodes: (collectionId: string) =>
+    ipcRenderer.invoke('get-available-eco-codes', { collectionId }),
+
   // === Settings ===
   getSettings: () => ipcRenderer.invoke('get-settings'),
 

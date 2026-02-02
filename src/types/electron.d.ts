@@ -82,6 +82,7 @@ export interface ElectronAPI {
   getGameMoves: (collectionId: string, gameId: number) => Promise<GameRow | null>
   getGameCount: (collectionId: string) => Promise<number>
   getAvailableDates: (collectionId: string) => Promise<number[]>
+  getAvailableEcoCodes: (collectionId: string) => Promise<string[]>
 
   // Settings
   getSettings: () => Promise<AppSettings>

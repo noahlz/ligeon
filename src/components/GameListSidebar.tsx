@@ -220,6 +220,7 @@ export default function GameListSidebar({
           <div className="text-xs space-y-1">
             <label className="text-ui-text-dim">Opening:</label>
             <OpeningFilter
+              collectionId={collectionId || ''}
               value={filters.ecoCodes}
               onChange={(ecos) => setFilters({ ...filters, ecoCodes: ecos })}
             />

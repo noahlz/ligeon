@@ -2,33 +2,50 @@ import { useState, useEffect, useRef } from 'react'
 import { searchOpenings, getAllOpenings, type Opening } from '../utils/openings.js'
 
 interface OpeningFilterProps {
+  collectionId: string
   value: string[] // Array of ECO codes
   onChange: (ecos: string[]) => void
 }
 
-export default function OpeningFilter({ value, onChange }: OpeningFilterProps) {
+export default function OpeningFilter({ collectionId, value, onChange }: OpeningFilterProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Opening[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [availableEcoCodes, setAvailableEcoCodes] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Fetch available ECO codes when collection changes
+  useEffect(() => {
+    const fetchAvailableEcoCodes = async () => {
+      const codes = await window.electron.getAvailableEcoCodes(collectionId)
+      setAvailableEcoCodes(codes)
+    }
+    fetchAvailableEcoCodes()
+  }, [collectionId])
+
+  // Filter openings by available ECO codes
+  const filterByAvailableEcos = (openings: Opening[]) => {
+    if (availableEcoCodes.length === 0) return []
+    return openings.filter((opening) => availableEcoCodes.includes(opening.eco))
+  }
 
   // Search openings as user types (show all if query is empty)
   useEffect(() => {
     if (query.length === 0) {
       // Show all openings when dropdown is focused with empty query
-      const matches = getAllOpenings()
+      const matches = filterByAvailableEcos(getAllOpenings())
       setResults(matches)
       setSelectedIndex(0)
       return
     }
 
-    const matches = searchOpenings(query, 20)
+    const matches = filterByAvailableEcos(searchOpenings(query, 20))
     setResults(matches)
     setSelectedIndex(0)
-  }, [query])
+  }, [query, availableEcoCodes])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -80,6 +97,14 @@ export default function OpeningFilter({ value, onChange }: OpeningFilterProps) {
     onChange(value.filter((e) => e !== eco))
   }
 
+  const handleInputMouseDown = (e: React.MouseEvent) => {
+    // If dropdown is open, close it; otherwise let onFocus handle opening
+    if (showDropdown) {
+      e.preventDefault()
+      setShowDropdown(false)
+    }
+  }
+
   return (
     <div ref={containerRef} className="space-y-2">
       {/* Selected opening tags */}
@@ -116,6 +141,7 @@ export default function OpeningFilter({ value, onChange }: OpeningFilterProps) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => setShowDropdown(true)}
+          onMouseDown={handleInputMouseDown}
           className="w-full px-2 py-1.5 bg-ui-bg-element rounded text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border outline-none"
         />
 
