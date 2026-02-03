@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import type { Key } from '@lichess-org/chessground/types'
+import { useState, useEffect } from 'react'
 import { ChessKnight } from 'lucide-react'
 import BoardDisplay from './components/BoardDisplay.js'
 import MoveList from './components/MoveList.js'
@@ -9,9 +8,12 @@ import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
 import ControlStrip from './components/ControlStrip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
-import { playMoveSound, preloadAllSounds } from './utils/audioManager.js'
 import { separateResultFromMoves } from './utils/moveFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
+import { useAudioInit } from './hooks/useAudioInit.js'
+import { useBoardState } from './hooks/useBoardState.js'
+import { useGameNavigation } from './hooks/useGameNavigation.js'
+import { useGameMoves } from './hooks/useGameMoves.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 
 interface Collection {
@@ -30,16 +32,28 @@ export default function App() {
   const [selectedGame, setSelectedGame] = useState<GameRow | null>(null)
   const [selectedGameCollectionId, setSelectedGameCollectionId] = useState<string | null>(null)
   const [chessManager, setChessManager] = useState<ChessManager | null>(null)
-  const [currentPly, setCurrentPly] = useState(0)
-  const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-  const [lastMove, setLastMove] = useState<Key[] | undefined>(undefined)
 
-  // Audio state
-  const audioInitialized = useRef(false)
+  // Audio & sound
   const [soundEnabled, setSoundEnabled] = useState(true)
+  const { audioInitialized } = useAudioInit()
 
   // Board orientation
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
+
+  // Board state & navigation
+  const { fen, currentPly, lastMove, updateBoardState } = useBoardState({
+    soundEnabled,
+    audioInitialized,
+  })
+
+  const { handleFirst, handlePrev, handleNext, handleLast, handleJump } = useGameNavigation({
+    chessManager,
+    currentPly,
+    updateBoardState,
+  })
+
+  // Move list parsing
+  const { moves } = useGameMoves({ movesString: selectedGame?.moves })
 
   // Load collections on mount
   useEffect(() => {
@@ -51,25 +65,6 @@ export default function App() {
       }
     }
     loadCollections()
-  }, [])
-
-  // Initialize audio on first user interaction
-  useEffect(() => {
-    const initAudio = () => {
-      if (!audioInitialized.current) {
-        preloadAllSounds()
-        audioInitialized.current = true
-      }
-    }
-
-    // Listen for any user interaction to initialize audio
-    window.addEventListener('click', initAudio, { once: true })
-    window.addEventListener('keydown', initAudio, { once: true })
-
-    return () => {
-      window.removeEventListener('click', initAudio)
-      window.removeEventListener('keydown', initAudio)
-    }
   }, [])
 
   // Handle game selection
@@ -94,58 +89,8 @@ export default function App() {
     setChessManager(manager)
 
     // Reset to initial position
-    setCurrentPly(0)
     updateBoardState(manager, 0)
   }
-
-  // Update board state from chess manager
-  const updateBoardState = useCallback((manager: ChessManager, ply: number) => {
-    manager.goto(ply)
-    setFen(manager.getFen())
-    const move = manager.getLastMove()
-    setLastMove(move ? move as Key[] : undefined)
-    setCurrentPly(ply)
-
-    // Play sound for the move (if not at initial position and sound is enabled)
-    if (ply > 0 && soundEnabled && audioInitialized.current) {
-      const moveType = manager.getMoveType(ply)
-      if (moveType) {
-        playMoveSound(moveType)
-      }
-    }
-  }, [soundEnabled])
-
-  // Navigation handlers
-  const handleFirst = useCallback(() => {
-    if (!chessManager) return
-    updateBoardState(chessManager, 0)
-  }, [chessManager, updateBoardState])
-
-  const handlePrev = useCallback(() => {
-    if (!chessManager) return
-    updateBoardState(chessManager, Math.max(0, currentPly - 1))
-  }, [chessManager, currentPly, updateBoardState])
-
-  const handleNext = useCallback((): boolean => {
-    if (!chessManager) return false
-    const totalPlies = chessManager.getTotalPlies()
-    if (currentPly < totalPlies) {
-      updateBoardState(chessManager, currentPly + 1)
-      return true
-    }
-    return false
-  }, [chessManager, currentPly, updateBoardState])
-
-  const handleLast = useCallback(() => {
-    if (!chessManager) return
-    const totalPlies = chessManager.getTotalPlies()
-    updateBoardState(chessManager, totalPlies)
-  }, [chessManager, updateBoardState])
-
-  const handleJump = useCallback((ply: number) => {
-    if (!chessManager) return
-    updateBoardState(chessManager, ply)
-  }, [chessManager, updateBoardState])
 
   // Auto-play hook
   const autoPlay = useAutoPlay({
@@ -218,14 +163,6 @@ export default function App() {
     const cols = await window.electron.listCollections()
     setCollections(cols)
   }
-
-  // Parse moves for MoveList component
-  const moves = selectedGame?.moves
-    ? selectedGame.moves
-        .replace(/\d+\./g, '') // Remove move numbers
-        .split(/\s+/)
-        .filter(m => m.length > 0)
-    : []
 
   return (
     <div className="h-screen bg-ui-bg-page text-ui-text flex flex-col">
