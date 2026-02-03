@@ -2,6 +2,16 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type { GameFilters, AppSettings } from './ipc/types.js'
 
 /**
+ * Import progress event shape — mirrors the callbacks emitted by importHandlers.
+ * Duplicated here because preload is compiled in isolation (CommonJS, separate
+ * tsconfig) and cannot import from src/renderer/ under NodeNext resolution.
+ */
+type ImportProgressData =
+  | { type: 'progress'; parsed: number; indexed: number; skipped: number }
+  | { type: 'log'; logs: Array<{ type: string; message: string; timestamp: number }> }
+  | { type: 'complete'; success?: boolean; collectionId: string; gamesIndexed: number; error?: string }
+
+/**
  * Expose safe IPC methods to React renderer
  * Using context isolation for security
  */
@@ -54,7 +64,7 @@ contextBridge.exposeInMainWorld('electron', {
    * Listen for import progress events
    * Returns unsubscribe function
    */
-  onImportProgress: (callback: (data: any) => void) => {
+  onImportProgress: (callback: (data: ImportProgressData) => void) => {
     const unsubscribe = () => {
       ipcRenderer.removeAllListeners('import-progress')
       ipcRenderer.removeAllListeners('import-progress-log')

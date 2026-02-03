@@ -1,17 +1,5 @@
-import type {
-  GameData as LibGameData,
-  GameRow as LibGameRow,
-  GameSearchResult as LibGameSearchResult,
-  AppSettings as LibAppSettings,
-} from '../../shared/types/game.js'
-
-/**
- * Re-export shared types from lib (single source of truth)
- */
-export type GameData = LibGameData
-export type GameRow = LibGameRow
-export type GameSearchResult = LibGameSearchResult
-export type AppSettings = LibAppSettings
+import type { GameData, GameRow, GameSearchResult, AppSettings } from '../../shared/types/game.js'
+export type { GameData, GameRow, GameSearchResult, AppSettings }
 
 /**
  * Filters for searching games
