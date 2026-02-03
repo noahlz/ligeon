@@ -21,7 +21,7 @@ npm run build            # Compile renderer + main (no packaging)
 npm run typecheck        # Check types
 npm test                 # Run all tests (auto-rebuilds better-sqlite3)
 npm run test:coverage    # Run tests with coverage report
-npm run dev              # Dev server + launch Electron
+npm run app              # Dev server + launch Electron App
 npm run package          # Build + package (out/)
 ```
 
@@ -30,10 +30,9 @@ npm run package          # Build + package (out/)
 Always validate with:
 1. `npm test` — run tests
 2. `npm run typecheck` — check types
-3. `npm run dev` — launch app
+3. `npm run app` — launch app
    - Window should open
    - Console shows "✓ IPC handlers set up"
-   - Ignore "Autofill.enable failed" warnings
 
 ## Tech Stack
 
@@ -58,7 +57,7 @@ See `package.json` for versions.
 - PGN parsing, date/result converters, database schema, GameData type
 - Used by src/main/ and CLI scripts
 
-**Dev:** Vite on `localhost:5173`, Electron loads from dev server
+**Dev:** Vite on `localhost:5173`, Electron loads from dev server  
 **Prod:** Electron loads from `dist/index.html`
 
 **Build:**
@@ -178,7 +177,7 @@ Useful LSP operations:
 | Filter panel (search, result radio) | `GameListSidebar` | `src/renderer/components/GameListSidebar.tsx` |
 | Game list items | `GameListSidebar` | `src/renderer/components/GameListSidebar.tsx` |
 | Chess board | `BoardDisplay` | `src/renderer/components/BoardDisplay.tsx` |
-| Navigation buttons (`|<  <  ▶  >  >|`) | `MoveNavigation` | `src/renderer/components/MoveNavigation.tsx` |
+| Navigation buttons (`<  <  ▶  >  >`) | `MoveNavigation` | `src/renderer/components/MoveNavigation.tsx` |
 | Control strip (Lichess, sound, flip) | `ControlStrip` | `src/renderer/components/ControlStrip.tsx` |
 | Game title header (collapsible) | `GameInfo` | `src/renderer/components/GameInfo.tsx` |
 | Move list grid | `MoveList` | `src/renderer/components/MoveList.tsx` |
@@ -311,7 +310,7 @@ Electron's sandboxed preload scripts cannot use ES modules (`import`/`export`). 
 
 ### Ignore DevTools Warnings
 
-These are harmless when running `npm run dev`:
+These are harmless when running `npm run app`:
 ```
 Request Autofill.enable failed
 Request Autofill.setAddresses failed
