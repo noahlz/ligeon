@@ -16,17 +16,13 @@ This application has not yet been released - don't worry about making "backwards
 ## Commands
 
 ```bash
-npm run dev              # Dev server + launch Electron
+npm run clean            # Delete dist, dist-electron, out
 npm run build            # Compile renderer + main (no packaging)
-npm run build:main       # Compile main process only
-npm run build:renderer   # Compile renderer only
-npm run package          # Build + package (out/)
+npm run typecheck        # Check types
 npm test                 # Run all tests (auto-rebuilds better-sqlite3)
 npm run test:coverage    # Run tests with coverage report
-npm run clean            # Delete dist, dist-electron, out
-npm run typecheck        # Check types
-npm run rebuild:sqlite   # Rebuild better-sqlite3 for Node.js
-npm run rebuild:electron # Rebuild better-sqlite3 for Electron
+npm run dev              # Dev server + launch Electron
+npm run package          # Build + package (out/)
 ```
 
 ## After Changes
@@ -52,10 +48,10 @@ See `package.json` for versions.
 
 ## Architecture
 
-**Main Process** (Node.js): `src/main/` + `src/shared/` → `tsc` → `dist-src/main/`
+**Main Process** (Node.js): `src/main/` + `src/shared/` → `tsc` → `dist-electron/`
 - App lifecycle, native APIs, SQLite, IPC handlers
 
-**Renderer** (Browser): `src/` → `Vite` → `dist/`
+**Renderer** (Browser): `src/renderer/` → `Vite` → `dist/`
 - React components, Chessground board, IPC calls via `window.electron.*`
 
 **Shared Library**: `src/shared/`
@@ -68,39 +64,46 @@ See `package.json` for versions.
 **Build:**
 | Source | Compiler | Output | Entry |
 |--------|----------|--------|-------|
-| `src/main/*.ts` + `src/shared/*.ts` | TypeScript | `dist-src/main/` | `src/main/main.js` |
-| `src/*.tsx` | Vite | `dist/` | `index.html` |
+| `src/main/*.ts` + `src/shared/*.ts` | TypeScript (ESM) | `dist-electron/` | `dist-electron/main/main.js` |
+| `src/main/preload.ts` | TypeScript (CJS) | `dist-electron/preload/` | `dist-electron/preload/main/preload.js` |
+| `src/renderer/*.tsx` | Vite | `dist/` | `index.html` |
 
 **TypeScript configs:**
-- `src/main/tsconfig.json` — Main + lib (Node.js, rootDir=`..`)
-- `tsconfig.json` — Renderer (Browser)
+- `src/main/tsconfig.json` — Main + shared (Node.js ESM, rootDir=`src/`)
+- `src/main/tsconfig.preload.json` — Preload (Node.js CJS, separate outDir — see Gotchas)
+- `src/renderer/tsconfig.json` — Renderer (Browser)
 
 ## Project Structure
 
 ```
-├── __tests__          # Tests (Vitest)
-│   ├── integration
-│   ├── performance
-│   └── unit
-├── electron            # Main process (Node.js, .ts only, no .js)
-│   ├── config          # Centralized configuration (paths)
-│   └── ipc             # IPC handlers + validators
-├── src/shared/                # Shared code (PGN parsing, converters, schema, types)
-│   ├── converters/     # Date, result converters
-│   ├── database/       # Schema
-│   ├── pgn/            # Game extraction
-│   └── types/          # GameData interface
-├── resources/          # Icons, sample PGN files
-├── scripts/            # CLI tools
-├── src/                # Renderer (React/TypeScript)
-│   ├── components/     # UI components
-│   ├── hooks/          # Custom hooks
-│   ├── styles/         # CSS, Tailwind
-│   ├── types/          # Types
-│   └── utils/          # Utilities
-├── dist/               # BUILD: Compiled renderer
-├── dist-src/main/      # BUILD: Compiled main + lib
-└── out/                # BUILD: Packaged app
+__tests__/             # Tests (Vitest)
+  integration/
+  performance/
+  unit/
+public/                # Static assets
+  sounds/              # Audio files
+resources/             # Icons, sample PGN files
+scripts/               # CLI tools
+src/
+  main/                # Main process (Node.js, .ts only)
+    config/            # Centralized configuration (paths, logger, settings)
+    ipc/               # IPC handlers, validators, types
+  renderer/            # Renderer (React/TypeScript)
+    components/
+    hooks/
+    styles/            # CSS, Tailwind
+    types/
+    utils/
+  shared/              # Shared code (single source for main + renderer)
+    converters/        # Date, result converters
+    database/          # Schema
+    pgn/               # Game extraction
+    types/             # GameData interface
+dist/                  # BUILD: Compiled renderer (Vite)
+dist-electron/         # BUILD: Compiled main + preload (tsc)
+  main/                #   ESM — main process + shared
+  preload/             #   CJS — preload (separate outDir, see Gotchas)
+out/                   # BUILD: Packaged app (electron-builder)
 ```
 
 ## Code Navigation
@@ -117,16 +120,16 @@ See `package.json` for versions.
 | PGN parsing | `src/shared/pgn/gameExtractor.ts` | Parse PGN → GameData |
 | Import | `src/main/ipc/importHandlers.ts` | PGN file import orchestration |
 | IPC bridge | `src/main/preload.ts` | Exposes `window.electron.*` API |
-| IPC types | `src/types/electron.d.ts` | Type definitions for IPC API |
+| IPC types | `src/renderer/types/electron.d.ts` | Type definitions for IPC API |
 | **Renderer** | | |
-| App root | `src/App.tsx` | Main layout, state management |
-| Board UI | `src/components/BoardDisplay.tsx` | Chessground integration |
-| Game browsing | `src/components/GameListSidebar.tsx` | Search/filter games |
-| Move navigation | `src/components/MoveNavigation.tsx` | Nav buttons + keyboard shortcuts |
+| App root | `src/renderer/App.tsx` | Main layout, state management |
+| Board UI | `src/renderer/components/BoardDisplay.tsx` | Chessground integration |
+| Game browsing | `src/renderer/components/GameListSidebar.tsx` | Search/filter games |
+| Move navigation | `src/renderer/components/MoveNavigation.tsx` | Nav buttons + keyboard shortcuts |
 | **Utilities** | | |
-| Chess logic | `src/utils/chessManager.ts` | Move parsing, FEN, ply navigation |
-| Audio | `src/utils/audioManager.ts` | Move sounds (capture, check, etc.) |
-| Date converter | `src/utils/dateConverter.ts` | Timestamp ↔ display format |
+| Chess logic | `src/renderer/utils/chessManager.ts` | Move parsing, FEN, ply navigation |
+| Audio | `src/renderer/utils/audioManager.ts` | Move sounds (capture, check, etc.) |
+| Date converter | `src/renderer/utils/dateConverter.ts` | Timestamp ↔ display format |
 | Result converter | `src/shared/converters/resultConverter.ts` | Numeric result ↔ display (single source)
 
 ### Prefer LSP Over Text Search
@@ -171,16 +174,16 @@ Useful LSP operations:
 
 | UI Element | Component | File |
 |------------|-----------|------|
-| Collection dropdown + rename/delete | `CollectionSelector` | `src/components/CollectionSelector.tsx` |
-| Filter panel (search, result radio) | `GameListSidebar` | `src/components/GameListSidebar.tsx` |
-| Game list items | `GameListSidebar` | `src/components/GameListSidebar.tsx` |
-| Chess board | `BoardDisplay` | `src/components/BoardDisplay.tsx` |
-| Navigation buttons (`|<  <  ▶  >  >|`) | `MoveNavigation` | `src/components/MoveNavigation.tsx` |
-| Control strip (Lichess, sound, flip) | `ControlStrip` | `src/components/ControlStrip.tsx` |
-| Game title header (collapsible) | `GameInfo` | `src/components/GameInfo.tsx` |
-| Move list grid | `MoveList` | `src/components/MoveList.tsx` |
-| PGN import dialog | `ImportDialog` | `src/components/ImportDialog.tsx` |
-| Delete confirmation dialog | `ConfirmDialog` | `src/components/ConfirmDialog.tsx` |
+| Collection dropdown + rename/delete | `CollectionSelector` | `src/renderer/components/CollectionSelector.tsx` |
+| Filter panel (search, result radio) | `GameListSidebar` | `src/renderer/components/GameListSidebar.tsx` |
+| Game list items | `GameListSidebar` | `src/renderer/components/GameListSidebar.tsx` |
+| Chess board | `BoardDisplay` | `src/renderer/components/BoardDisplay.tsx` |
+| Navigation buttons (`|<  <  ▶  >  >|`) | `MoveNavigation` | `src/renderer/components/MoveNavigation.tsx` |
+| Control strip (Lichess, sound, flip) | `ControlStrip` | `src/renderer/components/ControlStrip.tsx` |
+| Game title header (collapsible) | `GameInfo` | `src/renderer/components/GameInfo.tsx` |
+| Move list grid | `MoveList` | `src/renderer/components/MoveList.tsx` |
+| PGN import dialog | `ImportDialog` | `src/renderer/components/ImportDialog.tsx` |
+| Delete confirmation dialog | `ConfirmDialog` | `src/renderer/components/ConfirmDialog.tsx` |
 
 ### Keyboard Shortcuts (MoveNavigation.tsx)
 
@@ -195,7 +198,7 @@ Useful LSP operations:
 
 ### Styling
 
-**Color tokens** (`tailwind.config.ts` + `src/styles/index.css`):
+**Color tokens** (`tailwind.config.ts` + `src/renderer/styles/index.css`):
 - `ui-bg-page` — darkest background (main page)
 - `ui-bg-box` — panel backgrounds
 - `ui-bg-element` — buttons, list items
@@ -203,7 +206,7 @@ Useful LSP operations:
 - `ui-text` / `ui-text-dim` / `ui-text-dimmer` — text hierarchy
 - `ui-accent` — orange highlight (current move, active play button)
 
-**Chessground CSS** (`src/styles/index.css`):
+**Chessground CSS** (`src/renderer/styles/index.css`):
 - Board uses `.board-coords-wrapper` for coordinate padding
 - Coords positioned outside board via `.cg-wrap coords.ranks/files`
 - Board orientation handled via `data-orientation="black"` attribute
@@ -220,7 +223,7 @@ Useful LSP operations:
 
 When you fix a bug or solve a problem that required multiple attempts or significant reasoning:
 1. Propose adding a summary of the fix/approach to this section
-2. If existing content is inaccurate or obsolete, propose removing or revising it 
+2. If existing content is inaccurate or obsolete, propose removing or revising it
 
 ### Use `.js` Extensions in Imports
 
@@ -236,7 +239,7 @@ import { GameDatabase } from './gameDatabase'
 
 ### No `.js` Files in `src/main/`
 
-Only `.ts` source in `src/main/`. Compiled output `.js` goes into `dist-src/main/`. 
+Only `.ts` source in `src/main/`. Compiled output `.js` goes into `dist-electron/main/`.
 
 ### Database is Main-Process Only
 
@@ -245,7 +248,6 @@ SQLite doesn't work in renderer. Route all DB calls through IPC:
 2. preload.ts → ipcRenderer.invoke()
 3. src/main/ipc/ handler executes
 4. Result returned to renderer
-
 
 ### Validate IPC Inputs
 
@@ -266,20 +268,25 @@ const sanitizedFilters = validateSearchFilters(filters)
 
 ### Shared Code in src/shared/ (Single Source)
 
-Place shared utilities in `src/shared/` not `src/utils/`. Renderer can import from lib:
+Place shared utilities in `src/shared/` not `src/utils/`.
+- **Renderer**: `@shared` aliases work — Vite rewrites them at bundle time
+- **Main process**: must use relative paths — see Import Patterns and `@shared` gotcha below
 
 ```typescript
-// From renderer component
-import { resultNumericToDisplay } from '../../lib/converters/resultConverter.js'
+// Renderer — @shared alias works via Vite
+import { resultNumericToDisplay } from '@shared/converters/resultConverter.js'
+
+// Main process — relative path required
+import { GAMES_SCHEMA_SQL } from '../../shared/database/schema.js'
 ```
 
 ### Three TypeScript Configs
 
 | Config | Purpose | Module | Target |
 |--------|---------|--------|--------|
-| `src/main/tsconfig.json` | Main process + lib | ES modules | Node.js |
+| `src/main/tsconfig.json` | Main process + shared | ES modules | Node.js |
 | `src/main/tsconfig.preload.json` | Preload script | CommonJS | Node.js (sandboxed) |
-| `tsconfig.json` | Renderer components | ES modules | Browser |
+| `src/renderer/tsconfig.json` | Renderer components | ES modules | Browser |
 
 **IMPORTANT: Preload must use CommonJS.**
 Electron's sandboxed preload scripts cannot use ES modules (`import`/`export`). They must use CommonJS (`require`/`module.exports`). The preload script is compiled separately with `module: "CommonJS"` and excluded from the main electron build. Do not use ES modules in preload scripts.
@@ -316,13 +323,48 @@ Each subdirectory has an `index.ts` barrel that re-exports contents.
 
 ### Import Patterns
 
-From electron (relative to `src/main/ipc/`):
+From `src/main/ipc/` → `src/shared/`:
 ```typescript
-import { extractGameData, GAMES_SCHEMA_SQL } from '../../lib/pgn/gameExtractor.js'
-import { GAMES_SCHEMA_SQL } from '../../lib/database/schema.js'
+import { extractGameData } from '../../shared/pgn/gameExtractor.js'
+import { GAMES_SCHEMA_SQL } from '../../shared/database/schema.js'
 ```
 
-From CLI (relative to `scripts/`):
+From `src/main/ipc/utils/` → `src/shared/` (one extra `../`):
 ```typescript
-import { extractGameData, GAMES_SCHEMA_SQL, type GameData } from '../lib/index.js'
+export * from '../../../shared/converters/resultConverter.js'
 ```
+
+From CLI (`scripts/`):
+```typescript
+import { extractGameData, GAMES_SCHEMA_SQL, type GameData } from '../src/shared/index.js'
+```
+
+### `@shared` Aliases Are Compile-Time Only
+
+TypeScript `paths` (like `@shared/*`) satisfy the type-checker but are **not rewritten** in emitted `.js`. Node.js will crash at runtime with `Cannot find package '@shared/...'`.
+
+- **Renderer (`src/renderer/`)**: `@shared` works — Vite rewrites aliases during bundling
+- **Main process (`src/main/`)**: must use relative paths
+
+```typescript
+// ✗ Breaks at runtime in main process
+import { GAMES_SCHEMA_SQL } from '@shared/database/schema.js'
+
+// ✓ Correct — relative path survives tsc
+import { GAMES_SCHEMA_SQL } from '../../shared/database/schema.js'
+```
+
+**Why relative paths work identically in source and output:** `rootDir` is `src/` and `outDir` is `dist-electron/`, so the directory layout under `src/` is mirrored exactly under `dist-electron/`. Any relative path correct in source is also correct after compilation.
+
+### "File is not under rootDir" (TS6059) — Preload Build
+
+`tsc` reports this when a file outside `rootDir` is pulled into the compilation. This happens even through `import type` — type-only imports still trigger file resolution.
+
+**How it manifests here:** `preload.ts` → `import type { ... } from './ipc/types.js'` → `types.ts` re-exports from `src/shared/`. The transitive chain pulls `shared/` into the preload compilation.
+
+**Solution (already applied):**
+1. Preload `rootDir` set to `..` (= `src/`) so it covers both `src/main/` and `src/shared/`
+2. Preload uses a **separate** `outDir` (`dist-electron/preload/`) — otherwise its CJS output would overwrite the main build's ESM `shared/` files
+3. Main tsconfig excludes `preload.ts` to avoid compiling it as ESM
+
+**Rule of thumb:** If a tsconfig pulls in files from multiple subdirectories (even transitively via `import type`), `rootDir` must be their common ancestor. If two tsconfigs compile the same source files with different module systems, they **must** use different `outDir`s.
