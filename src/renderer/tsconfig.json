@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    /* Basic Options */
     "target": "ES2020",
     "module": "NodeNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -8,16 +9,30 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "isolatedModules": true,
+    
+    /* Error Reporting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "isolatedModules": true,
     "noFallthroughCasesInSwitch": true,
+    
+    /* React Support */
     "jsx": "react-jsx",
+    
+    /* Build & Paths */
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@shared": ["../shared/index.ts"],
+      "@shared/*": ["../shared/*"]
     }
   },
-  "include": ["./**/*"]
+  "include": [
+    "./**/*", 
+    "../shared/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

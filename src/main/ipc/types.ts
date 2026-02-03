@@ -3,7 +3,7 @@ import type {
   GameRow as LibGameRow,
   GameSearchResult as LibGameSearchResult,
   AppSettings as LibAppSettings,
-} from '../shared/types/game.js'
+} from '../../shared/types/game.js'
 
 /**
  * Re-export shared types from lib (single source of truth)

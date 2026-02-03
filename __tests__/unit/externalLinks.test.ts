@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildLichessURL } from '../../src/utils/externalLinks.js'
+import { buildLichessURL } from '../../src/renderer/utils/externalLinks.js'
 
 describe('externalLinks', () => {
   describe('buildLichessURL', () => {

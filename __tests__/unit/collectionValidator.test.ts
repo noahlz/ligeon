@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validateCollectionName } from '../../src/utils/collectionValidator.js'
+import { validateCollectionName } from '../../src/renderer/utils/collectionValidator.js'
 
 describe('collectionValidator', () => {
   describe('validateCollectionName', () => {

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    /* Basic Options */
     "target": "ES2020",
     "module": "NodeNext",
     "lib": ["ES2020"],
@@ -9,14 +10,34 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "isolatedModules": true,
+    
+    /* Error Reporting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": true,
+
+    /* Build & Paths */
     "noEmit": false,
+    /* rootDir points to 'src' so it can encompass both 'main' and 'shared' */
+    "rootDir": "..",
+    /* outDir: rootDir is src/, so main/main.ts -> dist-electron/main/main.js */
     "outDir": "../../dist-electron",
     "incremental": true,
-    "tsBuildInfoFile": "../../dist-electron/.tsbuildinfo"
+    "tsBuildInfoFile": "../../dist-electron/.tsbuildinfo",
+    
+    /* Alias Setup */
+    "baseUrl": ".",
+    "paths": {
+      "@shared": ["../shared/index.ts"],
+      "@shared/*": ["../shared/*"]
+    }
   },
-  "include": ["./**/*.ts", "../shared/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "./**/*.ts", 
+    "../shared/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "preload.ts"
+  ]
 }

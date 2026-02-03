@@ -4,7 +4,7 @@ import {
   isGameResult,
   getResultDisplay,
   type ChessManager,
-} from '../../src/utils/chessManager.js'
+} from '../../src/renderer/utils/chessManager.js'
 
 describe('chessManager', () => {
   describe('isGameResult', () => {

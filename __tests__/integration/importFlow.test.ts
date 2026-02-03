@@ -2,8 +2,8 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { importAndIndexPgn } from '../../electron/ipc/importHandlers'
-import { GameDatabase } from '../../electron/ipc/gameDatabase'
+import { importAndIndexPgn } from '../../src/main/ipc/importHandlers.js'
+import { GameDatabase } from '../../src/main/ipc/gameDatabase.js'
 
 describe('PGN Import Flow - Integration Tests', () => {
   let tempDir: string

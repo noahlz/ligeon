@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { separateResultFromMoves, groupMovesIntoPairs } from '../../src/utils/moveFormatter.js'
+import { separateResultFromMoves, groupMovesIntoPairs } from '../../src/renderer/utils/moveFormatter.js'
 
 describe('moveFormatter', () => {
   describe('separateResultFromMoves', () => {

@@ -1,15 +1,18 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist-electron",
-    "rootDir": ".",
+    /* rootDir must be src/ to cover transitive type imports into shared/ */
+    "rootDir": "..",
+    /* separate outDir avoids overwriting main build's ESM shared/ with CJS */
+    "outDir": "../../dist-electron/preload",
     "sourceMap": true,
+    /* Note: Preload scripts are often CommonJS for Electron compatibility */
     "module": "CommonJS",
     "moduleResolution": "Node",
     "tsBuildInfoFile": "../../dist-electron/.tsbuildinfo.preload",
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["preload.ts"],
+  "include": ["preload.ts", "../shared/**/*.ts"],
   "exclude": ["node_modules"]
 }
