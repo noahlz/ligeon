@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { deriveSuggestedName } from '../utils/filenameConverter.js'
+import { deriveSuggestedName } from '@/utils/filenameConverter.js';
 
 interface ImportProgress {
   parsed: number

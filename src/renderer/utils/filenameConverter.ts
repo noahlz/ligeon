@@ -1,3 +1,6 @@
+import path from 'path-browserify';
+import { titleCase } from 'text-title-case';
+
 /**
  * Derive a suggested collection name from a file path
  *
@@ -5,17 +8,14 @@
  * @returns Suggested collection name (title-cased, normalized)
  *
  * @example
- * deriveSuggestedName('/path/to/kasparov-karpov.pgn')
- * // => 'Kasparov Karpov'
+ * deriveSuggestedName('/path/to/tal-life-and-games.pgn')
+ * // => 'Tal Life and Games'
  */
 export function deriveSuggestedName(filePath: string): string {
-  const baseName = filePath.trim().split('/').pop() ?? ''
-  const nameWithoutExt = baseName.trim().replace(/\.(pgn|PGN)$/, '')
-  // Convert to title case and replace special characters with spaces
-  return nameWithoutExt
-    .replace(/[-._\s]+/g, ' ')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ')
-    .trim()
+  if (filePath) {
+    const baseName = path.parse(filePath).name;
+    return titleCase(baseName);
+  } else {
+    return '';
+  };
 }

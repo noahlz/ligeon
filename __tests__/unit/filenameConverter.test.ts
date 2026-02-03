@@ -42,5 +42,21 @@ describe('filenameConverter', () => {
     it('preserves single word', () => {
       expect(deriveSuggestedName('games.pgn')).toBe('Games')
     })
+
+    it('handles minor words', () => {
+      expect(deriveSuggestedName('tal-a-complete-life-and-games')).toBe("Tal a Complete Life and Games")
+    })
+
+    it('handles empty filenames', () => {
+      expect(deriveSuggestedName('    ')).toBe("")
+    })
+
+    it('handles null', () => {
+      expect(deriveSuggestedName(null as unknown as string)).toBe("")
+    })
+
+    it('handles undefined', () => {
+      expect(deriveSuggestedName(undefined as any)).toBe("")
+    })
   })
 })

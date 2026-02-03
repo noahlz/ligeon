@@ -78,6 +78,7 @@ export default function App() {
     setSelectedGame(fullGame)
     setSelectedGameCollectionId(selectedCollectionId)
 
+    // TODO: extract the move string logic to function, add unit test.
     // Create chess manager with the game's moves (filter out result notation)
     const movesArray = fullGame.moves
       .replace(/\d+\./g, '') // Remove move numbers
@@ -85,6 +86,7 @@ export default function App() {
       .filter(m => m.length > 0)
     const { gameMoves } = separateResultFromMoves(movesArray)
     const movesString = gameMoves.join(' ')
+
     const manager = createChessManager(movesString)
     setChessManager(manager)
 
