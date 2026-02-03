@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deriveSuggestedName } from '../../src/utils/filenameConverter.js'
+import { deriveSuggestedName } from '../../src/renderer/utils/filenameConverter.js'
 
 describe('filenameConverter', () => {
   describe('deriveSuggestedName', () => {

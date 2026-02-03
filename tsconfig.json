@@ -1,7 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "./src" },
-    { "path": "./electron" }
+    { "path": "./src/main" },
+    { "path": "./src/renderer" }
   ]
 }

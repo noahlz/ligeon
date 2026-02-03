@@ -4,7 +4,7 @@ import {
   resultNumericToDisplay,
   resultNumericToAbbreviation,
   RESULT_FILTER_OPTIONS,
-} from '../../lib/converters/resultConverter'
+} from '../../src/shared/converters/resultConverter'
 
 describe('Result Converter', () => {
   test('converts white win', () => {

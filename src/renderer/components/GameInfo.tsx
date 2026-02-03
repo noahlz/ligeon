@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {  SquareChevronDown, SquareMinus } from 'lucide-react'
-import { yyyymmToDisplay } from '../../lib/converters/dateConverter.js'
-import { resultNumericToDisplay } from '../../lib/converters/resultConverter.js'
+import { yyyymmToDisplay } from '../../shared/converters/dateConverter.js'
+import { resultNumericToDisplay } from '../../shared/converters/resultConverter.js'
 import { getOpeningByEco } from '../utils/openings.js'
 
 interface GameInfoProps {

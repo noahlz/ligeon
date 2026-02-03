@@ -3,9 +3,9 @@ import { parsePgn } from 'chessops/pgn'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import { importAndIndexPgn } from '../../electron/ipc/importHandlers.js'
-import { GameDatabase } from '../../electron/ipc/gameDatabase.js'
-import { extractGameData } from '../../lib/pgn/gameExtractor.js'
+import { importAndIndexPgn } from '../../src/main/ipc/importHandlers.js'
+import { GameDatabase } from '../../src/main/ipc/gameDatabase.js'
+import { extractGameData } from '../../src/shared/pgn/gameExtractor.js'
 
 describe('PGN Import Handler', () => {
   let tempDir: string

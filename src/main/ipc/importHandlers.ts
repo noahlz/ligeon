@@ -4,7 +4,7 @@ import { WebContents } from 'electron'
 import { PgnParser } from 'chessops/pgn'
 import { DatabaseManager } from './gameDatabase.js'
 import type { GameData, CollectionMetadata } from './types.js'
-import { extractGameData } from '../../lib/pgn/gameExtractor.js'
+import { extractGameData } from '../../shared/pgn/gameExtractor.js'
 import { validateCollectionId, validateFilePath, validateCollectionName } from './validators.js'
 import { logger } from '../config/logger.js'
 

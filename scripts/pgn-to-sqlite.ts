@@ -12,7 +12,7 @@ import fs from 'fs'
 import path from 'path'
 import Database from 'better-sqlite3'
 import { parsePgn } from 'chessops/pgn'
-import { extractGameData, GAMES_SCHEMA_SQL, type GameData } from '../lib/index.js'
+import { extractGameData, GAMES_SCHEMA_SQL, type GameData } from '../src/shared/index.js'
 
 function main(): void {
   const args = process.argv.slice(2)

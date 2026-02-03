@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach } from 'vitest'
-import { GameDatabase } from '../../electron/ipc/gameDatabase'
-import type { GameData } from '../../electron/ipc/types'
+import { GameDatabase } from '../../src/main/ipc/gameDatabase.js'
+import type { GameData } from '../../src/main/ipc/types.js'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'

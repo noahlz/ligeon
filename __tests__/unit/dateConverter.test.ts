@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { pgnDateToYYYYMM, yyyymmToDisplay } from '../../lib/converters/dateConverter'
+import { pgnDateToYYYYMM, yyyymmToDisplay } from '../../src/shared/converters/dateConverter'
 
 describe('Date Converter - pgnDateToYYYYMM', () => {
   test('converts complete date to YYYYMM', () => {

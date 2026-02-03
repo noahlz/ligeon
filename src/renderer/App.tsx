@@ -12,38 +12,11 @@ import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { playMoveSound, preloadAllSounds } from './utils/audioManager.js'
 import { separateResultFromMoves } from './utils/moveFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
+import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 
 interface Collection {
   id: string
   name: string
-}
-
-interface GameSearchResult {
-  id: number
-  white: string
-  black: string
-  event: string | null
-  date: number | null
-  result: number
-  whiteElo: number | null
-  blackElo: number | null
-  ecoCode: string | null
-}
-
-interface GameRow {
-  id: number
-  white: string
-  black: string
-  event: string | null
-  date: number | null
-  result: number
-  whiteElo: number | null
-  blackElo: number | null
-  ecoCode: string | null
-  site: string | null
-  round: string | null
-  moveCount: number
-  moves: string
 }
 
 export default function App() {

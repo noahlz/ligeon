@@ -11,8 +11,8 @@ import {
   validateFilePathResult,
   validateSearchFiltersResult,
   validateCollectionNameResult,
-} from '../../electron/ipc/validators.js'
-import type { GameFilters } from '../../electron/ipc/types.js'
+} from '../../src/main/ipc/validators.js'
+import type { GameFilters } from '../../src/main/ipc/types.js'
 
 describe('validators', () => {
   describe('validateCollectionId', () => {

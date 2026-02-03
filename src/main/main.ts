@@ -37,7 +37,7 @@ function createWindow() {
     minWidth: 1000,
     minHeight: 700,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, '../preload/main/preload.js'),
       contextIsolation: true,
       sandbox: true,
     },
@@ -49,11 +49,6 @@ function createWindow() {
     : `file://${path.join(__dirname, '../dist/index.html')}`
 
   mainWindow.loadURL(startUrl)
-
-  // Open dev tools in development
-  if (isDev) {
-    mainWindow.webContents.openDevTools()
-  }
 
   mainWindow.on('closed', () => {
     mainWindow = null
