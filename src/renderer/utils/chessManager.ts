@@ -2,6 +2,9 @@ import { Chess } from 'chessops/chess'
 import { parseFen, makeFen, INITIAL_FEN } from 'chessops/fen'
 import { parseSan } from 'chessops/san'
 
+// TODO: Replace bespoke logic with chessops
+// See: https://niklasf.github.io/chessops/modules.html
+
 export type MoveType = 'move' | 'capture' | 'check' | 'castle'
 
 export interface ChessManager {

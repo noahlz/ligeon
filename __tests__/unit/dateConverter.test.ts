@@ -14,6 +14,14 @@ describe('Date Converter - pgnDateToYYYYMM', () => {
     expect(pgnDateToYYYYMM('?.?.?')).toBeNull()
   })
 
+  test('handles unknown month that has one question mark', () => {
+    expect(pgnDateToYYYYMM('2001.?.??')).toBe(200101)
+  })
+
+  test('handles unknown month that has too many question marks', () => {
+    expect(pgnDateToYYYYMM('2001.????.?')).toBe(200101)
+  })
+
   test('handles null input', () => {
     expect(pgnDateToYYYYMM(null)).toBeNull()
   })
@@ -49,17 +57,20 @@ describe('Date Converter - yyyymmToDisplay', () => {
     expect(yyyymmToDisplay(undefined)).toBe('Unknown')
   })
 
-  test('handles invalid month', () => {
+  test('handles invalid month 13', () => {
     expect(yyyymmToDisplay(198513)).toBe('Unknown')
+  })
+
+  test('handles invalid month zero', () => {
     expect(yyyymmToDisplay(198500)).toBe('Unknown')
   })
 
-  test('handles all months correctly', () => {
+  test('handles all months correctly (for en-US locale)', () => {
     const expected = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     for (let i = 1; i <= 12; i++) {
       const yyyymm = 2000 * 100 + i
-      const result = yyyymmToDisplay(yyyymm)
+      const result = yyyymmToDisplay(yyyymm, 'en-US')
       expect(result).toBe(`${expected[i - 1]} 2000`)
     }
   })

@@ -7,6 +7,10 @@
   - Plan file: ~/.claude/plans/ligeon-headlessui-refactor.md
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
 
+## Chess Manager
+
+- Revise chessManager to use chessops for interpreting PGN content (instead of bespoke code)
+
 ## Game Replay / Navigation
 
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)

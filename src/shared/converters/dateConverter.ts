@@ -18,8 +18,9 @@ export function pgnDateToYYYYMM(pgnDate: string | null | undefined): number | nu
     const year = parseInt(parts[0])
     if (isNaN(year)) return null
 
-    // Default to January if month is unknown
-    const month = parts[1] === '??' ? 1 : parseInt(parts[1])
+    // Default to January if month is unknown (not numeric)
+    const month = !/\d/.test(parts[1]) ? 1 : parseInt(parts[1])
+
     if (isNaN(month) || month < 1 || month > 12) return null
 
     return year * 100 + month
@@ -33,26 +34,27 @@ export function pgnDateToYYYYMM(pgnDate: string | null | undefined): number | nu
  * Convert YYYYMM integer to human-readable display format
  *
  * @param yyyymm - YYYYMM integer (e.g., 198503)
+ * @param locale - the locale i.e. 'en-US' (default), 'fr-FR', 'de-DE', etc.
  * @returns Formatted date string (e.g., "Mar 1985") or "Unknown"
  *
  * Examples:
  * - 198503 → "Mar 1985"
  * - null → "Unknown"
  */
-export function yyyymmToDisplay(yyyymm: number | null | undefined): string {
+export function yyyymmToDisplay(yyyymm: number | null | undefined, locale: string = 'en-US'): string {
   if (!yyyymm) return 'Unknown'
 
-  try {
-    const year = Math.floor(yyyymm / 100)
-    const month = yyyymm % 100
+  const str = yyyymm.toString();
+  const year = parseInt(str.substring(0, 4));
+  const month = parseInt(str.substring(4, 6));
 
-    if (month < 1 || month > 12) return 'Unknown'
-
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    return `${monthNames[month - 1]} ${year}`
-  } catch (error) {
-    console.warn('Error formatting YYYYMM:', yyyymm, error)
-    return 'Unknown'
+  // Parser alerady ensured months are 1-12.
+  if (month < 1 || month > 12) {
+    return 'Unknown';
   }
+
+  return new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(year, month - 1));
 }
