@@ -8,7 +8,7 @@ import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
 import ControlStrip from './components/ControlStrip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
-import { separateResultFromMoves } from './utils/moveFormatter.js'
+import { parseMoveAndResult } from './utils/moveFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardState } from './hooks/useBoardState.js'
@@ -78,13 +78,7 @@ export default function App() {
     setSelectedGame(fullGame)
     setSelectedGameCollectionId(selectedCollectionId)
 
-    // TODO: extract the move string logic to function, add unit test.
-    // Create chess manager with the game's moves (filter out result notation)
-    const movesArray = fullGame.moves
-      .replace(/\d+\./g, '') // Remove move numbers
-      .split(/\s+/)
-      .filter(m => m.length > 0)
-    const { gameMoves } = separateResultFromMoves(movesArray)
+    const { gameMoves } = parseMoveAndResult(fullGame.moves)
     const movesString = gameMoves.join(' ')
 
     const manager = createChessManager(movesString)

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { getResultDisplay } from '../utils/chessManager.js'
-import { separateResultFromMoves, groupMovesIntoPairs } from '../utils/moveFormatter.js'
+import { parseMoveAndResult, groupMovesIntoPairs } from '../utils/moveFormatter.js'
 
 interface MoveListProps {
   moves: string[]
@@ -21,7 +21,7 @@ export default function MoveList({ moves, currentPly, onJump }: MoveListProps) {
     }
   }, [currentPly])
 
-  const { gameMoves, result } = separateResultFromMoves(moves)
+  const { gameMoves, result } = parseMoveAndResult(moves)
   const movePairs = groupMovesIntoPairs(gameMoves)
 
   return (

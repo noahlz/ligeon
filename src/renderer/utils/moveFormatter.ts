@@ -6,22 +6,33 @@ export interface MovePair {
   moveNumber: number
 }
 
-export interface MovesSeparated {
+export interface MovesAndResult {
   gameMoves: string[]
   result: string | null
 }
 
 /**
- * Separate game result from move list
- *
+ * Convert PGN move list into a string array of moves and the result. 
+ * 
  * @param moves - Full move list including possible result
  * @returns Separated moves and result
  *
  * @example
- * separateResultFromMoves(['e4', 'c5', 'Nf3', '1-0'])
+ * separateResultFromMoves('1. e4 c5' 2. Nf3 1-0'])
  * // => { gameMoves: ['e4', 'c5', 'Nf3'], result: '1-0' }
  */
-export function separateResultFromMoves(moves: string[]): MovesSeparated {
+export function parseMoveAndResult(pgnMoves: string | string[]): MovesAndResult {
+  let moves: string[];
+
+  if (Array.isArray(pgnMoves)) {
+    moves = pgnMoves;
+  } else {
+    moves = pgnMoves
+      .replace(/\d+\./g, '') // Remove move numbers
+      .split(/\s+/)
+      .filter(m => m.length > 0);
+  }
+
   const lastElement = moves[moves.length - 1]
   const hasResult = lastElement && isGameResult(lastElement)
 
