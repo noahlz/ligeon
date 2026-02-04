@@ -1,12 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-import { deriveSuggestedName } from '@/utils/filenameConverter.js';
-
-interface ImportProgress {
-  parsed: number
-  indexed: number
-  skipped: number
-  logs: Array<{ message: string; type: 'info' | 'error' }>
-}
+import { deriveSuggestedName } from '@/utils/filenameConverter.js'
+import { useImportDialog } from '../hooks/useImportDialog.js'
+import { useImportProgress } from '../hooks/useImportProgress.js'
 
 interface ImportDialogProps {
   isOpen: boolean
@@ -16,84 +10,27 @@ interface ImportDialogProps {
 }
 
 export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: ImportDialogProps) {
-  const [collectionName, setCollectionName] = useState('')
-  const [isIndexing, setIsIndexing] = useState(false)
-  const [isComplete, setIsComplete] = useState(false)
-  const [progress, setProgress] = useState<ImportProgress>({
-    parsed: 0,
-    indexed: 0,
-    skipped: 0,
-    logs: [],
-  })
-  const [importedCollectionId, setImportedCollectionId] = useState<string | null>(null)
-  const logEndRef = useRef<HTMLDivElement>(null)
-
   const suggestedName = filePath ? deriveSuggestedName(filePath) : ''
 
-  // Reset state when dialog opens with a new file
-  useEffect(() => {
-    if (isOpen && filePath) {
-      setCollectionName('')
-      setIsIndexing(false)
-      setIsComplete(false)
-      setImportedCollectionId(null)
-      setProgress({ parsed: 0, indexed: 0, skipped: 0, logs: [] })
-    }
-  }, [isOpen, filePath])
+  const {
+    collectionName,
+    setCollectionName,
+    isIndexing,
+    isComplete,
+    handleImport,
+    handleClose,
+    setIsComplete,
+    setImportedCollectionId,
+  } = useImportDialog({ isOpen, filePath, suggestedName, onComplete, onClose })
 
-  useEffect(() => {
-    const unsubscribe = window.electron.onImportProgress((data: any) => {
-      if (data.type === 'progress') {
-        setProgress((prev) => ({
-          ...prev,
-          parsed: data.parsed ?? prev.parsed,
-          indexed: data.indexed ?? prev.indexed,
-          skipped: data.skipped ?? prev.skipped,
-        }))
-      } else if (data.type === 'log') {
-        setProgress((prev) => ({
-          ...prev,
-          logs: [...prev.logs, ...data.logs],
-        }))
-      } else if (data.type === 'complete') {
-        // Extract collectionId from the event (only if successful)
-        if (data.success && data.collectionId) {
-          setImportedCollectionId(data.collectionId)
-        }
-        // Keep isIndexing=true so we stay in the progress/complete view
-        // isIndexing will be reset when handleClose() is called
-        setIsComplete(true)
-      }
-    })
-    return unsubscribe
-  }, [])
+  const { progress, logEndRef, resetProgress } = useImportProgress({
+    onComplete: setImportedCollectionId,
+    onMarkComplete: () => setIsComplete(true),
+  })
 
-  useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [progress.logs])
-
-  const handleImport = async () => {
-    if (!filePath) return
-    setIsIndexing(true)
-    setProgress({ parsed: 0, indexed: 0, skipped: 0, logs: [] })
-    const collectionId = crypto.randomUUID()
-    const finalName = collectionName || suggestedName
-    await window.electron.importPgn(filePath, collectionId, finalName)
-  }
-
-  const handleClose = () => {
-    setCollectionName('')
-    setProgress({ parsed: 0, indexed: 0, skipped: 0, logs: [] })
-    setIsIndexing(false)
-    const wasComplete = isComplete
-    const collectionId = importedCollectionId
-    setIsComplete(false)
-    setImportedCollectionId(null)
-    if (wasComplete && collectionId) {
-      onComplete?.(collectionId)
-    } else {
-      onClose?.()
-    }
+  const startImport = async () => {
+    resetProgress()
+    await handleImport()
   }
 
   if (!isOpen || !filePath) return null
@@ -119,14 +56,14 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  handleImport()
+                  startImport()
                 }
               }}
               className="w-full px-2 py-1.5 border rounded mb-3 bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
             />
             <div className="flex gap-2">
               <button
-                onClick={handleImport}
+                onClick={startImport}
                 className="flex-1 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
               >
                 Import

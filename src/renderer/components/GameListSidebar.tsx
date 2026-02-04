@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
 import { Filter, SquareChevronDown } from 'lucide-react'
 import { yyyymmToDisplay } from '../../shared/converters/dateConverter.js'
 import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../shared/converters/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
 import OpeningFilter from './OpeningFilter.js'
 import { getOpeningByEco } from '../utils/openings.js'
+import { useGameFilters } from '../hooks/useGameFilters.js'
+import { useGameSearch } from '../hooks/useGameSearch.js'
 import type { GameRow, GameSearchResult } from '../../shared/types/game.js'
 
 interface Collection {
@@ -37,68 +38,25 @@ export default function GameListSidebar({
   selectedGame,
   selectedGameCollectionId,
 }: GameListSidebarProps) {
-  const [games, setGames] = useState<GameSearchResult[]>([])
-  const [totalGameCount, setTotalGameCount] = useState(0)
-  const [availableDates, setAvailableDates] = useState<number[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filters, setFilters] = useState<{
-    result: number | null
-    dateFrom: number | null
-    dateTo: number | null
-    ecoCodes: string[]
-  }>({
-    result: null,
-    dateFrom: null,
-    dateTo: null,
-    ecoCodes: [],
+  const {
+    searchTerm,
+    setSearchTerm,
+    filters,
+    filtersExpanded,
+    setFiltersExpanded,
+    setResultFilter,
+    setDateFrom,
+    setDateTo,
+    setEcoCodes,
+    resetFilters,
+  } = useGameFilters()
+
+  const { games, totalGameCount, availableDates } = useGameSearch({
+    collectionId,
+    searchTerm,
+    filters,
+    onCollectionChange: resetFilters,
   })
-  const [filtersExpanded, setFiltersExpanded] = useState(false)
-
-  // Fetch total game count and available dates when collection changes
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      if (!collectionId) {
-        setTotalGameCount(0)
-        setAvailableDates([])
-        setFilters({
-          result: null,
-          dateFrom: null,
-          dateTo: null,
-          ecoCodes: [],
-        })
-        return
-      }
-
-      const count = await window.electron.getGameCount(collectionId)
-      setTotalGameCount(count)
-
-      // Get available dates (YYYYMM format)
-      const dates = await window.electron.getAvailableDates(collectionId)
-      setAvailableDates(dates)
-    }
-    fetchMetadata()
-  }, [collectionId])
-
-  // Search games with filters
-  useEffect(() => {
-    const searchGames = async () => {
-      if (!collectionId) {
-        setGames([])
-        return
-      }
-
-      const results = await window.electron.searchGames(collectionId, {
-        player: searchTerm || undefined,
-        result: filters.result ?? undefined,
-        dateFrom: filters.dateFrom ?? undefined,
-        dateTo: filters.dateTo ?? undefined,
-        ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
-        limit: 200,
-      })
-      setGames(results)
-    }
-    searchGames()
-  }, [collectionId, searchTerm, filters])
 
   return (
     <div data-testid="game-list-sidebar" className="flex flex-col gap-2 h-full">
@@ -146,7 +104,7 @@ export default function GameListSidebar({
                   <input
                     type="radio"
                     checked={filters.result === option.value}
-                    onChange={() => setFilters({ ...filters, result: option.value })}
+                    onChange={() => setResultFilter(option.value)}
                   />
                   <span>{option.label}</span>
                 </label>
@@ -163,10 +121,7 @@ export default function GameListSidebar({
                   value={filters.dateFrom ?? ''}
                   onChange={(e) => {
                     const value = e.target.value ? parseInt(e.target.value, 10) : null
-                    // Only update if valid (start <= end or one is null)
-                    if (value === null || filters.dateTo === null || value <= filters.dateTo) {
-                      setFilters({ ...filters, dateFrom: value })
-                    }
+                    setDateFrom(value)
                   }}
                   className="w-full px-2 py-1 bg-ui-bg-element rounded text-ui-text text-xs border border-ui-border"
                 >
@@ -184,10 +139,7 @@ export default function GameListSidebar({
                   value={filters.dateTo ?? ''}
                   onChange={(e) => {
                     const value = e.target.value ? parseInt(e.target.value, 10) : null
-                    // Only update if valid (start <= end or one is null)
-                    if (value === null || filters.dateFrom === null || filters.dateFrom <= value) {
-                      setFilters({ ...filters, dateTo: value })
-                    }
+                    setDateTo(value)
                   }}
                   className="w-full px-2 py-1 bg-ui-bg-element rounded text-ui-text text-xs border border-ui-border"
                 >
@@ -207,20 +159,12 @@ export default function GameListSidebar({
             <OpeningFilter
               collectionId={collectionId || ''}
               value={filters.ecoCodes}
-              onChange={(ecos) => setFilters({ ...filters, ecoCodes: ecos })}
+              onChange={setEcoCodes}
             />
           </div>
 
           <button
-            onClick={() => {
-              setSearchTerm('')
-              setFilters({
-                result: null,
-                dateFrom: null,
-                dateTo: null,
-                ecoCodes: [],
-              })
-            }}
+            onClick={resetFilters}
             className="w-full px-2 py-1.5 bg-ui-bg-hover hover:bg-ui-bg-element rounded text-sm"
           >
             Reset

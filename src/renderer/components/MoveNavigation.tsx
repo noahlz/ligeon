@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   ChevronsLeft,
   ChevronLeft,
@@ -7,6 +7,7 @@ import {
   Play,
   Pause,
 } from 'lucide-react'
+import { useGameControls } from '../hooks/useGameControls.js'
 
 interface MoveNavigationProps {
   onFirst: () => void
@@ -35,75 +36,7 @@ export default function MoveNavigation({
 }: MoveNavigationProps) {
   const [showSpeedMenu, setShowSpeedMenu] = useState(false)
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const lastScrollTime = { current: 0 }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't interfere if typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return
-      }
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          onPrev()
-          break
-        case 'ArrowRight':
-          onNext()
-          break
-        case 'Home':
-          onFirst()
-          break
-        case 'End':
-          onLast()
-          break
-        case ' ':
-          e.preventDefault()
-          onTogglePlay()
-          break
-      }
-    }
-
-    const handleWheel = (e: WheelEvent) => {
-      // Don't interfere if scrolling in an input/textarea
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return
-      }
-
-      // Skip if hovering over game list sidebar (let it scroll natively)
-      const gameListSidebar = document.querySelector('[data-testid="game-list-sidebar"]')
-      if (gameListSidebar?.contains(e.target as Node)) {
-        return
-      }
-
-      // Skip if hovering over move list panel (let it scroll natively)
-      const moveListPanel = document.querySelector('[data-testid="move-list-panel"]')
-      if (moveListPanel?.contains(e.target as Node)) {
-        return
-      }
-
-      // Debounce: 50ms between scroll actions
-      const now = Date.now()
-      if (now - lastScrollTime.current < 50) return
-
-      if (e.deltaY > 0) {
-        e.preventDefault()
-        onNext()
-      } else if (e.deltaY < 0) {
-        e.preventDefault()
-        onPrev()
-      }
-      lastScrollTime.current = now
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    window.addEventListener('wheel', handleWheel, { passive: false })
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('wheel', handleWheel)
-    }
-  }, [onFirst, onPrev, onNext, onLast, onTogglePlay])
+  useGameControls({ onFirst, onPrev, onNext, onLast, onTogglePlay })
 
   const isAtStart = currentPly === 0
   const isAtEnd = currentPly === totalPlies
