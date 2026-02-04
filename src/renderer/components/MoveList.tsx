@@ -1,14 +1,15 @@
 import React, { useRef, useEffect } from 'react'
 import { getResultDisplay } from '../utils/chessManager.js'
-import { parseMoveAndResult, groupMovesIntoPairs } from '../utils/moveFormatter.js'
+import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
 
 interface MoveListProps {
   moves: string[]
+  result: string | null
   currentPly: number
   onJump: (ply: number) => void
 }
 
-export default function MoveList({ moves, currentPly, onJump }: MoveListProps) {
+export default function MoveList({ moves, result, currentPly, onJump }: MoveListProps) {
   const currentMoveRef = useRef<HTMLSpanElement>(null)
 
   // Auto-scroll to current move
@@ -21,8 +22,7 @@ export default function MoveList({ moves, currentPly, onJump }: MoveListProps) {
     }
   }, [currentPly])
 
-  const { gameMoves, result } = parseMoveAndResult(moves)
-  const movePairs = groupMovesIntoPairs(gameMoves)
+  const movePairs = groupMovesIntoPairs(moves)
 
   return (
     <div className="move-list overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded">

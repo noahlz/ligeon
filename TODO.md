@@ -1,9 +1,5 @@
 # Ligeon TODOs
 
-## Chess Manager
-
-- Revise chessManager to use chessops for interpreting PGN content (instead of bespoke code)
-
 ## Style / UI
 
 - Upgrade to Tailwind 4

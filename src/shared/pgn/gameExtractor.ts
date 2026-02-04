@@ -42,28 +42,10 @@ export function extractGameData(game: Game<PgnNodeData>): GameData | null {
   const whiteElo = whiteEloStr ? parseInt(whiteEloStr) : null
   const blackElo = blackEloStr ? parseInt(blackEloStr) : null
 
-  // Count moves in mainline and build moves text
-  let moveCount = 0
-  const movesList: string[] = []
-  let moveNumber = 1
-
-  for (const node of game.moves.mainline()) {
-    if (node.san) {
-      moveCount++
-      // Add move number before white's move
-      if (moveCount % 2 === 1) {
-        movesList.push(`${moveNumber}.`)
-      }
-      movesList.push(node.san)
-      // Increment move number after black's move
-      if (moveCount % 2 === 0) {
-        moveNumber++
-      }
-    }
-  }
-
-  // Build moves text with result
-  const moves = movesList.join(' ') + (movesList.length > 0 ? ' ' : '') + resultStr
+  // Extract mainline SAN moves and build moves text with result
+  const sanMoves = [...game.moves.mainline()].map(n => n.san)
+  const moveCount = sanMoves.length
+  const moves = sanMoves.join(' ') + (sanMoves.length > 0 ? ' ' : '') + resultStr
 
   return {
     white,

@@ -8,7 +8,6 @@ import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
 import ControlStrip from './components/ControlStrip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
-import { parseMoveAndResult } from './utils/moveFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardState } from './hooks/useBoardState.js'
@@ -53,7 +52,7 @@ export default function App() {
   })
 
   // Move list parsing
-  const { moves } = useGameMoves({ movesString: selectedGame?.moves })
+  const { moves, result } = useGameMoves({ movesString: selectedGame?.moves })
 
   // Load collections on mount
   useEffect(() => {
@@ -78,10 +77,7 @@ export default function App() {
     setSelectedGame(fullGame)
     setSelectedGameCollectionId(selectedCollectionId)
 
-    const { gameMoves } = parseMoveAndResult(fullGame.moves)
-    const movesString = gameMoves.join(' ')
-
-    const manager = createChessManager(movesString)
+    const manager = createChessManager(fullGame.moves)
     setChessManager(manager)
 
     // Reset to initial position
@@ -241,6 +237,7 @@ export default function App() {
               {moves.length > 0 && (
                 <MoveList
                   moves={moves}
+                  result={result}
                   currentPly={currentPly}
                   onJump={handleJump}
                 />
