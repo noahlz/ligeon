@@ -1,15 +1,15 @@
 # Ligeon TODOs
 
+## Chess Manager
+
+- Revise chessManager to use chessops for interpreting PGN content (instead of bespoke code)
+
 ## Style / UI
 
 - Upgrade to Tailwind 4
 - Refactor app to use [HeadlessUI](https://headlessui.com/) for components.
   - Plan file: ~/.claude/plans/ligeon-headlessui-refactor.md
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
-
-## Chess Manager
-
-- Revise chessManager to use chessops for interpreting PGN content (instead of bespoke code)
 
 ## Game Replay / Navigation
 

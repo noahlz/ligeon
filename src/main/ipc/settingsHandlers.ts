@@ -39,14 +39,14 @@ export async function updateSettings(updates: Partial<AppSettings>): Promise<App
     }
 
     // Validate collections path if it was updated
-    if (updates.collectionsPath && updates.collectionsPath !== currentSettings.collectionsPath) {
+    if (updates.collections?.path && updates.collections.path !== currentSettings.collections.path) {
       // Check if path exists and is a directory
-      if (!fs.existsSync(updates.collectionsPath)) {
-        throw new Error(`Collections path does not exist: ${updates.collectionsPath}`)
+      if (!fs.existsSync(updates.collections.path)) {
+        throw new Error(`Collections path does not exist: ${updates.collections.path}`)
       }
-      const stats = fs.statSync(updates.collectionsPath)
+      const stats = fs.statSync(updates.collections.path)
       if (!stats.isDirectory()) {
-        throw new Error(`Collections path is not a directory: ${updates.collectionsPath}`)
+        throw new Error(`Collections path is not a directory: ${updates.collections.path}`)
       }
     }
 
@@ -81,7 +81,7 @@ export async function selectCollectionsDirectory(): Promise<string | null> {
     const updatedSettings = setCollectionsPath(selectedPath)
     console.log('✓ Collections path updated to:', selectedPath)
 
-    return updatedSettings.collectionsPath
+    return updatedSettings.collections.path
   } catch (error) {
     logError('settingsHandlers', 'selectCollectionsDirectory', {}, error)
     throw error

@@ -28,8 +28,8 @@ export function loadSettings(): AppSettings {
       if (fs.existsSync(defaultPath)) {
         // Existing collections found - use that path
         logger.info('✓ Detected existing collections at:', defaultPath)
-        settings.collectionsPath = defaultPath
-        settings.collectionsPathCustomized = false
+        settings.collections.path = defaultPath
+        settings.collections.custom = false
       }
 
       // Save initial settings
@@ -41,14 +41,15 @@ export function loadSettings(): AppSettings {
     const settings = JSON.parse(content) as AppSettings
 
     // Validate required fields
-    if (!settings.collectionsPath) {
+    if (!settings.collections?.path) {
       logger.warn('Invalid settings file - missing collectionsPath. Using defaults.')
       return getDefaultSettings()
     }
 
     return settings
   } catch (error) {
-    logger.error('Failed to load settings:', error)
+    const msg = "Failed to load settings:";
+    logger?.error(msg, error) || console.error(msg + error) 
     return getDefaultSettings()
   }
 }
@@ -82,7 +83,7 @@ export function saveSettings(settings: AppSettings): void {
  */
 export function getCollectionsPath(): string {
   const settings = loadSettings()
-  return settings.collectionsPath
+  return settings.collections.path
 }
 
 /**
@@ -93,8 +94,8 @@ export function getCollectionsPath(): string {
  */
 export function setCollectionsPath(newPath: string): AppSettings {
   const settings = loadSettings()
-  settings.collectionsPath = newPath
-  settings.collectionsPathCustomized = true
+  settings.collections.path = newPath
+  settings.collections.custom = true
   saveSettings(settings)
   return settings
 }

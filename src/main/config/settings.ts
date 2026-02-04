@@ -9,10 +9,20 @@ import os from 'os'
  * Application settings interface
  */
 export interface AppSettings {
-  /** Path to the collections directory */
-  collectionsPath: string
-  /** Whether the collections path has been customized by the user */
-  collectionsPathCustomized: boolean
+  collections: CollectionSettings
+  logging: LogSettings
+
+}
+
+export interface CollectionSettings {
+  path: string
+  custom: boolean
+}
+
+export interface LogSettings {
+  level: string
+  maxSize: string
+  retentionDays: number
 }
 
 /**
@@ -40,7 +50,11 @@ export function getDefaultCollectionsPath(): string {
  */
 export function getDefaultSettings(): AppSettings {
   return {
-    collectionsPath: getDefaultCollectionsPath(),
-    collectionsPathCustomized: false,
+    collections: { path: getDefaultCollectionsPath(), custom: false },
+    logging: {
+      level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+      maxSize: '10m',
+      retentionDays: 90
+    }
   }
 }

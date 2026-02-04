@@ -2,12 +2,14 @@ import winston from 'winston'
 import DailyRotateFile from 'winston-daily-rotate-file'
 import path from 'path'
 import os from 'os'
+import { loadSettings } from './settingsStore.js'
 
+// Not configurable...
 const LOG_DIR = path.join(os.homedir(), '.ligeon', 'logs')
-const LOG_RETENTION_DAYS = process.env.LOG_RETENTION_DAYS || '90'
+const settings =  loadSettings();
 
 export const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+  level: settings.logging.level,
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true })
@@ -23,8 +25,8 @@ export const logger = winston.createLogger({
       dirname: LOG_DIR,
       filename: 'ligeon-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
-      maxSize: '10m',
-      maxFiles: `${LOG_RETENTION_DAYS}d`,
+      maxSize: settings.logging.maxSize,
+      maxFiles: `${settings.logging.retentionDays}d`,
       format: winston.format.printf(({ timestamp, level, message, ...meta }) => {
         const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : ''
         return `${timestamp} [${level.toUpperCase()}]: ${message}${metaStr}`
