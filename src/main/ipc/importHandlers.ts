@@ -36,7 +36,7 @@ export interface ImportResult {
 /**
  * Progress information for an import operation
  */
-export interface ImportProgress {
+interface ImportProgress {
   parsed: number
   indexed: number
   skipped: number
@@ -261,7 +261,7 @@ export async function importAndIndexPgn(
 /**
  * Send progress update to renderer process
  */
-function sendProgressUpdate(sender: WebContents | null, progress: ImportProgress): void {
+  function sendProgressUpdate(sender: WebContents | null, progress: ImportProgress): void {
   if (sender && !sender.isDestroyed()) {
     sender.send('import-progress', progress)
   }

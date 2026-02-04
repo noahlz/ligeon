@@ -1,29 +1,11 @@
 import { describe, test, expect } from 'vitest'
 import {
   createChessManager,
-  isGameResult,
   getResultDisplay,
   type ChessManager,
 } from '../../src/renderer/utils/chessManager.js'
 
 describe('chessManager', () => {
-  describe('isGameResult', () => {
-    test('identifies valid game results', () => {
-      expect(isGameResult('1-0')).toBe(true)
-      expect(isGameResult('0-1')).toBe(true)
-      expect(isGameResult('1/2-1/2')).toBe(true)
-      expect(isGameResult('*')).toBe(true)
-    })
-
-    test('rejects invalid strings', () => {
-      expect(isGameResult('e4')).toBe(false)
-      expect(isGameResult('Nf3')).toBe(false)
-      expect(isGameResult('1-1')).toBe(false)
-      expect(isGameResult('')).toBe(false)
-      expect(isGameResult('draw')).toBe(false)
-    })
-  })
-
   describe('getResultDisplay', () => {
     test('formats white win', () => {
       expect(getResultDisplay('1-0')).toBe('1-0 (White Wins)')
