@@ -36,7 +36,7 @@ export interface ImportResult {
 /**
  * Progress information for an import operation
  */
-export interface ImportProgress {
+interface ImportProgress {
   parsed: number
   indexed: number
   skipped: number
