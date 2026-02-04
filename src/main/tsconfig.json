@@ -25,12 +25,7 @@
     "incremental": true,
     "tsBuildInfoFile": "../../dist-electron/.tsbuildinfo",
     
-    /* Alias Setup */
-    "baseUrl": ".",
-    "paths": {
-      "@shared": ["../shared/index.ts"],
-      "@shared/*": ["../shared/*"]
-    }
+    "baseUrl": "."
   },
   "include": [
     "./**/*.ts", 
