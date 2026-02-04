@@ -27,15 +27,6 @@ interface ParsedMove {
   type: MoveType
 }
 
-const GAME_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'] as const
-
-/**
- * Check if a string is a game result
- */
-export function isGameResult(str: string): boolean {
-  return GAME_RESULTS.includes(str as any)
-}
-
 /**
  * Get display text for a game result
  */
