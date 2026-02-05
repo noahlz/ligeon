@@ -33,24 +33,6 @@
   --color-slate-900: #0f172a;
 }
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
-
 * {
   box-sizing: border-box;
 }
@@ -63,12 +45,7 @@ body {
   color: hsl(0, 0%, 73%);
 }
 
-/* Use ui- color variables */
 html {
-  --ui-bg-page: hsl(37, 10%, 8%);
-  --ui-bg-box: hsl(37, 7%, 14%);
-  --ui-bg-element: hsl(37, 7%, 18%);
-  --ui-bg-hover: hsl(37, 7%, 22%);
   --ui-font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;

@@ -158,7 +158,7 @@ export default function CollectionSelector({
                       onSelect(col.id)
                       setShowMenu(false)
                     }}
-                    className="flex-1 text-left truncate min-w-0"
+                    className="flex-1 text-left truncate min-w-0 cursor-pointer"
                     title={col.name}
                   >
                     {col.name}
@@ -194,7 +194,7 @@ export default function CollectionSelector({
               onImport?.()
               setShowMenu(false)
             }}
-            className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover text-sm"
+            className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover text-sm cursor-pointer"
           >
             + Import
           </button>
