@@ -51,14 +51,14 @@ export default function ConfirmDialog({
         <div className="flex gap-2 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded text-sm"
+            className="px-4 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm text-sm"
           >
             Cancel
           </button>
           <button
             ref={confirmButtonRef}
             onClick={onConfirm}
-            className="flex items-center gap-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+            className="flex items-center gap-2 px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-sm text-sm"
           >
             {confirmIcon === 'trash' && <Trash2 size={14} />}
             OK

@@ -48,7 +48,7 @@ export default function MoveNavigation({
           <button
             onClick={onFirst}
             disabled={isAtStart}
-            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
             title="First (Home)"
           >
             <ChevronsLeft size={18} />
@@ -57,7 +57,7 @@ export default function MoveNavigation({
           <button
             onClick={onPrev}
             disabled={isAtStart}
-            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
             title="Previous (←)"
           >
             <ChevronLeft size={18} />
@@ -86,7 +86,7 @@ export default function MoveNavigation({
 
             {/* Speed menu (when not playing) */}
             {showSpeedMenu && !isPlaying && (
-              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-ui-bg-element rounded shadow-lg z-50 min-w-[100px]">
+              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-ui-bg-element rounded-sm shadow-lg z-50 min-w-[100px]">
                 <button
                   onClick={() => {
                     onSpeedChange('fast')
@@ -112,7 +112,7 @@ export default function MoveNavigation({
 
             {/* Current speed indicator (when playing) */}
             {isPlaying && (
-              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-ui-bg-element rounded text-xs text-ui-text-dim whitespace-nowrap">
+              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-ui-bg-element rounded-sm text-xs text-ui-text-dim whitespace-nowrap">
                 {speed === 'fast' ? 'Fast (3s)' : 'Slow (10s)'}
               </div>
             )}
@@ -121,7 +121,7 @@ export default function MoveNavigation({
           <button
             onClick={onNext}
             disabled={isAtEnd}
-            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
             title="Next (→)"
           >
             <ChevronRight size={18} />
@@ -130,7 +130,7 @@ export default function MoveNavigation({
           <button
             onClick={onLast}
             disabled={isAtEnd}
-            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
             title="Last (End)"
           >
             <ChevronsRight size={18} />

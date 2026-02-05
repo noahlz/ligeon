@@ -109,17 +109,17 @@ export default function CollectionSelector({
 
   return (
     <div className="relative" ref={containerRef}>
-      <div className="flex items-center border border-ui-border rounded cursor-pointer"
+      <div className="flex items-center border border-ui-border rounded-sm cursor-pointer"
         onClick={() => setShowMenu(!showMenu)} >
         <span className="text-sm cursor-pointer select-none truncate font-bold flex-1 min-w-0" title={selected?.name}>
           {selected?.name || 'Select Collection'}
         </span>
-        <button className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded flex-shrink-0" >
+        <button className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm shrink-0" >
           <LibraryBig size={18} />
         </button>
       </div>
       {showMenu && (
-        <div className="absolute top-full mt-1 bg-ui-bg-element rounded shadow-lg z-50 w-full max-w-xs border-2 border-ui-text-dimmer">
+        <div className="absolute top-full mt-1 bg-ui-bg-element rounded-sm shadow-lg z-50 w-full max-w-xs border-2 border-ui-text-dimmer">
           {collections.map((col) => (
             <div
               key={col.id}
@@ -134,18 +134,18 @@ export default function CollectionSelector({
                     onChange={(e) => setEditValue(e.target.value)}
                     onKeyDown={handleEditKeyDown}
                     onBlur={handleSaveEdit}
-                    className="flex-1 px-2 py-0.5 bg-ui-bg-page border border-ui-border rounded text-sm focus:outline-none focus:border-ui-text-dimmer"
+                    className="flex-1 px-2 py-0.5 bg-ui-bg-page border border-ui-border rounded-sm text-sm focus:outline-hidden focus:border-ui-text-dimmer"
                   />
                   <button
                     onClick={handleCancelEdit}
-                    className="flex-shrink-0 p-1 hover:bg-ui-bg-page rounded opacity-60 hover:opacity-100"
+                    className="shrink-0 p-1 hover:bg-ui-bg-page rounded-sm opacity-60 hover:opacity-100"
                     title="Cancel"
                   >
                     <X size={14} />
                   </button>
                   <button
                     onClick={handleSaveEdit}
-                    className="flex-shrink-0 p-1 hover:bg-ui-bg-page rounded opacity-60 hover:opacity-100"
+                    className="shrink-0 p-1 hover:bg-ui-bg-page rounded-sm opacity-60 hover:opacity-100"
                     title="Save"
                   >
                     <Check size={14} />
@@ -168,7 +168,7 @@ export default function CollectionSelector({
                       e.stopPropagation()
                       handleStartEdit(col)
                     }}
-                    className="flex-shrink-0 p-1 hover:bg-ui-bg-page rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity"
+                    className="shrink-0 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100! transition-opacity"
                     title="Rename collection"
                   >
                     <Pencil size={14} />
@@ -179,7 +179,7 @@ export default function CollectionSelector({
                       setCollectionToDelete(col)
                       setShowMenu(false)
                     }}
-                    className="flex-shrink-0 p-1 hover:bg-ui-bg-page rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity"
+                    className="shrink-0 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100! transition-opacity"
                     title="Delete collection"
                   >
                     <Trash2 size={14} />

@@ -246,21 +246,21 @@ export default function App() {
           ) : (
             <div className="flex flex-col gap-2">
               {/* Skeleton GameInfo header */}
-              <div className="bg-ui-bg-element rounded p-2">
+              <div className="bg-ui-bg-element rounded-sm p-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 bg-ui-bg-hover rounded flex-1" />
-                  <div className="h-5 w-5 bg-ui-bg-hover rounded" />
+                  <div className="h-4 bg-ui-bg-hover rounded-sm flex-1" />
+                  <div className="h-5 w-5 bg-ui-bg-hover rounded-sm" />
                 </div>
               </div>
 
               {/* Skeleton MoveList */}
-              <div className="bg-ui-bg-element rounded p-2 flex-1">
+              <div className="bg-ui-bg-element rounded-sm p-2 flex-1">
                 <div className="space-y-2">
                   {[...Array(12)].map((_, i) => (
                     <div key={i} className="grid gap-2" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
-                      <div className="h-6 w-6 bg-ui-bg-hover rounded" />
-                      <div className="h-6 bg-ui-bg-hover rounded" />
-                      <div className="h-6 bg-ui-bg-hover rounded" />
+                      <div className="h-6 w-6 bg-ui-bg-hover rounded-sm" />
+                      <div className="h-6 bg-ui-bg-hover rounded-sm" />
+                      <div className="h-6 bg-ui-bg-hover rounded-sm" />
                     </div>
                   ))}
                 </div>

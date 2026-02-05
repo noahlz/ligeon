@@ -59,18 +59,18 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
                   startImport()
                 }
               }}
-              className="w-full px-2 py-1.5 border rounded mb-3 bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
+              className="w-full px-2 py-1.5 border rounded-sm mb-3 bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
             />
             <div className="flex gap-2">
               <button
                 onClick={startImport}
-                className="flex-1 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
+                className="flex-1 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded-sm text-sm"
               >
                 Import
               </button>
               <button
                 onClick={handleClose}
-                className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover text-white rounded text-sm"
+                className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover text-white rounded-sm text-sm"
               >
                 Cancel
               </button>
@@ -92,7 +92,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
                 ? 'Import finished successfully.'
                 : `Indexed: ${progress.indexed.toLocaleString()} / ${progress.parsed.toLocaleString()}${progress.skipped > 0 ? ` (${progress.skipped} skipped)` : ''}`}
             </p>
-            <div className="border rounded bg-ui-bg-page p-2 h-48 overflow-y-auto font-mono text-sm border-ui-border whitespace-pre-wrap">
+            <div className="border rounded-sm bg-ui-bg-page p-2 h-48 overflow-y-auto font-mono text-sm border-ui-border whitespace-pre-wrap">
               {progress.logs?.map((log, idx) => (
                 <div
                   key={idx}
@@ -105,7 +105,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
             </div>
             <button
               onClick={handleClose}
-              className="w-full mt-3 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
+              className="w-full mt-3 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded-sm text-sm"
             >
               Close
             </button>

@@ -109,7 +109,7 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
           {value.map((eco) => (
             <span
               key={eco}
-              className="inline-flex items-center gap-1 px-2 py-0.5 bg-ui-accent text-white text-xs rounded"
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-ui-accent text-white text-xs rounded-sm"
             >
               {eco}
               <button
@@ -141,14 +141,14 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
           onKeyDown={handleKeyDown}
           onFocus={() => setShowDropdown(true)}
           onMouseDown={handleInputMouseDown}
-          className="w-full px-2 py-1.5 bg-ui-bg-element rounded text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border outline-none"
+          className="w-full px-2 py-1.5 bg-ui-bg-element rounded-sm text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border outline-hidden"
         />
 
         {/* Dropdown */}
         {showDropdown && (
           <div
             ref={dropdownRef}
-            className="absolute z-10 w-full mt-1 bg-ui-bg-box border border-ui-border rounded shadow-lg max-h-60 overflow-y-auto"
+            className="absolute z-10 w-full mt-1 bg-ui-bg-box border border-ui-border rounded-sm shadow-lg max-h-60 overflow-y-auto"
           >
             {isLoading ? (
               <div className="px-2 py-1.5 text-sm text-ui-text-dim">Loading openings...</div>

@@ -22,13 +22,13 @@ export default function GameInfo({ game }: GameInfoProps) {
   const openingName = game.ecoCode ? getOpeningByEco(game.ecoCode)?.name : null
 
   return (
-    <div className="bg-ui-bg-element rounded p-2 space-y-2 text-sm">
+    <div className="bg-ui-bg-element rounded-sm p-2 space-y-2 text-sm">
       {/* Header with toggle */}
       <div onClick={() => setMinimized(!minimized)} className="flex flex-col -m-1 gap-1 cursor-pointer">
         <div className="flex items-center gap-2">
-          <p className={`truncate font-semibold rounded`}>{minimized ? `${game.white} vs ${game.black}` : 'Game Info'}</p>
+          <p className={`truncate font-semibold rounded-sm`}>{minimized ? `${game.white} vs ${game.black}` : 'Game Info'}</p>
           <span
-            className="ml-auto flex items-center justify-center flex-shrink-0"
+            className="ml-auto flex items-center justify-center shrink-0"
             title={minimized ? 'Expand' : 'Minimize'}
           >
             {minimized ? <SquareChevronDown size={20} /> : <SquareMinus size={20} />}
