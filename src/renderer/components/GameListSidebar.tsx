@@ -75,7 +75,7 @@ export default function GameListSidebar({
         </span>
         <button
           onClick={() => setFiltersExpanded(!filtersExpanded)}
-          className="p-1 rounded border border-ui-border hover:bg-ui-bg-hover"
+          className="p-1 rounded-sm border border-ui-border hover:bg-ui-bg-hover"
           title={filtersExpanded ? 'Collapse filters' : 'Expand filters'}
         >
           {filtersExpanded ? (
@@ -87,13 +87,13 @@ export default function GameListSidebar({
       </div>
 
       {filtersExpanded && (
-        <div className="space-y-2 p-2 border border-ui-border rounded bg-ui-bg-element/50">
+        <div className="space-y-2 p-2 border border-ui-border rounded-sm bg-ui-bg-element/50">
           <input
             type="text"
             placeholder="Search players..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-2 py-1.5 bg-ui-bg-element rounded text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border"
+            className="w-full px-2 py-1.5 bg-ui-bg-element rounded-sm text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border"
           />
 
           <div className="text-xs space-y-1">
@@ -123,7 +123,7 @@ export default function GameListSidebar({
                     const value = e.target.value ? parseInt(e.target.value, 10) : null
                     setDateFrom(value)
                   }}
-                  className="w-full px-2 py-1 bg-ui-bg-element rounded text-ui-text text-xs border border-ui-border"
+                  className="w-full px-2 py-1 bg-ui-bg-element rounded-sm text-ui-text text-xs border border-ui-border"
                 >
                   <option value="">All</option>
                   {availableDates.map((date) => (
@@ -141,7 +141,7 @@ export default function GameListSidebar({
                     const value = e.target.value ? parseInt(e.target.value, 10) : null
                     setDateTo(value)
                   }}
-                  className="w-full px-2 py-1 bg-ui-bg-element rounded text-ui-text text-xs border border-ui-border"
+                  className="w-full px-2 py-1 bg-ui-bg-element rounded-sm text-ui-text text-xs border border-ui-border"
                 >
                   <option value="">All</option>
                   {availableDates.map((date) => (
@@ -165,7 +165,7 @@ export default function GameListSidebar({
 
           <button
             onClick={resetFilters}
-            className="w-full px-2 py-1.5 bg-ui-bg-hover hover:bg-ui-bg-element rounded text-sm"
+            className="w-full px-2 py-1.5 bg-ui-bg-hover hover:bg-ui-bg-element rounded-sm text-sm"
           >
             Reset
           </button>

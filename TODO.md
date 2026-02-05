@@ -2,9 +2,7 @@
 
 ## Style / UI
 
-- Upgrade to Tailwind 4
 - Refactor app to use [HeadlessUI](https://headlessui.com/) for components.
-  - Plan file: ~/.claude/plans/ligeon-headlessui-refactor.md
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
 
 ## Game Replay / Navigation

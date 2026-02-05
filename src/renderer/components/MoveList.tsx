@@ -25,7 +25,7 @@ export default function MoveList({ moves, result, currentPly, onJump }: MoveList
   const movePairs = groupMovesIntoPairs(moves)
 
   return (
-    <div className="move-list overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded">
+    <div className="move-list overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm">
       <div className="grid gap-1" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
         {movePairs.map((pair, pairIndex) => {
           const whitePly = pairIndex * 2
