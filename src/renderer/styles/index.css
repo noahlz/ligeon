@@ -31,6 +31,30 @@
   --color-slate-700: #334155;
   --color-slate-800: #1e293b;
   --color-slate-900: #0f172a;
+
+  /* shadcn color system */
+  --color-background: hsl(37, 10%, 8%);
+  --color-foreground: hsl(0, 0%, 73%);
+  --color-card: hsl(37, 7%, 14%);
+  --color-card-foreground: hsl(0, 0%, 73%);
+  --color-primary: hsl(22, 100%, 42%);
+  --color-primary-foreground: hsl(0, 0%, 100%);
+  --color-secondary: hsl(37, 7%, 18%);
+  --color-secondary-foreground: hsl(0, 0%, 73%);
+  --color-muted: hsl(37, 7%, 14%);
+  --color-muted-foreground: hsl(0, 0%, 50%);
+  --color-accent: hsl(22, 100%, 42%);
+  --color-accent-foreground: hsl(0, 0%, 100%);
+  --color-destructive: hsl(0, 84%, 60%);
+  --color-destructive-foreground: hsl(0, 0%, 100%);
+  --color-border: hsl(37, 7%, 25%);
+  --color-input: hsl(37, 7%, 25%);
+  --color-ring: hsl(22, 100%, 42%);
+}
+
+/* ShadCN border radius */
+:root {
+  --radius: 0.25rem;
 }
 
 * {
