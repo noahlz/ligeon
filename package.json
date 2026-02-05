@@ -28,12 +28,17 @@
   },
   "dependencies": {
     "@lichess-org/chessground": "^9.9.0",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-slot": "^1.2.4",
     "better-sqlite3": "^12.6.0",
     "chessops": "^0.15.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
     "path-browserify": "^1.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.4.0",
     "text-title-case": "^1.2.10",
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0"

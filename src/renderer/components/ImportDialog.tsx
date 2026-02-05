@@ -1,6 +1,14 @@
 import { deriveSuggestedName } from '@/utils/filenameConverter.js'
 import { useImportDialog } from '../hooks/useImportDialog.js'
 import { useImportProgress } from '../hooks/useImportProgress.js'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog.js'
+import { Button } from '@/components/ui/button.js'
 
 interface ImportDialogProps {
   isOpen: boolean
@@ -33,17 +41,19 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
     await handleImport()
   }
 
-  if (!isOpen || !filePath) return null
+  if (!filePath) return null
 
   const percent =
     progress.parsed > 0 ? Math.round((progress.indexed / progress.parsed) * 100) : 0
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-ui-bg-box rounded-lg shadow-xl w-96 max-h-screen overflow-auto">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="sm:max-w-[425px]">
         {!isIndexing ? (
-          <div className="p-4">
-            <h2 className="text-lg font-bold mb-3">Import Collection</h2>
+          <>
+            <DialogHeader>
+              <DialogTitle>Import Collection</DialogTitle>
+            </DialogHeader>
             <input
               type="text"
               placeholder={suggestedName}
@@ -59,40 +69,36 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
                   startImport()
                 }
               }}
-              className="w-full px-2 py-1.5 border rounded-sm mb-3 bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
+              className="w-full px-2 py-1.5 border rounded-sm bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
             />
-            <div className="flex gap-2">
-              <button
-                onClick={startImport}
-                className="flex-1 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded-sm text-sm"
-              >
-                Import
-              </button>
-              <button
-                onClick={handleClose}
-                className="px-3 py-1.5 bg-ui-bg-element hover:bg-ui-bg-hover text-white rounded-sm text-sm"
-              >
+            <DialogFooter>
+              <Button variant="outline" onClick={handleClose}>
                 Cancel
-              </button>
-            </div>
-          </div>
+              </Button>
+              <Button onClick={startImport} className="bg-ui-primary hover:bg-blue-600 text-white">
+                Import
+              </Button>
+            </DialogFooter>
+          </>
         ) : (
-          <div className="p-4">
-            <h2 className="text-lg font-bold mb-3">{isComplete ? 'Import Complete' : 'Indexing'}</h2>
+          <>
+            <DialogHeader>
+              <DialogTitle>{isComplete ? 'Import Complete' : 'Indexing'}</DialogTitle>
+            </DialogHeader>
             {!isComplete && (
-              <div className="w-full bg-ui-bg-element rounded-full h-2 mb-3">
+              <div className="w-full bg-ui-bg-element rounded-full h-2">
                 <div
                   className="bg-ui-primary h-full transition-all rounded-full"
                   style={{ width: `${percent}%` }}
                 />
               </div>
             )}
-            <p className="text-xs text-ui-text-dim mb-3">
+            <p className="text-xs text-ui-text-dim">
               {isComplete
                 ? 'Import finished successfully.'
                 : `Indexed: ${progress.indexed.toLocaleString()} / ${progress.parsed.toLocaleString()}${progress.skipped > 0 ? ` (${progress.skipped} skipped)` : ''}`}
             </p>
-            <div className="border rounded-sm bg-ui-bg-page p-2 h-48 overflow-y-auto font-mono text-sm border-ui-border whitespace-pre-wrap">
+            <div className="border rounded-sm bg-ui-bg-element p-2 h-48 overflow-y-auto font-mono text-sm border-ui-border whitespace-pre-wrap">
               {progress.logs?.map((log, idx) => (
                 <div
                   key={idx}
@@ -103,15 +109,14 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
               ))}
               <div ref={logEndRef} />
             </div>
-            <button
-              onClick={handleClose}
-              className="w-full mt-3 bg-ui-primary hover:bg-blue-600 text-white px-3 py-1.5 rounded-sm text-sm"
-            >
-              Close
-            </button>
-          </div>
+            <DialogFooter>
+              <Button onClick={handleClose} className="bg-ui-secondary hover:bg-green-700 text-white">
+                Close
+              </Button>
+            </DialogFooter>
+          </>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
