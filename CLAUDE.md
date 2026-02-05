@@ -2,7 +2,7 @@
 
 Electron.js desktop app for chess game viewing (PGN). Pre-release — move fast, break things.
 
-Links: 
+Links:
 - [chessops](https://github.com/niklasf/chessops) (move logic)
 - [chessground](https://github.com/lichess-org/chessground) (board UI)
 - [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) (display options ref).
@@ -40,7 +40,7 @@ src/renderer/*.tsx               →  Vite       →  dist/                   # 
 
 ## Project Structure
 
-Each subdirectory exports via an `index.ts` barrel.
+Export from each subdirectory via `index.ts` barrel.
 
 ```
 __tests__/             # Vitest: integration/, performance/, unit/
@@ -53,7 +53,9 @@ src/
     ipc/               # handlers, validators, types
   renderer/            # React + Chessground
     components/        # UI components (see Component Map)
+      ui/              # shadcn/ui primitives (copied, not imported — see Styling)
     hooks/             # Custom React hooks
+    lib/               # Shared utilities (cn helper)
     styles/            # CSS + Tailwind
     types/             # electron.d.ts (IPC API types)
     utils/             # chessManager, audioManager, dateConverter
@@ -86,9 +88,9 @@ src/
 | `src/renderer/utils/audioManager.ts` | Move sounds |
 | `src/renderer/utils/dateConverter.ts` | Timestamp ↔ display |
 
-### Prefer LSP Over Text Search
+### LSP First, Glob/Grep Second
 
-Use LSP first: `goToDefinition`, `findReferences`, `documentSymbol`, `incomingCalls`/`outgoingCalls`, `hover`. Fall back to Glob/Grep for text, comments, config values.
+Use LSP tools: `goToDefinition`, `findReferences`, `documentSymbol`, `incomingCalls`/`outgoingCalls`, `hover`. Fall back to Glob/Grep for text, comments, config values.
 
 ## UI Layout
 
@@ -126,28 +128,29 @@ Use LSP first: `goToDefinition`, `findReferences`, `documentSymbol`, `incomingCa
 
 ## Styling
 
-**Colors** (`tailwind.config.ts` + `styles/index.css`):
-- Backgrounds: `ui-bg-page` → `ui-bg-box` → `ui-bg-element` → `ui-bg-hover`
-- Text: `ui-text` → `ui-text-dim` → `ui-text-dimmer`
-- `ui-accent` — orange (current move, active button)
+**[shadcn/ui](https://ui.shadcn.com):** Dialogs and buttons use shadcn/ui components in `components/ui/` — **copy-pasted source code**, not npm imports. Add components via `npx shadcn@latest add <name>`. Config: `components.json`. Keep `ui/` customizations minimal; compose around them in app components.
 
-**Layout:** Flex only — no absolute positioning. Left spacer matches ControlStrip width for centering. Board + MoveNavigation in flex-col.
+**Colors** — `tailwind.config.ts` + `styles/index.css`:
+- App: `ui-bg-page` → `ui-bg-box` → `ui-bg-element` → `ui-bg-hover`; `ui-text` → `ui-text-dim` → `ui-text-dimmer`; `ui-accent` (orange)
+- shadcn: CSS variables (`--color-background`, `--color-primary`, `--color-destructive`, etc.) in `index.css` — used by `ui/` components
 
-**Chessground:** `.board-coords-wrapper` for coord padding. Coords via `.cg-wrap coords.ranks/files`. Flip via `data-orientation="black"`.
+**Layout:** Flex only (no absolute positioning). Left spacer width = ControlStrip width. Board + MoveNavigation = flex-col.
+
+**Chessground:** Use `.board-coords-wrapper` for coord padding. Coords: `.cg-wrap coords.ranks/files`. Flip: `data-orientation="black"`.
 
 ## Gotchas
 
 **Update this section after non-trivial fixes.**
 
-### Use `.js` in All Imports
+### `.js` Extension in All Imports
 
-ESM requires `.js` extension even for `.ts` source. `src/main/` contains only `.ts` — compiled `.js` output goes to `dist-electron/`.
+ESM requires `.js` extension even for `.ts` source. `src/main/` = `.ts` source only; `.js` output → `dist-electron/`.
 
 ### Import Paths by Context
 
-Use relative paths to `shared/` everywhere — renderer, main, tests, and CLI all do this. No `@shared` alias. (`@/` is used for renderer-internal imports only, e.g. `ImportDialog.tsx`.)
+Use relative paths to `shared/` (all targets: renderer, main, tests, CLI). No `@shared` alias. Use `@/` for renderer-internal imports only.
 
-Depth of `../` depends on the file's location relative to `src/shared/`:
+`../` depth = file's distance from `src/shared/`:
 
 ```typescript
 // Renderer root (src/renderer/*.tsx):
@@ -166,13 +169,13 @@ export * from '../../../shared/converters/resultConverter.js'
 import { extractGameData, GAMES_SCHEMA_SQL, type GameData } from '../src/shared/index.js'
 ```
 
-### Database is Main-Process Only
+### Database Main-Process Only
 
-SQLite unavailable in renderer. All DB access via IPC: renderer → `window.electron.fn()` → preload → `src/main/ipc/` handler → return.
+SQLite unavailable in renderer. DB access: renderer → `window.electron.fn()` → preload → `src/main/ipc/` handler → return.
 
-### Validate All IPC Inputs
+### Validate IPC Inputs
 
-Every IPC handler must validate inputs before use. See `src/main/ipc/validators.ts` for available functions; follow the pattern in `gameHandlers.ts` or `importHandlers.ts`.
+Validate all IPC handler inputs before use. See `src/main/ipc/validators.ts`. Follow patterns in `gameHandlers.ts` or `importHandlers.ts`.
 
 ### TypeScript Configs
 
@@ -182,17 +185,18 @@ Every IPC handler must validate inputs before use. See `src/main/ipc/validators.
 | `src/main/tsconfig.preload.json` | **CJS** | `dist-electron/preload/` | `rootDir=src/` — covers `shared/` pulled in via `import type` chains |
 | `src/renderer/tsconfig.json` | ESM | `dist/` | — |
 
-- Preload **must** use CJS — Electron sandbox forbids ESM.
-- Preload needs a separate `outDir` — its CJS output would overwrite main's ESM `shared/` files otherwise.
-- Rule: if a config pulls in files from multiple subdirs (even via `import type`), `rootDir` must be their common ancestor. Configs sharing source files with different module systems must have different `outDir`s.
+- Preload = CJS (Electron sandbox forbids ESM).
+- Preload = separate `outDir` (else CJS output overwrites main's ESM `shared/`).
+- Multi-subdir config → `rootDir` = common ancestor  
+- Different module systems → different `outDir`s.
 
 ### Rebuild better-sqlite3
 
-`npm test` auto-rebuilds for Node.js. Manual rebuilds:
-- `npm run rebuild:sqlite` — Node.js (tests)
-- `npm run rebuild:electron` — Electron (app)
+`npm test` auto-rebuilds for Node.js. Manual:
+- `npm run rebuild:sqlite` (tests)
+- `npm run rebuild:electron` (app)
 
-If rebuild appears to succeed but fails at runtime: `rm -rf node_modules/better-sqlite3/build` then retry.
+If rebuild succeeds but fails at runtime: `rm -rf node_modules/better-sqlite3/build` and retry.
 
 ### Ignore DevTools Warnings
 
