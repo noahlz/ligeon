@@ -231,19 +231,25 @@ export function validateSearchFiltersResult(filters: GameFilters): ValidationRes
     sanitized.ecoCodes = validCodes.length > 0 ? validCodes : undefined
   }
 
-  // Copy numeric fields with range validation
-  if (filters.result !== undefined && filters.result !== null) {
-    // Result must be 0.0, 0.5, or 1.0
-    if ([0.0, 0.5, 1.0].includes(filters.result)) {
-      sanitized.result = filters.result
-    } else {
+  // Results array validation
+  if (filters.results !== undefined && Array.isArray(filters.results) && filters.results.length > 0) {
+    const VALID_RESULTS = [0.0, 0.5, 1.0]
+    const validResults = filters.results.filter(r => VALID_RESULTS.includes(r))
+
+    if (validResults.length > 0) {
+      sanitized.results = validResults
+    }
+
+    if (validResults.length < filters.results.length) {
       warnings.push({
-        code: 'INVALID_RESULT',
-        message: 'Result must be 0.0 (loss), 0.5 (draw), or 1.0 (win)',
-        field: 'result',
+        code: 'INVALID_RESULT_VALUES',
+        message: 'Some result values were invalid and filtered out. Valid: 0.0 (black), 0.5 (draw), 1.0 (white)',
+        field: 'results',
       })
     }
   }
+
+  // Copy numeric fields with range validation
 
   // Date YYYYMM - must be reasonable (190001 to 210012)
   const MIN_YYYYMM = 190001

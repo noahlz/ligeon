@@ -9,7 +9,7 @@ import { useGameSearch } from '../hooks/useGameSearch.js'
 import type { GameRow, GameSearchResult } from '../../shared/types/game.js'
 import { Input } from '@/components/ui/input.js'
 import { Label } from '@/components/ui/label.js'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group.js'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.js'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.js'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible.js'
 import { Button } from '@/components/ui/button.js'
@@ -50,7 +50,7 @@ export default function GameListSidebar({
     filters,
     filtersExpanded,
     setFiltersExpanded,
-    setResultFilter,
+    setResultsFilter,
     setDateFrom,
     setDateTo,
     setEcoCodes,
@@ -107,23 +107,23 @@ export default function GameListSidebar({
 
           <div className="text-xs space-y-1">
             <Label className="text-ui-text-dim text-xs">Winner:</Label>
-            <RadioGroup
-              value={filters.result !== null ? filters.result.toString() : 'all'}
-              onValueChange={(value: string) => setResultFilter(value === 'all' ? null : parseFloat(value))}
-              className="flex gap-2"
+            <ToggleGroup
+              type="multiple"
+              value={filters.results.map(String)}
+              onValueChange={(values: string[]) => setResultsFilter(values.map(parseFloat))}
+              className="flex gap-2 justify-start"
             >
               {RESULT_FILTER_OPTIONS.map((option, i) => (
-                <div key={i} className="flex items-center gap-1">
-                  <RadioGroupItem
-                    value={option.value !== null ? option.value.toString() : 'all'}
-                    id={`result-${i}`}
-                  />
-                  <Label htmlFor={`result-${i}`} className="text-xs cursor-pointer">
-                    {option.label}
-                  </Label>
-                </div>
+                <ToggleGroupItem
+                  key={i}
+                  value={option.value.toString()}
+                  aria-label={option.label}
+                  className="h-7 px-2 text-xs data-[state=on]:bg-ui-accent data-[state=on]:text-white"
+                >
+                  {option.label}
+                </ToggleGroupItem>
               ))}
-            </RadioGroup>
+            </ToggleGroup>
           </div>
 
           <div className="text-xs space-y-1">

@@ -67,7 +67,7 @@ export function useGameSearch({
 
       const results = await window.electron.searchGames(collectionId, {
         player: searchTerm || undefined,
-        result: filters.result ?? undefined,
+        results: filters.results.length > 0 ? filters.results : undefined,
         dateFrom: filters.dateFrom ?? undefined,
         dateTo: filters.dateTo ?? undefined,
         ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,

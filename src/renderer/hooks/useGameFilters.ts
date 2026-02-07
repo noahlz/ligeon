@@ -1,14 +1,14 @@
 import { useState, useCallback } from 'react'
 
 export interface GameFilterValues {
-  result: number | null
+  results: number[]
   dateFrom: number | null
   dateTo: number | null
   ecoCodes: string[]
 }
 
 const INITIAL_FILTERS: GameFilterValues = {
-  result: null,
+  results: [],
   dateFrom: null,
   dateTo: null,
   ecoCodes: [],
@@ -23,8 +23,8 @@ export interface UseGameFiltersReturn {
   /** Whether the filter panel is expanded */
   filtersExpanded: boolean
   setFiltersExpanded: (expanded: boolean) => void
-  /** Set result filter (1 = white, -1 = black, 0 = draw, null = all) */
-  setResultFilter: (result: number | null) => void
+  /** Set results filter - array of selected results (1.0 = white, 0.0 = black, 0.5 = draw) */
+  setResultsFilter: (results: number[]) => void
   /** Set dateFrom filter — validates dateFrom <= dateTo */
   setDateFrom: (date: number | null) => void
   /** Set dateTo filter — validates dateFrom <= dateTo */
@@ -44,8 +44,8 @@ export function useGameFilters(): UseGameFiltersReturn {
   const [filters, setFilters] = useState<GameFilterValues>(INITIAL_FILTERS)
   const [filtersExpanded, setFiltersExpanded] = useState(false)
 
-  const setResultFilter = useCallback((result: number | null) => {
-    setFilters(prev => ({ ...prev, result }))
+  const setResultsFilter = useCallback((results: number[]) => {
+    setFilters(prev => ({ ...prev, results }))
   }, [])
 
   const setDateFrom = useCallback((date: number | null) => {
@@ -81,7 +81,7 @@ export function useGameFilters(): UseGameFiltersReturn {
     filters,
     filtersExpanded,
     setFiltersExpanded,
-    setResultFilter,
+    setResultsFilter,
     setDateFrom,
     setDateTo,
     setEcoCodes,

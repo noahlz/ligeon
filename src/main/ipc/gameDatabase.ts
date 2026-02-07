@@ -143,9 +143,10 @@ export class GameDatabase {
           params.push(filters.dateTo);
       }
     }
-    if (filters.result !== null && filters.result !== undefined) {
-      query += ' AND result = ?'
-      params.push(filters.result)
+    if (filters.results && filters.results.length > 0) {
+      const placeholders = filters.results.map(() => '?').join(',')
+      query += ` AND result IN (${placeholders})`
+      params.push(...filters.results)
     }
     if (filters.ecoCodes && filters.ecoCodes.length > 0) {
       const placeholders = filters.ecoCodes.map(() => '?').join(',')
