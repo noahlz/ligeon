@@ -105,13 +105,13 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
                     key={opening.eco}
                     value={opening.eco}
                     onSelect={() => handleToggle(opening)}
-                    className="cursor-pointer text-sm"
+                    className="group cursor-pointer text-sm data-[selected=true]:bg-ui-accent"
                   >
                     <div className="flex items-center gap-2 w-full">
-                      {isSelected(opening.eco) && <Check className="h-4 w-4 text-ui-accent" />}
-                      <span className="font-semibold text-ui-accent">{opening.eco}</span>
-                      <span className="text-ui-text-dim">{opening.name}</span>
-                      <span className="ml-auto text-ui-text-dimmer">{opening.count}</span>
+                      {isSelected(opening.eco) && <Check className="h-4 w-4 group-data-[selected=true]:text-white" />}
+                      <span className="font-semibold text-ui-accent group-data-[selected=true]:text-white">{opening.eco}</span>
+                      <span className="text-ui-text-dim group-data-[selected=true]:text-white">{opening.name}</span>
+                      <span className="ml-auto text-ui-text-dimmer group-data-[selected=true]:text-white">{opening.count}</span>
                     </div>
                   </CommandItem>
                 ))}
