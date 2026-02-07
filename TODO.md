@@ -2,7 +2,6 @@
 
 ## Style / UI
 
-- Refactor app to use [shadcn](https://ui.shadcn.com) for components.
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
 
 ## Game Replay / Navigation
