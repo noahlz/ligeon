@@ -1,5 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { searchAvailableOpenings, type Opening } from '../utils/openings.js'
+import { Check } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.js'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command.js'
+import { Badge } from '@/components/ui/badge.js'
 
 interface OpeningFilterProps {
   collectionId: string
@@ -10,13 +14,9 @@ interface OpeningFilterProps {
 export default function OpeningFilter({ collectionId, value, onChange }: OpeningFilterProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Opening[]>([])
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [open, setOpen] = useState(false)
   const [availableEcoCodes, setAvailableEcoCodes] = useState<Array<{ eco: string; count: number }>>([])
   const [isLoading, setIsLoading] = useState(true)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   // Fetch available ECO codes when collection changes
   useEffect(() => {
@@ -29,34 +29,16 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
     fetchAvailableEcoCodes()
   }, [collectionId])
 
-  // Search openings as user types (show all if query is empty)
+  // Search openings as user types
   useEffect(() => {
-    // Don't search while loading
     if (isLoading) {
       setResults([])
       return
     }
 
-    // Use new search function that operates on collection ECO codes
     const matches = searchAvailableOpenings(query, availableEcoCodes)
     setResults(matches)
-    setSelectedIndex(0)
   }, [query, availableEcoCodes, isLoading])
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setShowDropdown(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
   const isSelected = (eco: string) => value.includes(eco)
 
@@ -66,112 +48,78 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
     } else {
       onChange([...value, opening.eco])
     }
-    // Keep dropdown open for multi-select
-    setShowDropdown(true)
-    // Refocus input to maintain dropdown visibility
-    setTimeout(() => inputRef.current?.focus(), 0)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showDropdown || results.length === 0) return
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setSelectedIndex((prev) => (prev + 1) % results.length)
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setSelectedIndex((prev) => (prev - 1 + results.length) % results.length)
-    } else if (e.key === 'Enter') {
-      e.preventDefault()
-      handleToggle(results[selectedIndex])
-    } else if (e.key === 'Escape') {
-      setShowDropdown(false)
-    }
-  }
-
-  const handleRemoveTag = (eco: string) => {
-    onChange(value.filter((e) => e !== eco))
-  }
-
-  const handleInputMouseDown = (e: React.MouseEvent) => {
-    // If dropdown is open, close it; otherwise let onFocus handle opening
-    if (showDropdown) {
-      e.preventDefault()
-      setShowDropdown(false)
-    }
+  const handleRemoveTag = (eco: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    onChange(value.filter((code) => code !== eco))
   }
 
   return (
-    <div ref={containerRef} className="space-y-2">
+    <div className="space-y-2">
       {/* Selected opening tags */}
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {value.map((eco) => (
-            <span
+            <Badge
               key={eco}
-              className="inline-flex items-center gap-1 px-2 py-0.5 bg-ui-accent text-white text-xs rounded-sm"
+              variant="default"
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-ui-accent text-white text-xs hover:bg-ui-accent/80"
             >
               {eco}
               <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleRemoveTag(eco)
-                }}
+                onClick={(e) => handleRemoveTag(eco, e)}
                 className="hover:opacity-80"
                 title="Remove"
               >
                 ✕
               </button>
-            </span>
+            </Badge>
           ))}
         </div>
       )}
 
-      {/* Search section with dropdown */}
-      <div className="relative">
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Search openings..."
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value)
-            setShowDropdown(true)
-          }}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setShowDropdown(true)}
-          onMouseDown={handleInputMouseDown}
-          className="w-full px-2 py-1.5 bg-ui-bg-element rounded-sm text-ui-text placeholder-ui-text-dimmer text-sm border border-ui-border outline-hidden"
-        />
-
-        {/* Dropdown */}
-        {showDropdown && (
-          <div
-            ref={dropdownRef}
-            className="absolute z-10 w-full mt-1 bg-ui-bg-box border border-ui-border rounded-sm shadow-lg max-h-60 overflow-y-auto"
-          >
-            {isLoading ? (
-              <div className="px-2 py-1.5 text-sm text-ui-text-dim">Loading openings...</div>
-            ) : results.length === 0 ? (
-              <div className="px-2 py-1.5 text-sm text-ui-text-dim">No openings found</div>
-            ) : (
-              results.map((opening, idx) => (
-                <div
-                  key={opening.eco}
-                  onClick={() => handleToggle(opening)}
-                  className={`px-2 py-1.5 cursor-pointer text-sm flex items-center gap-2 ${
-                    isSelected(opening.eco) ? 'border-l-4 border-ui-accent bg-ui-bg-hover' : ''
-                  } ${idx === selectedIndex && !isSelected(opening.eco) ? 'bg-ui-bg-hover' : 'hover:bg-ui-bg-hover'}`}
-                >
-                  <span className="font-semibold text-ui-accent">{opening.eco}</span>
-                  <span className="text-ui-text-dim">{opening.name}</span>
-                  <span className="ml-auto text-ui-text-dimmer">{opening.count}</span>
-                </div>
-              ))
-            )}
+      {/* Search with Command */}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <div className="w-full">
+            <Command className="border border-ui-border rounded-sm bg-ui-bg-element">
+              <CommandInput
+                placeholder="Search openings..."
+                value={query}
+                onValueChange={setQuery}
+                className="h-8 text-sm placeholder-ui-text-dimmer"
+              />
+            </Command>
           </div>
-        )}
-      </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0 bg-ui-bg-box border-ui-border" align="start">
+          <Command>
+            <CommandList>
+              <CommandEmpty className="text-ui-text-dim text-sm">
+                {isLoading ? 'Loading openings...' : 'No openings found'}
+              </CommandEmpty>
+              <CommandGroup>
+                {results.map((opening) => (
+                  <CommandItem
+                    key={opening.eco}
+                    value={opening.eco}
+                    onSelect={() => handleToggle(opening)}
+                    className="group cursor-pointer text-sm data-[selected=true]:bg-ui-accent"
+                  >
+                    <div className="flex items-center gap-2 w-full">
+                      {isSelected(opening.eco) && <Check className="h-4 w-4 group-data-[selected=true]:text-white" />}
+                      <span className="font-semibold text-ui-accent group-data-[selected=true]:text-white">{opening.eco}</span>
+                      <span className="text-ui-text-dim group-data-[selected=true]:text-white">{opening.name}</span>
+                      <span className="ml-auto text-ui-text-dimmer group-data-[selected=true]:text-white">{opening.count}</span>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   )
 }

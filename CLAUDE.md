@@ -124,7 +124,7 @@ Use LSP tools: `goToDefinition`, `findReferences`, `documentSymbol`, `incomingCa
 | `←` / `→` | Previous / next move |
 | `Home` / `End` | First / last position |
 | `Space` | Toggle auto-play |
-| Mouse wheel | Prev/next move (not over sidebar or move list) |
+| Mouse wheel | Prev/next move (only over board or move list) |
 
 ## Styling
 

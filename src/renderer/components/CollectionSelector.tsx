@@ -2,6 +2,15 @@ import { useState, useEffect, useRef } from 'react'
 import { LibraryBig, Trash2, Pencil, Check, X } from 'lucide-react'
 import ConfirmDialog from './ConfirmDialog.js'
 import { validateCollectionName } from '../utils/collectionValidator.js'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu.js'
+import { Input } from '@/components/ui/input.js'
+import { Button } from '@/components/ui/button.js'
 
 interface Collection {
   id: string
@@ -33,22 +42,7 @@ export default function CollectionSelector({
   const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState<string>('')
   const selected = collections.find((c) => c.id === selectedId)
-  const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    if (!showMenu) return
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setShowMenu(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [showMenu])
 
   const handleConfirmDelete = () => {
     if (collectionToDelete) {
@@ -108,48 +102,54 @@ export default function CollectionSelector({
   }
 
   return (
-    <div className="relative" ref={containerRef}>
-      <div className="flex items-center border border-ui-border rounded-sm cursor-pointer"
-        onClick={() => setShowMenu(!showMenu)} >
-        <span className="text-sm cursor-pointer select-none truncate font-bold flex-1 min-w-0" title={selected?.name}>
-          {selected?.name || 'Select Collection'}
-        </span>
-        <button className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm shrink-0" >
-          <LibraryBig size={18} />
-        </button>
-      </div>
-      {showMenu && (
-        <div className="absolute top-full mt-1 bg-ui-bg-element rounded-sm shadow-lg z-50 w-full max-w-xs border-2 border-ui-text-dimmer">
+    <div className="relative">
+      <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
+        <DropdownMenuTrigger asChild>
+          <div className="flex items-center border border-ui-border rounded-sm cursor-pointer">
+            <span className="text-sm cursor-pointer select-none truncate font-bold flex-1 min-w-0 px-2" title={selected?.name}>
+              {selected?.name || 'Select Collection'}
+            </span>
+            <Button variant="ghost" size="icon" className="h-7 w-7 p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm shrink-0">
+              <LibraryBig size={18} />
+            </Button>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-full max-w-xs bg-ui-bg-element border-2 border-ui-text-dimmer" align="start">
           {collections.map((col) => (
             <div
               key={col.id}
-              className={`group flex items-center gap-2 px-3 py-1.5 hover:bg-ui-bg-hover text-sm ${selectedId === col.id ? 'bg-ui-bg-hover' : ''
-                }`}
+              className={`group flex items-center gap-2 px-3 py-1.5 hover:bg-ui-bg-hover text-sm ${
+                selectedId === col.id ? 'bg-ui-bg-hover' : ''
+              }`}
             >
               {editingCollectionId === col.id ? (
                 <>
-                  <input
+                  <Input
                     ref={inputRef}
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
                     onKeyDown={handleEditKeyDown}
                     onBlur={handleSaveEdit}
-                    className="flex-1 px-2 py-0.5 bg-ui-bg-page border border-ui-border rounded-sm text-sm focus:outline-hidden focus:border-ui-text-dimmer"
+                    className="flex-1 h-7 px-2 py-0.5 bg-ui-bg-page border-ui-border text-sm"
                   />
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={handleCancelEdit}
-                    className="shrink-0 p-1 hover:bg-ui-bg-page rounded-sm opacity-60 hover:opacity-100"
+                    className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100"
                     title="Cancel"
                   >
                     <X size={14} />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={handleSaveEdit}
-                    className="shrink-0 p-1 hover:bg-ui-bg-page rounded-sm opacity-60 hover:opacity-100"
+                    className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100"
                     title="Save"
                   >
                     <Check size={14} />
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <>
@@ -163,43 +163,47 @@ export default function CollectionSelector({
                   >
                     {col.name}
                   </button>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleStartEdit(col)
                     }}
-                    className="shrink-0 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100! transition-opacity"
+                    className="h-6 w-6 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity"
                     title="Rename collection"
                   >
                     <Pencil size={14} />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={(e) => {
                       e.stopPropagation()
                       setCollectionToDelete(col)
                       setShowMenu(false)
                     }}
-                    className="shrink-0 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100! transition-opacity"
+                    className="h-6 w-6 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity"
                     title="Delete collection"
                   >
                     <Trash2 size={14} />
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
           ))}
-          <div className="border-t border-ui-border" />
-          <button
+          <DropdownMenuSeparator className="bg-ui-border" />
+          <DropdownMenuItem
             onClick={() => {
               onImport?.()
               setShowMenu(false)
             }}
-            className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover text-sm cursor-pointer"
+            className="cursor-pointer"
           >
             + Import
-          </button>
-        </div>
-      )}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <ConfirmDialog
         isOpen={!!collectionToDelete}
         title="Delete Collection"
