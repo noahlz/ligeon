@@ -17,9 +17,8 @@ export interface UseGameControlsParams {
 
 /**
  * Registers keyboard (arrows, Home, End, Space) and mouse-wheel handlers
- * for game navigation.  Wheel scrolling is suppressed when the cursor is
- * over the game-list sidebar or the move-list panel so those panels can
- * scroll normally.
+ * for game navigation.  Wheel scrolling only triggers navigation when the
+ * cursor is over the board or the move-list panel.
  *
  * Side-effect-only hook — no return value.
  */
@@ -63,14 +62,14 @@ export function useGameControls({
         return
       }
 
-      // Let sidebar and move-list panels scroll natively
-      const gameListSidebar = document.querySelector('[data-testid="game-list-sidebar"]')
-      if (gameListSidebar?.contains(e.target as Node)) {
-        return
-      }
-
+      // Only navigate when wheel is over board or move-list panel
+      const board = document.querySelector('.chessground-board')
       const moveListPanel = document.querySelector('[data-testid="move-list-panel"]')
-      if (moveListPanel?.contains(e.target as Node)) {
+
+      const isOverBoard = board?.contains(e.target as Node)
+      const isOverMoveList = moveListPanel?.contains(e.target as Node)
+
+      if (!isOverBoard && !isOverMoveList) {
         return
       }
 
