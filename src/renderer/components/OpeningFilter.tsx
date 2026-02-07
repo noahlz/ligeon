@@ -85,7 +85,7 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
           <div className="w-full">
             <Command className="border border-ui-border rounded-sm bg-ui-bg-element">
               <CommandInput
-                placeholder="Search openings..."
+                placeholder="Openings..."
                 value={query}
                 onValueChange={setQuery}
                 className="h-8 text-sm placeholder-ui-text-dimmer"

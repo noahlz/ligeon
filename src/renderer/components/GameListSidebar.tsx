@@ -76,15 +76,15 @@ export default function GameListSidebar({
       />
       {/* Filter Panel */}
       <Collapsible open={filtersExpanded} onOpenChange={setFiltersExpanded}>
-        <div className="flex items-center justify-between">
-          <span className="text-ui-text-dim text-xs">
-            {games.length < totalGameCount ? `${games.length} of ${totalGameCount} games` : `${totalGameCount} games`}
-          </span>
-          <CollapsibleTrigger asChild>
+        <CollapsibleTrigger asChild>
+          <div className="flex items-center justify-between cursor-pointer">
+            <span className="text-ui-text-dim text-sm px-2">
+              {games.length < totalGameCount ? `${games.length} of ${totalGameCount} games` : `${totalGameCount} games`}
+            </span>
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 p-1 border border-ui-border hover:bg-ui-bg-hover cursor-pointer"
+              className="h-7 w-7 p-1 bg-ui-bg-element hover:bg-ui-bg-hover transition-colors cursor-pointer"
               title={filtersExpanded ? 'Collapse filters' : 'Expand filters'}
             >
               {filtersExpanded ? (
@@ -93,41 +93,30 @@ export default function GameListSidebar({
                 <Filter size={16} className="text-ui-text-dim" />
               )}
             </Button>
-          </CollapsibleTrigger>
-        </div>
-
-        <CollapsibleContent className="space-y-2 p-2 border border-ui-border rounded-sm bg-ui-bg-element/50">
-          <Input
-            type="text"
-            placeholder="Search players..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-8 bg-ui-bg-element text-ui-text placeholder-ui-text-dimmer text-sm border-ui-border"
-          />
-
-          <div className="text-xs space-y-1">
-            <Label className="text-ui-text-dim text-xs">Winner:</Label>
-            <ToggleGroup
-              type="multiple"
-              value={filters.results.map(String)}
-              onValueChange={(values: string[]) => setResultsFilter(values.map(parseFloat))}
-              className="flex gap-2 justify-start"
-            >
-              {RESULT_FILTER_OPTIONS.map((option, i) => (
-                <ToggleGroupItem
-                  key={i}
-                  value={option.value.toString()}
-                  aria-label={option.label}
-                  className="h-7 px-2 text-xs data-[state=on]:bg-ui-accent data-[state=on]:text-white"
-                >
-                  {option.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
           </div>
+        </CollapsibleTrigger>
 
-          <div className="text-xs space-y-1">
-            <Label className="text-ui-text-dim text-xs">Date Range:</Label>
+        <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+          <div className="space-y-3 p-3 mt-1 ml-1 border-l-2 border-ui-text-dim/20 bg-ui-bg-element/20 rounded-r-md" >
+            {/* Search Input */}
+            <Input
+              type="text"
+              placeholder="Search players..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-8 bg-ui-bg-element text-ui-text placeholder-ui-text-dimmer text-sm border-ui-border"
+            />
+
+            {/* Opening Filter */}
+            <div className="text-xs space-y-1">
+              <OpeningFilter
+                collectionId={collectionId || ''}
+                value={filters.ecoCodes}
+                onChange={setEcoCodes}
+              />
+            </div>
+
+            {/* Date Range Selectors */}
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-ui-text-dimmer text-xs">From</Label>
@@ -168,24 +157,40 @@ export default function GameListSidebar({
                 </Select>
               </div>
             </div>
-          </div>
 
-          <div className="text-xs space-y-1">
-            <Label className="text-ui-text-dim text-xs">Opening:</Label>
-            <OpeningFilter
-              collectionId={collectionId || ''}
-              value={filters.ecoCodes}
-              onChange={setEcoCodes}
-            />
-          </div>
+            {/* Winner Toggles (Centered Axis) */}
+            <div className="flex items-center gap-3 py-1">
+              <Label className="text-ui-text-dim text-xs whitespace-nowrap">
+                Winner:
+              </Label>
+              <ToggleGroup
+                type="multiple"
+                value={filters.results.map(String)}
+                onValueChange={(values: string[]) => setResultsFilter(values.map(parseFloat))}
+                className="flex gap-2 justify-start"
+              >
+                {RESULT_FILTER_OPTIONS.map((option, i) => (
+                  <ToggleGroupItem
+                    key={i}
+                    value={option.value.toString()}
+                    aria-label={option.label}
+                    className="h-7 px-2 text-xs cursor-pointer bg-ui-bg-hover hover:bg-ui-bg-element data-[state=on]:bg-ui-accent data-[state=on]:text-white transition-colors"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
 
-          <Button
-            variant="secondary"
-            onClick={resetFilters}
-            className="w-full h-8 bg-ui-bg-hover hover:bg-ui-bg-element text-sm"
-          >
-            Reset
-          </Button>
+            {/* Reset Button */}
+            <Button
+              variant="secondary"
+              onClick={resetFilters}
+              className="w-full h-8 bg-ui-bg-hover hover:bg-ui-bg-element text-sm mt-1"
+            >
+              Reset
+            </Button>
+          </div>
         </CollapsibleContent>
       </Collapsible>
 
@@ -194,11 +199,10 @@ export default function GameListSidebar({
           <div
             key={game.id}
             onClick={() => onGameSelect(game)}
-            className={`p-2 mb-1.5 rounded cursor-pointer text-sm ${
-              selectedGame?.id === game.id && selectedGameCollectionId === collectionId
-                ? 'border-2 border-ui-accent bg-ui-bg-element'
-                : 'bg-ui-bg-element hover:bg-ui-bg-hover'
-            }`}
+            className={`p-2 mb-1.5 rounded cursor-pointer text-sm ${selectedGame?.id === game.id && selectedGameCollectionId === collectionId
+              ? 'border-2 border-ui-accent bg-ui-bg-element'
+              : 'bg-ui-bg-element hover:bg-ui-bg-hover'
+              }`}
           >
             <p className="font-semibold">
               {game.white} vs {game.black}

@@ -102,7 +102,7 @@ export default function CollectionSelector({
   }
 
   return (
-    <div className="relative">
+    <div className="relative bg-ui-bg-element rounded-lg">
       <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
         <DropdownMenuTrigger asChild>
           <div className="flex items-center border border-ui-border rounded-sm cursor-pointer">

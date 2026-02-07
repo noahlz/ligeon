@@ -20,7 +20,7 @@ export default function ControlStrip({ pgn, soundEnabled, onToggleSound, onFlipB
       <button
         onClick={handleViewOnLichess}
         disabled={!pgn}
-        className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
+        className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover cursor-pointer disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
         title="View on Lichess"
       >
         <ExternalLink size={18} />
@@ -29,7 +29,7 @@ export default function ControlStrip({ pgn, soundEnabled, onToggleSound, onFlipB
       {/* Sound toggle */}
       <button
         onClick={onToggleSound}
-        className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm"
+        className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm cursor-pointer"
         title={soundEnabled ? 'Sound On' : 'Sound Off'}
       >
         {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
@@ -38,7 +38,7 @@ export default function ControlStrip({ pgn, soundEnabled, onToggleSound, onFlipB
       {/* Flip board */}
       <button
         onClick={onFlipBoard}
-        className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm"
+        className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm cursor-pointer"
         title="Flip Board"
       >
         <RefreshCcw size={18} />
