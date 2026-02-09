@@ -129,12 +129,12 @@ export default function CollectionSelector({
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
                     onKeyDown={handleEditKeyDown}
-                    onBlur={handleSaveEdit}
                     className="flex-1 h-7 px-2 py-0.5 bg-ui-bg-page border-ui-border text-sm"
                   />
                   <Button
                     variant="ghost"
                     size="icon"
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={handleCancelEdit}
                     className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100"
                     title="Cancel"
@@ -144,6 +144,7 @@ export default function CollectionSelector({
                   <Button
                     variant="ghost"
                     size="icon"
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={handleSaveEdit}
                     className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100"
                     title="Save"
