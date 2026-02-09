@@ -92,10 +92,10 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
               className="bg-ui-bg-element border-ui-border"
             />
             <DialogFooter>
-              <Button variant="outline" onClick={handleClose} className="cursor-pointer">
+              <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button onClick={startImport} className="bg-ui-primary hover:bg-blue-600 text-white cursor-pointer">
+              <Button onClick={startImport} className="bg-ui-primary hover:bg-blue-600 text-white">
                 Import
               </Button>
             </DialogFooter>
@@ -125,7 +125,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
               <div ref={logEndRef} />
             </div>
             <DialogFooter>
-              <Button onClick={handleClose} className="bg-ui-secondary hover:bg-green-700 text-white cursor-pointer">
+              <Button onClick={handleClose} className="bg-ui-secondary hover:bg-green-700 text-white">
                 Close
               </Button>
             </DialogFooter>

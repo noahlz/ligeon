@@ -44,19 +44,19 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
                 variant="ghost"
                 size="icon"
                 disabled={!game}
-                className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 cursor-pointer"
+                className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
               >
                 <ExternalLink size={18} />
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent side="left" className="cursor-pointer">View on Lichess</TooltipContent>
+          <TooltipContent side="left">View on Lichess</TooltipContent>
         </Tooltip>
         <DropdownMenuContent side="left" align="start">
-          <DropdownMenuItem onClick={handleImportGame} className="cursor-pointer">
+          <DropdownMenuItem onClick={handleImportGame}>
             View Game
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleAnalyzePosition} disabled={!fen} className="cursor-pointer">
+          <DropdownMenuItem onClick={handleAnalyzePosition} disabled={!fen}>
             Analyze Position
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -69,7 +69,7 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
             variant="ghost"
             size="icon"
             onClick={onToggleSound}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover cursor-pointer"
+            className="bg-ui-bg-element hover:bg-ui-bg-hover"
           >
             {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </Button>
@@ -84,7 +84,7 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
             variant="ghost"
             size="icon"
             onClick={onFlipBoard}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover cursor-pointer"
+            className="bg-ui-bg-element hover:bg-ui-bg-hover"
           >
             <RefreshCcw size={18} />
           </Button>
