@@ -43,7 +43,7 @@ export default function ControlStrip({ pgn, fen, soundEnabled, onToggleSound, on
                 variant="ghost"
                 size="icon"
                 disabled={!pgn}
-                className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+                className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 cursor-pointer"
               >
                 <ExternalLink size={18} />
               </Button>
@@ -68,7 +68,7 @@ export default function ControlStrip({ pgn, fen, soundEnabled, onToggleSound, on
             variant="ghost"
             size="icon"
             onClick={onToggleSound}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover"
+            className="bg-ui-bg-element hover:bg-ui-bg-hover cursor-pointer"
           >
             {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </Button>
@@ -83,7 +83,7 @@ export default function ControlStrip({ pgn, fen, soundEnabled, onToggleSound, on
             variant="ghost"
             size="icon"
             onClick={onFlipBoard}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover"
+            className="bg-ui-bg-element hover:bg-ui-bg-hover cursor-pointer"
           >
             <RefreshCcw size={18} />
           </Button>

@@ -56,7 +56,7 @@ export default function MoveNavigation({
               size="icon"
               onClick={onFirst}
               disabled={isAtStart}
-              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 cursor-pointer"
             >
               <ChevronsLeft size={18} />
             </Button>
@@ -71,7 +71,7 @@ export default function MoveNavigation({
               size="icon"
               onClick={onPrev}
               disabled={isAtStart}
-              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 cursor-pointer"
             >
               <ChevronLeft size={18} />
             </Button>
@@ -90,7 +90,7 @@ export default function MoveNavigation({
               className={
                 isPlaying
                   ? 'bg-ui-accent hover:bg-orange-600'
-                  : 'bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50'
+                  : 'bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 cursor-pointer'
               }
             >
               {isPlaying ? <Pause size={18} /> : <Play size={18} />}
@@ -106,7 +106,7 @@ export default function MoveNavigation({
               size="icon"
               onClick={onNext}
               disabled={isAtEnd}
-              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 cursor-pointer"
             >
               <ChevronRight size={18} />
             </Button>
@@ -121,7 +121,7 @@ export default function MoveNavigation({
               size="icon"
               onClick={onLast}
               disabled={isAtEnd}
-              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 cursor-pointer"
             >
               <ChevronsRight size={18} />
             </Button>
@@ -132,7 +132,7 @@ export default function MoveNavigation({
 
       {/* Speed slider (visible during auto-play) */}
       {isPlaying && (
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-1 cursor-pointer">
           <span className="text-xs text-ui-text-dim w-8">{(speed / 1000).toFixed(1)}s</span>
           <Slider
             value={[speed]}
