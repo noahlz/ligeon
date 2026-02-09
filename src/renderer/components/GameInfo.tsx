@@ -1,8 +1,13 @@
 import { useState } from 'react'
-import {  SquareChevronDown, SquareMinus } from 'lucide-react'
+import { SquareChevronDown, SquareMinus } from 'lucide-react'
 import { yyyymmToDisplay } from '../../shared/converters/dateConverter.js'
 import { resultNumericToDisplay } from '../../shared/converters/resultConverter.js'
 import { getOpeningByEco } from '../utils/openings.js'
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from '@/components/ui/collapsible.js'
 
 interface GameInfoProps {
   game: {
@@ -22,62 +27,68 @@ export default function GameInfo({ game }: GameInfoProps) {
   const openingName = game.ecoCode ? getOpeningByEco(game.ecoCode)?.name : null
 
   return (
-    <div className="bg-ui-bg-element rounded-sm p-2 space-y-2 text-sm">
-      {/* Header with toggle */}
-      <div onClick={() => setMinimized(!minimized)} className="flex flex-col -m-1 gap-1 cursor-pointer">
-        <div className="flex items-center gap-2">
-          <p className={`truncate font-semibold rounded-sm`}>{minimized ? `${game.white} vs ${game.black}` : 'Game Info'}</p>
-          <span
-            className="ml-auto flex items-center justify-center shrink-0"
-            title={minimized ? 'Expand' : 'Minimize'}
-          >
-            {minimized ? <SquareChevronDown size={20} /> : <SquareMinus size={20} />}
-          </span>
-        </div>
-        {minimized && 
-          <p className={`truncate text-ui-text-dim`}>{yyyymmToDisplay(game.date)} - {game.ecoCode}{openingName ? ` ${openingName}` : ''}</p>
-        }
-      </div>
-
-      {/* Content - hidden when minimized */}
-      {!minimized && (
-        <div className="grid grid-cols-2 gap-x-3 gap-y-2">
-        <div>
-          <p className="text-ui-text-dim text-xs">White</p>
-          <p className="font-semibold">
-            {game.white}
-            {game.whiteElo ? ` (${game.whiteElo})` : ''}
-          </p>
-        </div>
-        <div>
-          <p className="text-ui-text-dim text-xs">Black</p>
-          <p className="font-semibold">
-            {game.black}
-            {game.blackElo ? ` (${game.blackElo})` : ''}
-          </p>
-        </div>
-        <div>
-          <p className="text-ui-text-dim text-xs">Event</p>
-          <p className="text-xs">{game.event || '?'}</p>
-        </div>
-        <div>
-          <p className="text-ui-text-dim text-xs">Date</p>
-          <p className="text-xs">{yyyymmToDisplay(game.date)}</p>
-        </div>
-        <div>
-          <p className="text-ui-text-dim text-xs">Result</p>
-          <p className="text-xs">{resultNumericToDisplay(game.result ?? null)}</p>
-        </div>
-        {game.ecoCode && (
-          <div>
-            <p className="text-ui-text-dim text-xs">Opening</p>
-            <p className="text-xs">
-              {game.ecoCode}{openingName ? ` ${openingName}` : ''}
-            </p>
+    <Collapsible open={!minimized} onOpenChange={(open) => setMinimized(!open)}>
+      <div className="bg-ui-bg-element rounded-sm p-2 space-y-2 text-sm">
+        {/* Header with toggle */}
+        <CollapsibleTrigger asChild>
+          <div className="flex flex-col -m-1 gap-1 cursor-pointer">
+            <div className="flex items-center gap-2">
+              <p className="truncate font-semibold rounded-sm">
+                {minimized ? `${game.white} vs ${game.black}` : 'Game Info'}
+              </p>
+              <span className="ml-auto flex items-center justify-center shrink-0">
+                {minimized ? <SquareChevronDown size={20} /> : <SquareMinus size={20} />}
+              </span>
+            </div>
+            {minimized && (
+              <p className="truncate text-ui-text-dim">
+                {yyyymmToDisplay(game.date)} - {game.ecoCode}
+                {openingName ? ` ${openingName}` : ''}
+              </p>
+            )}
           </div>
-        )}
-        </div>
-      )}
-    </div>
+        </CollapsibleTrigger>
+
+        {/* Content */}
+        <CollapsibleContent className="animate-collapsible-down data-[state=closed]:animate-collapsible-up overflow-hidden">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+            <div>
+              <p className="text-ui-text-dim text-xs">White</p>
+              <p className="font-semibold">
+                {game.white}
+                {game.whiteElo ? ` (${game.whiteElo})` : ''}
+              </p>
+            </div>
+            <div>
+              <p className="text-ui-text-dim text-xs">Black</p>
+              <p className="font-semibold">
+                {game.black}
+                {game.blackElo ? ` (${game.blackElo})` : ''}
+              </p>
+            </div>
+            <div>
+              <p className="text-ui-text-dim text-xs">Event</p>
+              <p className="text-xs">{game.event || '?'}</p>
+            </div>
+            <div>
+              <p className="text-ui-text-dim text-xs">Date</p>
+              <p className="text-xs">{yyyymmToDisplay(game.date)}</p>
+            </div>
+            <div>
+              <p className="text-ui-text-dim text-xs">Result</p>
+              <p className="text-xs">{resultNumericToDisplay(game.result ?? null)}</p>
+            </div>
+            {game.ecoCode && (
+              <div>
+                <p className="text-ui-text-dim text-xs">Opening</p>
+                <p className="text-xs">
+                  {game.ecoCode}{openingName ? ` ${openingName}` : ''}
+                </p>
+              </div>
+            )}
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
   )
 }

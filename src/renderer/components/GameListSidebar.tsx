@@ -13,6 +13,11 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.js'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.js'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible.js'
 import { Button } from '@/components/ui/button.js'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip.js'
 
 interface Collection {
   id: string
@@ -81,18 +86,22 @@ export default function GameListSidebar({
             <span className="text-ui-text-dim text-sm px-2">
               {games.length < totalGameCount ? `${games.length} of ${totalGameCount} games` : `${totalGameCount} games`}
             </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 p-1 bg-ui-bg-element hover:bg-ui-bg-hover transition-colors cursor-pointer"
-              title={filtersExpanded ? 'Collapse filters' : 'Expand filters'}
-            >
-              {filtersExpanded ? (
-                <SquareChevronDown size={16} className="text-ui-text-dim" />
-              ) : (
-                <Filter size={16} className="text-ui-text-dim" />
-              )}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 p-1 bg-ui-bg-element hover:bg-ui-bg-hover transition-colors cursor-pointer"
+                >
+                  {filtersExpanded ? (
+                    <SquareChevronDown size={16} className="text-ui-text-dim" />
+                  ) : (
+                    <Filter size={16} className="text-ui-text-dim" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{filtersExpanded ? 'Collapse filters' : 'Expand filters'}</TooltipContent>
+            </Tooltip>
           </div>
         </CollapsibleTrigger>
 

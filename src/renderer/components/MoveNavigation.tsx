@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   ChevronsLeft,
   ChevronLeft,
@@ -8,6 +7,13 @@ import {
   Pause,
 } from 'lucide-react'
 import { useGameControls } from '../hooks/useGameControls.js'
+import { Slider } from '@/components/ui/slider.js'
+import { Button } from '@/components/ui/button.js'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip.js'
 
 interface MoveNavigationProps {
   onFirst: () => void
@@ -16,8 +22,8 @@ interface MoveNavigationProps {
   onLast: () => void
   onTogglePlay: () => void
   isPlaying: boolean
-  speed: 'fast' | 'slow'
-  onSpeedChange: (speed: 'fast' | 'slow') => void
+  speed: number
+  onSpeedChange: (speed: number) => void
   currentPly: number
   totalPlies: number
 }
@@ -34,8 +40,6 @@ export default function MoveNavigation({
   currentPly,
   totalPlies,
 }: MoveNavigationProps) {
-  const [showSpeedMenu, setShowSpeedMenu] = useState(false)
-
   useGameControls({ onFirst, onPrev, onNext, onLast, onTogglePlay })
 
   const isAtStart = currentPly === 0
@@ -45,97 +49,101 @@ export default function MoveNavigation({
     <div className="flex flex-col gap-1 items-center py-2">
       {/* Navigation buttons */}
       <div className="flex gap-1.5 items-center justify-center">
-          <button
-            onClick={onFirst}
-            disabled={isAtStart}
-            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
-            title="First (Home)"
-          >
-            <ChevronsLeft size={18} />
-          </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onFirst}
+              disabled={isAtStart}
+              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+            >
+              <ChevronsLeft size={18} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>First (Home)</TooltipContent>
+        </Tooltip>
 
-          <button
-            onClick={onPrev}
-            disabled={isAtStart}
-            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
-            title="Previous (←)"
-          >
-            <ChevronLeft size={18} />
-          </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onPrev}
+              disabled={isAtStart}
+              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+            >
+              <ChevronLeft size={18} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Previous (←)</TooltipContent>
+        </Tooltip>
 
-          {/* Play/Pause with speed menu */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                if (isPlaying) {
-                  onTogglePlay()
-                } else {
-                  setShowSpeedMenu(!showSpeedMenu)
-                }
-              }}
+        {/* Play/Pause */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={isPlaying ? 'default' : 'ghost'}
+              size="icon"
+              onClick={onTogglePlay}
               disabled={isAtEnd && !isPlaying}
-              className={`p-1.5 rounded ${
+              className={
                 isPlaying
                   ? 'bg-ui-accent hover:bg-orange-600'
-                  : 'bg-ui-bg-element hover:bg-ui-bg-hover'
-              } disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed`}
-              title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+                  : 'bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50'
+              }
             >
               {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-            </button>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{isPlaying ? 'Pause (Space)' : 'Play (Space)'}</TooltipContent>
+        </Tooltip>
 
-            {/* Speed menu (when not playing) */}
-            {showSpeedMenu && !isPlaying && (
-              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 bg-ui-bg-element rounded-sm shadow-lg z-50 min-w-[100px]">
-                <button
-                  onClick={() => {
-                    onSpeedChange('fast')
-                    setShowSpeedMenu(false)
-                    onTogglePlay()
-                  }}
-                  className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover rounded-t text-sm"
-                >
-                  Fast (3s)
-                </button>
-                <button
-                  onClick={() => {
-                    onSpeedChange('slow')
-                    setShowSpeedMenu(false)
-                    onTogglePlay()
-                  }}
-                  className="block w-full text-left px-3 py-1.5 hover:bg-ui-bg-hover rounded-b text-sm"
-                >
-                  Slow (10s)
-                </button>
-              </div>
-            )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onNext}
+              disabled={isAtEnd}
+              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+            >
+              <ChevronRight size={18} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Next (→)</TooltipContent>
+        </Tooltip>
 
-            {/* Current speed indicator (when playing) */}
-            {isPlaying && (
-              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-ui-bg-element rounded-sm text-xs text-ui-text-dim whitespace-nowrap">
-                {speed === 'fast' ? 'Fast (3s)' : 'Slow (10s)'}
-              </div>
-            )}
-          </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onLast}
+              disabled={isAtEnd}
+              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+            >
+              <ChevronsRight size={18} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Last (End)</TooltipContent>
+        </Tooltip>
+      </div>
 
-          <button
-            onClick={onNext}
-            disabled={isAtEnd}
-            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
-            title="Next (→)"
-          >
-            <ChevronRight size={18} />
-          </button>
-
-          <button
-            onClick={onLast}
-            disabled={isAtEnd}
-            className="p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 disabled:cursor-not-allowed rounded-sm"
-            title="Last (End)"
-          >
-            <ChevronsRight size={18} />
-          </button>
+      {/* Speed slider (visible during auto-play) */}
+      {isPlaying && (
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-xs text-ui-text-dim w-8">{(speed / 1000).toFixed(1)}s</span>
+          <Slider
+            value={[speed]}
+            onValueChange={([v]) => onSpeedChange(v)}
+            min={500}
+            max={10000}
+            step={500}
+            className="w-32"
+          />
         </div>
+      )}
     </div>
   )
 }

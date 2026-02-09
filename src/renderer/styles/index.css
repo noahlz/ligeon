@@ -49,6 +49,8 @@
   --color-destructive-foreground: hsl(0, 0%, 100%);
   --color-border: hsl(37, 7%, 25%);
   --color-input: hsl(37, 7%, 25%);
+  --color-popover: hsl(37, 7%, 18%);
+  --color-popover-foreground: hsl(0, 0%, 73%);
   --color-ring: hsl(22, 100%, 42%);
 
   @keyframes collapsible-down {
@@ -87,39 +89,6 @@ html {
     sans-serif;
 }
 
-.move-list {
-  font-family: 'Courier New', monospace;
-  line-height: 1.8;
-}
-
-.move-item {
-  padding: 4px 8px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.move-item:hover {
-  background-color: hsl(37, 7%, 22%) !important;
-}
-
-.move-item.current {
-  background-color: hsl(22, 100%, 42%) !important;
-  color: white;
-  font-weight: bold;
-}
-
-.game-result {
-  background-color: hsl(37, 10%, 8%);
-  color: hsl(0, 0%, 73%);
-  padding: 8px 12px;
-  margin-top: 12px;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: bold;
-  text-align: center;
-  font-family: var(--ui-font-system);
-}
 
 /* Chessground overrides */
 .cg-wrap {
