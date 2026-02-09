@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog.js'
 import { Button } from '@/components/ui/button.js'
+import { Input } from '@/components/ui/input.js'
 
 interface ImportDialogProps {
   isOpen: boolean
@@ -54,7 +55,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
             <DialogHeader>
               <DialogTitle>Import Collection</DialogTitle>
             </DialogHeader>
-            <input
+            <Input
               type="text"
               placeholder={suggestedName}
               value={collectionName}
@@ -69,7 +70,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
                   startImport()
                 }
               }}
-              className="w-full px-2 py-1.5 border rounded-sm bg-ui-bg-element border-ui-border text-ui-text placeholder-ui-text-dimmer text-sm"
+              className="bg-ui-bg-element border-ui-border"
             />
             <DialogFooter>
               <Button variant="outline" onClick={handleClose}>

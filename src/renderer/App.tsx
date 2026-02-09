@@ -7,6 +7,8 @@ import GameInfo from './components/GameInfo.js'
 import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
 import ControlStrip from './components/ControlStrip.js'
+import PanelHandle from './components/PanelHandle.js'
+import { TooltipProvider } from '@/components/ui/tooltip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
@@ -38,6 +40,10 @@ export default function App() {
 
   // Board orientation
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
+
+  // Panel collapse state
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true)
+  const [rightPanelOpen, setRightPanelOpen] = useState(true)
 
   // Board state & navigation
   const { fen, currentPly, lastMove, updateBoardState } = useBoardState({
@@ -99,7 +105,7 @@ export default function App() {
     }
   }
 
-  const handleSpeedChange = (speed: 'fast' | 'slow') => {
+  const handleSpeedChange = (speed: number) => {
     autoPlay.setSpeed(speed)
   }
 
@@ -157,126 +163,147 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen bg-ui-bg-page text-ui-text flex flex-col">
-      {/* Main content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-72 bg-ui-bg-box border-r border-ui-border p-2 overflow-y-auto">
-          <GameListSidebar
-            collectionId={selectedCollectionId}
-            onGameSelect={handleGameSelect}
-            collections={collections}
-            selectedCollectionId={selectedCollectionId}
-            onSelectCollection={setSelectedCollectionId}
-            onImport={handleImportClick}
-            onDeleteCollection={handleDeleteCollection}
-            onRenameCollection={handleRenameCollection}
-            selectedGame={selectedGame}
-            selectedGameCollectionId={selectedGameCollectionId}
+    <TooltipProvider>
+      <div className="h-screen bg-ui-bg-page text-ui-text flex flex-col">
+        {/* Main content */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left panel */}
+          <div
+            className={`${leftPanelOpen ? 'w-72' : 'w-0 overflow-hidden'} bg-ui-bg-box border-r border-ui-border p-2 overflow-y-auto transition-all duration-200`}
+          >
+            <GameListSidebar
+              collectionId={selectedCollectionId}
+              onGameSelect={handleGameSelect}
+              collections={collections}
+              selectedCollectionId={selectedCollectionId}
+              onSelectCollection={setSelectedCollectionId}
+              onImport={handleImportClick}
+              onDeleteCollection={handleDeleteCollection}
+              onRenameCollection={handleRenameCollection}
+              selectedGame={selectedGame}
+              selectedGameCollectionId={selectedGameCollectionId}
+            />
+          </div>
+
+          {/* Left panel handle */}
+          <PanelHandle
+            side="left"
+            isOpen={leftPanelOpen}
+            onToggle={() => setLeftPanelOpen(prev => !prev)}
           />
-        </div>
 
-        {/* Center: Board area with control strip */}
-        <div className="flex-1 flex flex-row items-start justify-center px-2 pt-10 pb-2 gap-2">
-          {selectedGame && chessManager ? (
-            <>
-              {/* Left spacer (matches control strip width) */}
-              <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start" style={{ width: '38px' }} />
+          {/* Center: Board area with control strip */}
+          <div className="flex-1 flex flex-row items-start justify-center px-2 pt-10 pb-2 gap-2">
+            {selectedGame && chessManager ? (
+              <>
+                {/* Left spacer (matches control strip width) */}
+                <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start" style={{ width: '38px' }} />
 
-              {/* Board and Navigation wrapper */}
-              <div className="flex-1 flex flex-col items-center">
-                {/* Board */}
-                <div className="w-full max-w-4xl aspect-square board-coords-wrapper">
-                  <BoardDisplay
-                    key={selectedGame?.id}
-                    fen={fen}
-                    lastMove={lastMove}
-                    orientation={boardOrientation}
-                    check={chessManager.getMoveType(currentPly) === 'check' ? (currentPly % 2 === 1 ? 'black' : 'white') : false}
-                  />
+                {/* Board and Navigation wrapper */}
+                <div className="flex-1 flex flex-col items-center">
+                  {/* Board */}
+                  <div className="w-full max-w-[min(64rem,calc(100vh-8rem))] aspect-square board-coords-wrapper">
+                    <BoardDisplay
+                      key={selectedGame?.id}
+                      fen={fen}
+                      lastMove={lastMove}
+                      orientation={boardOrientation}
+                      check={chessManager.getMoveType(currentPly) === 'check' ? (currentPly % 2 === 1 ? 'black' : 'white') : false}
+                    />
+                  </div>
+
+                  {/* Navigation (below board) */}
+                  <div className="mt-4">
+                    <MoveNavigation
+                      onFirst={handleFirst}
+                      onPrev={handlePrev}
+                      onNext={() => handleNext()}
+                      onLast={handleLast}
+                      onTogglePlay={handleTogglePlay}
+                      isPlaying={autoPlay.isPlaying}
+                      speed={autoPlay.speed}
+                      onSpeedChange={handleSpeedChange}
+                      currentPly={currentPly}
+                      totalPlies={chessManager.getTotalPlies()}
+                    />
+                  </div>
                 </div>
 
-                {/* Navigation (below board) */}
-                <div className="mt-4">
-                  <MoveNavigation
-                    onFirst={handleFirst}
-                    onPrev={handlePrev}
-                    onNext={() => handleNext()}
-                    onLast={handleLast}
-                    onTogglePlay={handleTogglePlay}
-                    isPlaying={autoPlay.isPlaying}
-                    speed={autoPlay.speed}
-                    onSpeedChange={handleSpeedChange}
-                    currentPly={currentPly}
-                    totalPlies={chessManager.getTotalPlies()}
-                  />
-                </div>
-              </div>
-
-              {/* Control Strip */}
-              <ControlStrip
-                pgn={selectedGame.moves}
-                soundEnabled={soundEnabled}
-                onToggleSound={() => setSoundEnabled(!soundEnabled)}
-                onFlipBoard={handleFlipBoard}
-              />
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full">
-              <ChessKnight size={200} className="text-ui-text-dimmer mb-4" strokeWidth={1} />
-              <p className="text-lg text-ui-text-dim">Please select a game...</p>
-            </div>
-          )}
-        </div>
-
-        {/* Right panel: Game info and move list */}
-        <div className="w-80 bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto" data-testid="move-list-panel">
-          {selectedGame ? (
-            <>
-              <GameInfo game={selectedGame} />
-              {moves.length > 0 && (
-                <MoveList
-                  moves={moves}
-                  result={result}
-                  currentPly={currentPly}
-                  onJump={handleJump}
+                {/* Control Strip */}
+                <ControlStrip
+                  pgn={selectedGame.moves}
+                  soundEnabled={soundEnabled}
+                  onToggleSound={() => setSoundEnabled(!soundEnabled)}
+                  onFlipBoard={handleFlipBoard}
                 />
-              )}
-            </>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {/* Skeleton GameInfo header */}
-              <div className="bg-ui-bg-element rounded-sm p-2">
-                <div className="flex items-center gap-2">
-                  <div className="h-4 bg-ui-bg-hover rounded-sm flex-1" />
-                  <div className="h-5 w-5 bg-ui-bg-hover rounded-sm" />
-                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full">
+                <ChessKnight size={200} className="text-ui-text-dimmer mb-4" strokeWidth={1} />
+                <p className="text-lg text-ui-text-dim">Please select a game...</p>
               </div>
+            )}
+          </div>
 
-              {/* Skeleton MoveList */}
-              <div className="bg-ui-bg-element rounded-sm p-2 flex-1">
-                <div className="space-y-2">
-                  {[...Array(12)].map((_, i) => (
-                    <div key={i} className="grid gap-2" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
-                      <div className="h-6 w-6 bg-ui-bg-hover rounded-sm" />
-                      <div className="h-6 bg-ui-bg-hover rounded-sm" />
-                      <div className="h-6 bg-ui-bg-hover rounded-sm" />
-                    </div>
-                  ))}
+          {/* Right panel handle */}
+          <PanelHandle
+            side="right"
+            isOpen={rightPanelOpen}
+            onToggle={() => setRightPanelOpen(prev => !prev)}
+          />
+
+          {/* Right panel: Game info and move list */}
+          <div
+            className={`${rightPanelOpen ? 'w-80' : 'w-0 overflow-hidden'} bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-200`}
+            data-testid="move-list-panel"
+          >
+            {selectedGame ? (
+              <>
+                <GameInfo game={selectedGame} />
+                {moves.length > 0 && (
+                  <MoveList
+                    moves={moves}
+                    result={result}
+                    currentPly={currentPly}
+                    onJump={handleJump}
+                  />
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {/* Skeleton GameInfo header */}
+                <div className="bg-ui-bg-element rounded-sm p-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 bg-ui-bg-hover rounded-sm flex-1" />
+                    <div className="h-5 w-5 bg-ui-bg-hover rounded-sm" />
+                  </div>
+                </div>
+
+                {/* Skeleton MoveList */}
+                <div className="bg-ui-bg-element rounded-sm p-2 flex-1">
+                  <div className="space-y-2">
+                    {[...Array(12)].map((_, i) => (
+                      <div key={i} className="grid gap-2" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
+                        <div className="h-6 w-6 bg-ui-bg-hover rounded-sm" />
+                        <div className="h-6 bg-ui-bg-hover rounded-sm" />
+                        <div className="h-6 bg-ui-bg-hover rounded-sm" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Import dialog */}
-      <ImportDialog
-        isOpen={showImportDialog}
-        filePath={importFilePath}
-        onComplete={handleImportComplete}
-        onClose={handleImportClose}
-      />
-    </div>
+        {/* Import dialog */}
+        <ImportDialog
+          isOpen={showImportDialog}
+          filePath={importFilePath}
+          onComplete={handleImportComplete}
+          onClose={handleImportClose}
+        />
+      </div>
+    </TooltipProvider>
   )
 }

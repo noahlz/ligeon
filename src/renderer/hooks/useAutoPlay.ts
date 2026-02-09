@@ -1,12 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-export type AutoPlaySpeed = 'fast' | 'slow'
-
-const SPEED_INTERVALS: Record<AutoPlaySpeed, number> = {
-  fast: 3000, // 3 seconds
-  slow: 10000 // 10 seconds
-}
-
 export interface UseAutoPlayOptions {
   /** Callback to advance to next move */
   onAdvance: () => boolean // Returns true if advanced, false if at end
@@ -18,10 +11,10 @@ export interface UseAutoPlayOptions {
 
 export interface UseAutoPlayReturn {
   isPlaying: boolean
-  speed: AutoPlaySpeed
+  speed: number
   start: () => void
   stop: () => void
-  setSpeed: (speed: AutoPlaySpeed) => void
+  setSpeed: (ms: number) => void
 }
 
 /**
@@ -32,7 +25,7 @@ export function useAutoPlay(options: UseAutoPlayOptions): UseAutoPlayReturn {
   const { onAdvance, currentPly, maxPly } = options
 
   const [isPlaying, setIsPlaying] = useState(false)
-  const [speed, setSpeed] = useState<AutoPlaySpeed>('fast')
+  const [speed, setSpeed] = useState<number>(3000)
   const intervalRef = useRef<number | null>(null)
 
   const stop = useCallback(() => {
@@ -70,7 +63,7 @@ export function useAutoPlay(options: UseAutoPlayOptions): UseAutoPlayReturn {
       if (!advanced) {
         stop()
       }
-    }, SPEED_INTERVALS[speed])
+    }, speed)
 
     // Cleanup on unmount or when dependencies change
     return () => {
