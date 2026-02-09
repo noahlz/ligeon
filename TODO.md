@@ -8,8 +8,6 @@
 
 - "View on Lichess" clicking should brings up mini-menu: Import to Lichess | Analyze Position (Opens FEN in browser)
 - Replay:
-  - No more pop up menu for speed. Put slider under navigation. Replay speed: 1s[    | ]30s
-  - Allow changing replay speed during play
   - Any manual navigation stops "play"
 
 ## Sideline Mode / Analysis
