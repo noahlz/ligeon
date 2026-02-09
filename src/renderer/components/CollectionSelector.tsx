@@ -109,7 +109,7 @@ export default function CollectionSelector({
             <span className="text-sm cursor-pointer select-none truncate font-bold flex-1 min-w-0 px-2" title={selected?.name}>
               {selected?.name || 'Select Collection'}
             </span>
-            <Button variant="ghost" size="icon" className="h-7 w-7 p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm shrink-0">
+            <Button variant="ghost" size="icon" className="h-7 w-7 p-1.5 bg-ui-bg-element hover:bg-ui-bg-hover rounded-sm shrink-0 cursor-pointer">
               <LibraryBig size={18} />
             </Button>
           </div>
@@ -136,7 +136,7 @@ export default function CollectionSelector({
                     size="icon"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={handleCancelEdit}
-                    className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100"
+                    className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100 cursor-pointer"
                     title="Cancel"
                   >
                     <X size={14} />
@@ -146,7 +146,7 @@ export default function CollectionSelector({
                     size="icon"
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={handleSaveEdit}
-                    className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100"
+                    className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100 cursor-pointer"
                     title="Save"
                   >
                     <Check size={14} />
@@ -171,7 +171,7 @@ export default function CollectionSelector({
                       e.stopPropagation()
                       handleStartEdit(col)
                     }}
-                    className="h-6 w-6 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity"
+                    className="h-6 w-6 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
                     title="Rename collection"
                   >
                     <Pencil size={14} />
@@ -184,7 +184,7 @@ export default function CollectionSelector({
                       setCollectionToDelete(col)
                       setShowMenu(false)
                     }}
-                    className="h-6 w-6 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity"
+                    className="h-6 w-6 p-1 hover:bg-ui-bg-page rounded-sm opacity-0 group-hover:opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
                     title="Delete collection"
                   >
                     <Trash2 size={14} />

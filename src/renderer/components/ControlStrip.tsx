@@ -50,13 +50,13 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
               </Button>
             </DropdownMenuTrigger>
           </TooltipTrigger>
-          <TooltipContent side="left">View on Lichess</TooltipContent>
+          <TooltipContent side="left" className="cursor-pointer">View on Lichess</TooltipContent>
         </Tooltip>
         <DropdownMenuContent side="left" align="start">
-          <DropdownMenuItem onClick={handleImportGame}>
-            Import Game
+          <DropdownMenuItem onClick={handleImportGame} className="cursor-pointer">
+            View Game
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleAnalyzePosition} disabled={!fen}>
+          <DropdownMenuItem onClick={handleAnalyzePosition} disabled={!fen} className="cursor-pointer">
             Analyze Position
           </DropdownMenuItem>
         </DropdownMenuContent>
