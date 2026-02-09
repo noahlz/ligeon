@@ -7,7 +7,7 @@ export const GAMES_SCHEMA_SQL = `
     white TEXT NOT NULL,
     black TEXT NOT NULL,
     event TEXT,
-    dateYYYYMM INTEGER,
+    dateYYYYMMDD INTEGER,
     result REAL NOT NULL,
     ecoCode TEXT,
     whiteElo INTEGER,

@@ -1,5 +1,5 @@
 import { Filter, SquareChevronDown } from 'lucide-react'
-import { yyyymmToDisplay } from '../../shared/converters/dateConverter.js'
+import { yyyymmddToDisplay } from '../../shared/converters/dateConverter.js'
 import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../shared/converters/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
 import OpeningFilter from './OpeningFilter.js'
@@ -140,7 +140,7 @@ export default function GameListSidebar({
                     <SelectItem value="all" className="text-xs">All</SelectItem>
                     {availableDates.map((date) => (
                       <SelectItem key={date} value={date.toString()} className="text-xs">
-                        {yyyymmToDisplay(date)}
+                        {yyyymmddToDisplay(date)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -159,7 +159,7 @@ export default function GameListSidebar({
                     <SelectItem value="all" className="text-xs">All</SelectItem>
                     {availableDates.map((date) => (
                       <SelectItem key={date} value={date.toString()} className="text-xs">
-                        {yyyymmToDisplay(date)}
+                        {yyyymmddToDisplay(date)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -218,7 +218,7 @@ export default function GameListSidebar({
             </p>
             <p className="text-ui-text-dim text-xs flex gap-1 whitespace-nowrap">
               <span>
-                {yyyymmToDisplay(game.date)} - {resultNumericToDisplay(game.result)}
+                {yyyymmddToDisplay(game.date)} - {resultNumericToDisplay(game.result)}
               </span>
               {game.ecoCode && (
                 <span

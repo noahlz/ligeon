@@ -52,7 +52,7 @@ export class GameDatabase {
    */
   insertGame(gameData: GameData): Database.RunResult {
     const stmt = this.db.prepare(`
-      INSERT INTO games (white, black, event, dateYYYYMM, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
+      INSERT INTO games (white, black, event, dateYYYYMMDD, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     return stmt.run(
@@ -78,7 +78,7 @@ export class GameDatabase {
    */
   insertGamesBatch(games: GameData[]): void {
     const stmt = this.db.prepare(`
-      INSERT INTO games (white, black, event, dateYYYYMM, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
+      INSERT INTO games (white, black, event, dateYYYYMMDD, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     const insertMany = this.db.transaction((games: GameData[]) => {
@@ -111,7 +111,7 @@ export class GameDatabase {
    */
   searchGames(filters: GameFilters, limit = 1000): GameSearchResult[] {
     const startTime = Date.now()
-    let query = 'SELECT id, white, black, event, dateYYYYMM as date, result, whiteElo, blackElo, ecoCode FROM games WHERE 1=1'
+    let query = 'SELECT id, white, black, event, dateYYYYMMDD as date, result, whiteElo, blackElo, ecoCode FROM games WHERE 1=1'
     const params: any[] = []
 
     if (filters.player) {
@@ -131,15 +131,15 @@ export class GameDatabase {
       params.push(`%${filters.event}%`)
     }
     if (filters.dateFrom != null && filters.dateTo != null) {
-        query += ' AND dateYYYYMM BETWEEN ? AND ?';
+        query += ' AND dateYYYYMMDD BETWEEN ? AND ?';
         params.push(filters.dateFrom, filters.dateTo);
     } else {
       if (filters.dateFrom != null) {
-          query += ' AND (dateYYYYMM IS NULL OR dateYYYYMM >= ?)';
+          query += ' AND (dateYYYYMMDD IS NULL OR dateYYYYMMDD >= ?)';
           params.push(filters.dateFrom);
       }
       if (filters.dateTo != null) {
-          query += ' AND (dateYYYYMM IS NULL OR dateYYYYMM <= ?)';
+          query += ' AND (dateYYYYMMDD IS NULL OR dateYYYYMMDD <= ?)';
           params.push(filters.dateTo);
       }
     }
@@ -170,7 +170,7 @@ export class GameDatabase {
       params.push(filters.blackEloMax)
     }
 
-    query += ' ORDER BY dateYYYYMM, white, black LIMIT ?'
+    query += ' ORDER BY dateYYYYMMDD, white, black LIMIT ?'
     params.push(limit)
 
     try {
@@ -197,7 +197,7 @@ export class GameDatabase {
    */
   getGameWithMoves(gameId: number): GameRow | null {
     try {
-      const stmt = this.db.prepare('SELECT id, white, black, event, dateYYYYMM as date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves FROM games WHERE id = ?')
+      const stmt = this.db.prepare('SELECT id, white, black, event, dateYYYYMMDD as date, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves FROM games WHERE id = ?')
       return stmt.get(gameId) as GameRow | undefined ?? null
     } catch (error) {
       logError('GameDatabase', 'getGameWithMoves', { dbPath: this.dbPath, gameId }, error)
@@ -222,20 +222,20 @@ export class GameDatabase {
   }
 
   /**
-   * Get distinct dates (YYYYMM) that have games in the database
+   * Get distinct dates (YYYYMMDD) that have games in the database
    *
-   * @returns Array of YYYYMM integers sorted ascending (e.g., [195601, 195603, 195712])
+   * @returns Array of YYYYMMDD integers sorted ascending (e.g., [19560101, 19560315, 19571231])
    */
   getAvailableDates(): number[] {
     try {
       const stmt = this.db.prepare(`
-        SELECT DISTINCT dateYYYYMM
+        SELECT DISTINCT dateYYYYMMDD
         FROM games
-        WHERE dateYYYYMM IS NOT NULL
-        ORDER BY dateYYYYMM ASC
+        WHERE dateYYYYMMDD IS NOT NULL
+        ORDER BY dateYYYYMMDD ASC
       `)
-      const results = stmt.all() as { dateYYYYMM: number }[]
-      return results.map((r) => r.dateYYYYMM)
+      const results = stmt.all() as { dateYYYYMMDD: number }[]
+      return results.map((r) => r.dateYYYYMMDD)
     } catch (error) {
       logError('GameDatabase', 'getAvailableDates', { dbPath: this.dbPath }, error)
       return []

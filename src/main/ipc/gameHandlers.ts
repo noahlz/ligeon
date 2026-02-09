@@ -85,10 +85,10 @@ export async function getGameCount(collectionId: string): Promise<number> {
 }
 
 /**
- * Get distinct dates (YYYYMM) that have games in a collection
+ * Get distinct dates (YYYYMMDD) that have games in a collection
  *
  * @param collectionId - ID of the collection
- * @returns Array of YYYYMM integers sorted ascending (e.g., [195601, 195603, 195712])
+ * @returns Array of YYYYMMDD integers sorted ascending (e.g., [19560101, 19560315, 19571231])
  */
 export async function getAvailableDates(collectionId: string): Promise<number[]> {
   if (!validateCollectionId(collectionId)) {

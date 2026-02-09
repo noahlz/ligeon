@@ -3,6 +3,7 @@ import {
   convertResult,
   resultNumericToDisplay,
   resultNumericToAbbreviation,
+  resultNumericToPgn,
   RESULT_FILTER_OPTIONS,
 } from '../../src/shared/converters/resultConverter'
 
@@ -72,9 +73,24 @@ describe('Result Converter', () => {
     expect(resultNumericToAbbreviation(null)).toBe('Any')
   })
 
+  test('converts numeric to PGN - white wins', () => {
+    expect(resultNumericToPgn(1.0)).toBe('1-0')
+  })
+
+  test('converts numeric to PGN - black wins', () => {
+    expect(resultNumericToPgn(0.0)).toBe('0-1')
+  })
+
+  test('converts numeric to PGN - draw', () => {
+    expect(resultNumericToPgn(0.5)).toBe('1/2-1/2')
+  })
+
+  test('converts numeric to PGN - null', () => {
+    expect(resultNumericToPgn(null)).toBe('*')
+  })
+
   test('RESULT_FILTER_OPTIONS contains expected values', () => {
     expect(RESULT_FILTER_OPTIONS).toEqual([
-      { value: null, label: 'All' },
       { value: 1.0, label: 'White' },
       { value: 0.0, label: 'Black' },
       { value: 0.5, label: 'Draw' },

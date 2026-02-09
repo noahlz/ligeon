@@ -1,7 +1,7 @@
 import type { Game, PgnNodeData } from 'chessops/pgn'
 import type { GameData } from '../types/game.js'
 import { convertResult } from '../converters/resultConverter.js'
-import { pgnDateToYYYYMM } from '../converters/dateConverter.js'
+import { pgnDateToYYYYMMDD } from '../converters/dateConverter.js'
 
 /**
  * Extract game metadata and moves from a parsed PGN game
@@ -31,7 +31,7 @@ export function extractGameData(game: Game<PgnNodeData>): GameData | null {
   // Extract optional metadata
   const event = headers.get('Event') || null
   const dateStr = headers.get('Date')
-  const date = pgnDateToYYYYMM(dateStr)
+  const date = pgnDateToYYYYMMDD(dateStr)
   const ecoCode = headers.get('ECO') || null
   const site = headers.get('Site') || null
   const round = headers.get('Round') || null

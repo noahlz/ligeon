@@ -18,7 +18,7 @@ export interface UseGameSearchReturn {
   games: GameSearchResult[]
   /** Total number of games in the collection */
   totalGameCount: number
-  /** Available dates in the collection (YYYYMM) */
+  /** Available dates in the collection (YYYYMMDD) */
   availableDates: number[]
 }
 

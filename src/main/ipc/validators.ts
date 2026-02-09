@@ -251,27 +251,27 @@ export function validateSearchFiltersResult(filters: GameFilters): ValidationRes
 
   // Copy numeric fields with range validation
 
-  // Date YYYYMM - must be reasonable (190001 to 210012)
-  const MIN_YYYYMM = 190001
-  const MAX_YYYYMM = 210012
+  // Date YYYYMMDD - must be reasonable (19000101 to 21001231)
+  const MIN_YYYYMMDD = 19000101
+  const MAX_YYYYMMDD = 21001231
 
   if (filters.dateFrom !== undefined && filters.dateFrom !== null) {
-    const clamped = Math.max(MIN_YYYYMM, Math.min(MAX_YYYYMM, filters.dateFrom))
+    const clamped = Math.max(MIN_YYYYMMDD, Math.min(MAX_YYYYMMDD, filters.dateFrom))
     if (clamped !== filters.dateFrom) {
       warnings.push({
         code: 'VALUE_CLAMPED',
-        message: 'Date from value clamped to valid range (190001-210012)',
+        message: 'Date from value clamped to valid range (19000101-21001231)',
         field: 'dateFrom',
       })
     }
     sanitized.dateFrom = clamped
   }
   if (filters.dateTo !== undefined && filters.dateTo !== null) {
-    const clamped = Math.max(MIN_YYYYMM, Math.min(MAX_YYYYMM, filters.dateTo))
+    const clamped = Math.max(MIN_YYYYMMDD, Math.min(MAX_YYYYMMDD, filters.dateTo))
     if (clamped !== filters.dateTo) {
       warnings.push({
         code: 'VALUE_CLAMPED',
-        message: 'Date to value clamped to valid range (190001-210012)',
+        message: 'Date to value clamped to valid range (19000101-21001231)',
         field: 'dateTo',
       })
     }

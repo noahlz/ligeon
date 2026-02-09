@@ -1,5 +1,6 @@
 import { ExternalLink, Volume2, VolumeX, RefreshCcw } from 'lucide-react'
-import { buildLichessURL, buildLichessAnalysisURL } from '../utils/externalLinks.js'
+import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn } from '../utils/externalLinks.js'
+import type { GameRow } from '../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,
@@ -14,17 +15,17 @@ import {
 } from '@/components/ui/dropdown-menu.js'
 
 interface ControlStripProps {
-  pgn?: string
+  game?: GameRow
   fen?: string
   soundEnabled: boolean
   onToggleSound: () => void
   onFlipBoard: () => void
 }
 
-export default function ControlStrip({ pgn, fen, soundEnabled, onToggleSound, onFlipBoard }: ControlStripProps) {
+export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard }: ControlStripProps) {
   const handleImportGame = () => {
-    if (!pgn) return
-    window.electron.openExternal(buildLichessURL(pgn))
+    if (!game) return
+    window.electron.openExternal(buildLichessURL(buildFullPgn(game)))
   }
 
   const handleAnalyzePosition = () => {
@@ -42,7 +43,7 @@ export default function ControlStrip({ pgn, fen, soundEnabled, onToggleSound, on
               <Button
                 variant="ghost"
                 size="icon"
-                disabled={!pgn}
+                disabled={!game}
                 className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50 cursor-pointer"
               >
                 <ExternalLink size={18} />

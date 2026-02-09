@@ -74,6 +74,28 @@ export function resultNumericToAbbreviation(resultNumeric: number | null): strin
 /**
  * Result filter options for UI
  */
+/**
+ * Convert numeric result value to PGN result string
+ *
+ * @param resultNumeric - Numeric result (1.0, 0.5, 0.0, or null)
+ * @returns PGN result string ("1-0", "0-1", "1/2-1/2", or "*")
+ */
+export function resultNumericToPgn(resultNumeric: number | null): string {
+  switch (resultNumeric) {
+    case 1.0:
+      return '1-0'
+    case 0.5:
+      return '1/2-1/2'
+    case 0.0:
+      return '0-1'
+    default:
+      return '*'
+  }
+}
+
+/**
+ * Result filter options for UI
+ */
 export const RESULT_FILTER_OPTIONS: Array<{ value: number; label: string }> = [
   { value: 1.0, label: 'White' },
   { value: 0.0, label: 'Black' },

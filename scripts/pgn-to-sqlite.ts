@@ -61,7 +61,7 @@ function main(): void {
 
   // Prepare insert statement
   const insertStmt = db.prepare(`
-    INSERT INTO games (white, black, event, dateYYYYMM, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
+    INSERT INTO games (white, black, event, dateYYYYMMDD, result, ecoCode, whiteElo, blackElo, site, round, moveCount, moves)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
 

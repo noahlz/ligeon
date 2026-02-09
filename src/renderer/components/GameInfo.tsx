@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { SquareChevronDown, SquareMinus } from 'lucide-react'
-import { yyyymmToDisplay } from '../../shared/converters/dateConverter.js'
+import { yyyymmddToDisplay } from '../../shared/converters/dateConverter.js'
 import { resultNumericToDisplay } from '../../shared/converters/resultConverter.js'
 import { getOpeningByEco } from '../utils/openings.js'
 import {
@@ -42,7 +42,7 @@ export default function GameInfo({ game }: GameInfoProps) {
             </div>
             {minimized && (
               <p className="truncate text-ui-text-dim">
-                {yyyymmToDisplay(game.date)} - {game.ecoCode}
+                {yyyymmddToDisplay(game.date)} - {game.ecoCode}
                 {openingName ? ` ${openingName}` : ''}
               </p>
             )}
@@ -72,7 +72,7 @@ export default function GameInfo({ game }: GameInfoProps) {
             </div>
             <div>
               <p className="text-ui-text-dim text-xs">Date</p>
-              <p className="text-xs">{yyyymmToDisplay(game.date)}</p>
+              <p className="text-xs">{yyyymmddToDisplay(game.date)}</p>
             </div>
             <div>
               <p className="text-ui-text-dim text-xs">Result</p>
