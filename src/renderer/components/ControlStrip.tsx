@@ -1,42 +1,65 @@
 import { ExternalLink, Volume2, VolumeX, RefreshCcw } from 'lucide-react'
-import { buildLichessURL } from '../utils/externalLinks.js'
+import { buildLichessURL, buildLichessAnalysisURL } from '../utils/externalLinks.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip.js'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu.js'
 
 interface ControlStripProps {
   pgn?: string
+  fen?: string
   soundEnabled: boolean
   onToggleSound: () => void
   onFlipBoard: () => void
 }
 
-export default function ControlStrip({ pgn, soundEnabled, onToggleSound, onFlipBoard }: ControlStripProps) {
-  const handleViewOnLichess = () => {
+export default function ControlStrip({ pgn, fen, soundEnabled, onToggleSound, onFlipBoard }: ControlStripProps) {
+  const handleImportGame = () => {
     if (!pgn) return
     window.electron.openExternal(buildLichessURL(pgn))
   }
 
+  const handleAnalyzePosition = () => {
+    if (!fen) return
+    window.electron.openExternal(buildLichessAnalysisURL(fen))
+  }
+
   return (
     <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start">
-      {/* View on Lichess button */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleViewOnLichess}
-            disabled={!pgn}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
-          >
-            <ExternalLink size={18} />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left">Import on Lichess</TooltipContent>
-      </Tooltip>
+      {/* View on Lichess dropdown */}
+      <DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                disabled={!pgn}
+                className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
+              >
+                <ExternalLink size={18} />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="left">View on Lichess</TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent side="left" align="start">
+          <DropdownMenuItem onClick={handleImportGame}>
+            Import Game
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleAnalyzePosition} disabled={!fen}>
+            Analyze Position
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Sound toggle */}
       <Tooltip>

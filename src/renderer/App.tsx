@@ -232,6 +232,7 @@ export default function App() {
                 {/* Control Strip */}
                 <ControlStrip
                   pgn={selectedGame.moves}
+                  fen={fen}
                   soundEnabled={soundEnabled}
                   onToggleSound={() => setSoundEnabled(!soundEnabled)}
                   onFlipBoard={handleFlipBoard}
