@@ -270,23 +270,31 @@ export default function App() {
                 )}
               </>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="group relative flex flex-col gap-2 h-full">
+                {/* Centered hint overlay — visible on hover */}
+                <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-sm text-ui-text-dimmer bg-ui-bg-box/80 px-3 py-1.5 rounded-md">
+                    Select a game to view moves.
+                  </span>
+                </div>
+
                 {/* Skeleton GameInfo header */}
                 <div className="bg-ui-bg-element rounded-sm p-2">
                   <div className="flex items-center gap-2">
-                    <div className="h-4 bg-ui-bg-hover rounded-sm flex-1" />
-                    <div className="h-5 w-5 bg-ui-bg-hover rounded-sm" />
+                    <div className="h-4 bg-ui-bg-hover rounded-sm w-48 animate-pulse" />
+                    <div className="h-5 w-5 bg-ui-bg-hover rounded-sm ml-auto" />
                   </div>
+                  <div className="h-3 bg-ui-bg-hover rounded-sm w-36 mt-1.5 animate-pulse" />
                 </div>
 
                 {/* Skeleton MoveList */}
-                <div className="bg-ui-bg-element rounded-sm p-2 flex-1">
-                  <div className="space-y-2">
-                    {[...Array(12)].map((_, i) => (
-                      <div key={i} className="grid gap-2" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
-                        <div className="h-6 w-6 bg-ui-bg-hover rounded-sm" />
-                        <div className="h-6 bg-ui-bg-hover rounded-sm" />
-                        <div className="h-6 bg-ui-bg-hover rounded-sm" />
+                <div className="bg-ui-bg-element rounded-sm p-2 flex-1 font-mono min-h-0">
+                  <div className="space-y-0.5">
+                    {[...Array(30)].map((_, i) => (
+                      <div key={i} className="grid gap-2 py-0.5" style={{ gridTemplateColumns: '2rem 1fr 1fr' }}>
+                        <div className="h-5 w-5 bg-ui-bg-hover rounded-sm animate-pulse" style={{ animationDelay: `${i * 50}ms` }} />
+                        <div className="h-5 bg-ui-bg-hover rounded-sm animate-pulse" style={{ width: `${40 + (i * 7) % 35}%`, animationDelay: `${i * 50 + 25}ms` }} />
+                        <div className="h-5 bg-ui-bg-hover rounded-sm animate-pulse" style={{ width: `${35 + (i * 11) % 40}%`, animationDelay: `${i * 50 + 50}ms` }} />
                       </div>
                     ))}
                   </div>

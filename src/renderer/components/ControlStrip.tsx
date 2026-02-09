@@ -35,7 +35,7 @@ export default function ControlStrip({ pgn, soundEnabled, onToggleSound, onFlipB
             <ExternalLink size={18} />
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="left">View on Lichess</TooltipContent>
+        <TooltipContent side="left">Import on Lichess</TooltipContent>
       </Tooltip>
 
       {/* Sound toggle */}

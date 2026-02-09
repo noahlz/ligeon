@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { deriveSuggestedName } from '@/utils/filenameConverter.js'
 import { useImportDialog } from '../hooks/useImportDialog.js'
 import { useImportProgress } from '../hooks/useImportProgress.js'
@@ -10,6 +11,7 @@ import {
 } from '@/components/ui/dialog.js'
 import { Button } from '@/components/ui/button.js'
 import { Input } from '@/components/ui/input.js'
+import { Progress } from '@/components/ui/progress.js'
 
 interface ImportDialogProps {
   isOpen: boolean
@@ -42,6 +44,23 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
     await handleImport()
   }
 
+  // Auto-close for small imports (≤1000 games) to avoid UI flicker
+  const PROGRESS_THRESHOLD = 1000
+  const showProgress = isIndexing && progress.parsed > PROGRESS_THRESHOLD
+  const autoCloseFired = useRef(false)
+
+  useEffect(() => {
+    if (isComplete && progress.parsed <= PROGRESS_THRESHOLD && !autoCloseFired.current) {
+      autoCloseFired.current = true
+      handleClose()
+    }
+  }, [isComplete, progress.parsed, handleClose])
+
+  // Reset auto-close guard when dialog reopens
+  useEffect(() => {
+    if (isOpen) autoCloseFired.current = false
+  }, [isOpen])
+
   if (!filePath) return null
 
   const percent =
@@ -50,7 +69,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-[425px]">
-        {!isIndexing ? (
+        {!showProgress ? (
           <>
             <DialogHeader>
               <DialogTitle>Import Collection</DialogTitle>
@@ -87,12 +106,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
               <DialogTitle>{isComplete ? 'Import Complete' : 'Indexing'}</DialogTitle>
             </DialogHeader>
             {!isComplete && (
-              <div className="w-full bg-ui-bg-element rounded-full h-2">
-                <div
-                  className="bg-ui-primary h-full transition-all rounded-full"
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
+              <Progress value={percent} className="h-2 bg-ui-bg-element" />
             )}
             <p className="text-xs text-ui-text-dim">
               {isComplete
