@@ -35,29 +35,25 @@ export async function getSidelines(
 }
 
 /**
- * Check if adding a sideline at branchPly would violate the density limit
- * (one sideline per 12-ply bucket)
+ * Check if adding a sideline would exceed the per-game limit.
+ * Limit: 1 sideline per 6 full moves (12 plys).
+ * e.g. a 60-move game (120 plys) allows up to 10 sidelines.
+ * Sidelines may be at any ply positions (adjacency is fine).
  *
- * @param existingSidelines - Array of existing sidelines for the game
+ * @param existingSidelines - Current sidelines for the game
  * @param branchPly - The ply where we want to add a sideline
- * @returns True if allowed, false if density limit violated
+ * @param moveCount - Total full moves in the game
+ * @returns True if allowed, false if limit would be exceeded
  *
- * @visibleForTesting Exported for testing density limit logic
+ * @visibleForTesting Exported for testing
  */
-export function checkDensityLimit(existingSidelines: SidelineData[], branchPly: number): boolean {
-  const bucket = Math.floor((branchPly - 1) / 12)
+export function checkSidelineLimit(existingSidelines: SidelineData[], branchPly: number, moveCount: number): boolean {
+  const maxSidelines = Math.max(1, Math.floor(moveCount / 6))
 
-  for (const sideline of existingSidelines) {
-    // Skip if this is the same branchPly (upsert case)
-    if (sideline.branchPly === branchPly) continue
+  // Don't count existing sideline at same branchPly (upsert case)
+  const currentCount = existingSidelines.filter(s => s.branchPly !== branchPly).length
 
-    const existingBucket = Math.floor((sideline.branchPly - 1) / 12)
-    if (bucket === existingBucket) {
-      return false // Density limit violated
-    }
-  }
-
-  return true
+  return currentCount < maxSidelines
 }
 
 /**
@@ -98,10 +94,16 @@ export async function upsertSideline(
   const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
 
   try {
-    // Check density limit
+    // Look up game to get moveCount for limit check
+    const game = db.getGameWithMoves(gameId)
+    if (!game) {
+      logError('sidelineHandlers', 'upsertSideline', { gameId, reason: 'game not found' }, new Error('Validation failed'))
+      return null
+    }
+
     const existingSidelines = db.getSidelines(gameId)
-    if (!checkDensityLimit(existingSidelines, branchPly)) {
-      logError('sidelineHandlers', 'upsertSideline', { gameId, branchPly, reason: 'density limit violated' }, new Error('Validation failed'))
+    if (!checkSidelineLimit(existingSidelines, branchPly, game.moveCount)) {
+      logError('sidelineHandlers', 'upsertSideline', { gameId, branchPly, moveCount: game.moveCount, reason: 'sideline limit exceeded' }, new Error('Validation failed'))
       return null
     }
 
