@@ -21,18 +21,24 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
     cgRef.current = Chessground(boardRef.current, {
       fen,
       orientation,
-      viewOnly: true,
       coordinates: true,
       animation: {
         enabled: true,
         duration: 300,
       },
       drawable: {
-        visible: false,
+        enabled: true,
+        visible: true,
+        eraseOnMovablePieceClick: true
       },
       highlight: {
+        lastMove: true,
         check: true,
       },
+      movable: {
+        free: false,
+        showDests: true
+      }
     })
 
     return () => {
