@@ -8,6 +8,7 @@ import {
   deleteCollection,
 } from './ipc/collectionHandlers.js'
 import { searchGames, getGameMoves, getGameCount, getAvailableDates, getAvailableEcoCodes } from './ipc/gameHandlers.js'
+import { getSidelines, upsertSideline, deleteSideline } from './ipc/sidelineHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
 import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
@@ -171,6 +172,19 @@ function setupIpcHandlers() {
 
   ipcMain.handle('get-available-eco-codes', async (_event, { collectionId, filters }) =>
     getAvailableEcoCodes(collectionId, filters)
+  )
+
+  // Sideline handlers
+  ipcMain.handle('get-sidelines', async (_event, { collectionId, gameId }) =>
+    getSidelines(collectionId, parseInt(gameId, 10))
+  )
+
+  ipcMain.handle('upsert-sideline', async (_event, { collectionId, gameId, branchPly, moves }) =>
+    upsertSideline(collectionId, parseInt(gameId, 10), branchPly, moves)
+  )
+
+  ipcMain.handle('delete-sideline', async (_event, { collectionId, gameId, branchPly }) =>
+    deleteSideline(collectionId, parseInt(gameId, 10), branchPly)
   )
 
   // Settings handlers

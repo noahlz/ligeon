@@ -12,6 +12,9 @@ import {
   validateSearchFiltersResult,
   validateCollectionNameResult,
   validateOptionFilters,
+  validateGameId,
+  validateBranchPly,
+  validateSidelineMoves,
 } from '../../src/main/ipc/validators.js'
 import type { GameFilters } from '../../src/main/ipc/types.js'
 
@@ -580,6 +583,103 @@ describe('validators', () => {
         dateFrom: 'invalid',
       })
       expect(result).toBeUndefined()
+    })
+  })
+
+  describe('validateGameId', () => {
+    test('accepts positive integers', () => {
+      expect(validateGameId(1)).toBe(true)
+      expect(validateGameId(100)).toBe(true)
+      expect(validateGameId(9999)).toBe(true)
+    })
+
+    test('rejects zero', () => {
+      expect(validateGameId(0)).toBe(false)
+    })
+
+    test('rejects negative numbers', () => {
+      expect(validateGameId(-1)).toBe(false)
+      expect(validateGameId(-100)).toBe(false)
+    })
+
+    test('rejects non-integers', () => {
+      expect(validateGameId(1.5)).toBe(false)
+      expect(validateGameId(3.14)).toBe(false)
+    })
+
+    test('rejects non-numbers', () => {
+      expect(validateGameId('5' as any)).toBe(false)
+      expect(validateGameId(null as any)).toBe(false)
+      expect(validateGameId(undefined as any)).toBe(false)
+      expect(validateGameId({} as any)).toBe(false)
+    })
+  })
+
+  describe('validateBranchPly', () => {
+    test('accepts positive integers', () => {
+      expect(validateBranchPly(1)).toBe(true)
+      expect(validateBranchPly(100)).toBe(true)
+      expect(validateBranchPly(9999)).toBe(true)
+    })
+
+    test('rejects zero', () => {
+      expect(validateBranchPly(0)).toBe(false)
+    })
+
+    test('rejects negative numbers', () => {
+      expect(validateBranchPly(-1)).toBe(false)
+      expect(validateBranchPly(-100)).toBe(false)
+    })
+
+    test('rejects non-integers', () => {
+      expect(validateBranchPly(1.5)).toBe(false)
+      expect(validateBranchPly(3.14)).toBe(false)
+    })
+
+    test('rejects non-numbers', () => {
+      expect(validateBranchPly('5' as any)).toBe(false)
+      expect(validateBranchPly(null as any)).toBe(false)
+      expect(validateBranchPly(undefined as any)).toBe(false)
+      expect(validateBranchPly({} as any)).toBe(false)
+    })
+  })
+
+  describe('validateSidelineMoves', () => {
+    test('accepts non-empty strings', () => {
+      expect(validateSidelineMoves('e4')).toBe(true)
+      expect(validateSidelineMoves('Nf3 d5 Bg5')).toBe(true)
+      expect(validateSidelineMoves('1. e4 e5 2. Nf3')).toBe(true)
+    })
+
+    test('accepts strings with whitespace around valid moves', () => {
+      expect(validateSidelineMoves('  e4  ')).toBe(true)
+    })
+
+    test('rejects empty strings', () => {
+      expect(validateSidelineMoves('')).toBe(false)
+    })
+
+    test('rejects whitespace-only strings', () => {
+      expect(validateSidelineMoves('   ')).toBe(false)
+      expect(validateSidelineMoves('\t\n')).toBe(false)
+    })
+
+    test('rejects strings over 10000 characters', () => {
+      const longString = 'e4 '.repeat(3400) // ~10200 chars
+      expect(validateSidelineMoves(longString)).toBe(false)
+    })
+
+    test('accepts strings at exactly 10000 characters', () => {
+      const maxString = 'a'.repeat(10000)
+      expect(validateSidelineMoves(maxString)).toBe(true)
+    })
+
+    test('rejects non-strings', () => {
+      expect(validateSidelineMoves(123 as any)).toBe(false)
+      expect(validateSidelineMoves(null as any)).toBe(false)
+      expect(validateSidelineMoves(undefined as any)).toBe(false)
+      expect(validateSidelineMoves({} as any)).toBe(false)
+      expect(validateSidelineMoves(['e4', 'e5'] as any)).toBe(false)
     })
   })
 })

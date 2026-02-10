@@ -153,7 +153,7 @@ describe('GameDatabase', () => {
       moveCount: 1,
       moves: '1. e4',
     })
-    const results = db.searchGames({ result: 1.0 })
+    const results = db.searchGames({ results: [1.0] })
     expect(results.length).toBe(1)
   })
 
@@ -481,5 +481,105 @@ describe('GameDatabase', () => {
     insertFilterTestGames(db)
     const codes = db.getAvailableEcoCodes({})
     expect(codes.length).toBe(5)
+  })
+
+  describe('Sidelines', () => {
+    let gameId: number
+
+    beforeEach(() => {
+      // Insert a test game
+      const result = db.insertGame({
+        white: 'Player1',
+        black: 'Player2',
+        event: 'Test',
+        date: 20200101,
+        result: 0.5,
+        ecoCode: 'C50',
+        whiteElo: 2000,
+        blackElo: 2000,
+        site: null,
+        round: null,
+        moveCount: 20,
+        moves: '1. e4 e5 2. Nf3 Nc6',
+      })
+      gameId = result.lastInsertRowid as number
+    })
+
+    test('getSidelines returns empty array for game with no sidelines', () => {
+      const sidelines = db.getSidelines(gameId)
+      expect(sidelines).toEqual([])
+    })
+
+    test('upsertSideline inserts new sideline', () => {
+      const result = db.upsertSideline(gameId, 3, 'd6 3. Bb5')
+      expect(result.gameId).toBe(gameId)
+      expect(result.branchPly).toBe(3)
+      expect(result.moves).toBe('d6 3. Bb5')
+      expect(result.id).toBeDefined()
+    })
+
+    test('upsertSideline updates existing sideline at same branchPly', () => {
+      const first = db.upsertSideline(gameId, 3, 'd6')
+      const second = db.upsertSideline(gameId, 3, 'd6 3. Bb5 a6')
+
+      expect(second.id).toBe(first.id)
+      expect(second.moves).toBe('d6 3. Bb5 a6')
+
+      const sidelines = db.getSidelines(gameId)
+      expect(sidelines.length).toBe(1)
+    })
+
+    test('getSidelines returns sidelines ordered by branchPly', () => {
+      db.upsertSideline(gameId, 5, 'Nc6')
+      db.upsertSideline(gameId, 1, 'd5')
+      db.upsertSideline(gameId, 3, 'd6')
+
+      const sidelines = db.getSidelines(gameId)
+      expect(sidelines.length).toBe(3)
+      expect(sidelines[0].branchPly).toBe(1)
+      expect(sidelines[1].branchPly).toBe(3)
+      expect(sidelines[2].branchPly).toBe(5)
+    })
+
+    test('deleteSideline removes sideline', () => {
+      db.upsertSideline(gameId, 3, 'd6')
+      db.deleteSideline(gameId, 3)
+
+      const sidelines = db.getSidelines(gameId)
+      expect(sidelines.length).toBe(0)
+    })
+
+    test('deleteSideline is idempotent', () => {
+      db.upsertSideline(gameId, 3, 'd6')
+      db.deleteSideline(gameId, 3)
+      expect(() => db.deleteSideline(gameId, 3)).not.toThrow()
+    })
+
+    test('unique constraint prevents duplicate branchPly', () => {
+      db.upsertSideline(gameId, 3, 'first')
+      // Second insert at same ply should update (upsert behavior)
+      const result = db.upsertSideline(gameId, 3, 'second')
+      expect(result.moves).toBe('second')
+
+      const sidelines = db.getSidelines(gameId)
+      expect(sidelines.length).toBe(1)
+    })
+
+    test('sidelines cascade delete with game', () => {
+      db.upsertSideline(gameId, 3, 'd6')
+      db.upsertSideline(gameId, 5, 'Nc6')
+
+      // Verify sidelines exist
+      let sidelines = db.getSidelines(gameId)
+      expect(sidelines.length).toBe(2)
+
+      // Delete the game using a DELETE statement (clearGames uses DELETE FROM games)
+      // This should trigger ON DELETE CASCADE due to foreign key constraint
+      db.clearGames()
+
+      // Sidelines should be automatically deleted due to CASCADE
+      sidelines = db.getSidelines(gameId)
+      expect(sidelines.length).toBe(0)
+    })
   })
 })
