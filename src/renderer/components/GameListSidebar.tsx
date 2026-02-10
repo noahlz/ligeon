@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Filter, SquareChevronDown } from 'lucide-react'
 import { yyyymmddToDisplay } from '../../shared/converters/dateConverter.js'
 import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../shared/converters/resultConverter.js'
@@ -62,12 +63,18 @@ export default function GameListSidebar({
     resetFilters,
   } = useGameFilters()
 
-  const { games, totalGameCount, availableDates } = useGameSearch({
+  const { games, totalGameCount, availableDates, staleDateFrom, staleDateTo } = useGameSearch({
     collectionId,
     searchTerm,
     filters,
     onCollectionChange: resetFilters,
   })
+
+  // Clear stale date selections when they become invalid
+  useEffect(() => {
+    if (staleDateFrom) setDateFrom(null)
+    if (staleDateTo) setDateTo(null)
+  }, [staleDateFrom, staleDateTo, setDateFrom, setDateTo])
 
   return (
     <div data-testid="game-list-sidebar" className="flex flex-col gap-2 h-full">
@@ -122,6 +129,10 @@ export default function GameListSidebar({
                 collectionId={collectionId || ''}
                 value={filters.ecoCodes}
                 onChange={setEcoCodes}
+                player={searchTerm || undefined}
+                results={filters.results}
+                dateFrom={filters.dateFrom}
+                dateTo={filters.dateTo}
               />
             </div>
 

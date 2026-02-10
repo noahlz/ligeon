@@ -45,3 +45,14 @@ export interface AppSettings {
   collectionsPath: string
   collectionsPathCustomized: boolean
 }
+
+/**
+ * Filters for narrowing available filter options (dates, openings)
+ * based on currently active player/result filters.
+ */
+export interface OptionFilters {
+  player?: string
+  results?: number[]
+  dateFrom?: number | null
+  dateTo?: number | null
+}

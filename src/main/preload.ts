@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { GameFilters, AppSettings } from './ipc/types.js'
+import type { GameFilters, AppSettings, OptionFilters } from './ipc/types.js'
 
 /**
  * Import progress event shape — mirrors the callbacks emitted by importHandlers.
@@ -45,11 +45,11 @@ contextBridge.exposeInMainWorld('electron', {
   getGameCount: (collectionId: string) =>
     ipcRenderer.invoke('get-game-count', { collectionId }),
 
-  getAvailableDates: (collectionId: string) =>
-    ipcRenderer.invoke('get-available-dates', { collectionId }),
+  getAvailableDates: (collectionId: string, filters?: OptionFilters) =>
+    ipcRenderer.invoke('get-available-dates', { collectionId, filters }),
 
-  getAvailableEcoCodes: (collectionId: string) =>
-    ipcRenderer.invoke('get-available-eco-codes', { collectionId }),
+  getAvailableEcoCodes: (collectionId: string, filters?: OptionFilters) =>
+    ipcRenderer.invoke('get-available-eco-codes', { collectionId, filters }),
 
   // === Settings ===
   getSettings: () => ipcRenderer.invoke('get-settings'),

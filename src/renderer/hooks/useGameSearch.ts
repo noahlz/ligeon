@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { GameSearchResult } from '../../shared/types/game.js'
 import type { GameFilterValues } from './useGameFilters.js'
+import { buildOptionFilters } from './useGameFilters.js'
 
 export interface UseGameSearchParams {
   /** Currently selected collection ID */
@@ -20,6 +21,10 @@ export interface UseGameSearchReturn {
   totalGameCount: number
   /** Available dates in the collection (YYYYMMDD) */
   availableDates: number[]
+  /** True if the current dateFrom selection is stale (no longer available) */
+  staleDateFrom: boolean
+  /** True if the current dateTo selection is stale (no longer available) */
+  staleDateTo: boolean
 }
 
 /**
@@ -35,27 +40,45 @@ export function useGameSearch({
   const [games, setGames] = useState<GameSearchResult[]>([])
   const [totalGameCount, setTotalGameCount] = useState(0)
   const [availableDates, setAvailableDates] = useState<number[]>([])
+  const [staleDateFrom, setStaleDateFrom] = useState(false)
+  const [staleDateTo, setStaleDateTo] = useState(false)
 
-  // Fetch metadata when collection changes
+  // Fetch game count when collection changes
   useEffect(() => {
-    const fetchMetadata = async () => {
-      if (!collectionId) {
-        setTotalGameCount(0)
-        setAvailableDates([])
-        onCollectionChange?.()
-        return
-      }
-
-      const count = await window.electron.getGameCount(collectionId)
-      setTotalGameCount(count)
-
-      const dates = await window.electron.getAvailableDates(collectionId)
-      setAvailableDates(dates)
-
+    if (!collectionId) {
+      setTotalGameCount(0)
+      setAvailableDates([])
+      setStaleDateFrom(false)
+      setStaleDateTo(false)
       onCollectionChange?.()
+      return
     }
-    fetchMetadata()
+
+    window.electron.getGameCount(collectionId).then(setTotalGameCount)
+    setStaleDateFrom(false)
+    setStaleDateTo(false)
+    onCollectionChange?.()
   }, [collectionId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Re-fetch available dates when player/result filters change
+  useEffect(() => {
+    if (!collectionId) {
+      setAvailableDates([])
+      return
+    }
+
+    const optionFilters = buildOptionFilters({
+      player: searchTerm,
+      results: filters.results,
+    })
+
+    window.electron.getAvailableDates(collectionId, optionFilters).then((dates) => {
+      setAvailableDates(dates)
+      // Set stale flags if date selections are no longer available
+      setStaleDateFrom(filters.dateFrom != null && !dates.includes(filters.dateFrom))
+      setStaleDateTo(filters.dateTo != null && !dates.includes(filters.dateTo))
+    })
+  }, [collectionId, searchTerm, filters.results]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Search games whenever filters change
   useEffect(() => {
@@ -82,5 +105,7 @@ export function useGameSearch({
     games,
     totalGameCount,
     availableDates,
+    staleDateFrom,
+    staleDateTo,
   }
 }

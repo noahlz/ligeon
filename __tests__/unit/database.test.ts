@@ -389,4 +389,97 @@ describe('GameDatabase', () => {
     expect(results.some(r => r.date === 19560315)).toBe(true)
     expect(results.some(r => r.date === null)).toBe(true)
   })
+
+  // --- Filtered getAvailableDates tests ---
+
+  function insertFilterTestGames(db: GameDatabase) {
+    db.insertGamesBatch([
+      { white: 'Kasparov', black: 'Karpov', event: 'WC', date: 19850315, result: 1.0, ecoCode: 'C95', whiteElo: 2740, blackElo: 2710, site: null, round: null, moveCount: 1, moves: '1. e4' },
+      { white: 'Kasparov', black: 'Anand', event: 'WC', date: 19950901, result: 0.5, ecoCode: 'B90', whiteElo: 2800, blackElo: 2770, site: null, round: null, moveCount: 1, moves: '1. e4' },
+      { white: 'Carlsen', black: 'Anand', event: 'WC', date: 20131122, result: 1.0, ecoCode: 'C67', whiteElo: 2870, blackElo: 2775, site: null, round: null, moveCount: 1, moves: '1. e4' },
+      { white: 'Carlsen', black: 'Caruana', event: 'WC', date: 20181109, result: 0.5, ecoCode: 'B33', whiteElo: 2835, blackElo: 2832, site: null, round: null, moveCount: 1, moves: '1. e4' },
+      { white: 'Anand', black: 'Carlsen', event: 'WC', date: 20131122, result: 0.0, ecoCode: 'D37', whiteElo: 2775, blackElo: 2870, site: null, round: null, moveCount: 1, moves: '1. d4' },
+    ])
+  }
+
+  test('getAvailableDates with player filter', () => {
+    insertFilterTestGames(db)
+    const dates = db.getAvailableDates({ player: 'Kasparov' })
+    expect(dates).toEqual([19850315, 19950901])
+  })
+
+  test('getAvailableDates with results filter', () => {
+    insertFilterTestGames(db)
+    const dates = db.getAvailableDates({ results: [1.0] })
+    expect(dates).toEqual([19850315, 20131122])
+  })
+
+  test('getAvailableDates with player + results filter', () => {
+    insertFilterTestGames(db)
+    const dates = db.getAvailableDates({ player: 'Carlsen', results: [1.0] })
+    expect(dates).toEqual([20131122])
+  })
+
+  test('getAvailableDates with no filters returns all dates', () => {
+    insertFilterTestGames(db)
+    const dates = db.getAvailableDates()
+    expect(dates).toEqual([19850315, 19950901, 20131122, 20181109])
+  })
+
+  test('getAvailableDates with empty filters returns all dates', () => {
+    insertFilterTestGames(db)
+    const dates = db.getAvailableDates({})
+    expect(dates).toEqual([19850315, 19950901, 20131122, 20181109])
+  })
+
+  // --- Filtered getAvailableEcoCodes tests ---
+
+  test('getAvailableEcoCodes with player filter', () => {
+    insertFilterTestGames(db)
+    const codes = db.getAvailableEcoCodes({ player: 'Kasparov' })
+    const ecos = codes.map(c => c.eco)
+    expect(ecos).toEqual(['B90', 'C95'])
+  })
+
+  test('getAvailableEcoCodes with results filter', () => {
+    insertFilterTestGames(db)
+    const codes = db.getAvailableEcoCodes({ results: [0.5] })
+    const ecos = codes.map(c => c.eco)
+    expect(ecos).toEqual(['B33', 'B90'])
+  })
+
+  test('getAvailableEcoCodes with player + results filter', () => {
+    insertFilterTestGames(db)
+    const codes = db.getAvailableEcoCodes({ player: 'Carlsen', results: [0.5] })
+    expect(codes).toEqual([{ eco: 'B33', count: 1 }])
+  })
+
+  test('getAvailableEcoCodes with date filter', () => {
+    insertFilterTestGames(db)
+    const codes = db.getAvailableEcoCodes({ dateFrom: 20000101 })
+    const ecos = codes.map(c => c.eco)
+    expect(ecos).toEqual(['B33', 'C67', 'D37'])
+  })
+
+  test('getAvailableEcoCodes returns accurate counts per filter', () => {
+    insertFilterTestGames(db)
+    const codes = db.getAvailableEcoCodes({ player: 'Carlsen' })
+    expect(codes).toEqual([
+      { eco: 'B33', count: 1 },
+      { eco: 'C67', count: 1 },
+      { eco: 'D37', count: 1 },
+    ])
+  })
+
+  test('getAvailableEcoCodes with no filters returns all codes', () => {
+    insertFilterTestGames(db)
+    const codes = db.getAvailableEcoCodes()
+    expect(codes.length).toBe(5)
+  })
+
+  test('getAvailableEcoCodes with empty filters returns all codes', () => {
+    insertFilterTestGames(db)
+    const codes = db.getAvailableEcoCodes({})
+    expect(codes.length).toBe(5)
+  })
 })

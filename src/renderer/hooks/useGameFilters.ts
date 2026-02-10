@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import type { OptionFilters } from '../../shared/types/game.js'
 
 export interface GameFilterValues {
   results: number[]
@@ -12,6 +13,24 @@ const INITIAL_FILTERS: GameFilterValues = {
   dateFrom: null,
   dateTo: null,
   ecoCodes: [],
+}
+
+/**
+ * Build OptionFilters object for narrowing date/opening dropdowns.
+ * Converts empty arrays to undefined and handles null dateFrom/dateTo.
+ */
+export function buildOptionFilters(params: {
+  player?: string
+  results?: number[]
+  dateFrom?: number | null
+  dateTo?: number | null
+}): OptionFilters {
+  return {
+    player: params.player || undefined,
+    results: params.results && params.results.length > 0 ? params.results : undefined,
+    dateFrom: params.dateFrom ?? undefined,
+    dateTo: params.dateTo ?? undefined,
+  }
 }
 
 export interface UseGameFiltersReturn {

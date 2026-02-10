@@ -1,5 +1,5 @@
 import fs from 'fs'
-import type { GameFilters } from './types.js'
+import type { GameFilters, OptionFilters } from './types.js'
 import { logger } from '../config/logger.js'
 
 /**
@@ -396,4 +396,35 @@ export function validateCollectionName(name: string): boolean {
     logger.warn('Validation failed:', result.errors[0].message.toLowerCase())
   }
   return result.valid
+}
+
+/**
+ * Validate and sanitize option filters used for narrowing date/opening dropdowns
+ */
+export function validateOptionFilters(filters: unknown): OptionFilters | undefined {
+  if (!filters || typeof filters !== 'object') return undefined
+
+  const f = filters as Record<string, unknown>
+  const sanitized: OptionFilters = {}
+
+  if (typeof f.player === 'string') {
+    const trimmed = f.player.trim().slice(0, 100)
+    if (trimmed.length > 0) sanitized.player = trimmed
+  }
+
+  if (Array.isArray(f.results) && f.results.length > 0) {
+    const VALID_RESULTS = [0.0, 0.5, 1.0]
+    const valid = f.results.filter((r: unknown) => typeof r === 'number' && VALID_RESULTS.includes(r))
+    if (valid.length > 0) sanitized.results = valid
+  }
+
+  if (typeof f.dateFrom === 'number' && Number.isInteger(f.dateFrom)) {
+    sanitized.dateFrom = Math.max(19000101, Math.min(21001231, f.dateFrom))
+  }
+
+  if (typeof f.dateTo === 'number' && Number.isInteger(f.dateTo)) {
+    sanitized.dateTo = Math.max(19000101, Math.min(21001231, f.dateTo))
+  }
+
+  return Object.keys(sanitized).length > 0 ? sanitized : undefined
 }

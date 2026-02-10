@@ -165,12 +165,12 @@ function setupIpcHandlers() {
     getGameCount(collectionId)
   )
 
-  ipcMain.handle('get-available-dates', async (_event, { collectionId }) =>
-    getAvailableDates(collectionId)
+  ipcMain.handle('get-available-dates', async (_event, { collectionId, filters }) =>
+    getAvailableDates(collectionId, filters)
   )
 
-  ipcMain.handle('get-available-eco-codes', async (_event, { collectionId }) =>
-    getAvailableEcoCodes(collectionId)
+  ipcMain.handle('get-available-eco-codes', async (_event, { collectionId, filters }) =>
+    getAvailableEcoCodes(collectionId, filters)
   )
 
   // Settings handlers

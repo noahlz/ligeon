@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
-import type { GameData, GameRow, GameSearchResult, GameFilters } from './types.js'
+import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters } from './types.js'
 import { GAMES_SCHEMA_SQL } from '../../shared/database/schema.js'
 import { logError, logger } from '../config/logger.js'
 
@@ -226,15 +226,23 @@ export class GameDatabase {
    *
    * @returns Array of YYYYMMDD integers sorted ascending (e.g., [19560101, 19560315, 19571231])
    */
-  getAvailableDates(): number[] {
+  getAvailableDates(filters?: OptionFilters): number[] {
     try {
-      const stmt = this.db.prepare(`
-        SELECT DISTINCT dateYYYYMMDD
-        FROM games
-        WHERE dateYYYYMMDD IS NOT NULL
-        ORDER BY dateYYYYMMDD ASC
-      `)
-      const results = stmt.all() as { dateYYYYMMDD: number }[]
+      let query = 'SELECT DISTINCT dateYYYYMMDD FROM games WHERE dateYYYYMMDD IS NOT NULL'
+      const params: any[] = []
+
+      if (filters?.player) {
+        query += ' AND (white LIKE ? OR black LIKE ?)'
+        params.push(`%${filters.player}%`, `%${filters.player}%`)
+      }
+      if (filters?.results && filters.results.length > 0) {
+        query += ` AND result IN (${filters.results.map(() => '?').join(',')})`
+        params.push(...filters.results)
+      }
+
+      query += ' ORDER BY dateYYYYMMDD ASC'
+      const stmt = this.db.prepare(query)
+      const results = stmt.all(...params) as { dateYYYYMMDD: number }[]
       return results.map((r) => r.dateYYYYMMDD)
     } catch (error) {
       logError('GameDatabase', 'getAvailableDates', { dbPath: this.dbPath }, error)
@@ -246,16 +254,31 @@ export class GameDatabase {
    * Get distinct ECO codes with game counts.
    * @returns  Array of ECO codes with counts, sorted ascending (e.g., [{eco: 'A00', count: 5}, ...])
    */
-  getAvailableEcoCodes(): { eco: string; count: number }[] {
+  getAvailableEcoCodes(filters?: OptionFilters): { eco: string; count: number }[] {
     try {
-      const stmt = this.db.prepare(`
-        SELECT ecoCode, COUNT(*) as count
-        FROM games
-        WHERE ecoCode IS NOT NULL AND ecoCode != ''
-        GROUP BY ecoCode
-        ORDER BY ecoCode ASC
-      `)
-      const results = stmt.all() as { ecoCode: string; count: number }[]
+      let query = `SELECT ecoCode, COUNT(*) as count FROM games WHERE ecoCode IS NOT NULL AND ecoCode != ''`
+      const params: any[] = []
+
+      if (filters?.player) {
+        query += ' AND (white LIKE ? OR black LIKE ?)'
+        params.push(`%${filters.player}%`, `%${filters.player}%`)
+      }
+      if (filters?.results && filters.results.length > 0) {
+        query += ` AND result IN (${filters.results.map(() => '?').join(',')})`
+        params.push(...filters.results)
+      }
+      if (filters?.dateFrom != null) {
+        query += ' AND (dateYYYYMMDD IS NULL OR dateYYYYMMDD >= ?)'
+        params.push(filters.dateFrom)
+      }
+      if (filters?.dateTo != null) {
+        query += ' AND (dateYYYYMMDD IS NULL OR dateYYYYMMDD <= ?)'
+        params.push(filters.dateTo)
+      }
+
+      query += ' GROUP BY ecoCode ORDER BY ecoCode ASC'
+      const stmt = this.db.prepare(query)
+      const results = stmt.all(...params) as { ecoCode: string; count: number }[]
       return results.map((r) => ({ eco: r.ecoCode, count: r.count }))
     } catch (error) {
       logError('GameDatabase', 'getAvailableEcoCodes', { dbPath: this.dbPath }, error)

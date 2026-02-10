@@ -1,5 +1,5 @@
-import type { GameData, GameRow, GameSearchResult, AppSettings } from '../../shared/types/game.js'
-export type { GameData, GameRow, GameSearchResult, AppSettings }
+import type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters } from '../../shared/types/game.js'
+export type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters }
 
 /**
  * Filters for searching games
@@ -20,9 +20,6 @@ export interface GameFilters {
   limit?: number
 }
 
-/**
- * Collection metadata
- */
 export interface CollectionMetadata {
   id: string
   name: string

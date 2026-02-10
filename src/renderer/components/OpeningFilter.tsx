@@ -4,40 +4,59 @@ import { Check } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.js'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command.js'
 import { Badge } from '@/components/ui/badge.js'
+import { buildOptionFilters } from '../hooks/useGameFilters.js'
 
 interface OpeningFilterProps {
   collectionId: string
   value: string[] // Array of ECO codes
   onChange: (ecos: string[]) => void
+  player?: string
+  results?: number[]
+  dateFrom?: number | null
+  dateTo?: number | null
 }
 
-export default function OpeningFilter({ collectionId, value, onChange }: OpeningFilterProps) {
+export default function OpeningFilter({ collectionId, value, onChange, player, results, dateFrom, dateTo }: OpeningFilterProps) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<Opening[]>([])
+  const [searchResults, setSearchResults] = useState<Opening[]>([])
   const [open, setOpen] = useState(false)
   const [availableEcoCodes, setAvailableEcoCodes] = useState<Array<{ eco: string; count: number }>>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch available ECO codes when collection changes
+  // Fetch available ECO codes when collection or upstream filters change
   useEffect(() => {
     const fetchAvailableEcoCodes = async () => {
       setIsLoading(true)
-      const codes = await window.electron.getAvailableEcoCodes(collectionId)
+      const optionFilters = buildOptionFilters({
+        player,
+        results,
+        dateFrom,
+        dateTo,
+      })
+      const codes = await window.electron.getAvailableEcoCodes(collectionId, optionFilters)
       setAvailableEcoCodes(codes)
+
+      // Clear selected ECO codes that are no longer available
+      const availableSet = new Set(codes.map((c) => c.eco))
+      const stillValid = value.filter((eco) => availableSet.has(eco))
+      if (stillValid.length !== value.length) {
+        onChange(stillValid)
+      }
+
       setIsLoading(false)
     }
     fetchAvailableEcoCodes()
-  }, [collectionId])
+  }, [collectionId, player, results, dateFrom, dateTo]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Search openings as user types
   useEffect(() => {
     if (isLoading) {
-      setResults([])
+      setSearchResults([])
       return
     }
 
     const matches = searchAvailableOpenings(query, availableEcoCodes)
-    setResults(matches)
+    setSearchResults(matches)
   }, [query, availableEcoCodes, isLoading])
 
   const isSelected = (eco: string) => value.includes(eco)
@@ -100,7 +119,7 @@ export default function OpeningFilter({ collectionId, value, onChange }: Opening
                 {isLoading ? 'Loading openings...' : 'No openings found'}
               </CommandEmpty>
               <CommandGroup>
-                {results.map((opening) => (
+                {searchResults.map((opening) => (
                   <CommandItem
                     key={opening.eco}
                     value={opening.eco}

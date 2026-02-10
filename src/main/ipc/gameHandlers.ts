@@ -1,7 +1,8 @@
 import { DatabaseManager } from './gameDatabase.js'
 import type { GameFilters, GameSearchResult, GameRow } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
-import { validateCollectionId, validateSearchFilters } from './validators.js'
+import type { OptionFilters } from './types.js'
+import { validateCollectionId, validateSearchFilters, validateOptionFilters } from './validators.js'
 import { logError } from '../config/logger.js'
 
 /**
@@ -90,31 +91,33 @@ export async function getGameCount(collectionId: string): Promise<number> {
  * @param collectionId - ID of the collection
  * @returns Array of YYYYMMDD integers sorted ascending (e.g., [19560101, 19560315, 19571231])
  */
-export async function getAvailableDates(collectionId: string): Promise<number[]> {
+export async function getAvailableDates(collectionId: string, filters?: OptionFilters): Promise<number[]> {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getAvailableDates', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
   }
 
+  const sanitizedFilters = validateOptionFilters(filters)
   const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
   try {
-    return db.getAvailableDates()
+    return db.getAvailableDates(sanitizedFilters)
   } catch (error) {
     logError('gameHandlers', 'getAvailableDates', { collectionId }, error)
     return []
   }
 }
 
-export async function getAvailableEcoCodes(collectionId: string): Promise<{ eco: string; count: number }[]> {
+export async function getAvailableEcoCodes(collectionId: string, filters?: OptionFilters): Promise<{ eco: string; count: number }[]> {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getAvailableEcoCodes', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
   }
 
+  const sanitizedFilters = validateOptionFilters(filters)
   const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
 
   try {
-    return db.getAvailableEcoCodes()
+    return db.getAvailableEcoCodes(sanitizedFilters)
   } catch (error) {
     logError('gameHandlers', 'getAvailableEcoCodes', { collectionId }, error)
     return []

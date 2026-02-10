@@ -11,6 +11,7 @@ import {
   validateFilePathResult,
   validateSearchFiltersResult,
   validateCollectionNameResult,
+  validateOptionFilters,
 } from '../../src/main/ipc/validators.js'
 import type { GameFilters } from '../../src/main/ipc/types.js'
 
@@ -149,15 +150,15 @@ describe('validators', () => {
     })
 
     test('validates result values', () => {
-      expect(validateSearchFilters({ result: 0.0 }).result).toBe(0.0)
-      expect(validateSearchFilters({ result: 0.5 }).result).toBe(0.5)
-      expect(validateSearchFilters({ result: 1.0 }).result).toBe(1.0)
+      expect(validateSearchFilters({ results: [0.0] }).results).toEqual([0.0])
+      expect(validateSearchFilters({ results: [0.5] }).results).toEqual([0.5])
+      expect(validateSearchFilters({ results: [1.0] }).results).toEqual([1.0])
     })
 
     test('rejects invalid result values', () => {
-      expect(validateSearchFilters({ result: 0.3 }).result).toBeUndefined()
-      expect(validateSearchFilters({ result: 2.0 }).result).toBeUndefined()
-      expect(validateSearchFilters({ result: -1.0 }).result).toBeUndefined()
+      expect(validateSearchFilters({ results: [0.3] }).results).toBeUndefined()
+      expect(validateSearchFilters({ results: [2.0] }).results).toBeUndefined()
+      expect(validateSearchFilters({ results: [-1.0] }).results).toBeUndefined()
     })
 
     test('clamps date YYYYMMDD to valid range', () => {
@@ -226,7 +227,7 @@ describe('validators', () => {
 
     test('handles null values correctly', () => {
       const result = validateSearchFilters({
-        result: null,
+        results: [],
         dateFrom: null,
         dateTo: null,
         whiteEloMin: null,
@@ -235,7 +236,7 @@ describe('validators', () => {
         blackEloMax: null,
       })
 
-      expect(result.result).toBeUndefined()
+      expect(result.results).toBeUndefined()
       expect(result.dateFrom).toBeUndefined()
       expect(result.dateTo).toBeUndefined()
       expect(result.whiteEloMin).toBeUndefined()
@@ -249,7 +250,7 @@ describe('validators', () => {
         white: '  Magnus Carlsen  ',
         black: 'Hikaru Nakamura',
         event: 'Speed Chess Championship',
-        result: 1.0,
+        results: [1.0],
         dateFrom: 20230101,
         dateTo: 20231231,
         whiteEloMin: 2800,
@@ -265,7 +266,7 @@ describe('validators', () => {
       expect(sanitized.white).toBe('Magnus Carlsen')
       expect(sanitized.black).toBe('Hikaru Nakamura')
       expect(sanitized.event).toBe('Speed Chess Championship')
-      expect(sanitized.result).toBe(1.0)
+      expect(sanitized.results).toEqual([1.0])
       expect(sanitized.dateFrom).toBe(filters.dateFrom)
       expect(sanitized.dateTo).toBe(filters.dateTo)
       expect(sanitized.whiteEloMin).toBe(2800)
@@ -441,14 +442,14 @@ describe('validators', () => {
       const filters: GameFilters = {
         white: 'Magnus Carlsen',
         black: 'Hikaru Nakamura',
-        result: 1.0,
+        results: [1.0],
       }
       const result = validateSearchFiltersResult(filters)
       expect(result.valid).toBe(true)
       if (result.valid) {
         expect(result.value.white).toBe('Magnus Carlsen')
         expect(result.value.black).toBe('Hikaru Nakamura')
-        expect(result.value.result).toBe(1.0)
+        expect(result.value.results).toEqual([1.0])
       }
     })
 
@@ -478,13 +479,107 @@ describe('validators', () => {
 
     test('removes invalid result values', () => {
       const filters: GameFilters = {
-        result: 0.75, // Invalid result
+        results: [0.75], // Invalid result
       }
       const result = validateSearchFiltersResult(filters)
       expect(result.valid).toBe(true)
       if (result.valid) {
-        expect(result.value.result).toBeUndefined()
+        expect(result.value.results).toBeUndefined()
       }
+    })
+  })
+
+  describe('validateOptionFilters', () => {
+    test('returns undefined for null or non-object input', () => {
+      expect(validateOptionFilters(null)).toBeUndefined()
+      expect(validateOptionFilters(undefined)).toBeUndefined()
+      expect(validateOptionFilters('string')).toBeUndefined()
+      expect(validateOptionFilters(123)).toBeUndefined()
+    })
+
+    test('returns undefined for empty object', () => {
+      expect(validateOptionFilters({})).toBeUndefined()
+    })
+
+    test('validates and trims player filter', () => {
+      const result = validateOptionFilters({ player: '  Carlsen  ' })
+      expect(result?.player).toBe('Carlsen')
+    })
+
+    test('truncates long player names to 100 chars', () => {
+      const result = validateOptionFilters({ player: 'a'.repeat(150) })
+      expect(result?.player).toHaveLength(100)
+    })
+
+    test('ignores empty player after trimming', () => {
+      const result = validateOptionFilters({ player: '   ' })
+      expect(result).toBeUndefined()
+    })
+
+    test('validates results array with valid values', () => {
+      const result = validateOptionFilters({ results: [0.0, 0.5, 1.0] })
+      expect(result?.results).toEqual([0.0, 0.5, 1.0])
+    })
+
+    test('filters out invalid result values', () => {
+      const result = validateOptionFilters({ results: [0.0, 0.3, 0.5, 2.0] })
+      expect(result?.results).toEqual([0.0, 0.5])
+    })
+
+    test('ignores empty results array', () => {
+      const result = validateOptionFilters({ results: [] })
+      expect(result).toBeUndefined()
+    })
+
+    test('validates and clamps dateFrom', () => {
+      const result1 = validateOptionFilters({ dateFrom: 20240101 })
+      expect(result1?.dateFrom).toBe(20240101)
+
+      const result2 = validateOptionFilters({ dateFrom: 18000101 })
+      expect(result2?.dateFrom).toBe(19000101)
+
+      const result3 = validateOptionFilters({ dateFrom: 22000101 })
+      expect(result3?.dateFrom).toBe(21001231)
+    })
+
+    test('validates and clamps dateTo', () => {
+      const result1 = validateOptionFilters({ dateTo: 20240101 })
+      expect(result1?.dateTo).toBe(20240101)
+
+      const result2 = validateOptionFilters({ dateTo: 18000101 })
+      expect(result2?.dateTo).toBe(19000101)
+
+      const result3 = validateOptionFilters({ dateTo: 22000101 })
+      expect(result3?.dateTo).toBe(21001231)
+    })
+
+    test('ignores non-integer dates', () => {
+      const result = validateOptionFilters({ dateFrom: 20240101.5, dateTo: '20240101' })
+      expect(result).toBeUndefined()
+    })
+
+    test('combines multiple valid filters', () => {
+      const result = validateOptionFilters({
+        player: 'Carlsen',
+        results: [1.0],
+        dateFrom: 20200101,
+        dateTo: 20231231,
+      })
+      expect(result).toEqual({
+        player: 'Carlsen',
+        results: [1.0],
+        dateFrom: 20200101,
+        dateTo: 20231231,
+      })
+    })
+
+    test('returns undefined when all filters are invalid', () => {
+      const result = validateOptionFilters({
+        player: '',
+        results: [0.3, 0.7],
+        dateFrom: 'invalid',
+      })
+      expect(result).toBeUndefined()
     })
   })
 })
