@@ -2,7 +2,7 @@ import { DatabaseManager } from './gameDatabase.js'
 import type { GameFilters, GameSearchResult, GameRow } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
 import type { OptionFilters } from './types.js'
-import { validateCollectionId, validateSearchFilters, validateOptionFilters } from './validators.js'
+import { validateCollectionId, validateSearchFilters, validateOptionFilters, validateGameId } from './validators.js'
 import { logError } from '../config/logger.js'
 
 /**
@@ -43,14 +43,12 @@ export async function getGameMoves(
   collectionId: string,
   gameId: number
 ): Promise<GameRow | null> {
-  // Validate inputs
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getGameMoves', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return null
   }
 
-  // Validate gameId is a positive number
-  if (!Number.isInteger(gameId) || gameId <= 0) {
+  if (!validateGameId(gameId)) {
     logError('gameHandlers', 'getGameMoves', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
     return null
   }
