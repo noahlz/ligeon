@@ -41,8 +41,13 @@ export function useAutoPlay(options: UseAutoPlayOptions): UseAutoPlayReturn {
     if (currentPly >= maxPly) {
       return
     }
-    setIsPlaying(true)
-  }, [currentPly, maxPly])
+    // Play first move immediately
+    const advanced = onAdvance()
+    // Only start interval if we successfully advanced
+    if (advanced) {
+      setIsPlaying(true)
+    }
+  }, [currentPly, maxPly, onAdvance])
 
   // Effect to manage the interval
   useEffect(() => {

@@ -193,16 +193,13 @@ export default function App() {
           />
 
           {/* Center: Board area with control strip */}
-          <div className="flex-1 flex flex-row items-start justify-center px-2 pt-10 pb-2 gap-2">
+          <div className="flex-1 flex flex-row items-start justify-center px-2 pt-10 pb-4 gap-2">
             {selectedGame && chessManager ? (
               <>
-                {/* Left spacer (matches control strip width) */}
-                <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start" style={{ width: '38px' }} />
-
                 {/* Board and Navigation wrapper */}
-                <div className="flex-1 flex flex-col items-center">
+                <div className="flex flex-col items-center w-[min(64rem,calc(100vh-8rem))]">
                   {/* Board */}
-                  <div className="w-full max-w-[min(64rem,calc(100vh-8rem))] aspect-square board-coords-wrapper">
+                  <div className="w-full aspect-square board-coords-wrapper">
                     <BoardDisplay
                       key={selectedGame?.id}
                       fen={fen}
@@ -213,7 +210,7 @@ export default function App() {
                   </div>
 
                   {/* Navigation (below board) */}
-                  <div className="mt-4">
+                  <div className="mt-2">
                     <MoveNavigation
                       onFirst={handleFirst}
                       onPrev={handlePrev}

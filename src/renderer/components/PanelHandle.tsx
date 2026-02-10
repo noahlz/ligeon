@@ -12,8 +12,8 @@ interface PanelHandleProps {
 
 export default function PanelHandle({ side, isOpen, onToggle }: PanelHandleProps) {
   const label = side === 'left'
-    ? (isOpen ? 'Hide sidebar' : 'Show sidebar')
-    : (isOpen ? 'Hide moves' : 'Show moves')
+    ? (isOpen ? 'Hide Game Collection' : 'Show Game Collection')
+    : (isOpen ? 'Hide Game Details' : 'Show Game Details')
 
   return (
     <Tooltip>
