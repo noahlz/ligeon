@@ -15,7 +15,9 @@ import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
+import { useSidelineState } from './hooks/useSidelineState.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
+import type { Key } from '@lichess-org/chessground/types'
 
 interface Collection {
   id: string
@@ -88,6 +90,9 @@ export default function App() {
 
     // Reset to initial position
     updateBoardState(manager, 0)
+
+    // Load sidelines for this game
+    sidelineState.loadSidelines(selectedCollectionId, game.id)
   }
 
   // Auto-play hook
@@ -96,6 +101,25 @@ export default function App() {
     currentPly,
     maxPly: chessManager?.getTotalPlies() || 0,
   })
+
+  // Sideline state
+  const sidelineState = useSidelineState({
+    chessManager,
+    collectionId: selectedGameCollectionId,
+    gameId: selectedGame?.id ?? null,
+    currentPly,
+    updateBoardState,
+    autoPlayStop: autoPlay.stop,
+  })
+
+  // Compute interactive board values — sideline overrides mainline
+  const boardDests = (sidelineState.isInSideline
+    ? sidelineState.dests
+    : chessManager?.getDests() ?? new Map()) as Map<Key, Key[]>
+
+  const boardTurnColor = sidelineState.isInSideline
+    ? sidelineState.turnColor
+    : chessManager?.getTurnColor() ?? 'white'
 
   const handleTogglePlay = () => {
     if (autoPlay.isPlaying) {
@@ -206,16 +230,19 @@ export default function App() {
                       lastMove={lastMove}
                       orientation={boardOrientation}
                       check={chessManager.getMoveType(currentPly) === 'check' ? (currentPly % 2 === 1 ? 'black' : 'white') : false}
+                      dests={boardDests}
+                      turnColor={boardTurnColor}
+                      onMove={sidelineState.handleUserMove}
                     />
                   </div>
 
                   {/* Navigation (below board) */}
                   <div className="mt-2">
                     <MoveNavigation
-                      onFirst={handleFirst}
-                      onPrev={handlePrev}
-                      onNext={() => handleNext()}
-                      onLast={handleLast}
+                      onFirst={sidelineState.isInSideline ? sidelineState.sidelineNav.first : handleFirst}
+                      onPrev={sidelineState.isInSideline ? sidelineState.sidelineNav.prev : handlePrev}
+                      onNext={sidelineState.isInSideline ? sidelineState.sidelineNav.next : () => handleNext()}
+                      onLast={sidelineState.isInSideline ? sidelineState.sidelineNav.last : handleLast}
                       onTogglePlay={handleTogglePlay}
                       isPlaying={autoPlay.isPlaying}
                       speed={autoPlay.speed}
@@ -263,7 +290,17 @@ export default function App() {
                     moves={moves}
                     result={result}
                     currentPly={currentPly}
-                    onJump={handleJump}
+                    onJump={(ply) => {
+                      if (sidelineState.isInSideline) sidelineState.exitSideline()
+                      handleJump(ply)
+                    }}
+                    sidelines={sidelineState.sidelines}
+                    activeSidelineBranchPly={sidelineState.activeBranchPly}
+                    sidelineMoves={sidelineState.sidelineMoves}
+                    sidelinePly={sidelineState.sidelinePly}
+                    onSidelineJump={sidelineState.sidelineNav.jump}
+                    onDismissSideline={sidelineState.dismissSideline}
+                    isInSideline={sidelineState.isInSideline}
                   />
                 )}
               </>

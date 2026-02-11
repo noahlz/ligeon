@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import type { MutableRefObject } from 'react'
 import type { Key } from '@lichess-org/chessground/types'
-import type { ChessManager } from '../utils/chessManager.js'
+import type { NavigableManager } from '../types/navigableManager.js'
 import { playMoveSound } from '../utils/audioManager.js'
 
 const INITIAL_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -26,8 +26,8 @@ export interface UseBoardStateReturn {
   setCurrentPly: React.Dispatch<React.SetStateAction<number>>
   /** Set lastMove state directly */
   setLastMove: React.Dispatch<React.SetStateAction<Key[] | undefined>>
-  /** Update board state from a ChessManager at the given ply, with optional sound */
-  updateBoardState: (manager: ChessManager, ply: number) => void
+  /** Update board state from a NavigableManager at the given ply, with optional sound */
+  updateBoardState: (manager: NavigableManager, ply: number) => void
 }
 
 /**
@@ -42,7 +42,7 @@ export function useBoardState({
   const [currentPly, setCurrentPly] = useState(0)
   const [lastMove, setLastMove] = useState<Key[] | undefined>(undefined)
 
-  const updateBoardState = useCallback((manager: ChessManager, ply: number) => {
+  const updateBoardState = useCallback((manager: NavigableManager, ply: number) => {
     manager.goto(ply)
     setFen(manager.getFen())
     const move = manager.getLastMove()

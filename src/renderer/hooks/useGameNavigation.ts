@@ -1,13 +1,13 @@
 import { useCallback } from 'react'
-import type { ChessManager } from '../utils/chessManager.js'
+import type { NavigableManager } from '../types/navigableManager.js'
 
 export interface UseGameNavigationParams {
   /** Chess manager instance (null if no game is loaded) */
-  chessManager: ChessManager | null
+  chessManager: NavigableManager | null
   /** Current ply (half-move) position */
   currentPly: number
   /** Callback to update board state at a given ply */
-  updateBoardState: (manager: ChessManager, ply: number) => void
+  updateBoardState: (manager: NavigableManager, ply: number) => void
 }
 
 export interface UseGameNavigationReturn {

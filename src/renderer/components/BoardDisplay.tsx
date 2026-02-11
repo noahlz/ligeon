@@ -8,11 +8,16 @@ interface BoardDisplayProps {
   lastMove?: Key[] | null
   orientation?: 'white' | 'black'
   check?: 'white' | 'black' | false
+  dests?: Map<Key, Key[]>
+  turnColor?: 'white' | 'black'
+  onMove?: (from: string, to: string) => void
 }
 
-export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false }: BoardDisplayProps) {
+export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove }: BoardDisplayProps) {
   const boardRef = useRef<HTMLDivElement>(null)
   const cgRef = useRef<Api | null>(null)
+  const onMoveRef = useRef(onMove)
+  onMoveRef.current = onMove
 
   // Initialize Chessground once on mount
   useEffect(() => {
@@ -37,7 +42,10 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
       },
       movable: {
         free: false,
-        showDests: true
+        showDests: true,
+        dests: dests ?? undefined,
+        color: turnColor ?? 'both',
+        events: { after: (from, to) => onMoveRef.current?.(from, to) }
       }
     })
 
@@ -55,8 +63,12 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
       lastMove: lastMove || undefined,
       orientation,
       check,
+      movable: {
+        dests: dests ?? undefined,
+        color: turnColor ?? 'both',
+      },
     })
-  }, [fen, lastMove, orientation, check])
+  }, [fen, lastMove, orientation, check, dests, turnColor])
 
   return (
     <div
