@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
-import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters } from './types.js'
-import { GAMES_SCHEMA_SQL } from '../../shared/database/schema.js'
+import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters, SidelineData } from './types.js'
+import { GAMES_SCHEMA_SQL, SIDELINES_SCHEMA_SQL } from '../../shared/database/schema.js'
 import { logError, logger } from '../config/logger.js'
 
 /**
@@ -30,6 +30,7 @@ export class GameDatabase {
     try {
       this.db = new Database(this.dbPath)
       this.db.pragma('journal_mode = WAL')
+      this.db.pragma('foreign_keys = ON')
     } catch (error) {
       logError('GameDatabase', 'constructor', { dbPath: this.dbPath, collectionDir: this.collectionDir }, error)
       throw error
@@ -41,6 +42,7 @@ export class GameDatabase {
    */
   createSchema(): void {
     this.db.exec(GAMES_SCHEMA_SQL)
+    this.db.exec(SIDELINES_SCHEMA_SQL)
     logger.info('✓ Database schema created')
   }
 
@@ -306,6 +308,61 @@ export class GameDatabase {
       logger.info('✓ Cleared all games')
     } catch (error) {
       logError('GameDatabase', 'clearGames', { dbPath: this.dbPath }, error)
+    }
+  }
+
+  /**
+   * Get all sidelines for a game
+   *
+   * @param gameId - Database ID of the game
+   * @returns Array of sideline records ordered by branchPly
+   */
+  getSidelines(gameId: number): SidelineData[] {
+    try {
+      const stmt = this.db.prepare('SELECT id, gameId, branchPly, moves FROM sidelines WHERE gameId = ? ORDER BY branchPly')
+      return stmt.all(gameId) as SidelineData[]
+    } catch (error) {
+      logError('GameDatabase', 'getSidelines', { dbPath: this.dbPath, gameId }, error)
+      return []
+    }
+  }
+
+  /**
+   * Insert or update a sideline
+   *
+   * @param gameId - Database ID of the game
+   * @param branchPly - Mainline ply where sideline departs (1-based)
+   * @param moves - Space-separated SAN moves
+   * @returns The created/updated sideline record
+   */
+  upsertSideline(gameId: number, branchPly: number, moves: string): SidelineData {
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO sidelines (gameId, branchPly, moves)
+        VALUES (?, ?, ?)
+        ON CONFLICT(gameId, branchPly) DO UPDATE SET moves = excluded.moves
+        RETURNING id, gameId, branchPly, moves
+      `)
+      const result = stmt.get(gameId, branchPly, moves) as SidelineData
+      return result
+    } catch (error) {
+      logError('GameDatabase', 'upsertSideline', { dbPath: this.dbPath, gameId, branchPly }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Delete a sideline
+   *
+   * @param gameId - Database ID of the game
+   * @param branchPly - Mainline ply where sideline departs
+   */
+  deleteSideline(gameId: number, branchPly: number): void {
+    try {
+      this.db.prepare('DELETE FROM sidelines WHERE gameId = ? AND branchPly = ?').run(gameId, branchPly)
+    } catch (error) {
+      logError('GameDatabase', 'deleteSideline', { dbPath: this.dbPath, gameId, branchPly }, error)
+      throw error
     }
   }
 }

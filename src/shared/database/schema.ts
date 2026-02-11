@@ -25,3 +25,22 @@ export const GAMES_SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_whiteElo ON games(whiteElo);
   CREATE INDEX IF NOT EXISTS idx_blackElo ON games(blackElo);
 `
+
+/**
+ * SQLite schema for sidelines table.
+ *
+ * ON DELETE CASCADE: deleting a game automatically cleans up its sidelines.
+ * UNIQUE(gameId, branchPly): enforces one sideline per branch point — upsert overwrites
+ * rather than creating duplicates.
+ */
+export const SIDELINES_SCHEMA_SQL = `
+  CREATE TABLE IF NOT EXISTS sidelines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gameId INTEGER NOT NULL,
+    branchPly INTEGER NOT NULL,
+    moves TEXT NOT NULL,
+    FOREIGN KEY (gameId) REFERENCES games(id) ON DELETE CASCADE,
+    UNIQUE(gameId, branchPly)
+  );
+  CREATE INDEX IF NOT EXISTS idx_sidelines_game ON sidelines(gameId);
+`

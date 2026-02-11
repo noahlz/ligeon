@@ -1,4 +1,4 @@
-import type { MoveType } from './chessManager.js'
+import type { MoveType } from '../types/moveTypes.js'
 
 // Sound file paths (relative to public directory)
 const SOUND_PATHS: Record<MoveType, string> = {

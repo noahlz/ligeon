@@ -428,3 +428,49 @@ export function validateOptionFilters(filters: unknown): OptionFilters | undefin
 
   return Object.keys(sanitized).length > 0 ? sanitized : undefined
 }
+
+/**
+ * Validate game ID
+ *
+ * @param id - Game ID to validate
+ * @returns True if valid (positive integer), false otherwise
+ */
+export function validateGameId(id: unknown): id is number {
+  if (typeof id !== 'number' || !Number.isInteger(id) || id <= 0) {
+    logger.warn('Validation failed: game ID must be a positive integer')
+    return false
+  }
+  return true
+}
+
+/**
+ * Validate branch ply (mainline ply where sideline departs)
+ *
+ * @param ply - Branch ply to validate
+ * @returns True if valid (positive integer), false otherwise
+ */
+export function validateBranchPly(ply: unknown): ply is number {
+  if (typeof ply !== 'number' || !Number.isInteger(ply) || ply < 1) {
+    logger.warn('Validation failed: branch ply must be a positive integer')
+    return false
+  }
+  return true
+}
+
+/**
+ * Validate sideline moves string
+ *
+ * @param moves - Moves string to validate
+ * @returns True if valid (non-empty string under 10000 chars), false otherwise
+ */
+export function validateSidelineMoves(moves: unknown): moves is string {
+  if (typeof moves !== 'string' || moves.trim().length === 0) {
+    logger.warn('Validation failed: sideline moves must be a non-empty string')
+    return false
+  }
+  if (moves.length > 10000) {
+    logger.warn('Validation failed: sideline moves must be 10000 characters or less')
+    return false
+  }
+  return true
+}

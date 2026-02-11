@@ -284,5 +284,222 @@ describe('chessManager', () => {
         }
       })
     })
+
+    describe('ChessManager extensions', () => {
+      describe('getDests', () => {
+        test('returns legal destinations from initial position', () => {
+          const manager = createChessManager('')
+          const dests = manager.getDests()
+
+          // Initial position has 20 legal moves: 16 pawn moves (2 per pawn) + 4 knight moves
+          expect(dests.size).toBeGreaterThan(0)
+
+          // e2 pawn can move to e3 or e4
+          const e2Dests = dests.get('e2')
+          expect(e2Dests).toBeDefined()
+          expect(e2Dests).toContain('e3')
+          expect(e2Dests).toContain('e4')
+
+          // g1 knight can move to f3 or h3
+          const g1Dests = dests.get('g1')
+          expect(g1Dests).toBeDefined()
+          expect(g1Dests).toContain('f3')
+          expect(g1Dests).toContain('h3')
+        })
+
+        test('returns empty map at checkmate position', () => {
+          // Scholar's mate position
+          const manager = createChessManager('1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7#')
+          manager.last()
+          const dests = manager.getDests()
+
+          // Black is checkmated, no legal moves
+          expect(dests.size).toBe(0)
+        })
+
+        test('updates when ply changes', () => {
+          const manager = createChessManager('1. e4 e5')
+
+          // Initial position
+          const initialDests = manager.getDests()
+          expect(initialDests.get('e2')).toBeDefined()
+
+          // After e4
+          manager.next()
+          const afterE4Dests = manager.getDests()
+          expect(afterE4Dests.get('e2')).toBeUndefined() // e2 pawn moved
+          expect(afterE4Dests.get('e7')).toBeDefined() // Black's e7 pawn can move
+        })
+      })
+
+      describe('getTurnColor', () => {
+        test('returns white at ply 0', () => {
+          const manager = createChessManager('1. e4 e5')
+          expect(manager.getTurnColor()).toBe('white')
+        })
+
+        test('returns black after white\'s first move', () => {
+          const manager = createChessManager('1. e4 e5')
+          manager.next() // After e4
+          expect(manager.getTurnColor()).toBe('black')
+        })
+
+        test('returns white after black\'s reply', () => {
+          const manager = createChessManager('1. e4 e5')
+          manager.goto(2) // After e4 e5
+          expect(manager.getTurnColor()).toBe('white')
+        })
+
+        test('alternates correctly through game', () => {
+          const manager = createChessManager('1. e4 e5 2. Nf3 Nc6')
+
+          expect(manager.getTurnColor()).toBe('white') // ply 0
+          manager.next()
+          expect(manager.getTurnColor()).toBe('black') // ply 1
+          manager.next()
+          expect(manager.getTurnColor()).toBe('white') // ply 2
+          manager.next()
+          expect(manager.getTurnColor()).toBe('black') // ply 3
+          manager.next()
+          expect(manager.getTurnColor()).toBe('white') // ply 4
+        })
+      })
+
+      describe('tryMove', () => {
+        test('returns SAN for legal move', () => {
+          const manager = createChessManager('1. e4 e5')
+          const san = manager.tryMove('e2', 'e4')
+          expect(san).toBe('e4')
+        })
+
+        test('returns null for illegal move', () => {
+          const manager = createChessManager('')
+          const san = manager.tryMove('e2', 'e5') // Can't move 3 squares
+          expect(san).toBeNull()
+        })
+
+        test('does not change manager state', () => {
+          const manager = createChessManager('1. e4 e5')
+          const initialPly = manager.getCurrentPly()
+          const initialFen = manager.getFen()
+
+          manager.tryMove('e2', 'e4')
+
+          expect(manager.getCurrentPly()).toBe(initialPly)
+          expect(manager.getFen()).toBe(initialFen)
+        })
+
+        test('handles promotion parameter', () => {
+          // Just verify the promotion parameter is accepted and doesn't cause errors
+          // Testing actual promotion requires complex game setup
+          const manager = createChessManager('')
+
+          // Try a move with promotion parameter (will be invalid from initial position)
+          const san = manager.tryMove('e2', 'e8', 'queen')
+          expect(san).toBeNull() // Invalid move, but parameter is handled
+
+          // Verify promotion parameter with a legal non-promotion move
+          const san2 = manager.tryMove('e2', 'e4', undefined)
+          expect(san2).toBe('e4')
+        })
+
+        test('returns correct SAN for captures', () => {
+          const manager = createChessManager('1. e4 d5')
+          manager.last()
+          const san = manager.tryMove('e4', 'd5')
+          expect(san).toBe('exd5')
+        })
+
+        test('validates from/to squares', () => {
+          const manager = createChessManager('')
+          expect(manager.tryMove('invalid', 'e4')).toBeNull()
+          expect(manager.tryMove('e2', 'invalid')).toBeNull()
+        })
+
+        test('rejects off-board squares', () => {
+          const manager = createChessManager('')
+          expect(manager.tryMove('a9', 'a10')).toBeNull()
+          expect(manager.tryMove('i1', 'j1')).toBeNull()
+          expect(manager.tryMove('e2', 'e9')).toBeNull()
+        })
+
+        test('rejects empty/whitespace squares', () => {
+          const manager = createChessManager('')
+          expect(manager.tryMove('', 'e4')).toBeNull()
+          expect(manager.tryMove('e2', '')).toBeNull()
+          expect(manager.tryMove(' ', 'e4')).toBeNull()
+        })
+      })
+
+      describe('getMainlineSan', () => {
+        test('returns SAN for valid ply', () => {
+          const manager = createChessManager('1. e4 e5 2. Nf3')
+          expect(manager.getMainlineSan(1)).toBe('e4')
+          expect(manager.getMainlineSan(2)).toBe('e5')
+          expect(manager.getMainlineSan(3)).toBe('Nf3')
+        })
+
+        test('returns undefined for ply 0', () => {
+          const manager = createChessManager('1. e4')
+          expect(manager.getMainlineSan(0)).toBeUndefined()
+        })
+
+        test('returns undefined for out-of-range ply', () => {
+          const manager = createChessManager('1. e4 e5')
+          expect(manager.getMainlineSan(-1)).toBeUndefined()
+          expect(manager.getMainlineSan(10)).toBeUndefined()
+        })
+
+        test('works regardless of current ply', () => {
+          const manager = createChessManager('1. e4 e5 2. Nf3')
+          manager.last()
+          expect(manager.getMainlineSan(1)).toBe('e4')
+          expect(manager.getMainlineSan(2)).toBe('e5')
+        })
+
+        test('boundary: ply 1 when only initial position exists', () => {
+          const manager = createChessManager('')
+          expect(manager.getMainlineSan(1)).toBeUndefined()
+        })
+
+        test('boundary: negative ply values', () => {
+          const manager = createChessManager('1. e4')
+          expect(manager.getMainlineSan(-1)).toBeUndefined()
+          expect(manager.getMainlineSan(-100)).toBeUndefined()
+        })
+      })
+
+      describe('getFenAtPly', () => {
+        test('returns initial FEN at ply 0', () => {
+          const manager = createChessManager('1. e4')
+          const fen = manager.getFenAtPly(0)
+          expect(fen).toBe('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+        })
+
+        test('returns correct FEN at any valid ply', () => {
+          const manager = createChessManager('1. e4 e5')
+          const fen1 = manager.getFenAtPly(1)
+          const fen2 = manager.getFenAtPly(2)
+
+          expect(fen1).toContain('4P3') // e4 pawn
+          expect(fen1).toContain('b KQkq') // Black to move
+          expect(fen2).toContain('4p3') // e5 pawn
+          expect(fen2).toContain('w KQkq') // White to move
+        })
+
+        test('returns undefined for out-of-range ply', () => {
+          const manager = createChessManager('1. e4 e5')
+          expect(manager.getFenAtPly(-1)).toBeUndefined()
+          expect(manager.getFenAtPly(10)).toBeUndefined()
+        })
+
+        test('works regardless of current ply', () => {
+          const manager = createChessManager('1. e4 e5')
+          manager.goto(1)
+          const fen0 = manager.getFenAtPly(0)
+          expect(fen0).toBe('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+        })
+      })
+    })
   })
 })

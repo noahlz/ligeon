@@ -56,3 +56,13 @@ export interface OptionFilters {
   dateFrom?: number | null
   dateTo?: number | null
 }
+
+/**
+ * Sideline data structure
+ */
+export interface SidelineData {
+  id?: number          // DB auto-increment (undefined before first save)
+  gameId: number       // FK to games.id
+  branchPly: number    // mainline ply where sideline departs (1-based)
+  moves: string        // space-separated SAN: "Nf3 d5 Bg5"
+}
