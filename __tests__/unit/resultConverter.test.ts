@@ -2,7 +2,6 @@ import { describe, test, expect } from 'vitest'
 import {
   convertResult,
   resultNumericToDisplay,
-  resultNumericToAbbreviation,
   resultNumericToPgn,
   RESULT_FILTER_OPTIONS,
 } from '../../src/shared/converters/resultConverter'
@@ -55,22 +54,6 @@ describe('Result Converter', () => {
 
   test('converts numeric to display - null', () => {
     expect(resultNumericToDisplay(null)).toBe('Unknown')
-  })
-
-  test('converts numeric to abbreviation - white wins', () => {
-    expect(resultNumericToAbbreviation(1.0)).toBe('W')
-  })
-
-  test('converts numeric to abbreviation - draw', () => {
-    expect(resultNumericToAbbreviation(0.5)).toBe('D')
-  })
-
-  test('converts numeric to abbreviation - black wins', () => {
-    expect(resultNumericToAbbreviation(0.0)).toBe('B')
-  })
-
-  test('converts numeric to abbreviation - null', () => {
-    expect(resultNumericToAbbreviation(null)).toBe('Any')
   })
 
   test('converts numeric to PGN - white wins', () => {

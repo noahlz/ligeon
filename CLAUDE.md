@@ -57,7 +57,7 @@ src/
     hooks/             # Custom React hooks
     lib/               # Shared utilities (cn helper)
     styles/            # CSS + Tailwind
-    types/             # electron.d.ts (IPC API types)
+    types/             # electron.ts (IPC API ambient types)
     utils/             # chessManager, audioManager, dateConverter
   shared/              # Single source for main + renderer + CLI
     converters/        # resultConverter
@@ -79,7 +79,7 @@ src/
 | `src/main/ipc/validators.ts` | IPC input validation |
 | `src/main/ipc/importHandlers.ts` | PGN import orchestration |
 | `src/main/preload.ts` | `window.electron.*` bridge |
-| `src/renderer/types/electron.d.ts` | IPC API type definitions |
+| `src/renderer/types/electron.ts` | IPC API ambient type definitions |
 | `src/renderer/App.tsx` | Root layout + state |
 | `src/renderer/components/BoardDisplay.tsx` | Chessground board |
 | `src/renderer/components/GameListSidebar.tsx` | Search, filter, game list |
@@ -201,3 +201,9 @@ If rebuild succeeds but fails at runtime: `rm -rf node_modules/better-sqlite3/bu
 ### Ignore DevTools Warnings
 
 `Request Autofill.enable/setAddresses failed` — harmless in `npm run app`.
+
+### Knip False Positives
+
+`npm run knip` reports expected "unused exports" from shadcn/ui components (`components/ui/**`). These are library components designed to export comprehensive APIs even when not all exports are used. Do not remove these exports. See `knip.json` for configured ignores:
+- `electron.ts` marked as entry point (ambient type declarations, no explicit imports)
+- `tailwindcss` ignored (peer dependency of `@tailwindcss/vite`)

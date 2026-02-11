@@ -1,9 +1,12 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": [
     "src/main/main.ts",
     "src/main/preload.ts",
-    "src/renderer/index.tsx"
+    "src/renderer/index.tsx",
+    "src/renderer/types/electron.ts"
   ],
-  "project": ["src/**/*.{ts,tsx}"]
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignoreDependencies": [
+    "tailwindcss"
+  ]
 }
