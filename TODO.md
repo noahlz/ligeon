@@ -1,8 +1,37 @@
 # Ligeon TODOs
+
 ## Sideline Mode / Analysis
 
-- Allow pieces clickable / draggable / moveable - but do not modify game pgn. Moving a piece enters a "sideline mode" where you can move pieces legally (play chess) - you can either exit that mode or view FEN on lichess.
-  - See chessground-example for "Play legal moves from initial position"
+### Features 
+
+**PGN Export**
+- Extend buildFullPgn to export sidelines as PGN variations
+- Add tests for PGN export with sidelines
+- Verify exported PGN opens correctly in Lichess
+
+**Error Reporting**
+- If user tries to create one more sideline but max reached, show toast error "Max sidelines reached (1 per 6 moves)"
+- Any error that originates from a user action should have a toast in addition to a console log.
+
+### Bugs
+
+- Ad-hoc sideline navigation issues:
+  - After minimizing and then re-expanding a sideline, the moves are no longer clickable.
+  - When a sideline is minimized, clicking on it should maximize it but not navigate to a move.
+    - The sideline when minimized should have slightly different color so it's clear it expands. UX expectation should *not* be that it jumps to the move. It should have title like "Sideline: 4. d4 ..." Only clicking on a move when maximized should navigate directly to that move on the board.
+  - Subtle bug: Sometimes clicking on a sideline move navigates in a different sideline (perhaps because they have the same branch point? Don't allow that).
+
+- When deleting a sideline:
+  - If you are in the sideline, navigate to the move that was the branch point of the sideline.
+  - If you are not in the sideline, just delete it and remain at the current move in the mainline.
+
+- Disable premoving. Sometimes when attempting to start a new sideline, chessground interprets it as a "premove" instead.
+
+## Code Quality
+
+- Extract business logic out of React components.
+- Make sure all errors and warnings are surfaced to the user as toasts
+- Full code review / refactoring / delete unused code.
 
 ## Style / UI
 
@@ -11,6 +40,8 @@
 ## Testing
 
 - Improve coverage of React/Electron files.
+- Coverage for UI components? 
+- Exclude ShadCN copy/pasted components from coverage.
 
 ## Packaging
 

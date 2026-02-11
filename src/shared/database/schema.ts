@@ -27,7 +27,11 @@ export const GAMES_SCHEMA_SQL = `
 `
 
 /**
- * SQLite schema for sidelines table
+ * SQLite schema for sidelines table.
+ *
+ * ON DELETE CASCADE: deleting a game automatically cleans up its sidelines.
+ * UNIQUE(gameId, branchPly): enforces one sideline per branch point — upsert overwrites
+ * rather than creating duplicates.
  */
 export const SIDELINES_SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS sidelines (
