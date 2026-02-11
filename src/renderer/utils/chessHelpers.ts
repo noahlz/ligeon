@@ -1,0 +1,78 @@
+import { Chess } from 'chessops/chess'
+import { parseFen } from 'chessops/fen'
+import { makeSan } from 'chessops/san'
+import { parseSquare } from 'chessops/util'
+import { chessgroundDests } from 'chessops/compat'
+import type { NormalMove, Role } from 'chessops/types'
+
+/**
+ * Get legal move destinations from a FEN position for chessground.
+ * Returns empty map if FEN is invalid.
+ */
+export function getDestsFromFen(fen: string): Map<string, string[]> {
+  const setup = parseFen(fen)
+  if (setup.isErr) {
+    console.error('Failed to parse FEN for getDests:', fen, setup.error)
+    return new Map()
+  }
+  const pos = Chess.fromSetup(setup.value)
+  if (pos.isErr) {
+    console.error('Failed to create Chess position from FEN:', fen, pos.error)
+    return new Map()
+  }
+  return chessgroundDests(pos.value)
+}
+
+/**
+ * Get the active player's color from a FEN position.
+ * Uses chessops API instead of string parsing for robustness.
+ */
+export function getTurnColorFromFen(fen: string): 'white' | 'black' {
+  const setup = parseFen(fen)
+  if (setup.isErr) {
+    console.error('Failed to parse FEN for getTurnColor:', fen, setup.error)
+    return 'white' // Default to white on error
+  }
+  return setup.value.turn === 'black' ? 'black' : 'white'
+}
+
+/**
+ * Validate a move from a FEN position and return its SAN notation.
+ * Returns null if the move is illegal or squares are invalid.
+ *
+ * @param fen - The FEN position to validate the move from
+ * @param from - Source square (e.g., 'e2')
+ * @param to - Destination square (e.g., 'e4')
+ * @param promotion - Optional promotion piece ('queen', 'rook', 'bishop', 'knight')
+ */
+export function tryMoveFromFen(
+  fen: string,
+  from: string,
+  to: string,
+  promotion?: string
+): string | null {
+  const setup = parseFen(fen)
+  if (setup.isErr) {
+    console.error('Failed to parse FEN for tryMove:', fen, setup.error)
+    return null
+  }
+  const pos = Chess.fromSetup(setup.value)
+  if (pos.isErr) {
+    console.error('Failed to create Chess position from FEN:', fen, pos.error)
+    return null
+  }
+
+  const fromSq = parseSquare(from)
+  const toSq = parseSquare(to)
+  if (fromSq === undefined || toSq === undefined) return null
+
+  const move: NormalMove = {
+    from: fromSq,
+    to: toSq,
+    promotion: promotion as Role | undefined,
+  }
+
+  // Check if the move is legal
+  if (!pos.value.isLegal(move)) return null
+  return makeSan(pos.value, move)
+}

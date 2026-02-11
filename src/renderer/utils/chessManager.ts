@@ -4,23 +4,27 @@ import { parseSan } from 'chessops/san'
 import { parsePgn } from 'chessops/pgn'
 import { makeSquare, squareFile } from 'chessops/util'
 import type { NormalMove } from 'chessops/types'
+import type { NavigableManager } from '../types/navigableManager.js'
+import type { MoveType } from '../types/moveTypes.js'
+import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
 
-export type MoveType = 'move' | 'capture' | 'check' | 'castle'
+// Re-export MoveType for backward compatibility
+export type { MoveType } from '../types/moveTypes.js'
 
-export interface ChessManager {
-  getFen: () => string
-  getLastMove: () => [string, string] | undefined
-  getMoveType: (ply: number) => MoveType | undefined
-  goto: (ply: number) => void
+export interface ChessManager extends NavigableManager {
+  // NavigableManager methods inherited: getFen, getLastMove, getMoveType, goto, getCurrentPly, getTotalPlies
   next: () => boolean
   prev: () => boolean
   first: () => void
   last: () => void
-  getCurrentPly: () => number
-  getTotalPlies: () => number
+  getDests: () => Map<string, string[]>
+  getTurnColor: () => 'white' | 'black'
+  tryMove: (from: string, to: string, promotion?: string) => string | null
+  getMainlineSan: (ply: number) => string | undefined
+  getFenAtPly: (ply: number) => string | undefined
 }
 
-interface ParsedMove {
+export interface ParsedMove {
   san: string
   fen: string
   lastMove?: [string, string]
@@ -43,6 +47,41 @@ export function getResultDisplay(result: string): string {
     default:
       return result
   }
+}
+
+/**
+ * Play a SAN move on a Chess position and record position metadata.
+ * Returns null if the SAN is invalid or illegal.
+ */
+export function playAndRecord(chess: Chess, san: string): ParsedMove | null {
+  const move = parseSan(chess, san)
+  if (!move) return null
+
+  // Standard chess PGN only contains normal moves (from → to), not drops
+  // Validate that this is actually a NormalMove before casting
+  if (!('from' in move && 'to' in move)) {
+    console.error(`Unexpected move type (not a NormalMove): ${JSON.stringify(move)}`)
+    return null
+  }
+  const normal = move as NormalMove
+  const from = makeSquare(normal.from)
+  const to = makeSquare(normal.to)
+
+  // Detect castle and capture from pre-move position state
+  const role = chess.board.getRole(normal.from)
+  const isCastle = role === 'king' && chess.board[chess.turn].has(normal.to)
+  const isCapture = chess.board.occupied.has(normal.to) ||
+    (role === 'pawn' && squareFile(normal.from) !== squareFile(normal.to))
+
+  // Play move, then detect check/checkmate from resulting position
+  chess.play(move)
+  const isCheck = chess.isCheck() || chess.outcome()?.winner !== undefined
+  const fen = makeFen(chess.toSetup())
+
+  // Priority: check > castle > capture > move
+  const type: MoveType = isCheck ? 'check' : isCastle ? 'castle' : isCapture ? 'capture' : 'move'
+
+  return { san, fen, lastMove: [from, to], type }
 }
 
 /**
@@ -76,32 +115,12 @@ export function createChessManager(movesString: string): ChessManager {
 
   // Replay each move, deriving all metadata from position state
   for (const san of sanMoves) {
-    const move = parseSan(chess, san)
-    if (!move) {
+    const parsed = playAndRecord(chess, san)
+    if (!parsed) {
       console.error(`Failed to parse move: ${san}`)
       break
     }
-
-    // Standard chess PGN only contains normal moves (from → to), not drops
-    const normal = move as NormalMove
-    const from = makeSquare(normal.from)
-    const to = makeSquare(normal.to)
-
-    // Detect castle and capture from pre-move position state
-    const role = chess.board.getRole(normal.from)
-    const isCastle = role === 'king' && chess.board[chess.turn].has(normal.to)
-    const isCapture = chess.board.occupied.has(normal.to) ||
-      (role === 'pawn' && squareFile(normal.from) !== squareFile(normal.to))
-
-    // Play move, then detect check/checkmate from resulting position
-    chess.play(move)
-    const isCheck = chess.isCheck() || chess.outcome()?.winner !== undefined
-    const fen = makeFen(chess.toSetup())
-
-    // Priority: check > castle > capture > move
-    const type: MoveType = isCheck ? 'check' : isCastle ? 'castle' : isCapture ? 'capture' : 'move'
-
-    positions.push({ san, fen, lastMove: [from, to], type })
+    positions.push(parsed)
   }
 
   return {
@@ -146,6 +165,23 @@ export function createChessManager(movesString: string): ChessManager {
 
     getCurrentPly: () => currentPly,
 
-    getTotalPlies: () => positions.length - 1 // Don't count initial position as a ply
+    getTotalPlies: () => positions.length - 1, // Don't count initial position as a ply
+
+    getDests: () => getDestsFromFen(positions[currentPly].fen),
+
+    getTurnColor: () => getTurnColorFromFen(positions[currentPly].fen),
+
+    tryMove: (from: string, to: string, promotion?: string) =>
+      tryMoveFromFen(positions[currentPly].fen, from, to, promotion),
+
+    getMainlineSan: (ply: number) => {
+      if (ply < 1 || ply >= positions.length) return undefined
+      return positions[ply].san
+    },
+
+    getFenAtPly: (ply: number) => {
+      if (ply < 0 || ply >= positions.length) return undefined
+      return positions[ply].fen
+    }
   }
 }
