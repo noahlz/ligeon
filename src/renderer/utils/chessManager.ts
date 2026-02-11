@@ -1,3 +1,14 @@
+/**
+ * ChessManager - read-only mainline game navigation.
+ *
+ * Parses a PGN move string and provides navigation through the game's mainline positions.
+ * Immutable after creation - for interactive move-making, see SidelineManager.
+ *
+ * Stores positions as FEN strings (not live Chess objects) for memory efficiency.
+ * Legal move calculation (getDests, tryMove) reconstructs Chess positions on-demand
+ * using shared helpers from chessHelpers.ts.
+ */
+
 import { Chess } from 'chessops/chess'
 import { parseFen, makeFen, INITIAL_FEN } from 'chessops/fen'
 import { parseSan } from 'chessops/san'

@@ -1,3 +1,14 @@
+/**
+ * SidelineManager - mutable move sequence manager for sideline exploration.
+ *
+ * Unlike ChessManager (read-only mainline), SidelineManager supports interactive
+ * move-making: appending moves, truncating variations, and building sequences from
+ * any position. Starts from a FEN (branch point) rather than the initial position.
+ *
+ * Used by the UI layer (PR3) to enable users to explore alternative moves and
+ * save them back to the database.
+ */
+
 import { Chess } from 'chessops/chess'
 import { parseFen } from 'chessops/fen'
 import { parsePgn } from 'chessops/pgn'
