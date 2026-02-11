@@ -112,7 +112,9 @@ export default function App() {
     autoPlayStop: autoPlay.stop,
   })
 
-  // Compute interactive board values — sideline overrides mainline
+  // Compute interactive board values — sideline overrides mainline.
+  // When exploring a sideline, the board must show legal moves for the sideline position,
+  // not the mainline position (different FENs = different legal moves).
   const boardDests = (sidelineState.isInSideline
     ? sidelineState.dests
     : chessManager?.getDests() ?? new Map()) as Map<Key, Key[]>
@@ -237,6 +239,7 @@ export default function App() {
                   </div>
 
                   {/* Navigation (below board) */}
+                  {/* Route keyboard/button nav to whichever manager is active (sideline or mainline). */}
                   <div className="mt-2">
                     <MoveNavigation
                       onFirst={sidelineState.isInSideline ? sidelineState.sidelineNav.first : handleFirst}
@@ -291,6 +294,7 @@ export default function App() {
                     result={result}
                     currentPly={currentPly}
                     onJump={(ply) => {
+                      // Clicking a mainline move exits sideline first to return navigation to mainline.
                       if (sidelineState.isInSideline) sidelineState.exitSideline()
                       handleJump(ply)
                     }}

@@ -48,8 +48,11 @@ function SidelineRow({
   isInSideline?: boolean
 }) {
   const [expanded, setExpanded] = useState(false)
+  // Active sidelines are always expanded so user can see their current position.
   const isExpanded = isActive || expanded
 
+  // Use live activeSidelineMoves if this sideline is active (may include new moves not yet persisted).
+  // Otherwise fall back to the persisted sideline.moves from the database.
   const moves = isActive && activeSidelineMoves
     ? activeSidelineMoves
     : parseSidelineMoves(sideline.moves)

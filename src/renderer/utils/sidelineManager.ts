@@ -60,8 +60,9 @@ export function createSidelineManager(
     type: 'move'
   })
 
-  // If existing moves provided, replay them
-  // Use parsePgn to handle move numbers, annotations, and comments robustly
+  // If existing moves provided, replay them.
+  // Route through parsePgn instead of simple split() to robustly handle move numbers,
+  // NAGs, and annotations that may be present in stored sideline strings.
   if (existingMoves && existingMoves.trim()) {
     const games = parsePgn(existingMoves)
     const sanMoves = games.length > 0
@@ -96,7 +97,9 @@ export function createSidelineManager(
 
     getCurrentPly: () => currentPly,
 
-    getTotalPlies: () => positions.length - 1, // Don't count initial position as a ply
+    // Exclude initial position (positions[0]) from ply count — it's the starting FEN,
+    // not a move that was played.
+    getTotalPlies: () => positions.length - 1,
 
     getDests: () => getDestsFromFen(positions[currentPly].fen),
 
@@ -109,7 +112,9 @@ export function createSidelineManager(
       // Truncate any moves after current position
       positions.length = currentPly + 1
 
-      // Reconstruct Chess position from current FEN
+      // Reconstruct Chess position from FEN instead of keeping a live Chess instance.
+      // Positions are stored as FEN strings for consistency with ChessManager and to avoid
+      // state drift between the position array and a mutable object.
       const fen = positions[currentPly].fen
       const setup = parseFen(fen)
       if (setup.isErr) return false

@@ -69,7 +69,8 @@ export function useSidelineState({
   const [dests, setDests] = useState<Map<Key, Key[]>>(new Map())
   const [turnColor, setTurnColor] = useState<'white' | 'black'>('white')
 
-  // Refs for stable access in callbacks without re-creating them
+  // Mirror currentPly in a ref to avoid re-creating handleUserMove on every ply change.
+  // Keeps callback reference stable for performance and prevents unnecessary re-renders.
   const currentPlyRef = useRef(currentPly)
   currentPlyRef.current = currentPly
 
@@ -143,6 +144,9 @@ export function useSidelineState({
 
     autoPlayStop()
 
+    // Three-way branch: already in sideline, matches mainline, or creates new sideline.
+    // Priority: extend active sideline first, then check if move continues mainline,
+    // finally create a new sideline if the move differs from mainline.
     if (activeSideline && activeBranchPly !== null) {
       // Already in a sideline — try appending the move
       const san = activeSideline.tryMove(from, to)
@@ -159,7 +163,8 @@ export function useSidelineState({
       return
     }
 
-    // Not in a sideline — check if the move matches the mainline
+    // Not in a sideline — check if the move matches the mainline.
+    // If it matches, just advance the mainline without creating a sideline.
     const ply = currentPlyRef.current
     const san = chessManager.tryMove(from, to)
     if (!san) return
@@ -171,7 +176,9 @@ export function useSidelineState({
       return
     }
 
-    // Different move — create a sideline
+    // Different move — create a sideline.
+    // Density limit prevents UI clutter: max 1 sideline per 12 plys (6 full moves).
+    // Short games get fewer sideline slots.
     const totalPlies = chessManager.getTotalPlies()
     const maxSidelines = getMaxSidelines(totalPlies)
     if (sidelines.length >= maxSidelines) {
@@ -179,13 +186,16 @@ export function useSidelineState({
       return
     }
 
-    // Check if a sideline already exists at this branch point
+    // Check if a sideline already exists at this branch point.
+    // branchPly is ply + 1 (1-indexed) — it's the mainline ply the sideline *replaces*.
     const branchPly = ply + 1
     const existing = sidelines.find(s => s.branchPly === branchPly)
 
     const fen = chessManager.getFenAtPly(ply)
     if (!fen) return
 
+    // If a sideline already exists at this branch point, load it and go to the end.
+    // This lets the user extend an existing variation rather than overwriting it.
     const manager = createSidelineManager(fen, existing?.moves)
     manager.goto(manager.getTotalPlies()) // Go to end of existing moves
 
@@ -203,7 +213,10 @@ export function useSidelineState({
     persistSideline(branchPly, manager.getMovesString())
   }, [chessManager, collectionId, gameId, activeSideline, activeBranchPly, sidelines, updateBoardState, syncSidelineState, autoPlayStop, persistSideline])
 
-  /** Navigate sideline to a computed ply */
+  /** Navigate sideline to a computed ply.
+   * Takes a compute function instead of a ply number to DRY the null-check + goto + sync pattern.
+   * Each nav direction (first/prev/next/last) just provides its own compute logic.
+   */
   const navigateSideline = useCallback((computePly: (manager: SidelineManager) => number | null) => {
     if (!activeSideline) return
     const ply = computePly(activeSideline)

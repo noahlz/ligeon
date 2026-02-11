@@ -38,6 +38,18 @@ src/renderer/*.tsx               →  Vite       →  dist/                   # 
 **Dev:** Vite on `localhost:5173`  
 **Prod:** Electron loads `dist/index.html`
 
+### Sideline Architecture
+
+Two managers implement `NavigableManager` interface:
+- **ChessManager**: read-only mainline navigation
+- **SidelineManager**: mutable sideline sequences (branching from mainline positions)
+
+Key concepts:
+- `branchPly` (1-based): mainline ply the sideline replaces
+- Positions stored as FEN strings; Chess objects reconstructed on demand
+- Density limit: `max(1, floor(totalPlies / 12))` sidelines per game
+- UNIQUE constraint: one sideline per branch point (upsert semantics)
+
 ## Project Structure
 
 Export from each subdirectory via `index.ts` barrel.
@@ -57,8 +69,8 @@ src/
     hooks/             # Custom React hooks
     lib/               # Shared utilities (cn helper)
     styles/            # CSS + Tailwind
-    types/             # electron.ts (IPC API ambient types)
-    utils/             # chessManager, audioManager, dateConverter
+    types/             # electron.ts (IPC API), navigableManager.ts, moveTypes.ts
+    utils/             # chessManager, sidelineManager, chessHelpers, audioManager
   shared/              # Single source for main + renderer + CLI
     converters/        # resultConverter
     database/          # schema
@@ -78,15 +90,19 @@ src/
 | `src/main/ipc/gameDatabase.ts` | `DatabaseManager` singleton |
 | `src/main/ipc/validators.ts` | IPC input validation |
 | `src/main/ipc/importHandlers.ts` | PGN import orchestration |
+| `src/main/ipc/sidelineHandlers.ts` | Sideline CRUD IPC handlers |
 | `src/main/preload.ts` | `window.electron.*` bridge |
 | `src/renderer/types/electron.ts` | IPC API ambient type definitions |
+| `src/renderer/types/navigableManager.ts` | Shared navigation interface |
 | `src/renderer/App.tsx` | Root layout + state |
-| `src/renderer/components/BoardDisplay.tsx` | Chessground board |
+| `src/renderer/components/BoardDisplay.tsx` | Chessground board + interactive move input |
 | `src/renderer/components/GameListSidebar.tsx` | Search, filter, game list |
 | `src/renderer/components/MoveNavigation.tsx` | Nav buttons + keyboard shortcuts |
-| `src/renderer/utils/chessManager.ts` | Move parsing, FEN, ply navigation |
+| `src/renderer/hooks/useSidelineState.ts` | Sideline state + persistence |
+| `src/renderer/utils/chessManager.ts` | Move parsing, FEN, ply navigation (read-only) |
+| `src/renderer/utils/sidelineManager.ts` | Mutable sideline move sequences |
+| `src/renderer/utils/chessHelpers.ts` | FEN-based position helpers |
 | `src/renderer/utils/audioManager.ts` | Move sounds |
-| `src/renderer/utils/dateConverter.ts` | Timestamp ↔ display |
 
 ### LSP First, Glob/Grep Second
 
@@ -109,11 +125,11 @@ Use LSP tools: `goToDefinition`, `findReferences`, `documentSymbol`, `incomingCa
 |-----------|------|----------------|
 | CollectionSelector | `components/CollectionSelector.tsx` | Collection dropdown + rename/delete |
 | GameListSidebar | `components/GameListSidebar.tsx` | Filter panel (search, result radio) + game list |
-| BoardDisplay | `components/BoardDisplay.tsx` | Chessground board + coords |
+| BoardDisplay | `components/BoardDisplay.tsx` | Chessground board + coords + interactive moves |
 | MoveNavigation | `components/MoveNavigation.tsx` | Nav buttons + keyboard shortcuts |
 | ControlStrip | `components/ControlStrip.tsx` | Lichess link, sound toggle, flip |
 | GameInfo | `components/GameInfo.tsx` | Collapsible game header |
-| MoveList | `components/MoveList.tsx` | Scrollable move grid |
+| MoveList | `components/MoveList.tsx` | Scrollable move grid + sideline variations |
 | ImportDialog | `components/ImportDialog.tsx` | PGN import |
 | ConfirmDialog | `components/ConfirmDialog.tsx` | Delete confirmation |
 
@@ -125,6 +141,7 @@ Use LSP tools: `goToDefinition`, `findReferences`, `documentSymbol`, `incomingCa
 | `Home` / `End` | First / last position |
 | `Space` | Toggle auto-play |
 | Mouse wheel | Prev/next move (only over board or move list) |
+| Drag piece | Play move (advances mainline or creates/extends sideline) |
 
 ## Styling
 
@@ -175,7 +192,11 @@ SQLite unavailable in renderer. DB access: renderer → `window.electron.fn()` �
 
 ### Validate IPC Inputs
 
-Validate all IPC handler inputs before use. See `src/main/ipc/validators.ts`. Follow patterns in `gameHandlers.ts` or `importHandlers.ts`.
+Validate all IPC handler inputs before use. See `src/main/ipc/validators.ts`. Follow patterns in `gameHandlers.ts`, `importHandlers.ts`, or `sidelineHandlers.ts`.
+
+### Sideline Ply Arithmetic
+
+`branchPly` is 1-based and represents the mainline ply the sideline *replaces*, not the position it branches from. Odd plies = white moves, even = black. See `sidelineFormatter.ts` for conversion helpers.
 
 ### TypeScript Configs
 

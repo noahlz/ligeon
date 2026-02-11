@@ -36,8 +36,8 @@ export async function getSidelines(
 
 /**
  * Check if adding a sideline would exceed the per-game limit.
- * Limit: 1 sideline per 6 full moves (12 plys).
- * e.g. a 60-move game (120 plys) allows up to 10 sidelines.
+ * Limit: 1 sideline per 6 full moves (12 plys) — prevents UI clutter while being generous for long games.
+ * e.g. a 60-move game allows up to 10 sidelines; a 12-move game allows 2.
  * Sidelines may be at any ply positions (adjacency is fine).
  *
  * @param existingSidelines - Current sidelines for the game
@@ -50,10 +50,10 @@ export async function getSidelines(
 export function checkSidelineLimit(existingSidelines: SidelineData[], branchPly: number, moveCount: number): boolean {
   const maxSidelines = Math.max(1, Math.floor(moveCount / 6))
 
-  // Don't count existing sideline at same branchPly (upsert case)
-  const currentCount = existingSidelines.filter(s => s.branchPly !== branchPly).length
+  // Exclude current branchPly (upsert case — updating shouldn't count against limit).
+  const otherSidelineCount = existingSidelines.filter(s => s.branchPly !== branchPly).length
 
-  return currentCount < maxSidelines
+  return otherSidelineCount < maxSidelines
 }
 
 /**
