@@ -67,7 +67,7 @@ function SidelineRow({
           <div className="flex items-center gap-1 px-2 py-0.5">
             <button
               onClick={() => setExpanded(!isExpanded)}
-              className="text-ui-text-dimmer hover:text-ui-text p-0.5"
+              className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer"
             >
               {isExpanded
                 ? <ChevronDown size={12} />
@@ -85,7 +85,7 @@ function SidelineRow({
 
             <button
               onClick={() => onDismiss?.(sideline.branchPly)}
-              className="text-ui-text-dimmer hover:text-red-400 p-0.5"
+              className="text-ui-text-dimmer hover:text-red-400 p-0.5 cursor-pointer"
               title="Dismiss sideline"
             >
               <X size={12} />

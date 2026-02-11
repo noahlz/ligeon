@@ -19,6 +19,7 @@
   - After minimizing and then re-expanding a sideline, the moves are no longer clickable.
   - When a sideline is minimized, clicking on it should maximize it but not navigate to a move.
     - The sideline when minimized should have slightly different color so it's clear it expands. UX expectation should *not* be that it jumps to the move. It should have title like "Sideline: 4. d4 ..." Only clicking on a move when maximized should navigate directly to that move on the board.
+  - Subtle bug: Sometimes clicking on a sideline move navigates in a different sideline (perhaps because they have the same branch point? Don't allow that).
 
 - When deleting a sideline:
   - If you are in the sideline, navigate to the move that was the branch point of the sideline.

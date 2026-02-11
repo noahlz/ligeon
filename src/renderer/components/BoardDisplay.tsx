@@ -46,6 +46,9 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
         dests: dests ?? undefined,
         color: turnColor ?? 'both',
         events: { after: (from, to) => onMoveRef.current?.(from, to) }
+      },
+      premovable: {
+        enabled: false
       }
     })
 
