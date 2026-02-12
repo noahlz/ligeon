@@ -27,6 +27,7 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
     cgRef.current = Chessground(boardRef.current, {
       fen,
       orientation,
+      turnColor: turnColor ?? 'white',
       coordinates: true,
       animation: {
         enabled: true,
@@ -64,10 +65,13 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
 
     cgRef.current.set({
       fen,
+      turnColor: turnColor ?? 'white',
       lastMove: lastMove || undefined,
       orientation,
       check,
       movable: {
+        free: false,
+        showDests: true,
         dests: dests ?? undefined,
         color: turnColor ?? 'both',
       },

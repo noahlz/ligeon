@@ -13,12 +13,6 @@
 - If user tries to create one more sideline but max reached, show toast error "Max sidelines reached (1 per 6 moves)"
 - Any error that originates from a user action should have a toast in addition to a console log.
 
-### Bugs
-
-- When deleting a sideline:
-  - If you are in the sideline, navigate to the move that was the branch point of the sideline.
-  - If you are not in the sideline, just delete it and remain at the current move in the mainline.
-
 ## Code Quality
 
 - Extract business logic out of React components.

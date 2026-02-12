@@ -232,7 +232,7 @@ export default function App() {
                       fen={fen}
                       lastMove={lastMove}
                       orientation={boardOrientation}
-                      check={chessManager.getMoveType(currentPly) === 'check' ? (currentPly % 2 === 1 ? 'black' : 'white') : false}
+                      check={sidelineState.isInSideline ? sidelineState.checkColor : (chessManager.getMoveType(currentPly) === 'check' ? (currentPly % 2 === 1 ? 'black' : 'white') : false)}
                       dests={boardDests}
                       turnColor={boardTurnColor}
                       onMove={sidelineState.handleUserMove}

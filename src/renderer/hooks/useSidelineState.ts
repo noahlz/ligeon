@@ -43,6 +43,7 @@ export interface UseSidelineStateReturn {
   loadSidelines: (collectionId: string, gameId: number) => Promise<void>
   dests: Map<Key, Key[]>
   turnColor: 'white' | 'black'
+  checkColor: 'white' | 'black' | false
 }
 
 /**
@@ -71,6 +72,7 @@ export function useSidelineState({
   const [sidelineMoves, setSidelineMoves] = useState<string[]>([])
   const [dests, setDests] = useState<Map<Key, Key[]>>(new Map())
   const [turnColor, setTurnColor] = useState<'white' | 'black'>('white')
+  const [checkColor, setCheckColor] = useState<'white' | 'black' | false>(false)
 
   // Mirror currentPly in a ref to avoid re-creating handleUserMove on every ply change.
   // Keeps callback reference stable for performance and prevents unnecessary re-renders.
@@ -83,9 +85,14 @@ export function useSidelineState({
   const syncSidelineState = useCallback((manager: SidelineManager) => {
     const movesStr = manager.getMovesString()
     setSidelineMoves(movesStr ? movesStr.split(' ') : [])
-    setSidelinePly(manager.getCurrentPly())
+    const ply = manager.getCurrentPly()
+    setSidelinePly(ply)
     setDests(manager.getDests() as Map<Key, Key[]>)
-    setTurnColor(manager.getTurnColor())
+    const turn = manager.getTurnColor()
+    setTurnColor(turn)
+    const moveType = manager.getMoveType(ply)
+    // When a move gives check, the king in check is the color whose turn it is NOW (opposite of who moved)
+    setCheckColor(moveType === 'check' ? turn : false)
   }, [])
 
   const exitSideline = useCallback(() => {
@@ -94,6 +101,7 @@ export function useSidelineState({
     setSidelineMoves([])
     setSidelinePly(0)
     setDests(new Map())
+    setCheckColor(false)
   }, [])
 
   /** Enter an existing saved sideline by branchPly, optionally jumping to a target ply. */
@@ -126,11 +134,11 @@ export function useSidelineState({
       await window.electron.deleteSideline(collectionId, gameId, branchPly)
       setSidelines(prev => prev.filter(s => s.branchPly !== branchPly))
 
-      // If we're dismissing the active sideline, exit and navigate to branch point
+      // If we're dismissing the active sideline, exit and navigate to the mainline move that was replaced
       if (activeBranchPly === branchPly) {
         exitSideline()
         if (chessManager) {
-          updateBoardState(chessManager, branchPly - 1)
+          updateBoardState(chessManager, branchPly)
         }
       }
     } catch (error) {
@@ -304,5 +312,6 @@ export function useSidelineState({
     loadSidelines,
     dests,
     turnColor,
+    checkColor,
   }
 }
