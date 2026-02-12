@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { ChessKnight } from 'lucide-react'
 import BoardDisplay from './components/BoardDisplay.js'
 import MoveList from './components/MoveList.js'
@@ -75,6 +75,42 @@ export default function App() {
     loadCollections()
   }, [])
 
+  // Break circular dependency between useAutoPlay and useSidelineState via refs.
+  // useSidelineState needs autoPlay.stop; useAutoPlay needs sideline ply values.
+  // Refs are populated after both hooks run but before any user interaction.
+  const autoPlayStopRef = useRef<() => void>(() => {})
+  const autoPlayStop = useCallback(() => autoPlayStopRef.current(), [])
+
+  // Sideline state (uses stable stop ref — only called during user interactions, never during render)
+  const sidelineState = useSidelineState({
+    chessManager,
+    collectionId: selectedGameCollectionId,
+    gameId: selectedGame?.id ?? null,
+    currentPly,
+    updateBoardState,
+    autoPlayStop,
+    forceBoardSync,
+  })
+
+  // Compute effective ply for auto-play based on active context
+  const effectivePly = sidelineState.isInSideline ? sidelineState.sidelinePly : currentPly
+  const effectiveMaxPly = sidelineState.isInSideline
+    ? sidelineState.sidelineMaxPly
+    : chessManager?.getTotalPlies() || 0
+
+  // onAdvance routes to sideline or mainline — useAutoPlay stores it in a ref internally,
+  // so new function identity per render doesn't cause interval restarts.
+  const autoPlay = useAutoPlay({
+    onAdvance: sidelineState.isInSideline
+      ? sidelineState.advanceSideline
+      : () => handleNext(),
+    currentPly: effectivePly,
+    maxPly: effectiveMaxPly,
+  })
+
+  // Populate stop ref after useAutoPlay is initialized
+  autoPlayStopRef.current = autoPlay.stop
+
   // Handle game selection
   const handleGameSelect = async (game: GameSearchResult) => {
     if (!selectedCollectionId) return
@@ -96,24 +132,6 @@ export default function App() {
     sidelineState.loadSidelines(selectedCollectionId, game.id)
   }
 
-  // Auto-play hook
-  const autoPlay = useAutoPlay({
-    onAdvance: handleNext,
-    currentPly,
-    maxPly: chessManager?.getTotalPlies() || 0,
-  })
-
-  // Sideline state
-  const sidelineState = useSidelineState({
-    chessManager,
-    collectionId: selectedGameCollectionId,
-    gameId: selectedGame?.id ?? null,
-    currentPly,
-    updateBoardState,
-    autoPlayStop: autoPlay.stop,
-    forceBoardSync,
-  })
-
   // Compute interactive board values — sideline overrides mainline.
   // When exploring a sideline, the board must show legal moves for the sideline position,
   // not the mainline position (different FENs = different legal moves).
@@ -124,6 +142,10 @@ export default function App() {
   const boardTurnColor = sidelineState.isInSideline
     ? sidelineState.turnColor
     : chessManager?.getTurnColor() ?? 'white'
+
+  const boardCheckColor = sidelineState.isInSideline
+    ? sidelineState.checkColor
+    : (chessManager ? getCheckColor(chessManager.getMoveType(currentPly), boardTurnColor) : false)
 
   const handleTogglePlay = () => {
     if (autoPlay.isPlaying) {
@@ -228,24 +250,17 @@ export default function App() {
                 <div className="flex flex-col items-center w-[min(64rem,calc(100vh-8rem))]">
                   {/* Board */}
                   <div className="w-full aspect-square board-coords-wrapper">
-                    {(() => {
-                      const checkColor = sidelineState.isInSideline
-                        ? sidelineState.checkColor
-                        : getCheckColor(chessManager.getMoveType(currentPly), boardTurnColor)
-                      return (
-                        <BoardDisplay
-                          key={selectedGame?.id}
-                          fen={fen}
-                          lastMove={lastMove}
-                          orientation={boardOrientation}
-                          check={checkColor}
-                          dests={boardDests}
-                          turnColor={boardTurnColor}
-                          onMove={sidelineState.handleUserMove}
-                          boardSyncKey={boardSyncKey}
-                        />
-                      )
-                    })()}
+                    <BoardDisplay
+                      key={selectedGame?.id}
+                      fen={fen}
+                      lastMove={lastMove}
+                      orientation={boardOrientation}
+                      check={boardCheckColor}
+                      dests={boardDests}
+                      turnColor={boardTurnColor}
+                      onMove={sidelineState.handleUserMove}
+                      boardSyncKey={boardSyncKey}
+                    />
                   </div>
 
                   {/* Navigation (below board) */}

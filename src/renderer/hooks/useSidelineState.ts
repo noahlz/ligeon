@@ -30,11 +30,13 @@ export interface UseSidelineStateReturn {
   activeBranchPly: number | null
   sidelineMoves: string[]
   sidelinePly: number
+  sidelineMaxPly: number
   handleUserMove: (from: string, to: string) => void
   exitSideline: () => void
   enterSideline: (branchPly: number, targetPly?: number) => void
   jumpToSidelineMove: (branchPly: number, ply: number) => void
   dismissSideline: (branchPly: number) => void
+  advanceSideline: () => boolean
   sidelineNav: {
     first: () => void
     prev: () => void
@@ -71,6 +73,7 @@ export function useSidelineState({
   const [activeSideline, setActiveSideline] = useState<SidelineManager | null>(null)
   const [activeBranchPly, setActiveBranchPly] = useState<number | null>(null)
   const [sidelinePly, setSidelinePly] = useState(0)
+  const [sidelineMaxPly, setSidelineMaxPly] = useState(0)
   const [sidelineMoves, setSidelineMoves] = useState<string[]>([])
   const [dests, setDests] = useState<Map<Key, Key[]>>(new Map())
   const [turnColor, setTurnColor] = useState<'white' | 'black'>('white')
@@ -89,6 +92,7 @@ export function useSidelineState({
     setSidelineMoves(movesStr ? movesStr.split(' ') : [])
     const ply = manager.getCurrentPly()
     setSidelinePly(ply)
+    setSidelineMaxPly(manager.getTotalPlies())
     setDests(manager.getDests() as Map<Key, Key[]>)
     const turn = manager.getTurnColor()
     setTurnColor(turn)
@@ -97,17 +101,20 @@ export function useSidelineState({
   }, [])
 
   const exitSideline = useCallback(() => {
+    autoPlayStop()
     setActiveSideline(null)
     setActiveBranchPly(null)
     setSidelineMoves([])
     setSidelinePly(0)
+    setSidelineMaxPly(0)
     setDests(new Map())
     setCheckColor(false)
-  }, [])
+  }, [autoPlayStop])
 
   /** Enter an existing saved sideline by branchPly, optionally jumping to a target ply. */
   const enterSideline = useCallback((branchPly: number, targetPly?: number) => {
     if (!chessManager) return
+    autoPlayStop()
     const sidelineData = sidelines.find(s => s.branchPly === branchPly)
     if (!sidelineData) return
     const fen = chessManager.getFenAtPly(branchPly - 1)
@@ -119,7 +126,7 @@ export function useSidelineState({
     setActiveBranchPly(branchPly)
     updateBoardState(manager, ply)
     syncSidelineState(manager)
-  }, [chessManager, sidelines, updateBoardState, syncSidelineState])
+  }, [chessManager, sidelines, updateBoardState, syncSidelineState, autoPlayStop])
 
   const loadSidelines = useCallback(async (colId: string, gId: number) => {
     const data = await window.electron.getSidelines(colId, gId)
@@ -252,18 +259,27 @@ export function useSidelineState({
     }
   }, [chessManager, collectionId, gameId, activeSideline, activeBranchPly, sidelines, updateBoardState, syncSidelineState, autoPlayStop, persistSideline, forceBoardSync])
 
-  /** Navigate sideline to a computed ply.
+  /** Navigate sideline to a computed ply. Returns true if navigation occurred.
    * Takes a compute function instead of a ply number to DRY the null-check + goto + sync pattern.
    * Each nav direction (first/prev/next/last) just provides its own compute logic.
    */
-  const navigateSideline = useCallback((computePly: (manager: SidelineManager) => number | null) => {
-    if (!activeSideline) return
+  const navigateSideline = useCallback((computePly: (manager: SidelineManager) => number | null): boolean => {
+    if (!activeSideline) return false
     const ply = computePly(activeSideline)
-    if (ply === null) return
+    if (ply === null) return false
     activeSideline.goto(ply)
     updateBoardState(activeSideline, ply)
     syncSidelineState(activeSideline)
+    return true
   }, [activeSideline, updateBoardState, syncSidelineState])
+
+  /** Advance sideline by one ply. Returns true if advanced, false if at end or not in sideline. */
+  const advanceSideline = useCallback((): boolean => {
+    return navigateSideline(m => {
+      const ply = m.getCurrentPly()
+      return ply < m.getTotalPlies() ? ply + 1 : null
+    })
+  }, [navigateSideline])
 
   // Sideline navigation
   const sidelineNav = {
@@ -313,11 +329,13 @@ export function useSidelineState({
     activeBranchPly,
     sidelineMoves,
     sidelinePly,
+    sidelineMaxPly,
     handleUserMove,
     exitSideline,
     enterSideline,
     jumpToSidelineMove,
     dismissSideline,
+    advanceSideline,
     sidelineNav,
     loadSidelines,
     dests,

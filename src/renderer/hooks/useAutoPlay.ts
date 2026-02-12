@@ -28,6 +28,11 @@ export function useAutoPlay(options: UseAutoPlayOptions): UseAutoPlayReturn {
   const [speed, setSpeed] = useState<number>(3000)
   const intervalRef = useRef<number | null>(null)
 
+  // Store onAdvance in a ref so the interval callback always reads the latest
+  // version without restarting the effect on every render.
+  const onAdvanceRef = useRef(onAdvance)
+  onAdvanceRef.current = onAdvance
+
   const stop = useCallback(() => {
     setIsPlaying(false)
     if (intervalRef.current !== null) {
@@ -42,12 +47,12 @@ export function useAutoPlay(options: UseAutoPlayOptions): UseAutoPlayReturn {
       return
     }
     // Play first move immediately
-    const advanced = onAdvance()
+    const advanced = onAdvanceRef.current()
     // Only start interval if we successfully advanced
     if (advanced) {
       setIsPlaying(true)
     }
-  }, [currentPly, maxPly, onAdvance])
+  }, [currentPly, maxPly])
 
   // Effect to manage the interval
   useEffect(() => {
@@ -62,7 +67,7 @@ export function useAutoPlay(options: UseAutoPlayOptions): UseAutoPlayReturn {
 
     // Set up new interval with current speed
     intervalRef.current = window.setInterval(() => {
-      const advanced = onAdvance()
+      const advanced = onAdvanceRef.current()
 
       // Stop if we couldn't advance (reached the end)
       if (!advanced) {
@@ -77,7 +82,7 @@ export function useAutoPlay(options: UseAutoPlayOptions): UseAutoPlayReturn {
         intervalRef.current = null
       }
     }
-  }, [isPlaying, speed, onAdvance, stop])
+  }, [isPlaying, speed, stop])
 
   // Auto-stop if we reach the end while playing
   useEffect(() => {
