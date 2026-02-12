@@ -69,10 +69,16 @@ function SidelineRow({
   const moveNum = sidelineMoveNumber(sideline.branchPly, 0)
   const collapsedPrefix = `${moveNum}.${firstIsWhite ? '' : '..'} `
 
+  // Show full accent border when in sideline but no move is highlighted
+  const showAccentBorder = isActive && isInSideline && (!sidelinePly || sidelinePly === 0)
+  const containerClass = showAccentBorder
+    ? 'ml-4 border-2 border-ui-accent bg-ui-bg-page rounded-sm my-0.5'
+    : 'ml-4 border-l-2 border-ui-accent bg-ui-bg-page rounded-r-sm my-0.5'
+
   return (
     <TableRow className="border-0 hover:bg-transparent">
       <TableCell colSpan={3} className="p-0 border-0">
-        <div className="ml-4 border-l-2 border-ui-accent bg-ui-bg-page rounded-r-sm my-0.5">
+        <div className={containerClass}>
           {/* Header row: toggle + first move preview + dismiss */}
           <div
             className={`flex items-center gap-1 px-2 py-0.5 ${!expanded ? 'cursor-pointer hover:bg-ui-bg-hover' : ''}`}
