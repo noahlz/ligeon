@@ -12,6 +12,7 @@ import type { SidelineData } from '../../shared/types/game.js'
 import type { ChessManager } from '../utils/chessManager.js'
 import type { NavigableManager } from '../types/navigableManager.js'
 import { createSidelineManager, type SidelineManager } from '../utils/sidelineManager.js'
+import { getCheckColor } from '../utils/chessHelpers.js'
 
 export interface UseSidelineStateParams {
   chessManager: ChessManager | null
@@ -32,6 +33,7 @@ export interface UseSidelineStateReturn {
   handleUserMove: (from: string, to: string) => void
   exitSideline: () => void
   enterSideline: (branchPly: number, targetPly?: number) => void
+  jumpToSidelineMove: (branchPly: number, ply: number) => void
   dismissSideline: (branchPly: number) => void
   sidelineNav: {
     first: () => void
@@ -91,8 +93,7 @@ export function useSidelineState({
     const turn = manager.getTurnColor()
     setTurnColor(turn)
     const moveType = manager.getMoveType(ply)
-    // When a move gives check, the king in check is the color whose turn it is NOW (opposite of who moved)
-    setCheckColor(moveType === 'check' ? turn : false)
+    setCheckColor(getCheckColor(moveType, turn))
   }, [])
 
   const exitSideline = useCallback(() => {
@@ -174,86 +175,81 @@ export function useSidelineState({
 
     autoPlayStop()
 
-    // Three-way branch: already in sideline, matches mainline, or creates new sideline.
-    // Priority: extend active sideline first, then check if move continues mainline,
-    // finally create a new sideline if the move differs from mainline.
-    if (activeSideline && activeBranchPly !== null) {
-      // Already in a sideline — try appending the move
-      const san = activeSideline.tryMove(from, to)
-      if (!san) {
-        forceBoardSync()
-        return
+    /** Attempt move and handle success/failure paths. Returns true on success. */
+    const attemptMove = (): boolean => {
+      // Three-way branch: already in sideline, matches mainline, or creates new sideline.
+      // Priority: extend active sideline first, then check if move continues mainline,
+      // finally create a new sideline if the move differs from mainline.
+      if (activeSideline && activeBranchPly !== null) {
+        // Already in a sideline — try appending the move
+        const san = activeSideline.tryMove(from, to)
+        if (!san) return false
+
+        activeSideline.appendMove(san)
+
+        // Update board from sideline manager
+        updateBoardState(activeSideline, activeSideline.getCurrentPly())
+        syncSidelineState(activeSideline)
+
+        // Persist
+        persistSideline(activeBranchPly, activeSideline.getMovesString())
+        return true
       }
 
-      activeSideline.appendMove(san)
+      // Not in a sideline — check if the move matches the mainline.
+      // If it matches, just advance the mainline without creating a sideline.
+      const ply = currentPlyRef.current
+      const san = chessManager.tryMove(from, to)
+      if (!san) return false
+
+      const mainlineSan = chessManager.getMainlineSan(ply + 1)
+      if (mainlineSan === san) {
+        // Matches mainline — just advance
+        updateBoardState(chessManager, ply + 1)
+        return true
+      }
+
+      // Different move — create a sideline.
+      // Density limit prevents UI clutter: max 1 sideline per 12 plys (6 full moves).
+      // Short games get fewer sideline slots.
+      const totalPlies = chessManager.getTotalPlies()
+      const maxSidelines = getMaxSidelines(totalPlies)
+      if (sidelines.length >= maxSidelines) {
+        console.warn(`Sideline density limit reached (${maxSidelines})`)
+        return false
+      }
+
+      // Check if a sideline already exists at this branch point.
+      // branchPly is ply + 1 (1-indexed) — it's the mainline ply the sideline *replaces*.
+      const branchPly = ply + 1
+      const existing = sidelines.find(s => s.branchPly === branchPly)
+
+      const fen = chessManager.getFenAtPly(ply)
+      if (!fen) return false
+
+      // If a sideline already exists at this branch point, load it and go to the end.
+      // This lets the user extend an existing variation rather than overwriting it.
+      const manager = createSidelineManager(fen, existing?.moves)
+      manager.goto(manager.getTotalPlies()) // Go to end of existing moves
+
+      // Append the new move
+      if (!manager.appendMove(san)) return false
+
+      setActiveSideline(manager)
+      setActiveBranchPly(branchPly)
 
       // Update board from sideline manager
-      updateBoardState(activeSideline, activeSideline.getCurrentPly())
-      syncSidelineState(activeSideline)
+      updateBoardState(manager, manager.getCurrentPly())
+      syncSidelineState(manager)
 
       // Persist
-      persistSideline(activeBranchPly, activeSideline.getMovesString())
-      return
+      persistSideline(branchPly, manager.getMovesString())
+      return true
     }
 
-    // Not in a sideline — check if the move matches the mainline.
-    // If it matches, just advance the mainline without creating a sideline.
-    const ply = currentPlyRef.current
-    const san = chessManager.tryMove(from, to)
-    if (!san) {
+    if (!attemptMove()) {
       forceBoardSync()
-      return
     }
-
-    const mainlineSan = chessManager.getMainlineSan(ply + 1)
-    if (mainlineSan === san) {
-      // Matches mainline — just advance
-      updateBoardState(chessManager, ply + 1)
-      return
-    }
-
-    // Different move — create a sideline.
-    // Density limit prevents UI clutter: max 1 sideline per 12 plys (6 full moves).
-    // Short games get fewer sideline slots.
-    const totalPlies = chessManager.getTotalPlies()
-    const maxSidelines = getMaxSidelines(totalPlies)
-    if (sidelines.length >= maxSidelines) {
-      console.warn(`Sideline density limit reached (${maxSidelines})`)
-      forceBoardSync()
-      return
-    }
-
-    // Check if a sideline already exists at this branch point.
-    // branchPly is ply + 1 (1-indexed) — it's the mainline ply the sideline *replaces*.
-    const branchPly = ply + 1
-    const existing = sidelines.find(s => s.branchPly === branchPly)
-
-    const fen = chessManager.getFenAtPly(ply)
-    if (!fen) {
-      forceBoardSync()
-      return
-    }
-
-    // If a sideline already exists at this branch point, load it and go to the end.
-    // This lets the user extend an existing variation rather than overwriting it.
-    const manager = createSidelineManager(fen, existing?.moves)
-    manager.goto(manager.getTotalPlies()) // Go to end of existing moves
-
-    // Append the new move
-    if (!manager.appendMove(san)) {
-      forceBoardSync()
-      return
-    }
-
-    setActiveSideline(manager)
-    setActiveBranchPly(branchPly)
-
-    // Update board from sideline manager
-    updateBoardState(manager, manager.getCurrentPly())
-    syncSidelineState(manager)
-
-    // Persist
-    persistSideline(branchPly, manager.getMovesString())
   }, [chessManager, collectionId, gameId, activeSideline, activeBranchPly, sidelines, updateBoardState, syncSidelineState, autoPlayStop, persistSideline, forceBoardSync])
 
   /** Navigate sideline to a computed ply.
@@ -298,6 +294,19 @@ export function useSidelineState({
     }, [navigateSideline]),
   }
 
+  /**
+   * Jump to a specific move in a sideline.
+   * If already in the target sideline, navigates to the ply.
+   * Otherwise, enters the sideline and navigates to the ply.
+   */
+  const jumpToSidelineMove = useCallback((branchPly: number, ply: number) => {
+    if (activeBranchPly === branchPly && isInSideline) {
+      navigateSideline(() => ply)
+    } else {
+      enterSideline(branchPly, ply)
+    }
+  }, [activeBranchPly, isInSideline, navigateSideline, enterSideline])
+
   return {
     sidelines,
     isInSideline,
@@ -307,6 +316,7 @@ export function useSidelineState({
     handleUserMove,
     exitSideline,
     enterSideline,
+    jumpToSidelineMove,
     dismissSideline,
     sidelineNav,
     loadSidelines,

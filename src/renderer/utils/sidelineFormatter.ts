@@ -31,7 +31,6 @@ export function parseSidelineMoves(moves: string): string[] {
  * @returns Chess move number (e.g., 1, 2, 3...)
  */
 export function sidelineMoveNumber(branchPly: number, moveIndex: number): number {
-  // branchPly is the ply being replaced. The first sideline move takes that ply number.
   const absolutePly = branchPly + moveIndex
   return Math.ceil(absolutePly / 2)
 }

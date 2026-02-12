@@ -10,6 +10,7 @@ import ControlStrip from './components/ControlStrip.js'
 import PanelHandle from './components/PanelHandle.js'
 import { TooltipProvider } from '@/components/ui/tooltip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
+import { getCheckColor } from './utils/chessHelpers.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardState } from './hooks/useBoardState.js'
@@ -227,17 +228,24 @@ export default function App() {
                 <div className="flex flex-col items-center w-[min(64rem,calc(100vh-8rem))]">
                   {/* Board */}
                   <div className="w-full aspect-square board-coords-wrapper">
-                    <BoardDisplay
-                      key={selectedGame?.id}
-                      fen={fen}
-                      lastMove={lastMove}
-                      orientation={boardOrientation}
-                      check={sidelineState.isInSideline ? sidelineState.checkColor : (chessManager.getMoveType(currentPly) === 'check' ? (currentPly % 2 === 1 ? 'black' : 'white') : false)}
-                      dests={boardDests}
-                      turnColor={boardTurnColor}
-                      onMove={sidelineState.handleUserMove}
-                      boardSyncKey={boardSyncKey}
-                    />
+                    {(() => {
+                      const checkColor = sidelineState.isInSideline
+                        ? sidelineState.checkColor
+                        : getCheckColor(chessManager.getMoveType(currentPly), boardTurnColor)
+                      return (
+                        <BoardDisplay
+                          key={selectedGame?.id}
+                          fen={fen}
+                          lastMove={lastMove}
+                          orientation={boardOrientation}
+                          check={checkColor}
+                          dests={boardDests}
+                          turnColor={boardTurnColor}
+                          onMove={sidelineState.handleUserMove}
+                          boardSyncKey={boardSyncKey}
+                        />
+                      )
+                    })()}
                   </div>
 
                   {/* Navigation (below board) */}
@@ -304,13 +312,7 @@ export default function App() {
                     activeSidelineBranchPly={sidelineState.activeBranchPly}
                     sidelineMoves={sidelineState.sidelineMoves}
                     sidelinePly={sidelineState.sidelinePly}
-                    onSidelineJump={(branchPly, ply) => {
-                      if (sidelineState.activeBranchPly === branchPly && sidelineState.isInSideline) {
-                        sidelineState.sidelineNav.jump(ply)
-                      } else {
-                        sidelineState.enterSideline(branchPly, ply)
-                      }
-                    }}
+                    onSidelineJump={sidelineState.jumpToSidelineMove}
                     onDismissSideline={sidelineState.dismissSideline}
                     isInSideline={sidelineState.isInSideline}
                   />

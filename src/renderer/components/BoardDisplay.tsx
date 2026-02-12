@@ -76,6 +76,7 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
         color: turnColor ?? 'both',
       },
     })
+    // boardSyncKey: incremented to force chessground re-sync when board state is stale
   }, [fen, lastMove, orientation, check, dests, turnColor, boardSyncKey])
 
   return (

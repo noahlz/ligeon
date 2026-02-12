@@ -30,6 +30,16 @@ interface MoveListProps {
   isInSideline?: boolean
 }
 
+interface SidelineRowProps {
+  sideline: SidelineData
+  isActive: boolean
+  sidelineMoves?: string[]
+  sidelinePly?: number
+  onSidelineJump?: (branchPly: number, ply: number) => void
+  onDismiss?: (branchPly: number) => void
+  isInSideline?: boolean
+}
+
 function SidelineRow({
   sideline,
   isActive,
@@ -38,22 +48,13 @@ function SidelineRow({
   onSidelineJump,
   onDismiss,
   isInSideline,
-}: {
-  sideline: SidelineData
-  isActive: boolean
-  sidelineMoves?: string[]
-  sidelinePly?: number
-  onSidelineJump?: (branchPly: number, ply: number) => void
-  onDismiss?: (branchPly: number) => void
-  isInSideline?: boolean
-}) {
+}: SidelineRowProps) {
   const [expanded, setExpanded] = useState(false)
   // Auto-expand when sideline becomes active (user clicked into it).
   // Unlike the previous `isActive || expanded`, this lets the user still collapse via chevron.
   useEffect(() => {
     if (isActive) setExpanded(true)
   }, [isActive])
-  const isExpanded = expanded
 
   // Use live activeSidelineMoves if this sideline is active (may include new moves not yet persisted).
   // Otherwise fall back to the persisted sideline.moves from the database.
@@ -63,37 +64,37 @@ function SidelineRow({
 
   if (moves.length === 0) return null
 
+  // Compute collapsed preview text
+  const firstIsWhite = isSidelineWhiteMove(sideline.branchPly, 0)
+  const moveNum = sidelineMoveNumber(sideline.branchPly, 0)
+  const collapsedPrefix = `${moveNum}.${firstIsWhite ? '' : '..'} `
+
   return (
     <TableRow className="border-0 hover:bg-transparent">
       <TableCell colSpan={3} className="p-0 border-0">
         <div className="ml-4 border-l-2 border-ui-accent bg-ui-bg-page rounded-r-sm my-0.5">
           {/* Header row: toggle + first move preview + dismiss */}
           <div
-            className={`flex items-center gap-1 px-2 py-0.5 ${!isExpanded ? 'cursor-pointer hover:bg-ui-bg-hover' : ''}`}
-            onClick={!isExpanded ? () => setExpanded(true) : undefined}
+            className={`flex items-center gap-1 px-2 py-0.5 ${!expanded ? 'cursor-pointer hover:bg-ui-bg-hover' : ''}`}
+            onClick={!expanded ? () => setExpanded(true) : undefined}
           >
             <button
-              onClick={(e) => { e.stopPropagation(); setExpanded(!isExpanded) }}
+              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
               className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer"
             >
-              {isExpanded
+              {expanded
                 ? <ChevronDown size={12} />
                 : <ChevronRight size={12} />
               }
             </button>
 
-            {!isExpanded && (() => {
-              const firstIsWhite = isSidelineWhiteMove(sideline.branchPly, 0)
-              const moveNum = sidelineMoveNumber(sideline.branchPly, 0)
-              const prefix = `${moveNum}.${firstIsWhite ? '' : '..'} `
-              return (
-                <span className="text-sm text-ui-text-dimmer italic truncate flex-1">
-                  {prefix}{moves.slice(0, 3).join(' ')}{moves.length > 3 ? '…' : ''}
-                </span>
-              )
-            })()}
+            {!expanded && (
+              <span className="text-sm text-ui-text-dimmer italic truncate flex-1">
+                {collapsedPrefix}{moves.slice(0, 3).join(' ')}{moves.length > 3 ? '…' : ''}
+              </span>
+            )}
 
-            {isExpanded && <span className="flex-1" />}
+            {expanded && <span className="flex-1" />}
 
             <button
               onClick={(e) => { e.stopPropagation(); onDismiss?.(sideline.branchPly) }}
@@ -105,7 +106,7 @@ function SidelineRow({
           </div>
 
           {/* Expanded moves */}
-          {isExpanded && (
+          {expanded && (
             <div className="flex flex-wrap gap-x-1 gap-y-0 px-2 pb-1 font-mono text-sm">
               {moves.map((move, i) => {
                 const isWhite = isSidelineWhiteMove(sideline.branchPly, i)
