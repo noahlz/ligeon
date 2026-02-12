@@ -29,6 +29,8 @@ export interface SidelineManager extends NavigableManager {
   truncateAfterCurrent: () => void
   /** Get the space-separated SAN string of all sideline moves */
   getMovesString: () => string
+  /** Get the SAN of the next move (currentPly + 1), or null if none exists */
+  getNextSan: () => string | null
 }
 
 /**
@@ -137,6 +139,11 @@ export function createSidelineManager(
 
     getMovesString: () => {
       return positions.slice(1).map(p => p.san).join(' ')
+    },
+
+    getNextSan: () => {
+      const nextPly = currentPly + 1
+      return nextPly < positions.length ? positions[nextPly].san : null
     }
   }
 }

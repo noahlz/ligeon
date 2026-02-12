@@ -296,4 +296,44 @@ describe('SidelineManager', () => {
       expect(manager.getMovesString()).toBe('e5 Nf3')
     })
   })
+
+  describe('getNextSan', () => {
+    test('returns next move SAN when moves exist after current ply', () => {
+      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+
+      // At ply 0, next move is e5
+      expect(manager.getNextSan()).toBe('e5')
+
+      manager.goto(1)
+      expect(manager.getNextSan()).toBe('Nf3')
+
+      manager.goto(2)
+      expect(manager.getNextSan()).toBe('Nc6')
+    })
+
+    test('returns null when at last position', () => {
+      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const manager = createSidelineManager(startFen, 'e5 Nf3')
+
+      manager.goto(2)
+      expect(manager.getNextSan()).toBeNull()
+    })
+
+    test('returns null when no moves exist', () => {
+      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const manager = createSidelineManager(startFen)
+
+      expect(manager.getNextSan()).toBeNull()
+    })
+
+    test('reflects truncation', () => {
+      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+
+      manager.goto(1)
+      manager.truncateAfterCurrent()
+      expect(manager.getNextSan()).toBeNull()
+    })
+  })
 })

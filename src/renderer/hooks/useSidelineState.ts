@@ -176,6 +176,29 @@ export function useSidelineState({
     }
   }, [collectionId, gameId, activeBranchPly, exitSideline, chessManager, updateBoardState])
 
+  /** Persist sideline to database and update local state */
+  const persistSideline = useCallback((branchPly: number, movesStr: string) => {
+    if (!collectionId || gameId === null) return
+
+    window.electron.upsertSideline(collectionId, gameId, branchPly, movesStr)
+      .then(saved => {
+        if (saved) {
+          setSidelines(prev => {
+            const idx = prev.findIndex(s => s.branchPly === branchPly)
+            if (idx >= 0) {
+              const updated = [...prev]
+              updated[idx] = saved
+              return updated
+            }
+            return [...prev, saved]
+          })
+        }
+      })
+      .catch(error => {
+        console.error('Failed to persist sideline:', error)
+      })
+  }, [collectionId, gameId])
+
   /** Confirm replacement of existing variation */
   const confirmReplacement = useCallback(() => {
     if (!pendingReplacement || !chessManager) return
@@ -196,7 +219,7 @@ export function useSidelineState({
     persistSideline(branchPly, manager.getMovesString())
 
     setPendingReplacement(null)
-  }, [pendingReplacement, chessManager, updateBoardState, syncSidelineState])
+  }, [pendingReplacement, chessManager, updateBoardState, syncSidelineState, persistSideline])
 
   /** Cancel replacement of existing variation */
   const cancelReplacement = useCallback(() => {
@@ -222,29 +245,6 @@ export function useSidelineState({
     setPendingDeletion(null)
   }, [])
 
-  /** Persist sideline to database and update local state */
-  const persistSideline = useCallback((branchPly: number, movesStr: string) => {
-    if (!collectionId || gameId === null) return
-
-    window.electron.upsertSideline(collectionId, gameId, branchPly, movesStr)
-      .then(saved => {
-        if (saved) {
-          setSidelines(prev => {
-            const idx = prev.findIndex(s => s.branchPly === branchPly)
-            if (idx >= 0) {
-              const updated = [...prev]
-              updated[idx] = saved
-              return updated
-            }
-            return [...prev, saved]
-          })
-        }
-      })
-      .catch(error => {
-        console.error('Failed to persist sideline:', error)
-      })
-  }, [collectionId, gameId])
-
   const handleUserMove = useCallback((from: string, to: string) => {
     if (!chessManager || !collectionId || gameId === null) return
 
@@ -260,6 +260,18 @@ export function useSidelineState({
         const san = activeSideline.tryMove(from, to)
         if (!san) return false
 
+        // Check if this move matches the next existing move in the sideline
+        const nextSan = activeSideline.getNextSan()
+        if (nextSan === san) {
+          // Advance through existing sideline without truncation
+          const nextPly = activeSideline.getCurrentPly() + 1
+          activeSideline.goto(nextPly)
+          updateBoardState(activeSideline, nextPly)
+          syncSidelineState(activeSideline)
+          return true
+        }
+
+        // Different move — truncate and append
         activeSideline.appendMove(san)
 
         // Update board from sideline manager
@@ -333,7 +345,7 @@ export function useSidelineState({
     if (!attemptMove()) {
       forceBoardSync()
     }
-  }, [chessManager, collectionId, gameId, activeSideline, activeBranchPly, sidelines, updateBoardState, syncSidelineState, autoPlayStop, persistSideline, forceBoardSync])
+  }, [chessManager, collectionId, gameId, activeSideline, activeBranchPly, sidelines, enterSideline, updateBoardState, syncSidelineState, autoPlayStop, persistSideline, forceBoardSync])
 
   /** Navigate sideline to a computed ply. Returns true if navigation occurred.
    * Takes a compute function instead of a ply number to DRY the null-check + goto + sync pattern.
