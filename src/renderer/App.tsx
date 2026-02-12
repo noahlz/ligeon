@@ -6,11 +6,13 @@ import MoveNavigation from './components/MoveNavigation.js'
 import GameInfo from './components/GameInfo.js'
 import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
+import ConfirmDialog from './components/ConfirmDialog.js'
 import ControlStrip from './components/ControlStrip.js'
 import PanelHandle from './components/PanelHandle.js'
 import { TooltipProvider } from '@/components/ui/tooltip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { getCheckColor } from './utils/chessHelpers.js'
+import { formatMovePreview } from './utils/sidelineFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardState } from './hooks/useBoardState.js'
@@ -328,7 +330,7 @@ export default function App() {
                     sidelineMoves={sidelineState.sidelineMoves}
                     sidelinePly={sidelineState.sidelinePly}
                     onSidelineJump={sidelineState.jumpToSidelineMove}
-                    onDismissSideline={sidelineState.dismissSideline}
+                    onDismissSideline={sidelineState.requestDeletion}
                     isInSideline={sidelineState.isInSideline}
                   />
                 )}
@@ -374,6 +376,30 @@ export default function App() {
           filePath={importFilePath}
           onComplete={handleImportComplete}
           onClose={handleImportClose}
+        />
+
+        {/* Variation deletion confirmation */}
+        <ConfirmDialog
+          isOpen={sidelineState.pendingDeletion !== null}
+          title="Delete Variation"
+          message="Delete this variation? This cannot be undone."
+          onConfirm={sidelineState.confirmDeletion}
+          onCancel={sidelineState.cancelDeletion}
+          confirmIcon="trash"
+        />
+
+        {/* Variation replacement confirmation */}
+        <ConfirmDialog
+          isOpen={sidelineState.pendingReplacement !== null}
+          title="Replace Variation"
+          message={
+            sidelineState.pendingReplacement
+              ? `Replace existing variation (${formatMovePreview(sidelineState.pendingReplacement.existingMoves)}) with new move (${sidelineState.pendingReplacement.newMove})? This cannot be undone.`
+              : ''
+          }
+          onConfirm={sidelineState.confirmReplacement}
+          onCancel={sidelineState.cancelReplacement}
+          confirmIcon="trash"
         />
       </div>
     </TooltipProvider>

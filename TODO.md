@@ -1,16 +1,18 @@
 # Ligeon TODOs
 
-## Sideline Mode / Analysis
+## Variation Mode / Analysis
+
+Rename from "Sidelines" to "Variations" - update all variable and function names accordingly.
 
 ### Features 
 
 **PGN Export**
-- Extend buildFullPgn to export sidelines as PGN variations
-- Add tests for PGN export with sidelines
+- Extend buildFullPgn to export game to PGN with all variations
+- Add tests for PGN export with variations 
 - Verify exported PGN opens correctly in Lichess
 
 **Error Reporting**
-- If user tries to create one more sideline but max reached, show toast error "Max sidelines reached (1 per 6 moves)"
+- If user tries to create one more variation but max reached, show toast error "Max variations reached (1 per 6 moves)"
 - Any error that originates from a user action should have a toast in addition to a console log.
 
 ## Code Quality

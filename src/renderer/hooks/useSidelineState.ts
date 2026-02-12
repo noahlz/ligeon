@@ -24,6 +24,19 @@ export interface UseSidelineStateParams {
   forceBoardSync: () => void
 }
 
+/**
+ * Pending variation replacement request awaiting user confirmation.
+ * Set when user makes a move that would replace an existing variation at the same branch point.
+ */
+export interface PendingVariationReplacement {
+  /** 1-based mainline ply where the variation branches */
+  branchPly: number
+  /** Space-separated SAN moves of the existing variation that would be replaced */
+  existingMoves: string
+  /** SAN of the new move the user attempted */
+  newMove: string
+}
+
 export interface UseSidelineStateReturn {
   sidelines: SidelineData[]
   isInSideline: boolean
@@ -48,6 +61,13 @@ export interface UseSidelineStateReturn {
   dests: Map<Key, Key[]>
   turnColor: 'white' | 'black'
   checkColor: 'white' | 'black' | false
+  pendingReplacement: PendingVariationReplacement | null
+  confirmReplacement: () => void
+  cancelReplacement: () => void
+  pendingDeletion: number | null
+  requestDeletion: (branchPly: number) => void
+  confirmDeletion: () => void
+  cancelDeletion: () => void
 }
 
 /**
@@ -78,6 +98,8 @@ export function useSidelineState({
   const [dests, setDests] = useState<Map<Key, Key[]>>(new Map())
   const [turnColor, setTurnColor] = useState<'white' | 'black'>('white')
   const [checkColor, setCheckColor] = useState<'white' | 'black' | false>(false)
+  const [pendingReplacement, setPendingReplacement] = useState<PendingVariationReplacement | null>(null)
+  const [pendingDeletion, setPendingDeletion] = useState<number | null>(null)
 
   // Mirror currentPly in a ref to avoid re-creating handleUserMove on every ply change.
   // Keeps callback reference stable for performance and prevents unnecessary re-renders.
@@ -153,6 +175,52 @@ export function useSidelineState({
       console.error('Failed to delete sideline:', error)
     }
   }, [collectionId, gameId, activeBranchPly, exitSideline, chessManager, updateBoardState])
+
+  /** Confirm replacement of existing variation */
+  const confirmReplacement = useCallback(() => {
+    if (!pendingReplacement || !chessManager) return
+
+    const { branchPly, newMove } = pendingReplacement
+    const ply = branchPly - 1
+    const fen = chessManager.getFenAtPly(ply)
+    if (!fen) return
+
+    // Create new sideline with just the new move (replaces existing via upsert)
+    const manager = createSidelineManager(fen)
+    if (!manager.appendMove(newMove)) return
+
+    setActiveSideline(manager)
+    setActiveBranchPly(branchPly)
+    updateBoardState(manager, manager.getCurrentPly())
+    syncSidelineState(manager)
+    persistSideline(branchPly, manager.getMovesString())
+
+    setPendingReplacement(null)
+  }, [pendingReplacement, chessManager, updateBoardState, syncSidelineState])
+
+  /** Cancel replacement of existing variation */
+  const cancelReplacement = useCallback(() => {
+    setPendingReplacement(null)
+    forceBoardSync()
+  }, [forceBoardSync])
+
+  /** Request deletion of a variation (shows confirmation dialog) */
+  const requestDeletion = useCallback((branchPly: number) => {
+    setPendingDeletion(branchPly)
+  }, [])
+
+  /** Confirm deletion of pending variation */
+  const confirmDeletion = useCallback(() => {
+    if (pendingDeletion !== null) {
+      dismissSideline(pendingDeletion)
+      setPendingDeletion(null)
+    }
+  }, [pendingDeletion, dismissSideline])
+
+  /** Cancel deletion of pending variation */
+  const cancelDeletion = useCallback(() => {
+    setPendingDeletion(null)
+  }, [])
 
   /** Persist sideline to database and update local state */
   const persistSideline = useCallback((branchPly: number, movesStr: string) => {
@@ -231,25 +299,33 @@ export function useSidelineState({
       const branchPly = ply + 1
       const existing = sidelines.find(s => s.branchPly === branchPly)
 
+      if (existing) {
+        const firstSidelineMove = existing.moves.split(' ')[0]
+        if (firstSidelineMove === san) {
+          // Move matches first sideline move — enter the sideline
+          enterSideline(branchPly, 1)
+          return true
+        }
+        // Different move but sideline already exists at this branch point — request confirmation
+        setPendingReplacement({
+          branchPly,
+          existingMoves: existing.moves,
+          newMove: san,
+        })
+        return false
+      }
+
+      // No existing sideline — create new one
       const fen = chessManager.getFenAtPly(ply)
       if (!fen) return false
 
-      // If a sideline already exists at this branch point, load it and go to the end.
-      // This lets the user extend an existing variation rather than overwriting it.
-      const manager = createSidelineManager(fen, existing?.moves)
-      manager.goto(manager.getTotalPlies()) // Go to end of existing moves
-
-      // Append the new move
+      const manager = createSidelineManager(fen)
       if (!manager.appendMove(san)) return false
 
       setActiveSideline(manager)
       setActiveBranchPly(branchPly)
-
-      // Update board from sideline manager
       updateBoardState(manager, manager.getCurrentPly())
       syncSidelineState(manager)
-
-      // Persist
       persistSideline(branchPly, manager.getMovesString())
       return true
     }
@@ -341,5 +417,12 @@ export function useSidelineState({
     dests,
     turnColor,
     checkColor,
+    pendingReplacement,
+    confirmReplacement,
+    cancelReplacement,
+    pendingDeletion,
+    requestDeletion,
+    confirmDeletion,
+    cancelDeletion,
   }
 }
