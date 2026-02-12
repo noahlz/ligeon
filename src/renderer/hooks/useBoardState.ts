@@ -28,6 +28,10 @@ export interface UseBoardStateReturn {
   setLastMove: React.Dispatch<React.SetStateAction<Key[] | undefined>>
   /** Update board state from a NavigableManager at the given ply, with optional sound */
   updateBoardState: (manager: NavigableManager, ply: number) => void
+  /** Counter that increments to force board sync (triggers chessground reset) */
+  boardSyncKey: number
+  /** Force chessground to resync from current FEN (fixes desync after rejected moves) */
+  forceBoardSync: () => void
 }
 
 /**
@@ -41,6 +45,7 @@ export function useBoardState({
   const [fen, setFen] = useState(INITIAL_FEN)
   const [currentPly, setCurrentPly] = useState(0)
   const [lastMove, setLastMove] = useState<Key[] | undefined>(undefined)
+  const [boardSyncKey, setBoardSyncKey] = useState(0)
 
   const updateBoardState = useCallback((manager: NavigableManager, ply: number) => {
     manager.goto(ply)
@@ -57,6 +62,10 @@ export function useBoardState({
     }
   }, [soundEnabled, audioInitialized])
 
+  const forceBoardSync = useCallback(() => {
+    setBoardSyncKey(k => k + 1)
+  }, [])
+
   return {
     fen,
     currentPly,
@@ -65,5 +74,7 @@ export function useBoardState({
     setCurrentPly,
     setLastMove,
     updateBoardState,
+    boardSyncKey,
+    forceBoardSync,
   }
 }

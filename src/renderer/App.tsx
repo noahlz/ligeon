@@ -48,7 +48,7 @@ export default function App() {
   const [rightPanelOpen, setRightPanelOpen] = useState(true)
 
   // Board state & navigation
-  const { fen, currentPly, lastMove, updateBoardState } = useBoardState({
+  const { fen, currentPly, lastMove, updateBoardState, boardSyncKey, forceBoardSync } = useBoardState({
     soundEnabled,
     audioInitialized,
   })
@@ -110,6 +110,7 @@ export default function App() {
     currentPly,
     updateBoardState,
     autoPlayStop: autoPlay.stop,
+    forceBoardSync,
   })
 
   // Compute interactive board values — sideline overrides mainline.
@@ -235,6 +236,7 @@ export default function App() {
                       dests={boardDests}
                       turnColor={boardTurnColor}
                       onMove={sidelineState.handleUserMove}
+                      boardSyncKey={boardSyncKey}
                     />
                   </div>
 
@@ -302,7 +304,13 @@ export default function App() {
                     activeSidelineBranchPly={sidelineState.activeBranchPly}
                     sidelineMoves={sidelineState.sidelineMoves}
                     sidelinePly={sidelineState.sidelinePly}
-                    onSidelineJump={sidelineState.sidelineNav.jump}
+                    onSidelineJump={(branchPly, ply) => {
+                      if (sidelineState.activeBranchPly === branchPly && sidelineState.isInSideline) {
+                        sidelineState.sidelineNav.jump(ply)
+                      } else {
+                        sidelineState.enterSideline(branchPly, ply)
+                      }
+                    }}
                     onDismissSideline={sidelineState.dismissSideline}
                     isInSideline={sidelineState.isInSideline}
                   />

@@ -11,9 +11,10 @@ interface BoardDisplayProps {
   dests?: Map<Key, Key[]>
   turnColor?: 'white' | 'black'
   onMove?: (from: string, to: string) => void
+  boardSyncKey?: number
 }
 
-export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove }: BoardDisplayProps) {
+export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove, boardSyncKey }: BoardDisplayProps) {
   const boardRef = useRef<HTMLDivElement>(null)
   const cgRef = useRef<Api | null>(null)
   const onMoveRef = useRef(onMove)
@@ -71,7 +72,7 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
         color: turnColor ?? 'both',
       },
     })
-  }, [fen, lastMove, orientation, check, dests, turnColor])
+  }, [fen, lastMove, orientation, check, dests, turnColor, boardSyncKey])
 
   return (
     <div
