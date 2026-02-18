@@ -241,7 +241,7 @@ export default function MoveList({
                 {hasSidelinesAfterWhite && pair.black && (
                   <TableRow className="border-0 hover:bg-transparent">
                     <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0" />
-                    <TableCell className="border-0">
+                    <TableCell className="border-0 py-0.5">
                       <span className="text-ui-text-dimmer">...</span>
                     </TableCell>
                     <TableCell
