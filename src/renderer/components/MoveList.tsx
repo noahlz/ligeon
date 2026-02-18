@@ -25,8 +25,18 @@ interface MoveListProps {
   activeSidelineBranchPly?: number | null
   sidelineMoves?: string[]
   sidelinePly?: number
-  onSidelineJump?: (ply: number) => void
+  onSidelineJump?: (branchPly: number, ply: number) => void
   onDismissSideline?: (branchPly: number) => void
+  isInSideline?: boolean
+}
+
+interface SidelineRowProps {
+  sideline: SidelineData
+  isActive: boolean
+  sidelineMoves?: string[]
+  sidelinePly?: number
+  onSidelineJump?: (branchPly: number, ply: number) => void
+  onDismiss?: (branchPly: number) => void
   isInSideline?: boolean
 }
 
@@ -38,18 +48,13 @@ function SidelineRow({
   onSidelineJump,
   onDismiss,
   isInSideline,
-}: {
-  sideline: SidelineData
-  isActive: boolean
-  sidelineMoves?: string[]
-  sidelinePly?: number
-  onSidelineJump?: (ply: number) => void
-  onDismiss?: (branchPly: number) => void
-  isInSideline?: boolean
-}) {
+}: SidelineRowProps) {
   const [expanded, setExpanded] = useState(false)
-  // Active sidelines are always expanded so user can see their current position.
-  const isExpanded = isActive || expanded
+  // Auto-expand when sideline becomes active (user clicked into it).
+  // Unlike the previous `isActive || expanded`, this lets the user still collapse via chevron.
+  useEffect(() => {
+    if (isActive) setExpanded(true)
+  }, [isActive])
 
   // Use live activeSidelineMoves if this sideline is active (may include new moves not yet persisted).
   // Otherwise fall back to the persisted sideline.moves from the database.
@@ -59,32 +64,46 @@ function SidelineRow({
 
   if (moves.length === 0) return null
 
+  // Compute collapsed preview text
+  const firstIsWhite = isSidelineWhiteMove(sideline.branchPly, 0)
+  const moveNum = sidelineMoveNumber(sideline.branchPly, 0)
+  const collapsedPrefix = `${moveNum}.${firstIsWhite ? '' : '..'} `
+
+  // Show full accent border when in sideline but no move is highlighted
+  const showAccentBorder = isActive && isInSideline && (!sidelinePly || sidelinePly === 0)
+  const containerClass = showAccentBorder
+    ? 'ml-4 border-2 border-ui-accent bg-ui-bg-page rounded-sm my-0.5'
+    : 'ml-4 border-l-2 border-ui-accent bg-ui-bg-page rounded-r-sm my-0.5'
+
   return (
     <TableRow className="border-0 hover:bg-transparent">
       <TableCell colSpan={3} className="p-0 border-0">
-        <div className="ml-4 border-l-2 border-ui-accent bg-ui-bg-page rounded-r-sm my-0.5">
+        <div className={containerClass}>
           {/* Header row: toggle + first move preview + dismiss */}
-          <div className="flex items-center gap-1 px-2 py-0.5">
+          <div
+            className={`flex items-center gap-1 px-2 py-0.5 ${!expanded ? 'cursor-pointer hover:bg-ui-bg-hover' : ''}`}
+            onClick={!expanded ? () => setExpanded(true) : undefined}
+          >
             <button
-              onClick={() => setExpanded(!isExpanded)}
+              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
               className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer"
             >
-              {isExpanded
+              {expanded
                 ? <ChevronDown size={12} />
                 : <ChevronRight size={12} />
               }
             </button>
 
-            {!isExpanded && (
-              <span className="text-sm text-ui-text-dim truncate flex-1">
-                {moves.slice(0, 3).join(' ')}{moves.length > 3 ? '…' : ''}
+            {!expanded && (
+              <span className="text-sm text-ui-text-dimmer italic truncate flex-1">
+                {collapsedPrefix}{moves.slice(0, 3).join(' ')}{moves.length > 3 ? '…' : ''}
               </span>
             )}
 
-            {isExpanded && <span className="flex-1" />}
+            {expanded && <span className="flex-1" />}
 
             <button
-              onClick={() => onDismiss?.(sideline.branchPly)}
+              onClick={(e) => { e.stopPropagation(); onDismiss?.(sideline.branchPly) }}
               className="text-ui-text-dimmer hover:text-red-400 p-0.5 cursor-pointer"
               title="Dismiss sideline"
             >
@@ -93,7 +112,7 @@ function SidelineRow({
           </div>
 
           {/* Expanded moves */}
-          {isExpanded && (
+          {expanded && (
             <div className="flex flex-wrap gap-x-1 gap-y-0 px-2 pb-1 font-mono text-sm">
               {moves.map((move, i) => {
                 const isWhite = isSidelineWhiteMove(sideline.branchPly, i)
@@ -110,7 +129,7 @@ function SidelineRow({
                       </span>
                     )}
                     <span
-                      onClick={() => onSidelineJump?.(ply)}
+                      onClick={() => onSidelineJump?.(sideline.branchPly, ply)}
                       className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
                         isCurrent ? 'bg-ui-accent text-white font-bold' : ''
                       }`}
@@ -165,8 +184,11 @@ export default function MoveList({
               ? getSidelinesAtPly(sidelines, blackPly + 1)
               : []
 
+            const hasSidelinesAfterWhite = sidelinesAfterWhite.length > 0
+
             return (
               <Fragment key={pairIndex}>
+                {/* White move row (+ black if no sideline splits needed) */}
                 <TableRow className="border-0 hover:bg-transparent">
                   {/* Move number */}
                   <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0">
@@ -184,16 +206,21 @@ export default function MoveList({
                     {pair.white}
                   </TableCell>
 
-                  {/* Black move */}
-                  <TableCell
-                    ref={isBlackCurrent ? currentMoveRef : null}
-                    onClick={pair.black ? () => onJump(blackPly + 1) : undefined}
-                    className={`px-2 py-0.5 rounded border-0 text-lg ${
-                      pair.black ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
-                    } ${isBlackCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
-                  >
-                    {pair.black || ''}
-                  </TableCell>
+                  {/* Black move (or empty placeholder when split) */}
+                  {hasSidelinesAfterWhite
+                    ? <TableCell className="border-0" />
+                    : (
+                      <TableCell
+                        ref={isBlackCurrent ? currentMoveRef : null}
+                        onClick={pair.black ? () => onJump(blackPly + 1) : undefined}
+                        className={`px-2 py-0.5 rounded border-0 text-lg ${
+                          pair.black ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
+                        } ${isBlackCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
+                      >
+                        {pair.black || ''}
+                      </TableCell>
+                    )
+                  }
                 </TableRow>
 
                 {/* Sidelines branching after white's move */}
@@ -209,6 +236,25 @@ export default function MoveList({
                     isInSideline={isInSideline}
                   />
                 ))}
+
+                {/* Black continuation row (only when split by white sideline) */}
+                {hasSidelinesAfterWhite && pair.black && (
+                  <TableRow className="border-0 hover:bg-transparent">
+                    <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0" />
+                    <TableCell className="border-0">
+                      <span className="text-ui-text-dimmer">...</span>
+                    </TableCell>
+                    <TableCell
+                      ref={isBlackCurrent ? currentMoveRef : null}
+                      onClick={() => onJump(blackPly + 1)}
+                      className={`px-2 py-0.5 rounded cursor-pointer hover:bg-ui-bg-hover border-0 text-lg ${
+                        isBlackCurrent ? 'bg-ui-accent text-white font-bold' : ''
+                      }`}
+                    >
+                      {pair.black}
+                    </TableCell>
+                  </TableRow>
+                )}
 
                 {/* Sidelines branching after black's move */}
                 {sidelinesAfterBlack.map(sl => (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { ChessKnight } from 'lucide-react'
 import BoardDisplay from './components/BoardDisplay.js'
 import MoveList from './components/MoveList.js'
@@ -6,10 +6,13 @@ import MoveNavigation from './components/MoveNavigation.js'
 import GameInfo from './components/GameInfo.js'
 import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
+import ConfirmDialog from './components/ConfirmDialog.js'
 import ControlStrip from './components/ControlStrip.js'
 import PanelHandle from './components/PanelHandle.js'
 import { TooltipProvider } from '@/components/ui/tooltip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
+import { getCheckColor } from './utils/chessHelpers.js'
+import { formatMovePreview } from './utils/sidelineFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardState } from './hooks/useBoardState.js'
@@ -48,7 +51,7 @@ export default function App() {
   const [rightPanelOpen, setRightPanelOpen] = useState(true)
 
   // Board state & navigation
-  const { fen, currentPly, lastMove, updateBoardState } = useBoardState({
+  const { fen, currentPly, lastMove, updateBoardState, boardSyncKey, forceBoardSync } = useBoardState({
     soundEnabled,
     audioInitialized,
   })
@@ -74,6 +77,42 @@ export default function App() {
     loadCollections()
   }, [])
 
+  // Break circular dependency between useAutoPlay and useSidelineState via refs.
+  // useSidelineState needs autoPlay.stop; useAutoPlay needs sideline ply values.
+  // Refs are populated after both hooks run but before any user interaction.
+  const autoPlayStopRef = useRef<() => void>(() => {})
+  const autoPlayStop = useCallback(() => autoPlayStopRef.current(), [])
+
+  // Sideline state (uses stable stop ref — only called during user interactions, never during render)
+  const sidelineState = useSidelineState({
+    chessManager,
+    collectionId: selectedGameCollectionId,
+    gameId: selectedGame?.id ?? null,
+    currentPly,
+    updateBoardState,
+    autoPlayStop,
+    forceBoardSync,
+  })
+
+  // Compute effective ply for auto-play based on active context
+  const effectivePly = sidelineState.isInSideline ? sidelineState.sidelinePly : currentPly
+  const effectiveMaxPly = sidelineState.isInSideline
+    ? sidelineState.sidelineMaxPly
+    : chessManager?.getTotalPlies() || 0
+
+  // onAdvance routes to sideline or mainline — useAutoPlay stores it in a ref internally,
+  // so new function identity per render doesn't cause interval restarts.
+  const autoPlay = useAutoPlay({
+    onAdvance: sidelineState.isInSideline
+      ? sidelineState.advanceSideline
+      : () => handleNext(),
+    currentPly: effectivePly,
+    maxPly: effectiveMaxPly,
+  })
+
+  // Populate stop ref after useAutoPlay is initialized
+  autoPlayStopRef.current = autoPlay.stop
+
   // Handle game selection
   const handleGameSelect = async (game: GameSearchResult) => {
     if (!selectedCollectionId) return
@@ -95,23 +134,6 @@ export default function App() {
     sidelineState.loadSidelines(selectedCollectionId, game.id)
   }
 
-  // Auto-play hook
-  const autoPlay = useAutoPlay({
-    onAdvance: handleNext,
-    currentPly,
-    maxPly: chessManager?.getTotalPlies() || 0,
-  })
-
-  // Sideline state
-  const sidelineState = useSidelineState({
-    chessManager,
-    collectionId: selectedGameCollectionId,
-    gameId: selectedGame?.id ?? null,
-    currentPly,
-    updateBoardState,
-    autoPlayStop: autoPlay.stop,
-  })
-
   // Compute interactive board values — sideline overrides mainline.
   // When exploring a sideline, the board must show legal moves for the sideline position,
   // not the mainline position (different FENs = different legal moves).
@@ -122,6 +144,10 @@ export default function App() {
   const boardTurnColor = sidelineState.isInSideline
     ? sidelineState.turnColor
     : chessManager?.getTurnColor() ?? 'white'
+
+  const boardCheckColor = sidelineState.isInSideline
+    ? sidelineState.checkColor
+    : (chessManager ? getCheckColor(chessManager.getMoveType(currentPly), boardTurnColor) : false)
 
   const handleTogglePlay = () => {
     if (autoPlay.isPlaying) {
@@ -231,10 +257,11 @@ export default function App() {
                       fen={fen}
                       lastMove={lastMove}
                       orientation={boardOrientation}
-                      check={chessManager.getMoveType(currentPly) === 'check' ? (currentPly % 2 === 1 ? 'black' : 'white') : false}
+                      check={boardCheckColor}
                       dests={boardDests}
                       turnColor={boardTurnColor}
                       onMove={sidelineState.handleUserMove}
+                      boardSyncKey={boardSyncKey}
                     />
                   </div>
 
@@ -302,8 +329,8 @@ export default function App() {
                     activeSidelineBranchPly={sidelineState.activeBranchPly}
                     sidelineMoves={sidelineState.sidelineMoves}
                     sidelinePly={sidelineState.sidelinePly}
-                    onSidelineJump={sidelineState.sidelineNav.jump}
-                    onDismissSideline={sidelineState.dismissSideline}
+                    onSidelineJump={sidelineState.jumpToSidelineMove}
+                    onDismissSideline={sidelineState.requestDeletion}
                     isInSideline={sidelineState.isInSideline}
                   />
                 )}
@@ -349,6 +376,30 @@ export default function App() {
           filePath={importFilePath}
           onComplete={handleImportComplete}
           onClose={handleImportClose}
+        />
+
+        {/* Variation deletion confirmation */}
+        <ConfirmDialog
+          isOpen={sidelineState.pendingDeletion !== null}
+          title="Delete Variation"
+          message="Delete this variation? This cannot be undone."
+          onConfirm={sidelineState.confirmDeletion}
+          onCancel={sidelineState.cancelDeletion}
+          confirmIcon="trash"
+        />
+
+        {/* Variation replacement confirmation */}
+        <ConfirmDialog
+          isOpen={sidelineState.pendingReplacement !== null}
+          title="Replace Variation"
+          message={
+            sidelineState.pendingReplacement
+              ? `Replace existing variation (${formatMovePreview(sidelineState.pendingReplacement.existingMoves)}) with new move (${sidelineState.pendingReplacement.newMove})? This cannot be undone.`
+              : ''
+          }
+          onConfirm={sidelineState.confirmReplacement}
+          onCancel={sidelineState.cancelReplacement}
+          confirmIcon="trash"
         />
       </div>
     </TooltipProvider>

@@ -12,6 +12,7 @@ import { makeSan } from 'chessops/san'
 import { parseSquare } from 'chessops/util'
 import { chessgroundDests } from 'chessops/compat'
 import type { NormalMove, Role } from 'chessops/types'
+import type { MoveType } from '../types/moveTypes.js'
 
 /**
  * Get legal move destinations from a FEN position for chessground.
@@ -83,4 +84,19 @@ export function tryMoveFromFen(
   // Check if the move is legal
   if (!pos.value.isLegal(move)) return null
   return makeSan(pos.value, move)
+}
+
+/**
+ * Determine which king is in check based on move type and turn color.
+ * When a move gives check, the king in check is the color whose turn it is NOW (opposite of who moved).
+ *
+ * @param moveType - The type of the last move played
+ * @param turnColor - Whose turn it is now (after the move)
+ * @returns 'white' if white king is in check, 'black' if black king is in check, false otherwise
+ */
+export function getCheckColor(
+  moveType: MoveType | undefined,
+  turnColor: 'white' | 'black'
+): 'white' | 'black' | false {
+  return moveType === 'check' ? turnColor : false
 }
