@@ -17,7 +17,7 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
-    reporters: process.env.GITHUB_ACTIONS ? ['tap-flat', 'github-actions'] : ['tap-flat'],
+    reporters: process.env.GITHUB_ACTIONS ? ['tap-flat', 'github-actions'] : ['default'],
     outputFile: {
       tap: 'dist/test-results.tap',
     },

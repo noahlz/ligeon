@@ -2,7 +2,7 @@
  * ChessManager - read-only mainline game navigation.
  *
  * Parses a PGN move string and provides navigation through the game's mainline positions.
- * Immutable after creation - for interactive move-making, see SidelineManager.
+ * Immutable after creation - for interactive move-making, see VariationManager.
  *
  * Stores positions as FEN strings (not live Chess objects) for memory efficiency.
  * Legal move calculation (getDests, tryMove) reconstructs Chess positions on-demand

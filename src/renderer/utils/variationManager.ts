@@ -1,7 +1,7 @@
 /**
- * SidelineManager - mutable move sequence manager for sideline exploration.
+ * VariationManager - mutable move sequence manager for variation exploration.
  *
- * Unlike ChessManager (read-only mainline), SidelineManager supports interactive
+ * Unlike ChessManager (read-only mainline), VariationManager supports interactive
  * move-making: appending moves, truncating variations, and building sequences from
  * any position. Starts from a FEN (branch point) rather than the initial position.
  *
@@ -16,7 +16,7 @@ import type { NavigableManager } from '../types/navigableManager.js'
 import { type ParsedMove, playAndRecord } from './chessManager.js'
 import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
 
-export interface SidelineManager extends NavigableManager {
+export interface VariationManager extends NavigableManager {
   /** Legal move destinations for chessground from current position */
   getDests: () => Map<string, string[]>
   /** Whose turn it is */
@@ -27,22 +27,22 @@ export interface SidelineManager extends NavigableManager {
   appendMove: (san: string) => boolean
   /** Remove all moves after the current ply */
   truncateAfterCurrent: () => void
-  /** Get the space-separated SAN string of all sideline moves */
+  /** Get the space-separated SAN string of all variation moves */
   getMovesString: () => string
   /** Get the SAN of the next move (currentPly + 1), or null if none exists */
   getNextSan: () => string | null
 }
 
 /**
- * Create a sideline manager for building and navigating a mutable move sequence.
+ * Create a variation manager for building and navigating a mutable move sequence.
  *
- * @param startFen - The FEN position where the sideline begins (the branch point)
- * @param existingMoves - Optional space-separated SAN moves to initialize the sideline
+ * @param startFen - The FEN position where the variation begins (the branch point)
+ * @param existingMoves - Optional space-separated SAN moves to initialize the variation
  */
-export function createSidelineManager(
+export function createVariationManager(
   startFen: string,
   existingMoves?: string
-): SidelineManager {
+): VariationManager {
   const positions: ParsedMove[] = []
   let currentPly = 0
 
@@ -64,7 +64,7 @@ export function createSidelineManager(
 
   // If existing moves provided, replay them.
   // Route through parsePgn instead of simple split() to robustly handle move numbers,
-  // NAGs, and annotations that may be present in stored sideline strings.
+  // NAGs, and annotations that may be present in stored variation strings.
   if (existingMoves && existingMoves.trim()) {
     const games = parsePgn(existingMoves)
     const sanMoves = games.length > 0
@@ -74,7 +74,7 @@ export function createSidelineManager(
     for (const san of sanMoves) {
       const parsed = playAndRecord(chess, san)
       if (!parsed) {
-        console.error(`Failed to parse sideline move: ${san}`)
+        console.error(`Failed to parse variation move: ${san}`)
         break
       }
       positions.push(parsed)

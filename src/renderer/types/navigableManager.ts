@@ -2,7 +2,7 @@
  * NavigableManager - shared interface for chess position navigation.
  *
  * Enables navigation hooks (useGameNavigation, useBoardState) to work with either
- * the read-only mainline (ChessManager) or mutable sideline sequences (SidelineManager)
+ * the read-only mainline (ChessManager) or mutable variation sequences (VariationManager)
  * without knowing which type they're navigating.
  */
 
@@ -10,7 +10,7 @@ import type { MoveType } from './moveTypes.js'
 
 /**
  * Common navigation methods for any position sequence.
- * Both ChessManager (mainline) and SidelineManager (sideline) implement this.
+ * Both ChessManager (mainline) and VariationManager (variation) implement this.
  */
 export interface NavigableManager {
   getFen: () => string

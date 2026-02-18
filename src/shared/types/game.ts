@@ -58,11 +58,11 @@ export interface OptionFilters {
 }
 
 /**
- * Sideline data structure
+ * Variation data structure
  */
-export interface SidelineData {
+export interface VariationData {
   id?: number          // DB auto-increment (undefined before first save)
   gameId: number       // FK to games.id
-  branchPly: number    // mainline ply where sideline departs (1-based)
+  branchPly: number    // mainline ply where variation departs (1-based)
   moves: string        // space-separated SAN: "Nf3 d5 Bg5"
 }

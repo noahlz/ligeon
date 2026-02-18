@@ -1,7 +1,7 @@
 /**
  * Chess position helpers - wrappers around chessops for FEN-based operations.
  *
- * ChessManager and SidelineManager store positions as FEN strings (not live Chess objects).
+ * ChessManager and VariationManager store positions as FEN strings (not live Chess objects).
  * These helpers handle the FEN → Chess object → chessops API boilerplate, eliminating
  * duplication and providing error handling at each step.
  */

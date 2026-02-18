@@ -8,7 +8,7 @@ import {
   deleteCollection,
 } from './ipc/collectionHandlers.js'
 import { searchGames, getGameMoves, getGameCount, getAvailableDates, getAvailableEcoCodes } from './ipc/gameHandlers.js'
-import { getSidelines, upsertSideline, deleteSideline } from './ipc/sidelineHandlers.js'
+import { getVariations, upsertVariation, deleteVariation } from './ipc/variationHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
 import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
@@ -174,17 +174,17 @@ function setupIpcHandlers() {
     getAvailableEcoCodes(collectionId, filters)
   )
 
-  // Sideline handlers
-  ipcMain.handle('get-sidelines', async (_event, { collectionId, gameId }) =>
-    getSidelines(collectionId, parseInt(gameId, 10))
+  // Variation handlers
+  ipcMain.handle('get-variations', async (_event, { collectionId, gameId }) =>
+    getVariations(collectionId, parseInt(gameId, 10))
   )
 
-  ipcMain.handle('upsert-sideline', async (_event, { collectionId, gameId, branchPly, moves }) =>
-    upsertSideline(collectionId, parseInt(gameId, 10), branchPly, moves)
+  ipcMain.handle('upsert-variation', async (_event, { collectionId, gameId, branchPly, moves }) =>
+    upsertVariation(collectionId, parseInt(gameId, 10), branchPly, moves)
   )
 
-  ipcMain.handle('delete-sideline', async (_event, { collectionId, gameId, branchPly }) =>
-    deleteSideline(collectionId, parseInt(gameId, 10), branchPly)
+  ipcMain.handle('delete-variation', async (_event, { collectionId, gameId, branchPly }) =>
+    deleteVariation(collectionId, parseInt(gameId, 10), branchPly)
   )
 
   // Settings handlers

@@ -483,7 +483,7 @@ describe('GameDatabase', () => {
     expect(codes.length).toBe(5)
   })
 
-  describe('Sidelines', () => {
+  describe('Variations', () => {
     let gameId: number
 
     beforeEach(() => {
@@ -505,81 +505,81 @@ describe('GameDatabase', () => {
       gameId = result.lastInsertRowid as number
     })
 
-    test('getSidelines returns empty array for game with no sidelines', () => {
-      const sidelines = db.getSidelines(gameId)
-      expect(sidelines).toEqual([])
+    test('getVariations returns empty array for game with no variations', () => {
+      const variations = db.getVariations(gameId)
+      expect(variations).toEqual([])
     })
 
-    test('upsertSideline inserts new sideline', () => {
-      const result = db.upsertSideline(gameId, 3, 'd6 3. Bb5')
+    test('upsertVariation inserts new variation', () => {
+      const result = db.upsertVariation(gameId, 3, 'd6 3. Bb5')
       expect(result.gameId).toBe(gameId)
       expect(result.branchPly).toBe(3)
       expect(result.moves).toBe('d6 3. Bb5')
       expect(result.id).toBeDefined()
     })
 
-    test('upsertSideline updates existing sideline at same branchPly', () => {
-      const first = db.upsertSideline(gameId, 3, 'd6')
-      const second = db.upsertSideline(gameId, 3, 'd6 3. Bb5 a6')
+    test('upsertVariation updates existing variation at same branchPly', () => {
+      const first = db.upsertVariation(gameId, 3, 'd6')
+      const second = db.upsertVariation(gameId, 3, 'd6 3. Bb5 a6')
 
       expect(second.id).toBe(first.id)
       expect(second.moves).toBe('d6 3. Bb5 a6')
 
-      const sidelines = db.getSidelines(gameId)
-      expect(sidelines.length).toBe(1)
+      const variations = db.getVariations(gameId)
+      expect(variations.length).toBe(1)
     })
 
-    test('getSidelines returns sidelines ordered by branchPly', () => {
-      db.upsertSideline(gameId, 5, 'Nc6')
-      db.upsertSideline(gameId, 1, 'd5')
-      db.upsertSideline(gameId, 3, 'd6')
+    test('getVariations returns variations ordered by branchPly', () => {
+      db.upsertVariation(gameId, 5, 'Nc6')
+      db.upsertVariation(gameId, 1, 'd5')
+      db.upsertVariation(gameId, 3, 'd6')
 
-      const sidelines = db.getSidelines(gameId)
-      expect(sidelines.length).toBe(3)
-      expect(sidelines[0].branchPly).toBe(1)
-      expect(sidelines[1].branchPly).toBe(3)
-      expect(sidelines[2].branchPly).toBe(5)
+      const variations = db.getVariations(gameId)
+      expect(variations.length).toBe(3)
+      expect(variations[0].branchPly).toBe(1)
+      expect(variations[1].branchPly).toBe(3)
+      expect(variations[2].branchPly).toBe(5)
     })
 
-    test('deleteSideline removes sideline', () => {
-      db.upsertSideline(gameId, 3, 'd6')
-      db.deleteSideline(gameId, 3)
+    test('deleteVariation removes variation', () => {
+      db.upsertVariation(gameId, 3, 'd6')
+      db.deleteVariation(gameId, 3)
 
-      const sidelines = db.getSidelines(gameId)
-      expect(sidelines.length).toBe(0)
+      const variations = db.getVariations(gameId)
+      expect(variations.length).toBe(0)
     })
 
-    test('deleteSideline is idempotent', () => {
-      db.upsertSideline(gameId, 3, 'd6')
-      db.deleteSideline(gameId, 3)
-      expect(() => db.deleteSideline(gameId, 3)).not.toThrow()
+    test('deleteVariation is idempotent', () => {
+      db.upsertVariation(gameId, 3, 'd6')
+      db.deleteVariation(gameId, 3)
+      expect(() => db.deleteVariation(gameId, 3)).not.toThrow()
     })
 
     test('unique constraint prevents duplicate branchPly', () => {
-      db.upsertSideline(gameId, 3, 'first')
+      db.upsertVariation(gameId, 3, 'first')
       // Second insert at same ply should update (upsert behavior)
-      const result = db.upsertSideline(gameId, 3, 'second')
+      const result = db.upsertVariation(gameId, 3, 'second')
       expect(result.moves).toBe('second')
 
-      const sidelines = db.getSidelines(gameId)
-      expect(sidelines.length).toBe(1)
+      const variations = db.getVariations(gameId)
+      expect(variations.length).toBe(1)
     })
 
-    test('sidelines cascade delete with game', () => {
-      db.upsertSideline(gameId, 3, 'd6')
-      db.upsertSideline(gameId, 5, 'Nc6')
+    test('variations cascade delete with game', () => {
+      db.upsertVariation(gameId, 3, 'd6')
+      db.upsertVariation(gameId, 5, 'Nc6')
 
-      // Verify sidelines exist
-      let sidelines = db.getSidelines(gameId)
-      expect(sidelines.length).toBe(2)
+      // Verify variations exist
+      let variations = db.getVariations(gameId)
+      expect(variations.length).toBe(2)
 
       // Delete the game using a DELETE statement (clearGames uses DELETE FROM games)
       // This should trigger ON DELETE CASCADE due to foreign key constraint
       db.clearGames()
 
-      // Sidelines should be automatically deleted due to CASCADE
-      sidelines = db.getSidelines(gameId)
-      expect(sidelines.length).toBe(0)
+      // Variations should be automatically deleted due to CASCADE
+      variations = db.getVariations(gameId)
+      expect(variations.length).toBe(0)
     })
   })
 })

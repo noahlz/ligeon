@@ -12,13 +12,13 @@ import PanelHandle from './components/PanelHandle.js'
 import { TooltipProvider } from '@/components/ui/tooltip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { getCheckColor } from './utils/chessHelpers.js'
-import { formatMovePreview } from './utils/sidelineFormatter.js'
+import { formatMovePreview } from './utils/variationFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
-import { useSidelineState } from './hooks/useSidelineState.js'
+import { useVariationState } from './hooks/useVariationState.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 import type { Key } from '@lichess-org/chessground/types'
 
@@ -77,14 +77,14 @@ export default function App() {
     loadCollections()
   }, [])
 
-  // Break circular dependency between useAutoPlay and useSidelineState via refs.
-  // useSidelineState needs autoPlay.stop; useAutoPlay needs sideline ply values.
+  // Break circular dependency between useAutoPlay and useVariationState via refs.
+  // useVariationState needs autoPlay.stop; useAutoPlay needs variation ply values.
   // Refs are populated after both hooks run but before any user interaction.
   const autoPlayStopRef = useRef<() => void>(() => {})
   const autoPlayStop = useCallback(() => autoPlayStopRef.current(), [])
 
-  // Sideline state (uses stable stop ref — only called during user interactions, never during render)
-  const sidelineState = useSidelineState({
+  // Variation state (uses stable stop ref — only called during user interactions, never during render)
+  const variationState = useVariationState({
     chessManager,
     collectionId: selectedGameCollectionId,
     gameId: selectedGame?.id ?? null,
@@ -95,16 +95,16 @@ export default function App() {
   })
 
   // Compute effective ply for auto-play based on active context
-  const effectivePly = sidelineState.isInSideline ? sidelineState.sidelinePly : currentPly
-  const effectiveMaxPly = sidelineState.isInSideline
-    ? sidelineState.sidelineMaxPly
+  const effectivePly = variationState.isInVariation ? variationState.variationPly : currentPly
+  const effectiveMaxPly = variationState.isInVariation
+    ? variationState.variationMaxPly
     : chessManager?.getTotalPlies() || 0
 
-  // onAdvance routes to sideline or mainline — useAutoPlay stores it in a ref internally,
+  // onAdvance routes to variation or mainline — useAutoPlay stores it in a ref internally,
   // so new function identity per render doesn't cause interval restarts.
   const autoPlay = useAutoPlay({
-    onAdvance: sidelineState.isInSideline
-      ? sidelineState.advanceSideline
+    onAdvance: variationState.isInVariation
+      ? variationState.advanceVariation
       : () => handleNext(),
     currentPly: effectivePly,
     maxPly: effectiveMaxPly,
@@ -130,23 +130,23 @@ export default function App() {
     // Reset to initial position
     updateBoardState(manager, 0)
 
-    // Load sidelines for this game
-    sidelineState.loadSidelines(selectedCollectionId, game.id)
+    // Load variations for this game
+    variationState.loadVariations(selectedCollectionId, game.id)
   }
 
-  // Compute interactive board values — sideline overrides mainline.
-  // When exploring a sideline, the board must show legal moves for the sideline position,
+  // Compute interactive board values — variation overrides mainline.
+  // When exploring a variation, the board must show legal moves for the variation position,
   // not the mainline position (different FENs = different legal moves).
-  const boardDests = (sidelineState.isInSideline
-    ? sidelineState.dests
+  const boardDests = (variationState.isInVariation
+    ? variationState.dests
     : chessManager?.getDests() ?? new Map()) as Map<Key, Key[]>
 
-  const boardTurnColor = sidelineState.isInSideline
-    ? sidelineState.turnColor
+  const boardTurnColor = variationState.isInVariation
+    ? variationState.turnColor
     : chessManager?.getTurnColor() ?? 'white'
 
-  const boardCheckColor = sidelineState.isInSideline
-    ? sidelineState.checkColor
+  const boardCheckColor = variationState.isInVariation
+    ? variationState.checkColor
     : (chessManager ? getCheckColor(chessManager.getMoveType(currentPly), boardTurnColor) : false)
 
   const handleTogglePlay = () => {
@@ -260,19 +260,19 @@ export default function App() {
                       check={boardCheckColor}
                       dests={boardDests}
                       turnColor={boardTurnColor}
-                      onMove={sidelineState.handleUserMove}
+                      onMove={variationState.handleUserMove}
                       boardSyncKey={boardSyncKey}
                     />
                   </div>
 
                   {/* Navigation (below board) */}
-                  {/* Route keyboard/button nav to whichever manager is active (sideline or mainline). */}
+                  {/* Route keyboard/button nav to whichever manager is active (variation or mainline). */}
                   <div className="mt-2">
                     <MoveNavigation
-                      onFirst={sidelineState.isInSideline ? sidelineState.sidelineNav.first : handleFirst}
-                      onPrev={sidelineState.isInSideline ? sidelineState.sidelineNav.prev : handlePrev}
-                      onNext={sidelineState.isInSideline ? sidelineState.sidelineNav.next : () => handleNext()}
-                      onLast={sidelineState.isInSideline ? sidelineState.sidelineNav.last : handleLast}
+                      onFirst={variationState.isInVariation ? variationState.variationNav.first : handleFirst}
+                      onPrev={variationState.isInVariation ? variationState.variationNav.prev : handlePrev}
+                      onNext={variationState.isInVariation ? variationState.variationNav.next : () => handleNext()}
+                      onLast={variationState.isInVariation ? variationState.variationNav.last : handleLast}
                       onTogglePlay={handleTogglePlay}
                       isPlaying={autoPlay.isPlaying}
                       speed={autoPlay.speed}
@@ -321,17 +321,17 @@ export default function App() {
                     result={result}
                     currentPly={currentPly}
                     onJump={(ply) => {
-                      // Clicking a mainline move exits sideline first to return navigation to mainline.
-                      if (sidelineState.isInSideline) sidelineState.exitSideline()
+                      // Clicking a mainline move exits variation first to return navigation to mainline.
+                      if (variationState.isInVariation) variationState.exitVariation()
                       handleJump(ply)
                     }}
-                    sidelines={sidelineState.sidelines}
-                    activeSidelineBranchPly={sidelineState.activeBranchPly}
-                    sidelineMoves={sidelineState.sidelineMoves}
-                    sidelinePly={sidelineState.sidelinePly}
-                    onSidelineJump={sidelineState.jumpToSidelineMove}
-                    onDismissSideline={sidelineState.requestDeletion}
-                    isInSideline={sidelineState.isInSideline}
+                    variations={variationState.variations}
+                    activeVariationBranchPly={variationState.activeBranchPly}
+                    variationMoves={variationState.variationMoves}
+                    variationPly={variationState.variationPly}
+                    onVariationJump={variationState.jumpToVariationMove}
+                    onDismissVariation={variationState.requestDeletion}
+                    isInVariation={variationState.isInVariation}
                   />
                 )}
               </>
@@ -380,25 +380,25 @@ export default function App() {
 
         {/* Variation deletion confirmation */}
         <ConfirmDialog
-          isOpen={sidelineState.pendingDeletion !== null}
+          isOpen={variationState.pendingDeletion !== null}
           title="Delete Variation"
           message="Delete this variation? This cannot be undone."
-          onConfirm={sidelineState.confirmDeletion}
-          onCancel={sidelineState.cancelDeletion}
+          onConfirm={variationState.confirmDeletion}
+          onCancel={variationState.cancelDeletion}
           confirmIcon="trash"
         />
 
         {/* Variation replacement confirmation */}
         <ConfirmDialog
-          isOpen={sidelineState.pendingReplacement !== null}
+          isOpen={variationState.pendingReplacement !== null}
           title="Replace Variation"
           message={
-            sidelineState.pendingReplacement
-              ? `Replace existing variation (${formatMovePreview(sidelineState.pendingReplacement.existingMoves)}) with new move (${sidelineState.pendingReplacement.newMove})? This cannot be undone.`
+            variationState.pendingReplacement
+              ? `Replace existing variation (${formatMovePreview(variationState.pendingReplacement.existingMoves)}) with new move (${variationState.pendingReplacement.newMove})? This cannot be undone.`
               : ''
           }
-          onConfirm={sidelineState.confirmReplacement}
-          onCancel={sidelineState.cancelReplacement}
+          onConfirm={variationState.confirmReplacement}
+          onCancel={variationState.cancelReplacement}
           confirmIcon="trash"
         />
       </div>

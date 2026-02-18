@@ -1,14 +1,14 @@
 import { describe, test, expect } from 'vitest'
 import {
-  createSidelineManager,
-  type SidelineManager,
-} from '../../src/renderer/utils/sidelineManager.js'
+  createVariationManager,
+  type VariationManager,
+} from '../../src/renderer/utils/variationManager.js'
 
-describe('SidelineManager', () => {
+describe('VariationManager', () => {
   describe('creation', () => {
     test('creates from FEN with no existing moves', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       expect(manager.getCurrentPly()).toBe(0)
       expect(manager.getTotalPlies()).toBe(0)
@@ -17,7 +17,7 @@ describe('SidelineManager', () => {
 
     test('creates from FEN with existing moves', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3')
+      const manager = createVariationManager(startFen, 'e5 Nf3')
 
       expect(manager.getTotalPlies()).toBe(2)
       expect(manager.getCurrentPly()).toBe(0) // Starts at beginning
@@ -25,18 +25,18 @@ describe('SidelineManager', () => {
 
     test('initial FEN matches startFen', () => {
       const startFen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       expect(manager.getFen()).toBe(startFen)
     })
 
     test('throws on invalid FEN', () => {
-      expect(() => createSidelineManager('invalid fen')).toThrow()
+      expect(() => createVariationManager('invalid fen')).toThrow()
     })
 
     test('handles existingMoves with move numbers', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, '1... e5 2. Nf3 Nc6')
+      const manager = createVariationManager(startFen, '1... e5 2. Nf3 Nc6')
 
       expect(manager.getTotalPlies()).toBe(3)
       expect(manager.getMovesString()).toBe('e5 Nf3 Nc6')
@@ -44,7 +44,7 @@ describe('SidelineManager', () => {
 
     test('handles existingMoves with annotations', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3 { Good move } Nc6')
+      const manager = createVariationManager(startFen, 'e5 Nf3 { Good move } Nc6')
 
       expect(manager.getTotalPlies()).toBe(3)
       expect(manager.getMovesString()).toBe('e5 Nf3 Nc6')
@@ -52,11 +52,11 @@ describe('SidelineManager', () => {
   })
 
   describe('navigation (NavigableManager)', () => {
-    let manager: SidelineManager
+    let manager: VariationManager
 
     test('goto, getCurrentPly, getTotalPlies work correctly', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+      manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       expect(manager.getCurrentPly()).toBe(0)
       expect(manager.getTotalPlies()).toBe(3)
@@ -70,7 +70,7 @@ describe('SidelineManager', () => {
 
     test('getFen returns correct FEN at each ply', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      manager = createSidelineManager(startFen, 'e5 Nf3')
+      manager = createVariationManager(startFen, 'e5 Nf3')
 
       const fen0 = manager.getFen()
       expect(fen0).toBe(startFen)
@@ -86,7 +86,7 @@ describe('SidelineManager', () => {
 
     test('getLastMove returns correct squares', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      manager = createSidelineManager(startFen, 'e5 Nf3')
+      manager = createVariationManager(startFen, 'e5 Nf3')
 
       expect(manager.getLastMove()).toBeUndefined() // Initial position
 
@@ -99,14 +99,14 @@ describe('SidelineManager', () => {
 
     test('getMoveType detects captures, checks, castles', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+      manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       expect(manager.getMoveType(1)).toBe('move') // e5
       expect(manager.getMoveType(2)).toBe('move') // Nf3
       expect(manager.getMoveType(3)).toBe('move') // Nc6
 
       // Test with capture
-      const captureManager = createSidelineManager(startFen, 'e5 Nf3 d5 exd5')
+      const captureManager = createVariationManager(startFen, 'e5 Nf3 d5 exd5')
       expect(captureManager.getMoveType(4)).toBe('capture')
     })
   })
@@ -114,7 +114,7 @@ describe('SidelineManager', () => {
   describe('getDests / getTurnColor / tryMove', () => {
     test('getDests returns legal moves from current position', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
       const dests = manager.getDests()
 
       expect(dests.size).toBeGreaterThan(0)
@@ -127,7 +127,7 @@ describe('SidelineManager', () => {
 
     test('getTurnColor reflects whose turn it is', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3')
+      const manager = createVariationManager(startFen, 'e5 Nf3')
 
       expect(manager.getTurnColor()).toBe('black')
 
@@ -140,7 +140,7 @@ describe('SidelineManager', () => {
 
     test('tryMove validates legal moves, rejects illegal ones', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       // Legal move
       expect(manager.tryMove('e7', 'e5')).toBe('e5')
@@ -156,7 +156,7 @@ describe('SidelineManager', () => {
   describe('appendMove', () => {
     test('appends a legal move and advances ply', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       const success = manager.appendMove('e5')
       expect(success).toBe(true)
@@ -166,7 +166,7 @@ describe('SidelineManager', () => {
 
     test('returns false for illegal SAN', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       const success = manager.appendMove('e4') // Illegal for black from this position
       expect(success).toBe(false)
@@ -176,7 +176,7 @@ describe('SidelineManager', () => {
 
     test('truncates future moves when appending from mid-sequence', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+      const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       expect(manager.getTotalPlies()).toBe(3)
 
@@ -190,7 +190,7 @@ describe('SidelineManager', () => {
 
     test('multiple appends build a move sequence', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       manager.appendMove('e5')
       manager.appendMove('Nf3')
@@ -202,7 +202,7 @@ describe('SidelineManager', () => {
 
     test('rejects gibberish SAN', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       expect(manager.appendMove('Xyz123!@#')).toBe(false)
       expect(manager.getTotalPlies()).toBe(0)
@@ -210,7 +210,7 @@ describe('SidelineManager', () => {
 
     test('rejects empty string', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       expect(manager.appendMove('')).toBe(false)
       expect(manager.getTotalPlies()).toBe(0)
@@ -218,7 +218,7 @@ describe('SidelineManager', () => {
 
     test('rejects invalid move notation', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       expect(manager.appendMove('e2e4')).toBe(false) // Long algebraic not recognized
       expect(manager.appendMove('P-e5')).toBe(false) // Old notation
@@ -229,7 +229,7 @@ describe('SidelineManager', () => {
   describe('truncateAfterCurrent', () => {
     test('removes moves after current ply', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+      const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       manager.goto(1)
       manager.truncateAfterCurrent()
@@ -240,7 +240,7 @@ describe('SidelineManager', () => {
 
     test('no-op when at last position', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3')
+      const manager = createVariationManager(startFen, 'e5 Nf3')
 
       manager.goto(2) // Last position
       manager.truncateAfterCurrent()
@@ -251,7 +251,7 @@ describe('SidelineManager', () => {
 
     test('can truncate all moves', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3')
+      const manager = createVariationManager(startFen, 'e5 Nf3')
 
       manager.goto(0) // Initial position
       manager.truncateAfterCurrent()
@@ -264,21 +264,21 @@ describe('SidelineManager', () => {
   describe('getMovesString', () => {
     test('returns space-separated SAN string', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+      const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       expect(manager.getMovesString()).toBe('e5 Nf3 Nc6')
     })
 
     test('returns empty string for no moves', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       expect(manager.getMovesString()).toBe('')
     })
 
     test('reflects truncation', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+      const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       manager.goto(1)
       manager.truncateAfterCurrent()
@@ -288,7 +288,7 @@ describe('SidelineManager', () => {
 
     test('works after appendMove', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       manager.appendMove('e5')
       manager.appendMove('Nf3')
@@ -300,7 +300,7 @@ describe('SidelineManager', () => {
   describe('getNextSan', () => {
     test('returns next move SAN when moves exist after current ply', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+      const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       // At ply 0, next move is e5
       expect(manager.getNextSan()).toBe('e5')
@@ -314,7 +314,7 @@ describe('SidelineManager', () => {
 
     test('returns null when at last position', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3')
+      const manager = createVariationManager(startFen, 'e5 Nf3')
 
       manager.goto(2)
       expect(manager.getNextSan()).toBeNull()
@@ -322,14 +322,14 @@ describe('SidelineManager', () => {
 
     test('returns null when no moves exist', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen)
+      const manager = createVariationManager(startFen)
 
       expect(manager.getNextSan()).toBeNull()
     })
 
     test('reflects truncation', () => {
       const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-      const manager = createSidelineManager(startFen, 'e5 Nf3 Nc6')
+      const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       manager.goto(1)
       manager.truncateAfterCurrent()

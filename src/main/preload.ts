@@ -51,15 +51,15 @@ contextBridge.exposeInMainWorld('electron', {
   getAvailableEcoCodes: (collectionId: string, filters?: OptionFilters) =>
     ipcRenderer.invoke('get-available-eco-codes', { collectionId, filters }),
 
-  // === Sidelines ===
-  getSidelines: (collectionId: string, gameId: number) =>
-    ipcRenderer.invoke('get-sidelines', { collectionId, gameId }),
+  // === Variations ===
+  getVariations: (collectionId: string, gameId: number) =>
+    ipcRenderer.invoke('get-variations', { collectionId, gameId }),
 
-  upsertSideline: (collectionId: string, gameId: number, branchPly: number, moves: string) =>
-    ipcRenderer.invoke('upsert-sideline', { collectionId, gameId, branchPly, moves }),
+  upsertVariation: (collectionId: string, gameId: number, branchPly: number, moves: string) =>
+    ipcRenderer.invoke('upsert-variation', { collectionId, gameId, branchPly, moves }),
 
-  deleteSideline: (collectionId: string, gameId: number, branchPly: number) =>
-    ipcRenderer.invoke('delete-sideline', { collectionId, gameId, branchPly }),
+  deleteVariation: (collectionId: string, gameId: number, branchPly: number) =>
+    ipcRenderer.invoke('delete-variation', { collectionId, gameId, branchPly }),
 
   // === Settings ===
   getSettings: () => ipcRenderer.invoke('get-settings'),

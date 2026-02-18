@@ -14,7 +14,7 @@ import {
   validateOptionFilters,
   validateGameId,
   validateBranchPly,
-  validateSidelineMoves,
+  validateVariationMoves,
 } from '../../src/main/ipc/validators.js'
 import type { GameFilters } from '../../src/main/ipc/types.js'
 
@@ -644,42 +644,42 @@ describe('validators', () => {
     })
   })
 
-  describe('validateSidelineMoves', () => {
+  describe('validateVariationMoves', () => {
     test('accepts non-empty strings', () => {
-      expect(validateSidelineMoves('e4')).toBe(true)
-      expect(validateSidelineMoves('Nf3 d5 Bg5')).toBe(true)
-      expect(validateSidelineMoves('1. e4 e5 2. Nf3')).toBe(true)
+      expect(validateVariationMoves('e4')).toBe(true)
+      expect(validateVariationMoves('Nf3 d5 Bg5')).toBe(true)
+      expect(validateVariationMoves('1. e4 e5 2. Nf3')).toBe(true)
     })
 
     test('accepts strings with whitespace around valid moves', () => {
-      expect(validateSidelineMoves('  e4  ')).toBe(true)
+      expect(validateVariationMoves('  e4  ')).toBe(true)
     })
 
     test('rejects empty strings', () => {
-      expect(validateSidelineMoves('')).toBe(false)
+      expect(validateVariationMoves('')).toBe(false)
     })
 
     test('rejects whitespace-only strings', () => {
-      expect(validateSidelineMoves('   ')).toBe(false)
-      expect(validateSidelineMoves('\t\n')).toBe(false)
+      expect(validateVariationMoves('   ')).toBe(false)
+      expect(validateVariationMoves('\t\n')).toBe(false)
     })
 
     test('rejects strings over 10000 characters', () => {
       const longString = 'e4 '.repeat(3400) // ~10200 chars
-      expect(validateSidelineMoves(longString)).toBe(false)
+      expect(validateVariationMoves(longString)).toBe(false)
     })
 
     test('accepts strings at exactly 10000 characters', () => {
       const maxString = 'a'.repeat(10000)
-      expect(validateSidelineMoves(maxString)).toBe(true)
+      expect(validateVariationMoves(maxString)).toBe(true)
     })
 
     test('rejects non-strings', () => {
-      expect(validateSidelineMoves(123 as any)).toBe(false)
-      expect(validateSidelineMoves(null as any)).toBe(false)
-      expect(validateSidelineMoves(undefined as any)).toBe(false)
-      expect(validateSidelineMoves({} as any)).toBe(false)
-      expect(validateSidelineMoves(['e4', 'e5'] as any)).toBe(false)
+      expect(validateVariationMoves(123 as any)).toBe(false)
+      expect(validateVariationMoves(null as any)).toBe(false)
+      expect(validateVariationMoves(undefined as any)).toBe(false)
+      expect(validateVariationMoves({} as any)).toBe(false)
+      expect(validateVariationMoves(['e4', 'e5'] as any)).toBe(false)
     })
   })
 })

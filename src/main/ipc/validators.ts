@@ -444,7 +444,7 @@ export function validateGameId(id: unknown): id is number {
 }
 
 /**
- * Validate branch ply (mainline ply where sideline departs)
+ * Validate branch ply (mainline ply where variation departs)
  *
  * @param ply - Branch ply to validate
  * @returns True if valid (positive integer), false otherwise
@@ -458,18 +458,18 @@ export function validateBranchPly(ply: unknown): ply is number {
 }
 
 /**
- * Validate sideline moves string
+ * Validate variation moves string
  *
  * @param moves - Moves string to validate
  * @returns True if valid (non-empty string under 10000 chars), false otherwise
  */
-export function validateSidelineMoves(moves: unknown): moves is string {
+export function validateVariationMoves(moves: unknown): moves is string {
   if (typeof moves !== 'string' || moves.trim().length === 0) {
-    logger.warn('Validation failed: sideline moves must be a non-empty string')
+    logger.warn('Validation failed: variation moves must be a non-empty string')
     return false
   }
   if (moves.length > 10000) {
-    logger.warn('Validation failed: sideline moves must be 10000 characters or less')
+    logger.warn('Validation failed: variation moves must be 10000 characters or less')
     return false
   }
   return true

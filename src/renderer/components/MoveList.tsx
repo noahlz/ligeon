@@ -3,12 +3,12 @@ import { X, ChevronDown, ChevronRight } from 'lucide-react'
 import { getResultDisplay } from '../utils/chessManager.js'
 import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
 import {
-  getSidelinesAtPly,
-  parseSidelineMoves,
-  sidelineMoveNumber,
-  isSidelineWhiteMove,
-} from '../utils/sidelineFormatter.js'
-import type { SidelineData } from '../../shared/types/game.js'
+  getVariationsAtPly,
+  parseVariationMoves,
+  variationMoveNumber,
+  isVariationWhiteMove,
+} from '../utils/variationFormatter.js'
+import type { VariationData } from '../../shared/types/game.js'
 import {
   Table,
   TableBody,
@@ -21,56 +21,56 @@ interface MoveListProps {
   result: string | null
   currentPly: number
   onJump: (ply: number) => void
-  sidelines?: SidelineData[]
-  activeSidelineBranchPly?: number | null
-  sidelineMoves?: string[]
-  sidelinePly?: number
-  onSidelineJump?: (branchPly: number, ply: number) => void
-  onDismissSideline?: (branchPly: number) => void
-  isInSideline?: boolean
+  variations?: VariationData[]
+  activeVariationBranchPly?: number | null
+  variationMoves?: string[]
+  variationPly?: number
+  onVariationJump?: (branchPly: number, ply: number) => void
+  onDismissVariation?: (branchPly: number) => void
+  isInVariation?: boolean
 }
 
-interface SidelineRowProps {
-  sideline: SidelineData
+interface VariationRowProps {
+  variation: VariationData
   isActive: boolean
-  sidelineMoves?: string[]
-  sidelinePly?: number
-  onSidelineJump?: (branchPly: number, ply: number) => void
+  variationMoves?: string[]
+  variationPly?: number
+  onVariationJump?: (branchPly: number, ply: number) => void
   onDismiss?: (branchPly: number) => void
-  isInSideline?: boolean
+  isInVariation?: boolean
 }
 
-function SidelineRow({
-  sideline,
+function VariationRow({
+  variation,
   isActive,
-  sidelineMoves: activeSidelineMoves,
-  sidelinePly,
-  onSidelineJump,
+  variationMoves: activeVariationMoves,
+  variationPly,
+  onVariationJump,
   onDismiss,
-  isInSideline,
-}: SidelineRowProps) {
+  isInVariation,
+}: VariationRowProps) {
   const [expanded, setExpanded] = useState(false)
-  // Auto-expand when sideline becomes active (user clicked into it).
+  // Auto-expand when variation becomes active (user clicked into it).
   // Unlike the previous `isActive || expanded`, this lets the user still collapse via chevron.
   useEffect(() => {
     if (isActive) setExpanded(true)
   }, [isActive])
 
-  // Use live activeSidelineMoves if this sideline is active (may include new moves not yet persisted).
-  // Otherwise fall back to the persisted sideline.moves from the database.
-  const moves = isActive && activeSidelineMoves
-    ? activeSidelineMoves
-    : parseSidelineMoves(sideline.moves)
+  // Use live activeVariationMoves if this variation is active (may include new moves not yet persisted).
+  // Otherwise fall back to the persisted variation.moves from the database.
+  const moves = isActive && activeVariationMoves
+    ? activeVariationMoves
+    : parseVariationMoves(variation.moves)
 
   if (moves.length === 0) return null
 
   // Compute collapsed preview text
-  const firstIsWhite = isSidelineWhiteMove(sideline.branchPly, 0)
-  const moveNum = sidelineMoveNumber(sideline.branchPly, 0)
+  const firstIsWhite = isVariationWhiteMove(variation.branchPly, 0)
+  const moveNum = variationMoveNumber(variation.branchPly, 0)
   const collapsedPrefix = `${moveNum}.${firstIsWhite ? '' : '..'} `
 
-  // Show full accent border when in sideline but no move is highlighted
-  const showAccentBorder = isActive && isInSideline && (!sidelinePly || sidelinePly === 0)
+  // Show full accent border when in variation but no move is highlighted
+  const showAccentBorder = isActive && isInVariation && (!variationPly || variationPly === 0)
   const containerClass = showAccentBorder
     ? 'ml-4 border-2 border-ui-accent bg-ui-bg-page rounded-sm my-0.5'
     : 'ml-4 border-l-2 border-ui-accent bg-ui-bg-page rounded-r-sm my-0.5'
@@ -103,9 +103,9 @@ function SidelineRow({
             {expanded && <span className="flex-1" />}
 
             <button
-              onClick={(e) => { e.stopPropagation(); onDismiss?.(sideline.branchPly) }}
+              onClick={(e) => { e.stopPropagation(); onDismiss?.(variation.branchPly) }}
               className="text-ui-text-dimmer hover:text-red-400 p-0.5 cursor-pointer"
-              title="Dismiss sideline"
+              title="Dismiss variation"
             >
               <X size={12} />
             </button>
@@ -115,10 +115,10 @@ function SidelineRow({
           {expanded && (
             <div className="flex flex-wrap gap-x-1 gap-y-0 px-2 pb-1 font-mono text-sm">
               {moves.map((move, i) => {
-                const isWhite = isSidelineWhiteMove(sideline.branchPly, i)
-                const moveNum = sidelineMoveNumber(sideline.branchPly, i)
+                const isWhite = isVariationWhiteMove(variation.branchPly, i)
+                const moveNum = variationMoveNumber(variation.branchPly, i)
                 const ply = i + 1
-                const isCurrent = isInSideline && isActive && sidelinePly === ply
+                const isCurrent = isInVariation && isActive && variationPly === ply
 
                 return (
                   <span key={i} className="inline-flex items-center">
@@ -129,7 +129,7 @@ function SidelineRow({
                       </span>
                     )}
                     <span
-                      onClick={() => onSidelineJump?.(sideline.branchPly, ply)}
+                      onClick={() => onVariationJump?.(variation.branchPly, ply)}
                       className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
                         isCurrent ? 'bg-ui-accent text-white font-bold' : ''
                       }`}
@@ -149,8 +149,8 @@ function SidelineRow({
 
 export default function MoveList({
   moves, result, currentPly, onJump,
-  sidelines, activeSidelineBranchPly, sidelineMoves,
-  sidelinePly, onSidelineJump, onDismissSideline, isInSideline,
+  variations, activeVariationBranchPly, variationMoves,
+  variationPly, onVariationJump, onDismissVariation, isInVariation,
 }: MoveListProps) {
   const currentMoveRef = useRef<HTMLTableCellElement>(null)
 
@@ -162,7 +162,7 @@ export default function MoveList({
         block: 'nearest',
       })
     }
-  }, [currentPly, sidelinePly])
+  }, [currentPly, variationPly])
 
   const movePairs = groupMovesIntoPairs(moves)
 
@@ -173,22 +173,22 @@ export default function MoveList({
           {movePairs.map((pair, pairIndex) => {
             const whitePly = pairIndex * 2
             const blackPly = pairIndex * 2 + 1
-            const isWhiteCurrent = !isInSideline && currentPly - 1 === whitePly
-            const isBlackCurrent = !isInSideline && currentPly - 1 === blackPly
+            const isWhiteCurrent = !isInVariation && currentPly - 1 === whitePly
+            const isBlackCurrent = !isInVariation && currentPly - 1 === blackPly
 
-            // Find sidelines that branch after white's move or after black's move
-            const sidelinesAfterWhite = sidelines
-              ? getSidelinesAtPly(sidelines, whitePly + 1)
+            // Find variations that branch after white's move or after black's move
+            const variationsAfterWhite = variations
+              ? getVariationsAtPly(variations, whitePly + 1)
               : []
-            const sidelinesAfterBlack = sidelines
-              ? getSidelinesAtPly(sidelines, blackPly + 1)
+            const variationsAfterBlack = variations
+              ? getVariationsAtPly(variations, blackPly + 1)
               : []
 
-            const hasSidelinesAfterWhite = sidelinesAfterWhite.length > 0
+            const hasVariationsAfterWhite = variationsAfterWhite.length > 0
 
             return (
               <Fragment key={pairIndex}>
-                {/* White move row (+ black if no sideline splits needed) */}
+                {/* White move row (+ black if no variation splits needed) */}
                 <TableRow className="border-0 hover:bg-transparent">
                   {/* Move number */}
                   <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0">
@@ -207,7 +207,7 @@ export default function MoveList({
                   </TableCell>
 
                   {/* Black move (or empty placeholder when split) */}
-                  {hasSidelinesAfterWhite
+                  {hasVariationsAfterWhite
                     ? <TableCell className="border-0" />
                     : (
                       <TableCell
@@ -223,22 +223,22 @@ export default function MoveList({
                   }
                 </TableRow>
 
-                {/* Sidelines branching after white's move */}
-                {sidelinesAfterWhite.map(sl => (
-                  <SidelineRow
+                {/* Variations branching after white's move */}
+                {variationsAfterWhite.map(sl => (
+                  <VariationRow
                     key={`sl-${sl.branchPly}`}
-                    sideline={sl}
-                    isActive={activeSidelineBranchPly === sl.branchPly}
-                    sidelineMoves={activeSidelineBranchPly === sl.branchPly ? sidelineMoves : undefined}
-                    sidelinePly={sidelinePly}
-                    onSidelineJump={onSidelineJump}
-                    onDismiss={onDismissSideline}
-                    isInSideline={isInSideline}
+                    variation={sl}
+                    isActive={activeVariationBranchPly === sl.branchPly}
+                    variationMoves={activeVariationBranchPly === sl.branchPly ? variationMoves : undefined}
+                    variationPly={variationPly}
+                    onVariationJump={onVariationJump}
+                    onDismiss={onDismissVariation}
+                    isInVariation={isInVariation}
                   />
                 ))}
 
-                {/* Black continuation row (only when split by white sideline) */}
-                {hasSidelinesAfterWhite && pair.black && (
+                {/* Black continuation row (only when split by white variation) */}
+                {hasVariationsAfterWhite && pair.black && (
                   <TableRow className="border-0 hover:bg-transparent">
                     <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0" />
                     <TableCell className="border-0 py-0.5">
@@ -256,17 +256,17 @@ export default function MoveList({
                   </TableRow>
                 )}
 
-                {/* Sidelines branching after black's move */}
-                {sidelinesAfterBlack.map(sl => (
-                  <SidelineRow
+                {/* Variations branching after black's move */}
+                {variationsAfterBlack.map(sl => (
+                  <VariationRow
                     key={`sl-${sl.branchPly}`}
-                    sideline={sl}
-                    isActive={activeSidelineBranchPly === sl.branchPly}
-                    sidelineMoves={activeSidelineBranchPly === sl.branchPly ? sidelineMoves : undefined}
-                    sidelinePly={sidelinePly}
-                    onSidelineJump={onSidelineJump}
-                    onDismiss={onDismissSideline}
-                    isInSideline={isInSideline}
+                    variation={sl}
+                    isActive={activeVariationBranchPly === sl.branchPly}
+                    variationMoves={activeVariationBranchPly === sl.branchPly ? variationMoves : undefined}
+                    variationPly={variationPly}
+                    onVariationJump={onVariationJump}
+                    onDismiss={onDismissVariation}
+                    isInVariation={isInVariation}
                   />
                 ))}
               </Fragment>

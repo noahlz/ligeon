@@ -1,9 +1,5 @@
 # Ligeon TODOs
 
-## Variation Mode / Analysis
-
-Rename from "Sidelines" to "Variations" - update all variable and function names accordingly.
-
 ### Features 
 
 **PGN Export**

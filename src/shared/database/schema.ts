@@ -27,14 +27,14 @@ export const GAMES_SCHEMA_SQL = `
 `
 
 /**
- * SQLite schema for sidelines table.
+ * SQLite schema for variations table.
  *
- * ON DELETE CASCADE: deleting a game automatically cleans up its sidelines.
- * UNIQUE(gameId, branchPly): enforces one sideline per branch point — upsert overwrites
+ * ON DELETE CASCADE: deleting a game automatically cleans up its variations.
+ * UNIQUE(gameId, branchPly): enforces one variation per branch point — upsert overwrites
  * rather than creating duplicates.
  */
-export const SIDELINES_SCHEMA_SQL = `
-  CREATE TABLE IF NOT EXISTS sidelines (
+export const VARIATIONS_SCHEMA_SQL = `
+  CREATE TABLE IF NOT EXISTS variations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     gameId INTEGER NOT NULL,
     branchPly INTEGER NOT NULL,
@@ -42,5 +42,5 @@ export const SIDELINES_SCHEMA_SQL = `
     FOREIGN KEY (gameId) REFERENCES games(id) ON DELETE CASCADE,
     UNIQUE(gameId, branchPly)
   );
-  CREATE INDEX IF NOT EXISTS idx_sidelines_game ON sidelines(gameId);
+  CREATE INDEX IF NOT EXISTS idx_variations_game ON variations(gameId);
 `
