@@ -17,6 +17,9 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
+    outputFile: {
+      tap: 'dist/test-results.tap',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
