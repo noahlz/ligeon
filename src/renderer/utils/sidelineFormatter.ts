@@ -32,7 +32,7 @@ export function parseSidelineMoves(moves: string): string[] {
  */
 export function sidelineMoveNumber(branchPly: number, moveIndex: number): number {
   const absolutePly = branchPly + moveIndex
-  return Math.ceil(absolutePly / 2)
+  return Math.ceil((absolutePly + 1) / 2)
 }
 
 /**
