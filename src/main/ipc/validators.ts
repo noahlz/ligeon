@@ -474,3 +474,49 @@ export function validateVariationMoves(moves: unknown): moves is string {
   }
   return true
 }
+
+/**
+ * Validate comment ply (mainline ply a comment is attached to)
+ *
+ * @param ply - Ply to validate
+ * @returns True if valid (positive integer >= 1), false otherwise
+ */
+export function validateCommentPly(ply: unknown): ply is number {
+  if (typeof ply !== 'number' || !Number.isInteger(ply) || ply < 1) {
+    logger.warn('Validation failed: comment ply must be a positive integer')
+    return false
+  }
+  return true
+}
+
+/**
+ * Validate variation ID (database row id)
+ *
+ * @param id - Variation ID to validate
+ * @returns True if valid (positive integer >= 1), false otherwise
+ */
+export function validateVariationId(id: unknown): id is number {
+  if (typeof id !== 'number' || !Number.isInteger(id) || id < 1) {
+    logger.warn('Validation failed: variation ID must be a positive integer')
+    return false
+  }
+  return true
+}
+
+/**
+ * Validate comment text
+ *
+ * @param text - Comment text to validate
+ * @returns True if valid (non-empty string, max 500 chars), false otherwise
+ */
+export function validateCommentText(text: unknown): text is string {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    logger.warn('Validation failed: comment text must be a non-empty string')
+    return false
+  }
+  if (text.length > 500) {
+    logger.warn('Validation failed: comment text must be 500 characters or less')
+    return false
+  }
+  return true
+}

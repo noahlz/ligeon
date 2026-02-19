@@ -19,6 +19,7 @@ import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
 import { useVariationState } from './hooks/useVariationState.js'
+import { useCommentState } from './hooks/useCommentState.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 import type { Key } from '@lichess-org/chessground/types'
 
@@ -83,6 +84,9 @@ export default function App() {
   const autoPlayStopRef = useRef<() => void>(() => {})
   const autoPlayStop = useCallback(() => autoPlayStopRef.current(), [])
 
+  // Comment state
+  const commentState = useCommentState()
+
   // Variation state (uses stable stop ref — only called during user interactions, never during render)
   const variationState = useVariationState({
     chessManager,
@@ -130,8 +134,15 @@ export default function App() {
     // Reset to initial position
     updateBoardState(manager, 0)
 
-    // Load variations for this game
-    variationState.loadVariations(selectedCollectionId, game.id)
+    // Load variations and comments for this game
+    try {
+      await Promise.all([
+        variationState.loadVariations(selectedCollectionId, game.id),
+        commentState.loadComments(selectedCollectionId, game.id),
+      ])
+    } catch (error) {
+      console.error('Failed to load variations or comments:', error)
+    }
   }
 
   // Compute interactive board values — variation overrides mainline.
@@ -317,6 +328,7 @@ export default function App() {
                 <GameInfo game={selectedGame} />
                 {moves.length > 0 && (
                   <MoveList
+                    key={selectedGame?.id}
                     moves={moves}
                     result={result}
                     currentPly={currentPly}
@@ -332,6 +344,43 @@ export default function App() {
                     onVariationJump={variationState.jumpToVariationMove}
                     onDismissVariation={variationState.requestDeletion}
                     isInVariation={variationState.isInVariation}
+                    commentHandlers={{
+                      comments: commentState.comments,
+                      editingPly: commentState.editingPly,
+                      editValue: commentState.editValue,
+                      onEdit: commentState.startEditing,
+                      onValueChange: commentState.setEditValue,
+                      onSave: selectedGameCollectionId && selectedGame
+                        ? () => commentState.saveComment(selectedGameCollectionId, selectedGame.id)
+                        : undefined,
+                      onCancel: commentState.cancelEditing,
+                      onDeleteRequest: commentState.requestDeletion,
+                      variationComments: commentState.variationComments,
+                      onSaveVariationComment: async (variationId: number, text: string) => {
+                        if (selectedGameCollectionId && selectedGame) {
+                          try {
+                            const saved = await window.electron.upsertVariationComment(
+                              selectedGameCollectionId, selectedGame.id, variationId, text
+                            )
+                            if (saved) commentState.updateVariationComment(saved)
+                          } catch (error) {
+                            console.error('Failed to save variation comment:', error)
+                          }
+                        }
+                      },
+                      onDeleteVariationComment: async (variationId: number) => {
+                        if (selectedGameCollectionId && selectedGame) {
+                          try {
+                            await window.electron.deleteVariationComment(
+                              selectedGameCollectionId, selectedGame.id, variationId
+                            )
+                            commentState.removeVariationComment(variationId)
+                          } catch (error) {
+                            console.error('Failed to delete variation comment:', error)
+                          }
+                        }
+                      },
+                    }}
                   />
                 )}
               </>
@@ -376,6 +425,20 @@ export default function App() {
           filePath={importFilePath}
           onComplete={handleImportComplete}
           onClose={handleImportClose}
+        />
+
+        {/* Comment deletion confirmation */}
+        <ConfirmDialog
+          isOpen={commentState.pendingDeletion !== null}
+          title="Delete Comment"
+          message="Delete this comment? This cannot be undone."
+          onConfirm={() => {
+            if (selectedGameCollectionId && selectedGame) {
+              commentState.confirmDeletion(selectedGameCollectionId, selectedGame.id)
+            }
+          }}
+          onCancel={commentState.cancelDeletion}
+          confirmIcon="trash"
         />
 
         {/* Variation deletion confirmation */}

@@ -66,3 +66,18 @@ export interface VariationData {
   branchPly: number    // mainline ply where variation departs (1-based)
   moves: string        // space-separated SAN: "Nf3 d5 Bg5"
 }
+
+/**
+ * Comment data structure.
+ *
+ * Two contexts:
+ * - Mainline move comment: ply = 1-based mainline ply, variationId = null
+ * - Variation comment: ply = 0, variationId = variation DB id
+ */
+export interface CommentData {
+  id?: number               // DB auto-increment (undefined before first save)
+  gameId: number            // FK to games.id
+  ply: number               // 1-based mainline ply (0 for variation-level comments)
+  variationId: number | null  // null for mainline comments, variation DB id for variation comments
+  text: string              // comment text (max 500 chars)
+}

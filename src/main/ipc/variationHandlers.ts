@@ -1,8 +1,9 @@
-import { DatabaseManager } from './gameDatabase.js'
 import type { VariationData } from './types.js'
-import { getCollectionsPath } from '../config/paths.js'
-import { validateCollectionId, validateGameId, validateBranchPly, validateVariationMoves } from './validators.js'
+import { validateBranchPly, validateVariationMoves } from './validators.js'
 import { logError } from '../config/logger.js'
+import { getValidatedDb } from './handlerUtils.js'
+
+const MODULE = 'variationHandlers'
 
 /**
  * Get all variations for a game
@@ -15,21 +16,12 @@ export async function getVariations(
   collectionId: string,
   gameId: number
 ): Promise<VariationData[]> {
-  if (!validateCollectionId(collectionId)) {
-    logError('variationHandlers', 'getVariations', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return []
-  }
-
-  if (!validateGameId(gameId)) {
-    logError('variationHandlers', 'getVariations', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
-    return []
-  }
-
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
+  const db = getValidatedDb(MODULE, 'getVariations', collectionId, gameId)
+  if (!db) return []
   try {
     return db.getVariations(gameId)
   } catch (error) {
-    logError('variationHandlers', 'getVariations', { collectionId, gameId }, error)
+    logError(MODULE, 'getVariations', { collectionId, gameId }, error)
     return []
   }
 }
@@ -71,45 +63,36 @@ export async function upsertVariation(
   branchPly: number,
   moves: string
 ): Promise<VariationData | null> {
-  if (!validateCollectionId(collectionId)) {
-    logError('variationHandlers', 'upsertVariation', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return null
-  }
-
-  if (!validateGameId(gameId)) {
-    logError('variationHandlers', 'upsertVariation', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
-    return null
-  }
+  const db = getValidatedDb(MODULE, 'upsertVariation', collectionId, gameId)
+  if (!db) return null
 
   if (!validateBranchPly(branchPly)) {
-    logError('variationHandlers', 'upsertVariation', { branchPly, reason: 'invalid branch ply' }, new Error('Validation failed'))
+    logError(MODULE, 'upsertVariation', { branchPly, reason: 'invalid branch ply' }, new Error('Validation failed'))
     return null
   }
 
   if (!validateVariationMoves(moves)) {
-    logError('variationHandlers', 'upsertVariation', { moves, reason: 'invalid moves string' }, new Error('Validation failed'))
+    logError(MODULE, 'upsertVariation', { moves, reason: 'invalid moves string' }, new Error('Validation failed'))
     return null
   }
-
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
 
   try {
     // Look up game to get moveCount for limit check
     const game = db.getGameWithMoves(gameId)
     if (!game) {
-      logError('variationHandlers', 'upsertVariation', { gameId, reason: 'game not found' }, new Error('Validation failed'))
+      logError(MODULE, 'upsertVariation', { gameId, reason: 'game not found' }, new Error('Validation failed'))
       return null
     }
 
     const existingVariations = db.getVariations(gameId)
     if (!checkVariationLimit(existingVariations, branchPly, game.moveCount)) {
-      logError('variationHandlers', 'upsertVariation', { gameId, branchPly, moveCount: game.moveCount, reason: 'variation limit exceeded' }, new Error('Validation failed'))
+      logError(MODULE, 'upsertVariation', { gameId, branchPly, moveCount: game.moveCount, reason: 'variation limit exceeded' }, new Error('Validation failed'))
       return null
     }
 
     return db.upsertVariation(gameId, branchPly, moves.trim())
   } catch (error) {
-    logError('variationHandlers', 'upsertVariation', { collectionId, gameId, branchPly }, error)
+    logError(MODULE, 'upsertVariation', { collectionId, gameId, branchPly }, error)
     return null
   }
 }
@@ -127,28 +110,19 @@ export async function deleteVariation(
   gameId: number,
   branchPly: number
 ): Promise<{ success: boolean }> {
-  if (!validateCollectionId(collectionId)) {
-    logError('variationHandlers', 'deleteVariation', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return { success: false }
-  }
-
-  if (!validateGameId(gameId)) {
-    logError('variationHandlers', 'deleteVariation', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
-    return { success: false }
-  }
+  const db = getValidatedDb(MODULE, 'deleteVariation', collectionId, gameId)
+  if (!db) return { success: false }
 
   if (!validateBranchPly(branchPly)) {
-    logError('variationHandlers', 'deleteVariation', { branchPly, reason: 'invalid branch ply' }, new Error('Validation failed'))
+    logError(MODULE, 'deleteVariation', { branchPly, reason: 'invalid branch ply' }, new Error('Validation failed'))
     return { success: false }
   }
-
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
 
   try {
     db.deleteVariation(gameId, branchPly)
     return { success: true }
   } catch (error) {
-    logError('variationHandlers', 'deleteVariation', { collectionId, gameId, branchPly }, error)
+    logError(MODULE, 'deleteVariation', { collectionId, gameId, branchPly }, error)
     return { success: false }
   }
 }

@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
-import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters, VariationData } from './types.js'
-import { GAMES_SCHEMA_SQL, VARIATIONS_SCHEMA_SQL } from '../../shared/database/schema.js'
+import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters, VariationData, CommentData } from './types.js'
+import { GAMES_SCHEMA_SQL, VARIATIONS_SCHEMA_SQL, COMMENTS_SCHEMA_SQL } from '../../shared/database/schema.js'
 import { logError, logger } from '../config/logger.js'
 
 /**
@@ -43,6 +43,7 @@ export class GameDatabase {
   createSchema(): void {
     this.db.exec(GAMES_SCHEMA_SQL)
     this.db.exec(VARIATIONS_SCHEMA_SQL)
+    this.db.exec(COMMENTS_SCHEMA_SQL)
     logger.info('✓ Database schema created')
   }
 
@@ -352,16 +353,91 @@ export class GameDatabase {
   }
 
   /**
-   * Delete a variation
+   * Delete a variation and its associated comment (if any) in a transaction.
+   * The FK CASCADE on variationId provides automatic cleanup for new-schema DBs.
+   * The manual comment delete provides backwards compatibility with old-schema DBs.
    *
    * @param gameId - Database ID of the game
    * @param branchPly - Mainline ply where variation departs
    */
   deleteVariation(gameId: number, branchPly: number): void {
     try {
-      this.db.prepare('DELETE FROM variations WHERE gameId = ? AND branchPly = ?').run(gameId, branchPly)
+      const deleteWithComment = this.db.transaction(() => {
+        const variationRow = this.db
+          .prepare('SELECT id FROM variations WHERE gameId = ? AND branchPly = ?')
+          .get(gameId, branchPly) as { id: number } | undefined
+        if (variationRow) {
+          // Manual delete for backwards compat; FK CASCADE handles this for new-schema DBs.
+          this.db
+            .prepare('DELETE FROM comments WHERE gameId = ? AND ply = 0 AND variationId IS ?')
+            .run(gameId, variationRow.id)
+        }
+        this.db.prepare('DELETE FROM variations WHERE gameId = ? AND branchPly = ?').run(gameId, branchPly)
+      })
+      deleteWithComment()
     } catch (error) {
       logError('GameDatabase', 'deleteVariation', { dbPath: this.dbPath, gameId, branchPly }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Get all comments for a game (mainline + variation), ordered by ply.
+   * Renderer is responsible for partitioning by variationId.
+   *
+   * @param gameId - Database ID of the game
+   * @returns Array of comment records
+   */
+  getComments(gameId: number): CommentData[] {
+    try {
+      const stmt = this.db.prepare(
+        'SELECT id, gameId, ply, variationId, text FROM comments WHERE gameId = ? ORDER BY ply'
+      )
+      return stmt.all(gameId) as CommentData[]
+    } catch (error) {
+      logError('GameDatabase', 'getComments', { dbPath: this.dbPath, gameId }, error)
+      return []
+    }
+  }
+
+  /**
+   * Insert or update a comment. Uses upsert semantics per partial unique index.
+   *
+   * @param gameId - Database ID of the game
+   * @param ply - 1-based mainline ply (0 for variation-level comments)
+   * @param text - Comment text (max 500 chars)
+   * @param variationId - null for mainline, variation DB id for variation comments
+   * @returns The created/updated comment record
+   */
+  upsertComment(gameId: number, ply: number, text: string, variationId: number | null = null): CommentData {
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO comments (gameId, ply, variationId, text)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT DO UPDATE SET text = excluded.text
+        RETURNING id, gameId, ply, variationId, text
+      `)
+      return stmt.get(gameId, ply, variationId, text) as CommentData
+    } catch (error) {
+      logError('GameDatabase', 'upsertComment', { dbPath: this.dbPath, gameId, ply, variationId }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Delete a comment by (gameId, ply, variationId).
+   *
+   * @param gameId - Database ID of the game
+   * @param ply - 1-based mainline ply
+   * @param variationId - null for mainline, variation DB id for variation comments
+   */
+  deleteComment(gameId: number, ply: number, variationId: number | null = null): void {
+    try {
+      this.db.prepare(
+        'DELETE FROM comments WHERE gameId = ? AND ply = ? AND variationId IS ?'
+      ).run(gameId, ply, variationId)
+    } catch (error) {
+      logError('GameDatabase', 'deleteComment', { dbPath: this.dbPath, gameId, ply, variationId }, error)
       throw error
     }
   }

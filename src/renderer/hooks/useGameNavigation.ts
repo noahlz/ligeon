@@ -60,8 +60,9 @@ export function useGameNavigation({
 
   const handleJump = useCallback((ply: number) => {
     if (!chessManager) return
+    if (ply === currentPly) return
     updateBoardState(chessManager, ply)
-  }, [chessManager, updateBoardState])
+  }, [chessManager, currentPly, updateBoardState])
 
   return {
     handleFirst,

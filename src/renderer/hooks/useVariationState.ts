@@ -355,6 +355,7 @@ export function useVariationState({
     if (!activeVariation) return false
     const ply = computePly(activeVariation)
     if (ply === null) return false
+    if (ply === activeVariation.getCurrentPly()) return false
     activeVariation.goto(ply)
     updateBoardState(activeVariation, ply)
     syncVariationState(activeVariation)
