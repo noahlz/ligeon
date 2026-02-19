@@ -10,6 +10,11 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui/table.js'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip.js'
 import { CommentRow } from './CommentRow.js'
 import { VariationRow } from './VariationRow.js'
 
@@ -33,6 +38,7 @@ interface MoveListProps {
   onCommentValueChange?: (value: string) => void
   onCommentSave?: () => void
   onCommentCancel?: () => void
+  onCommentDeleteRequest?: (ply: number) => void
 }
 
 export default function MoveList({
@@ -41,12 +47,34 @@ export default function MoveList({
   variationPly, onVariationJump, onDismissVariation, isInVariation,
   comments, editingCommentPly, editCommentValue,
   onCommentEdit, onCommentValueChange, onCommentSave, onCommentCancel,
+  onCommentDeleteRequest,
 }: MoveListProps) {
   const currentMoveRef = useRef<HTMLTableCellElement>(null)
 
-  // Track which ply has the comment trigger icon visible (hover 2s / right-click)
+  // Track which ply has the comment trigger icon visible (hover / right-click)
   const [commentMenuPly, setCommentMenuPly] = useState<number | null>(null)
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Track which plies have their comment row collapsed (hidden).
+  // All comments start collapsed; seenPliesRef ensures each ply is only initialized once.
+  const [collapsedCommentPlies, setCollapsedCommentPlies] = useState<Set<number>>(new Set())
+  const seenPliesRef = useRef<Set<number>>(new Set())
+
+  // Collapse any newly seen comment plies (runs on initial load and when comments change)
+  useEffect(() => {
+    if (!comments || comments.length === 0) return
+    const newPlies: number[] = []
+    comments.forEach(c => {
+      if (!seenPliesRef.current.has(c.ply)) {
+        newPlies.push(c.ply)
+        seenPliesRef.current.add(c.ply)
+      }
+    })
+    if (newPlies.length > 0) {
+      setCollapsedCommentPlies(prev => new Set([...prev, ...newPlies]))
+    }
+  }, [comments])
 
   const clearHoverTimer = useCallback(() => {
     if (hoverTimerRef.current) {
@@ -55,13 +83,34 @@ export default function MoveList({
     }
   }, [])
 
+  const clearHideTimer = useCallback(() => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = null
+    }
+  }, [])
+
+  const handleCollapseComment = useCallback((ply: number) => {
+    setCollapsedCommentPlies(prev => new Set([...prev, ply]))
+  }, [])
+
+  const handleExpandComment = useCallback((ply: number) => {
+    setCollapsedCommentPlies(prev => {
+      const s = new Set(prev)
+      s.delete(ply)
+      return s
+    })
+  }, [])
+
   const handleMoveMouseEnter = useCallback((ply: number) => {
+    clearHideTimer()
     clearHoverTimer()
-    hoverTimerRef.current = setTimeout(() => setCommentMenuPly(ply), 2000)
-  }, [clearHoverTimer])
+    hoverTimerRef.current = setTimeout(() => setCommentMenuPly(ply), 150)
+  }, [clearHoverTimer, clearHideTimer])
 
   const handleMoveMouseLeave = useCallback(() => {
     clearHoverTimer()
+    hideTimerRef.current = setTimeout(() => setCommentMenuPly(null), 600)
   }, [clearHoverTimer])
 
   const handleMoveContextMenu = useCallback((e: React.MouseEvent, ply: number) => {
@@ -82,8 +131,8 @@ export default function MoveList({
     }
   }, [currentPly, variationPly])
 
-  // Clean up hover timer on unmount
-  useEffect(() => () => clearHoverTimer(), [clearHoverTimer])
+  // Clean up timers on unmount
+  useEffect(() => () => { clearHoverTimer(); clearHideTimer() }, [clearHoverTimer, clearHideTimer])
 
   const movePairs = groupMovesIntoPairs(moves)
 
@@ -101,9 +150,51 @@ export default function MoveList({
     refProp?: React.Ref<HTMLTableCellElement>
   ) => {
     const comment = getCommentAtPly(ply)
-    // Show trigger icon if this ply has been hovered/right-clicked and no editor is open
-    const showTriggerIcon = commentMenuPly === ply && !editingCommentPly
     const hasComment = !!comment
+    const isCollapsed = collapsedCommentPlies.has(ply)
+    // Trigger icon only for moves WITHOUT a comment — comment icon handles the rest
+    const showTriggerIcon = commentMenuPly === ply && !editingCommentPly && !hasComment
+
+    // Icon button for existing comment — always visible, toggles collapse
+    const commentIcon = hasComment ? (
+      isCollapsed ? (
+        // Collapsed: tooltip previews the comment text
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={e => { e.stopPropagation(); handleExpandComment(ply) }}
+              className="text-white/70 hover:text-white p-0.5 cursor-pointer shrink-0"
+              title="Expand comment"
+            >
+              <MessageSquareMore size={14} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="left">
+            <p className="max-w-48 italic">{comment.text}</p>
+          </TooltipContent>
+        </Tooltip>
+      ) : (
+        // Expanded: click collapses
+        <button
+          onClick={e => { e.stopPropagation(); handleCollapseComment(ply) }}
+          className="text-white/70 hover:text-white p-0.5 cursor-pointer shrink-0"
+          title="Collapse comment"
+        >
+          <MessageSquareMore size={14} />
+        </button>
+      )
+    ) : null
+
+    // Hover/right-click triggered icon — only for moves with no comment
+    const triggerIcon = showTriggerIcon ? (
+      <button
+        onClick={e => { e.stopPropagation(); handleCommentIconClick(ply) }}
+        className="text-white/70 hover:text-white p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95"
+        title="Add comment"
+      >
+        <MessageSquareMore size={14} />
+      </button>
+    ) : null
 
     return (
       <TableCell
@@ -116,28 +207,12 @@ export default function MoveList({
           san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
         } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
       >
-        <span className="flex items-center gap-1">
-          <span>{san || ''}</span>
-          {/* Persistent icon for moves that already have a comment */}
-          {hasComment && !showTriggerIcon && (
-            <button
-              onClick={e => { e.stopPropagation(); handleCommentIconClick(ply) }}
-              className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer shrink-0"
-              title="Edit comment"
-            >
-              <MessageSquareMore size={11} />
-            </button>
-          )}
-          {/* Hover/right-click triggered icon (add or edit) */}
-          {showTriggerIcon && (
-            <button
-              onClick={e => { e.stopPropagation(); handleCommentIconClick(ply) }}
-              className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95"
-              title={hasComment ? 'Edit comment' : 'Add comment'}
-            >
-              <MessageSquareMore size={11} />
-            </button>
-          )}
+        <span className="flex items-center w-full">
+          <span className="flex-1">{san || ''}</span>
+          {/* Fixed-width slot so the column never resizes when the icon appears */}
+          <span className="w-5 shrink-0 flex items-center justify-end">
+            {commentIcon ?? triggerIcon}
+          </span>
         </span>
       </TableCell>
     )
@@ -167,14 +242,18 @@ export default function MoveList({
             const editingWhite = editingCommentPly === whitePly1
             const editingBlack = editingCommentPly === blackPly1
 
-            // Split the row when there's a variation OR comment/editor after white's move
-            const hasSplitAfterWhite = variationsAfterWhite.length > 0 || !!commentOnWhite || editingWhite
+            // CommentRow renders only when: (comment or editing) AND not collapsed
+            const whiteCommentWillRender = (!!commentOnWhite || editingWhite) && !collapsedCommentPlies.has(whitePly1)
+
+            // Split the row only when something actually renders between white and black
+            const hasSplitAfterWhite = variationsAfterWhite.length > 0 || whiteCommentWillRender
 
             const commentCallbacks = {
               onEdit: onCommentEdit ?? (() => {}),
               onValueChange: onCommentValueChange ?? (() => {}),
               onSave: onCommentSave ?? (() => {}),
               onCancel: onCommentCancel ?? (() => {}),
+              onDeleteRequest: onCommentDeleteRequest ?? (() => {}),
             }
 
             return (
@@ -192,7 +271,7 @@ export default function MoveList({
                 </TableRow>
 
                 {/* Comment on white's move */}
-                {(commentOnWhite || editingWhite) && (
+                {whiteCommentWillRender && (
                   <CommentRow
                     ply={whitePly1}
                     comment={commentOnWhite}
@@ -228,7 +307,7 @@ export default function MoveList({
                 )}
 
                 {/* Comment on black's move */}
-                {(commentOnBlack || editingBlack) && (
+                {(commentOnBlack || editingBlack) && !collapsedCommentPlies.has(blackPly1) && (
                   <CommentRow
                     ply={blackPly1}
                     comment={commentOnBlack}

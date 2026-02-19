@@ -322,6 +322,7 @@ export default function App() {
                 <GameInfo game={selectedGame} />
                 {moves.length > 0 && (
                   <MoveList
+                    key={selectedGame?.id}
                     moves={moves}
                     result={result}
                     currentPly={currentPly}
@@ -348,6 +349,7 @@ export default function App() {
                       }
                     }}
                     onCommentCancel={commentState.cancelEditing}
+                    onCommentDeleteRequest={commentState.requestDeletion}
                   />
                 )}
               </>
