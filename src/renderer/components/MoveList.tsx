@@ -60,6 +60,8 @@ export default function MoveList({
   // All comments start collapsed; seenPliesRef ensures each ply is only initialized once.
   const [collapsedCommentPlies, setCollapsedCommentPlies] = useState<Set<number>>(new Set())
   const seenPliesRef = useRef<Set<number>>(new Set())
+  // Tracks the ply of a comment the user just created — exempt from auto-collapse.
+  const justCreatedPlyRef = useRef<number | null>(null)
 
   // Collapse any newly seen comment plies (runs on initial load and when comments change)
   useEffect(() => {
@@ -71,8 +73,12 @@ export default function MoveList({
         seenPliesRef.current.add(c.ply)
       }
     })
-    if (newPlies.length > 0) {
-      setCollapsedCommentPlies(prev => new Set([...prev, ...newPlies]))
+    // Don't collapse a ply the user just created — leave it visible.
+    const justCreated = justCreatedPlyRef.current
+    justCreatedPlyRef.current = null
+    const toCollapse = newPlies.filter(p => p !== justCreated)
+    if (toCollapse.length > 0) {
+      setCollapsedCommentPlies(prev => new Set([...prev, ...toCollapse]))
     }
   }, [comments])
 
@@ -119,10 +125,24 @@ export default function MoveList({
     setCommentMenuPly(ply)
   }, [clearHoverTimer])
 
+  // Navigate to the ply and open its comment editor.
+  const handleCommentEdit = useCallback((ply: number) => {
+    onJump(ply)
+    onCommentEdit?.(ply)
+  }, [onJump, onCommentEdit])
+
   const handleCommentIconClick = useCallback((ply: number) => {
     setCommentMenuPly(null)
-    onCommentEdit?.(ply)
-  }, [onCommentEdit])
+    handleCommentEdit(ply)
+  }, [handleCommentEdit])
+
+  // Intercept save to detect brand-new comment saves (no existing comment at that ply).
+  const handleCommentSaveInternal = useCallback(() => {
+    if (editingCommentPly != null && !comments?.some(c => c.ply === editingCommentPly)) {
+      justCreatedPlyRef.current = editingCommentPly
+    }
+    onCommentSave?.()
+  }, [editingCommentPly, comments, onCommentSave])
 
   // Auto-scroll to current move
   useEffect(() => {
@@ -169,7 +189,7 @@ export default function MoveList({
               <MessageSquareMore size={14} />
             </button>
           </TooltipTrigger>
-          <TooltipContent side="left">
+          <TooltipContent side="bottom">
             <p className="max-w-48 italic">{comment.text}</p>
           </TooltipContent>
         </Tooltip>
@@ -249,9 +269,9 @@ export default function MoveList({
             const hasSplitAfterWhite = variationsAfterWhite.length > 0 || whiteCommentWillRender
 
             const commentCallbacks = {
-              onEdit: onCommentEdit ?? (() => {}),
+              onEdit: handleCommentEdit,
               onValueChange: onCommentValueChange ?? (() => {}),
-              onSave: onCommentSave ?? (() => {}),
+              onSave: handleCommentSaveInternal,
               onCancel: onCommentCancel ?? (() => {}),
               onDeleteRequest: onCommentDeleteRequest ?? (() => {}),
             }
