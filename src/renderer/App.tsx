@@ -19,6 +19,7 @@ import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
 import { useVariationState } from './hooks/useVariationState.js'
+import { useCommentState } from './hooks/useCommentState.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 import type { Key } from '@lichess-org/chessground/types'
 
@@ -83,6 +84,9 @@ export default function App() {
   const autoPlayStopRef = useRef<() => void>(() => {})
   const autoPlayStop = useCallback(() => autoPlayStopRef.current(), [])
 
+  // Comment state
+  const commentState = useCommentState()
+
   // Variation state (uses stable stop ref — only called during user interactions, never during render)
   const variationState = useVariationState({
     chessManager,
@@ -130,8 +134,9 @@ export default function App() {
     // Reset to initial position
     updateBoardState(manager, 0)
 
-    // Load variations for this game
+    // Load variations and comments for this game
     variationState.loadVariations(selectedCollectionId, game.id)
+    commentState.loadComments(selectedCollectionId, game.id)
   }
 
   // Compute interactive board values — variation overrides mainline.
@@ -332,6 +337,17 @@ export default function App() {
                     onVariationJump={variationState.jumpToVariationMove}
                     onDismissVariation={variationState.requestDeletion}
                     isInVariation={variationState.isInVariation}
+                    comments={commentState.comments}
+                    editingCommentPly={commentState.editingPly}
+                    editCommentValue={commentState.editValue}
+                    onCommentEdit={commentState.startEditing}
+                    onCommentValueChange={commentState.setEditValue}
+                    onCommentSave={() => {
+                      if (selectedGameCollectionId && selectedGame) {
+                        commentState.saveComment(selectedGameCollectionId, selectedGame.id)
+                      }
+                    }}
+                    onCommentCancel={commentState.cancelEditing}
                   />
                 )}
               </>
@@ -376,6 +392,20 @@ export default function App() {
           filePath={importFilePath}
           onComplete={handleImportComplete}
           onClose={handleImportClose}
+        />
+
+        {/* Comment deletion confirmation */}
+        <ConfirmDialog
+          isOpen={commentState.pendingDeletion !== null}
+          title="Delete Comment"
+          message="Delete this comment? This cannot be undone."
+          onConfirm={() => {
+            if (selectedGameCollectionId && selectedGame) {
+              commentState.confirmDeletion(selectedGameCollectionId, selectedGame.id)
+            }
+          }}
+          onCancel={commentState.cancelDeletion}
+          confirmIcon="trash"
         />
 
         {/* Variation deletion confirmation */}

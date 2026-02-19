@@ -1,6 +1,6 @@
 // Type definitions for Electron IPC bridge exposed via preload.ts
 
-import type { GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData } from '../../shared/types/game.js'
+import type { GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData } from '../../shared/types/game.js'
 
 export interface CollectionMetadata {
   id: string
@@ -32,7 +32,7 @@ export type ImportProgressData =
   | { type: 'complete'; success?: boolean; collectionId: string; gamesIndexed: number; error?: string }
 
 // Re-export types from lib
-export type { GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData }
+export type { GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData }
 
 export interface EcoCodeWithCount {
   eco: string
@@ -65,6 +65,11 @@ export interface ElectronAPI {
   getVariations: (collectionId: string, gameId: number) => Promise<VariationData[]>
   upsertVariation: (collectionId: string, gameId: number, branchPly: number, moves: string) => Promise<VariationData | null>
   deleteVariation: (collectionId: string, gameId: number, branchPly: number) => Promise<{ success: boolean }>
+
+  // Comments
+  getComments: (collectionId: string, gameId: number) => Promise<CommentData[]>
+  upsertComment: (collectionId: string, gameId: number, ply: number, text: string) => Promise<CommentData | null>
+  deleteComment: (collectionId: string, gameId: number, ply: number) => Promise<{ success: boolean }>
 
   // Settings
   getSettings: () => Promise<AppSettings>

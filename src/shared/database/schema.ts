@@ -44,3 +44,26 @@ export const VARIATIONS_SCHEMA_SQL = `
   );
   CREATE INDEX IF NOT EXISTS idx_variations_game ON variations(gameId);
 `
+
+/**
+ * SQLite schema for comments table.
+ *
+ * Supports two comment contexts:
+ * - Mainline move comment: ply = 1-based mainline ply, variationId = 0
+ * - Variation comment (UI not yet implemented): ply = 0, variationId = variation DB id
+ *
+ * ON DELETE CASCADE: deleting a game automatically cleans up its comments.
+ * UNIQUE(gameId, ply, variationId): one comment per ply per context.
+ */
+export const COMMENTS_SCHEMA_SQL = `
+  CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gameId INTEGER NOT NULL,
+    ply INTEGER NOT NULL,
+    variationId INTEGER NOT NULL DEFAULT 0,
+    text TEXT NOT NULL,
+    FOREIGN KEY (gameId) REFERENCES games(id) ON DELETE CASCADE,
+    UNIQUE(gameId, ply, variationId)
+  );
+  CREATE INDEX IF NOT EXISTS idx_comments_game ON comments(gameId);
+`

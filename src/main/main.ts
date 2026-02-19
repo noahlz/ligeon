@@ -9,6 +9,7 @@ import {
 } from './ipc/collectionHandlers.js'
 import { searchGames, getGameMoves, getGameCount, getAvailableDates, getAvailableEcoCodes } from './ipc/gameHandlers.js'
 import { getVariations, upsertVariation, deleteVariation } from './ipc/variationHandlers.js'
+import { getComments, upsertComment, deleteComment } from './ipc/commentHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
 import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
@@ -185,6 +186,19 @@ function setupIpcHandlers() {
 
   ipcMain.handle('delete-variation', async (_event, { collectionId, gameId, branchPly }) =>
     deleteVariation(collectionId, parseInt(gameId, 10), branchPly)
+  )
+
+  // Comment handlers
+  ipcMain.handle('get-comments', async (_event, { collectionId, gameId }) =>
+    getComments(collectionId, parseInt(gameId, 10))
+  )
+
+  ipcMain.handle('upsert-comment', async (_event, { collectionId, gameId, ply, text }) =>
+    upsertComment(collectionId, parseInt(gameId, 10), ply, text)
+  )
+
+  ipcMain.handle('delete-comment', async (_event, { collectionId, gameId, ply }) =>
+    deleteComment(collectionId, parseInt(gameId, 10), ply)
   )
 
   // Settings handlers

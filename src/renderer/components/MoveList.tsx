@@ -1,20 +1,17 @@
-import { Fragment, useRef, useEffect, useState } from 'react'
-import { X, ChevronDown, ChevronRight } from 'lucide-react'
+import { Fragment, useRef, useEffect, useState, useCallback } from 'react'
+import { MessageSquareMore } from 'lucide-react'
 import { getResultDisplay } from '../utils/chessManager.js'
 import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
-import {
-  getVariationsAtPly,
-  parseVariationMoves,
-  variationMoveNumber,
-  isVariationWhiteMove,
-} from '../utils/variationFormatter.js'
-import type { VariationData } from '../../shared/types/game.js'
+import { getVariationsAtPly } from '../utils/variationFormatter.js'
+import type { VariationData, CommentData } from '../../shared/types/game.js'
 import {
   Table,
   TableBody,
   TableRow,
   TableCell,
 } from '@/components/ui/table.js'
+import { CommentRow } from './CommentRow.js'
+import { VariationRow } from './VariationRow.js'
 
 interface MoveListProps {
   moves: string[]
@@ -28,200 +25,182 @@ interface MoveListProps {
   onVariationJump?: (branchPly: number, ply: number) => void
   onDismissVariation?: (branchPly: number) => void
   isInVariation?: boolean
-}
-
-interface VariationRowProps {
-  variation: VariationData
-  isActive: boolean
-  variationMoves?: string[]
-  variationPly?: number
-  onVariationJump?: (branchPly: number, ply: number) => void
-  onDismiss?: (branchPly: number) => void
-  isInVariation?: boolean
-}
-
-function VariationRow({
-  variation,
-  isActive,
-  variationMoves: activeVariationMoves,
-  variationPly,
-  onVariationJump,
-  onDismiss,
-  isInVariation,
-}: VariationRowProps) {
-  const [expanded, setExpanded] = useState(false)
-  // Auto-expand when variation becomes active (user clicked into it).
-  // Unlike the previous `isActive || expanded`, this lets the user still collapse via chevron.
-  useEffect(() => {
-    if (isActive) setExpanded(true)
-  }, [isActive])
-
-  // Use live activeVariationMoves if this variation is active (may include new moves not yet persisted).
-  // Otherwise fall back to the persisted variation.moves from the database.
-  const moves = isActive && activeVariationMoves
-    ? activeVariationMoves
-    : parseVariationMoves(variation.moves)
-
-  if (moves.length === 0) return null
-
-  // Compute collapsed preview text
-  const firstIsWhite = isVariationWhiteMove(variation.branchPly, 0)
-  const moveNum = variationMoveNumber(variation.branchPly, 0)
-  const collapsedPrefix = `${moveNum}.${firstIsWhite ? '' : '..'} `
-
-  // Show full accent border when in variation but no move is highlighted
-  const showAccentBorder = isActive && isInVariation && (!variationPly || variationPly === 0)
-  const containerClass = showAccentBorder
-    ? 'ml-4 border-2 border-ui-accent bg-ui-bg-page rounded-sm my-0.5'
-    : 'ml-4 border-l-2 border-ui-accent bg-ui-bg-page rounded-r-sm my-0.5'
-
-  return (
-    <TableRow className="border-0 hover:bg-transparent">
-      <TableCell colSpan={3} className="p-0 border-0">
-        <div className={containerClass}>
-          {/* Header row: toggle + first move preview + dismiss */}
-          <div
-            className={`flex items-center gap-1 px-2 py-0.5 ${!expanded ? 'cursor-pointer hover:bg-ui-bg-hover' : ''}`}
-            onClick={!expanded ? () => setExpanded(true) : undefined}
-          >
-            <button
-              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
-              className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer"
-            >
-              {expanded
-                ? <ChevronDown size={12} />
-                : <ChevronRight size={12} />
-              }
-            </button>
-
-            {!expanded && (
-              <span className="text-sm text-ui-text-dimmer italic truncate flex-1">
-                {collapsedPrefix}{moves.slice(0, 3).join(' ')}{moves.length > 3 ? '…' : ''}
-              </span>
-            )}
-
-            {expanded && <span className="flex-1" />}
-
-            <button
-              onClick={(e) => { e.stopPropagation(); onDismiss?.(variation.branchPly) }}
-              className="text-ui-text-dimmer hover:text-red-400 p-0.5 cursor-pointer"
-              title="Dismiss variation"
-            >
-              <X size={12} />
-            </button>
-          </div>
-
-          {/* Expanded moves */}
-          {expanded && (
-            <div className="flex flex-wrap gap-x-1 gap-y-0 px-2 pb-1 font-mono text-sm">
-              {moves.map((move, i) => {
-                const isWhite = isVariationWhiteMove(variation.branchPly, i)
-                const moveNum = variationMoveNumber(variation.branchPly, i)
-                const ply = i + 1
-                const isCurrent = isInVariation && isActive && variationPly === ply
-
-                return (
-                  <span key={i} className="inline-flex items-center">
-                    {/* Show move number before white moves, or before first move if black */}
-                    {(isWhite || i === 0) && (
-                      <span className="text-ui-text-dimmer mr-0.5">
-                        {moveNum}.{!isWhite && '..'}
-                      </span>
-                    )}
-                    <span
-                      onClick={() => onVariationJump?.(variation.branchPly, ply)}
-                      className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
-                        isCurrent ? 'bg-ui-accent text-white font-bold' : ''
-                      }`}
-                    >
-                      {move}
-                    </span>
-                  </span>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </TableCell>
-    </TableRow>
-  )
+  // Comments
+  comments?: CommentData[]
+  editingCommentPly?: number | null
+  editCommentValue?: string
+  onCommentEdit?: (ply: number) => void
+  onCommentValueChange?: (value: string) => void
+  onCommentSave?: () => void
+  onCommentCancel?: () => void
 }
 
 export default function MoveList({
   moves, result, currentPly, onJump,
   variations, activeVariationBranchPly, variationMoves,
   variationPly, onVariationJump, onDismissVariation, isInVariation,
+  comments, editingCommentPly, editCommentValue,
+  onCommentEdit, onCommentValueChange, onCommentSave, onCommentCancel,
 }: MoveListProps) {
   const currentMoveRef = useRef<HTMLTableCellElement>(null)
+
+  // Track which ply has the comment trigger icon visible (hover 2s / right-click)
+  const [commentMenuPly, setCommentMenuPly] = useState<number | null>(null)
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearHoverTimer = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current)
+      hoverTimerRef.current = null
+    }
+  }, [])
+
+  const handleMoveMouseEnter = useCallback((ply: number) => {
+    clearHoverTimer()
+    hoverTimerRef.current = setTimeout(() => setCommentMenuPly(ply), 2000)
+  }, [clearHoverTimer])
+
+  const handleMoveMouseLeave = useCallback(() => {
+    clearHoverTimer()
+  }, [clearHoverTimer])
+
+  const handleMoveContextMenu = useCallback((e: React.MouseEvent, ply: number) => {
+    e.preventDefault()
+    clearHoverTimer()
+    setCommentMenuPly(ply)
+  }, [clearHoverTimer])
+
+  const handleCommentIconClick = useCallback((ply: number) => {
+    setCommentMenuPly(null)
+    onCommentEdit?.(ply)
+  }, [onCommentEdit])
 
   // Auto-scroll to current move
   useEffect(() => {
     if (currentMoveRef.current) {
-      currentMoveRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      })
+      currentMoveRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
   }, [currentPly, variationPly])
 
+  // Clean up hover timer on unmount
+  useEffect(() => () => clearHoverTimer(), [clearHoverTimer])
+
   const movePairs = groupMovesIntoPairs(moves)
 
+  const getCommentAtPly = (ply: number): CommentData | undefined =>
+    comments?.find(c => c.ply === ply)
+
+  /**
+   * Render a move cell with hover/right-click comment trigger.
+   * @param ply - 1-based mainline ply
+   */
+  const renderMoveCell = (
+    ply: number,
+    san: string | null | undefined,
+    isCurrent: boolean,
+    refProp?: React.Ref<HTMLTableCellElement>
+  ) => {
+    const comment = getCommentAtPly(ply)
+    // Show trigger icon if this ply has been hovered/right-clicked and no editor is open
+    const showTriggerIcon = commentMenuPly === ply && !editingCommentPly
+    const hasComment = !!comment
+
+    return (
+      <TableCell
+        ref={refProp}
+        onClick={san ? () => onJump(ply) : undefined}
+        onMouseEnter={() => handleMoveMouseEnter(ply)}
+        onMouseLeave={handleMoveMouseLeave}
+        onContextMenu={e => handleMoveContextMenu(e, ply)}
+        className={`px-2 py-0.5 rounded border-0 text-lg ${
+          san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
+        } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
+      >
+        <span className="flex items-center gap-1">
+          <span>{san || ''}</span>
+          {/* Persistent icon for moves that already have a comment */}
+          {hasComment && !showTriggerIcon && (
+            <button
+              onClick={e => { e.stopPropagation(); handleCommentIconClick(ply) }}
+              className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer shrink-0"
+              title="Edit comment"
+            >
+              <MessageSquareMore size={11} />
+            </button>
+          )}
+          {/* Hover/right-click triggered icon (add or edit) */}
+          {showTriggerIcon && (
+            <button
+              onClick={e => { e.stopPropagation(); handleCommentIconClick(ply) }}
+              className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95"
+              title={hasComment ? 'Edit comment' : 'Add comment'}
+            >
+              <MessageSquareMore size={11} />
+            </button>
+          )}
+        </span>
+      </TableCell>
+    )
+  }
+
   return (
-    <div className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono">
+    <div
+      className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono"
+      onClick={() => setCommentMenuPly(null)}
+    >
       <Table>
         <TableBody>
           {movePairs.map((pair, pairIndex) => {
-            const whitePly = pairIndex * 2
-            const blackPly = pairIndex * 2 + 1
-            const isWhiteCurrent = !isInVariation && currentPly - 1 === whitePly
-            const isBlackCurrent = !isInVariation && currentPly - 1 === blackPly
+            const whitePly1 = pairIndex * 2 + 1   // 1-based white ply
+            const blackPly1 = pairIndex * 2 + 2   // 1-based black ply
+            const whitePly0 = whitePly1 - 1       // 0-based for currentPly comparison
+            const blackPly0 = blackPly1 - 1
 
-            // Find variations that branch after white's move or after black's move
-            const variationsAfterWhite = variations
-              ? getVariationsAtPly(variations, whitePly + 1)
-              : []
-            const variationsAfterBlack = variations
-              ? getVariationsAtPly(variations, blackPly + 1)
-              : []
+            const isWhiteCurrent = !isInVariation && currentPly - 1 === whitePly0
+            const isBlackCurrent = !isInVariation && currentPly - 1 === blackPly0
 
-            const hasVariationsAfterWhite = variationsAfterWhite.length > 0
+            const variationsAfterWhite = variations ? getVariationsAtPly(variations, whitePly1) : []
+            const variationsAfterBlack = variations ? getVariationsAtPly(variations, blackPly1) : []
+
+            const commentOnWhite = getCommentAtPly(whitePly1)
+            const commentOnBlack = getCommentAtPly(blackPly1)
+            const editingWhite = editingCommentPly === whitePly1
+            const editingBlack = editingCommentPly === blackPly1
+
+            // Split the row when there's a variation OR comment/editor after white's move
+            const hasSplitAfterWhite = variationsAfterWhite.length > 0 || !!commentOnWhite || editingWhite
+
+            const commentCallbacks = {
+              onEdit: onCommentEdit ?? (() => {}),
+              onValueChange: onCommentValueChange ?? (() => {}),
+              onSave: onCommentSave ?? (() => {}),
+              onCancel: onCommentCancel ?? (() => {}),
+            }
 
             return (
               <Fragment key={pairIndex}>
-                {/* White move row (+ black if no variation splits needed) */}
+                {/* Main row: move number + white + black (or split placeholder) */}
                 <TableRow className="border-0 hover:bg-transparent">
-                  {/* Move number */}
                   <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0">
                     {pair.moveNumber}.
                   </TableCell>
-
-                  {/* White move */}
-                  <TableCell
-                    ref={isWhiteCurrent ? currentMoveRef : null}
-                    onClick={() => onJump(whitePly + 1)}
-                    className={`px-2 py-0.5 rounded cursor-pointer hover:bg-ui-bg-hover border-0 text-lg ${
-                      isWhiteCurrent ? 'bg-ui-accent text-white font-bold' : ''
-                    }`}
-                  >
-                    {pair.white}
-                  </TableCell>
-
-                  {/* Black move (or empty placeholder when split) */}
-                  {hasVariationsAfterWhite
+                  {renderMoveCell(whitePly1, pair.white, isWhiteCurrent, isWhiteCurrent ? currentMoveRef : undefined)}
+                  {hasSplitAfterWhite
                     ? <TableCell className="border-0" />
-                    : (
-                      <TableCell
-                        ref={isBlackCurrent ? currentMoveRef : null}
-                        onClick={pair.black ? () => onJump(blackPly + 1) : undefined}
-                        className={`px-2 py-0.5 rounded border-0 text-lg ${
-                          pair.black ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
-                        } ${isBlackCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
-                      >
-                        {pair.black || ''}
-                      </TableCell>
-                    )
+                    : renderMoveCell(blackPly1, pair.black, isBlackCurrent, isBlackCurrent ? currentMoveRef : undefined)
                   }
                 </TableRow>
+
+                {/* Comment on white's move */}
+                {(commentOnWhite || editingWhite) && (
+                  <CommentRow
+                    ply={whitePly1}
+                    comment={commentOnWhite}
+                    isEditing={editingWhite}
+                    editValue={editCommentValue ?? ''}
+                    {...commentCallbacks}
+                  />
+                )}
 
                 {/* Variations branching after white's move */}
                 {variationsAfterWhite.map(sl => (
@@ -237,23 +216,26 @@ export default function MoveList({
                   />
                 ))}
 
-                {/* Black continuation row (only when split by white variation) */}
-                {hasVariationsAfterWhite && pair.black && (
+                {/* Black continuation row (when split by variation or white comment) */}
+                {hasSplitAfterWhite && pair.black && (
                   <TableRow className="border-0 hover:bg-transparent">
                     <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0" />
                     <TableCell className="border-0 py-0.5">
                       <span className="text-ui-text-dimmer">...</span>
                     </TableCell>
-                    <TableCell
-                      ref={isBlackCurrent ? currentMoveRef : null}
-                      onClick={() => onJump(blackPly + 1)}
-                      className={`px-2 py-0.5 rounded cursor-pointer hover:bg-ui-bg-hover border-0 text-lg ${
-                        isBlackCurrent ? 'bg-ui-accent text-white font-bold' : ''
-                      }`}
-                    >
-                      {pair.black}
-                    </TableCell>
+                    {renderMoveCell(blackPly1, pair.black, isBlackCurrent, isBlackCurrent ? currentMoveRef : undefined)}
                   </TableRow>
+                )}
+
+                {/* Comment on black's move */}
+                {(commentOnBlack || editingBlack) && (
+                  <CommentRow
+                    ply={blackPly1}
+                    comment={commentOnBlack}
+                    isEditing={editingBlack}
+                    editValue={editCommentValue ?? ''}
+                    {...commentCallbacks}
+                  />
                 )}
 
                 {/* Variations branching after black's move */}

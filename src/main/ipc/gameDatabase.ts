@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
-import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters, VariationData } from './types.js'
-import { GAMES_SCHEMA_SQL, VARIATIONS_SCHEMA_SQL } from '../../shared/database/schema.js'
+import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters, VariationData, CommentData } from './types.js'
+import { GAMES_SCHEMA_SQL, VARIATIONS_SCHEMA_SQL, COMMENTS_SCHEMA_SQL } from '../../shared/database/schema.js'
 import { logError, logger } from '../config/logger.js'
 
 /**
@@ -43,6 +43,7 @@ export class GameDatabase {
   createSchema(): void {
     this.db.exec(GAMES_SCHEMA_SQL)
     this.db.exec(VARIATIONS_SCHEMA_SQL)
+    this.db.exec(COMMENTS_SCHEMA_SQL)
     logger.info('✓ Database schema created')
   }
 
@@ -362,6 +363,66 @@ export class GameDatabase {
       this.db.prepare('DELETE FROM variations WHERE gameId = ? AND branchPly = ?').run(gameId, branchPly)
     } catch (error) {
       logError('GameDatabase', 'deleteVariation', { dbPath: this.dbPath, gameId, branchPly }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Get all mainline comments for a game (variationId = 0), ordered by ply.
+   *
+   * @param gameId - Database ID of the game
+   * @returns Array of comment records
+   */
+  getComments(gameId: number): CommentData[] {
+    try {
+      const stmt = this.db.prepare(
+        'SELECT id, gameId, ply, variationId, text FROM comments WHERE gameId = ? AND variationId = 0 ORDER BY ply'
+      )
+      return stmt.all(gameId) as CommentData[]
+    } catch (error) {
+      logError('GameDatabase', 'getComments', { dbPath: this.dbPath, gameId }, error)
+      return []
+    }
+  }
+
+  /**
+   * Insert or update a comment. Uses upsert semantics on (gameId, ply, variationId).
+   *
+   * @param gameId - Database ID of the game
+   * @param ply - 1-based mainline ply (0 for variation-level comments)
+   * @param text - Comment text (max 500 chars)
+   * @param variationId - 0 for mainline, variation DB id for variation comments
+   * @returns The created/updated comment record
+   */
+  upsertComment(gameId: number, ply: number, text: string, variationId = 0): CommentData {
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO comments (gameId, ply, variationId, text)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(gameId, ply, variationId) DO UPDATE SET text = excluded.text
+        RETURNING id, gameId, ply, variationId, text
+      `)
+      return stmt.get(gameId, ply, variationId, text) as CommentData
+    } catch (error) {
+      logError('GameDatabase', 'upsertComment', { dbPath: this.dbPath, gameId, ply, variationId }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Delete a comment by (gameId, ply, variationId).
+   *
+   * @param gameId - Database ID of the game
+   * @param ply - 1-based mainline ply
+   * @param variationId - 0 for mainline, variation DB id for variation comments
+   */
+  deleteComment(gameId: number, ply: number, variationId = 0): void {
+    try {
+      this.db.prepare(
+        'DELETE FROM comments WHERE gameId = ? AND ply = ? AND variationId = ?'
+      ).run(gameId, ply, variationId)
+    } catch (error) {
+      logError('GameDatabase', 'deleteComment', { dbPath: this.dbPath, gameId, ply, variationId }, error)
       throw error
     }
   }
