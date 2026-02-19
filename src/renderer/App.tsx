@@ -350,6 +350,23 @@ export default function App() {
                     }}
                     onCommentCancel={commentState.cancelEditing}
                     onCommentDeleteRequest={commentState.requestDeletion}
+                    variationComments={commentState.variationComments}
+                    onSaveVariationComment={async (variationId, text) => {
+                      if (selectedGameCollectionId && selectedGame) {
+                        const saved = await window.electron.upsertVariationComment(
+                          selectedGameCollectionId, selectedGame.id, variationId, text
+                        )
+                        if (saved) commentState.updateVariationComment(saved)
+                      }
+                    }}
+                    onDeleteVariationComment={async (variationId) => {
+                      if (selectedGameCollectionId && selectedGame) {
+                        await window.electron.deleteVariationComment(
+                          selectedGameCollectionId, selectedGame.id, variationId
+                        )
+                        commentState.removeVariationComment(variationId)
+                      }
+                    }}
                   />
                 )}
               </>

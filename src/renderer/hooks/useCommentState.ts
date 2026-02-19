@@ -11,6 +11,8 @@ import type { CommentData } from '../../shared/types/game.js'
 export interface UseCommentStateReturn {
   /** All mainline comments for the current game */
   comments: CommentData[]
+  /** All variation comments for the current game, keyed by variationId */
+  variationComments: Map<number, CommentData>
   /** Ply currently in edit mode (null = no comment being edited) */
   editingPly: number | null
   /** Current value of the comment input */
@@ -39,10 +41,15 @@ export interface UseCommentStateReturn {
   cancelDeletion: () => void
   /** Look up the saved comment for a ply, or undefined if none */
   getCommentAtPly: (ply: number) => CommentData | undefined
+  /** Upsert a variation comment into the local map */
+  updateVariationComment: (comment: CommentData) => void
+  /** Remove a variation comment from the local map */
+  removeVariationComment: (variationId: number) => void
 }
 
 export function useCommentState(): UseCommentStateReturn {
   const [comments, setComments] = useState<CommentData[]>([])
+  const [variationComments, setVariationComments] = useState<Map<number, CommentData>>(new Map())
   const [editingPly, setEditingPly] = useState<number | null>(null)
   const [editValue, setEditValue] = useState('')
   const [pendingDeletion, setPendingDeletion] = useState<number | null>(null)
@@ -52,11 +59,30 @@ export function useCommentState(): UseCommentStateReturn {
   }, [comments])
 
   const loadComments = useCallback(async (collectionId: string, gameId: number) => {
-    const data = await window.electron.getComments(collectionId, gameId)
-    setComments(data)
+    const all = await window.electron.getComments(collectionId, gameId)
+    setComments(all.filter(c => c.variationId === 0))
+    setVariationComments(new Map(
+      all.filter(c => c.variationId !== 0).map(c => [c.variationId!, c])
+    ))
     setEditingPly(null)
     setEditValue('')
     setPendingDeletion(null)
+  }, [])
+
+  const updateVariationComment = useCallback((comment: CommentData) => {
+    setVariationComments(prev => {
+      const next = new Map(prev)
+      next.set(comment.variationId!, comment)
+      return next
+    })
+  }, [])
+
+  const removeVariationComment = useCallback((variationId: number) => {
+    setVariationComments(prev => {
+      const next = new Map(prev)
+      next.delete(variationId)
+      return next
+    })
   }, [])
 
   const startEditing = useCallback((ply: number) => {
@@ -140,6 +166,7 @@ export function useCommentState(): UseCommentStateReturn {
 
   return {
     comments,
+    variationComments,
     editingPly,
     editValue,
     pendingDeletion,
@@ -152,5 +179,7 @@ export function useCommentState(): UseCommentStateReturn {
     confirmDeletion,
     cancelDeletion,
     getCommentAtPly,
+    updateVariationComment,
+    removeVariationComment,
   }
 }

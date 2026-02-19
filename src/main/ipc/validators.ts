@@ -490,6 +490,20 @@ export function validateCommentPly(ply: unknown): ply is number {
 }
 
 /**
+ * Validate variation ID (database row id)
+ *
+ * @param id - Variation ID to validate
+ * @returns True if valid (positive integer >= 1), false otherwise
+ */
+export function validateVariationId(id: unknown): id is number {
+  if (typeof id !== 'number' || !Number.isInteger(id) || id < 1) {
+    logger.warn('Validation failed: variation ID must be a positive integer')
+    return false
+  }
+  return true
+}
+
+/**
  * Validate comment text
  *
  * @param text - Comment text to validate

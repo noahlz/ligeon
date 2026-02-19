@@ -70,7 +70,7 @@ export function CommentRow({
                 onKeyDown={handleKeyDown}
                 onBlur={handleBlur}
                 maxLength={500}
-                className="flex-1 bg-transparent text-sm text-ui-text outline-none border-b border-ui-border focus:border-ui-accent"
+                className="flex-1 bg-transparent text-sm text-ui-text outline-none border-b border-ui-border focus:border-ui-text-dimmer"
               />
               {comment ? (
                 /* Existing comment — trash triggers confirm dialog */

@@ -39,6 +39,10 @@ interface MoveListProps {
   onCommentSave?: () => void
   onCommentCancel?: () => void
   onCommentDeleteRequest?: (ply: number) => void
+  // Variation comments
+  variationComments?: Map<number, CommentData>
+  onSaveVariationComment?: (variationId: number, text: string) => void
+  onDeleteVariationComment?: (variationId: number) => void
 }
 
 export default function MoveList({
@@ -48,6 +52,7 @@ export default function MoveList({
   comments, editingCommentPly, editCommentValue,
   onCommentEdit, onCommentValueChange, onCommentSave, onCommentCancel,
   onCommentDeleteRequest,
+  variationComments, onSaveVariationComment, onDeleteVariationComment,
 }: MoveListProps) {
   const currentMoveRef = useRef<HTMLTableCellElement>(null)
 
@@ -126,10 +131,11 @@ export default function MoveList({
   }, [clearHoverTimer])
 
   // Navigate to the ply and open its comment editor.
+  // Skip navigation (and its associated move sound) if already at this ply on the mainline.
   const handleCommentEdit = useCallback((ply: number) => {
-    onJump(ply)
+    if (ply !== currentPly || isInVariation) onJump(ply)
     onCommentEdit?.(ply)
-  }, [onJump, onCommentEdit])
+  }, [onJump, onCommentEdit, currentPly, isInVariation])
 
   const handleCommentIconClick = useCallback((ply: number) => {
     setCommentMenuPly(null)
@@ -312,6 +318,9 @@ export default function MoveList({
                     onVariationJump={onVariationJump}
                     onDismiss={onDismissVariation}
                     isInVariation={isInVariation}
+                    comment={sl.id != null ? variationComments?.get(sl.id) : undefined}
+                    onSaveComment={onSaveVariationComment}
+                    onDeleteComment={onDeleteVariationComment}
                   />
                 ))}
 
@@ -348,6 +357,9 @@ export default function MoveList({
                     onVariationJump={onVariationJump}
                     onDismiss={onDismissVariation}
                     isInVariation={isInVariation}
+                    comment={sl.id != null ? variationComments?.get(sl.id) : undefined}
+                    onSaveComment={onSaveVariationComment}
+                    onDeleteComment={onDeleteVariationComment}
                   />
                 ))}
               </Fragment>

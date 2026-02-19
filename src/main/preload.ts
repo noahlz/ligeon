@@ -71,6 +71,12 @@ contextBridge.exposeInMainWorld('electron', {
   deleteComment: (collectionId: string, gameId: number, ply: number) =>
     ipcRenderer.invoke('delete-comment', { collectionId, gameId, ply }),
 
+  upsertVariationComment: (collectionId: string, gameId: number, variationId: number, text: string) =>
+    ipcRenderer.invoke('upsert-variation-comment', { collectionId, gameId, variationId, text }),
+
+  deleteVariationComment: (collectionId: string, gameId: number, variationId: number) =>
+    ipcRenderer.invoke('delete-variation-comment', { collectionId, gameId, variationId }),
+
   // === Settings ===
   getSettings: () => ipcRenderer.invoke('get-settings'),
 

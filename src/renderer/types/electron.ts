@@ -70,6 +70,8 @@ export interface ElectronAPI {
   getComments: (collectionId: string, gameId: number) => Promise<CommentData[]>
   upsertComment: (collectionId: string, gameId: number, ply: number, text: string) => Promise<CommentData | null>
   deleteComment: (collectionId: string, gameId: number, ply: number) => Promise<{ success: boolean }>
+  upsertVariationComment: (collectionId: string, gameId: number, variationId: number, text: string) => Promise<CommentData | null>
+  deleteVariationComment: (collectionId: string, gameId: number, variationId: number) => Promise<{ success: boolean }>
 
   // Settings
   getSettings: () => Promise<AppSettings>

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
-import { X, ChevronDown, ChevronRight } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 import {
   parseVariationMoves,
   variationMoveNumber,
   isVariationWhiteMove,
 } from '../utils/variationFormatter.js'
-import type { VariationData } from '../../shared/types/game.js'
+import type { VariationData, CommentData } from '../../shared/types/game.js'
 import { TableRow, TableCell } from '@/components/ui/table.js'
 
 export interface VariationRowProps {
@@ -16,6 +16,9 @@ export interface VariationRowProps {
   onVariationJump?: (branchPly: number, ply: number) => void
   onDismiss?: (branchPly: number) => void
   isInVariation?: boolean
+  comment?: CommentData
+  onSaveComment?: (variationId: number, text: string) => void
+  onDeleteComment?: (variationId: number) => void
 }
 
 export function VariationRow({
@@ -26,8 +29,59 @@ export function VariationRow({
   onVariationJump,
   onDismiss,
   isInVariation,
+  comment,
+  onSaveComment,
+  onDeleteComment,
 }: VariationRowProps) {
   const [expanded, setExpanded] = useState(false)
+  const [localValue, setLocalValue] = useState(comment?.text ?? '')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Sync localValue when the saved comment changes (e.g., after save returns)
+  useEffect(() => {
+    setLocalValue(comment?.text ?? '')
+  }, [comment?.text])
+
+  // Auto-resize textarea whenever it becomes visible or the value changes
+  useEffect(() => {
+    if (expanded && textareaRef.current) {
+      const el = textareaRef.current
+      el.style.height = 'auto'
+      el.style.height = el.scrollHeight + 'px'
+    }
+  }, [expanded, localValue])
+
+  const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const el = e.currentTarget
+    el.style.height = 'auto'
+    el.style.height = el.scrollHeight + 'px'
+    setLocalValue(el.value)
+  }
+
+  const handleTextareaBlur = () => {
+    const trimmed = localValue.trim()
+    const savedText = comment?.text ?? ''
+    if (trimmed === savedText) return // no change
+    if (trimmed === '' && comment) {
+      onDeleteComment?.(variation.id!)
+    } else if (trimmed !== '') {
+      onSaveComment?.(variation.id!, trimmed)
+    }
+  }
+
+  const handleTextareaFocus = () => {
+    if (!isActive) {
+      onVariationJump?.(variation.branchPly, 1)
+    }
+  }
+
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      setLocalValue(comment?.text ?? '')
+      textareaRef.current?.blur()
+    }
+  }
 
   // Auto-expand when variation becomes active (user clicked into it).
   // Unlike `isActive || expanded`, this lets the user still collapse via chevron.
@@ -85,39 +139,57 @@ export function VariationRow({
               className="text-ui-text-dimmer hover:text-red-400 p-0.5 cursor-pointer"
               title="Dismiss variation"
             >
-              <X size={12} />
+              <Trash2 size={12} />
             </button>
           </div>
 
           {/* Expanded moves */}
           {expanded && (
-            <div className="flex flex-wrap gap-x-1 gap-y-0 px-2 pb-1 font-mono text-sm">
-              {moves.map((move, i) => {
-                const isWhite = isVariationWhiteMove(variation.branchPly, i)
-                const moveNum = variationMoveNumber(variation.branchPly, i)
-                const ply = i + 1
-                const isCurrent = isInVariation && isActive && variationPly === ply
+            <>
+              <div className="flex flex-wrap gap-x-1 gap-y-0 px-2 pb-1 font-mono text-sm">
+                {moves.map((move, i) => {
+                  const isWhite = isVariationWhiteMove(variation.branchPly, i)
+                  const moveNum = variationMoveNumber(variation.branchPly, i)
+                  const ply = i + 1
+                  const isCurrent = isInVariation && isActive && variationPly === ply
 
-                return (
-                  <span key={i} className="inline-flex items-center">
-                    {/* Show move number before white moves, or before first move if black */}
-                    {(isWhite || i === 0) && (
-                      <span className="text-ui-text-dimmer mr-0.5">
-                        {moveNum}.{!isWhite && '..'}
+                  return (
+                    <span key={i} className="inline-flex items-center">
+                      {/* Show move number before white moves, or before first move if black */}
+                      {(isWhite || i === 0) && (
+                        <span className="text-ui-text-dimmer mr-0.5">
+                          {moveNum}.{!isWhite && '..'}
+                        </span>
+                      )}
+                      <span
+                        onClick={() => onVariationJump?.(variation.branchPly, ply)}
+                        className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
+                          isCurrent ? 'bg-ui-accent text-white font-bold' : ''
+                        }`}
+                      >
+                        {move}
                       </span>
-                    )}
-                    <span
-                      onClick={() => onVariationJump?.(variation.branchPly, ply)}
-                      className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
-                        isCurrent ? 'bg-ui-accent text-white font-bold' : ''
-                      }`}
-                    >
-                      {move}
                     </span>
-                  </span>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+              {/* Variation comment textarea */}
+              <div className="px-2 pb-1.5">
+                <textarea
+                  ref={textareaRef}
+                  value={localValue}
+                  placeholder="Add a comment..."
+                  rows={1}
+                  maxLength={500}
+                  style={{ resize: 'none', height: 'auto', overflow: 'hidden' }}
+                  className="w-full bg-transparent font-mono text-sm text-ui-text italic outline-none border-b border-transparent focus:border-ui-text-dimmer placeholder:text-ui-text-dimmer/50"
+                  onFocus={handleTextareaFocus}
+                  onInput={handleTextareaInput}
+                  onBlur={handleTextareaBlur}
+                  onKeyDown={handleTextareaKeyDown}
+                />
+              </div>
+            </>
           )}
         </div>
       </TableCell>

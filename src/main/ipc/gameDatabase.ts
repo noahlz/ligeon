@@ -353,14 +353,25 @@ export class GameDatabase {
   }
 
   /**
-   * Delete a variation
+   * Delete a variation and its associated comment (if any) in a transaction.
    *
    * @param gameId - Database ID of the game
    * @param branchPly - Mainline ply where variation departs
    */
   deleteVariation(gameId: number, branchPly: number): void {
     try {
-      this.db.prepare('DELETE FROM variations WHERE gameId = ? AND branchPly = ?').run(gameId, branchPly)
+      const deleteWithComment = this.db.transaction(() => {
+        const variationRow = this.db
+          .prepare('SELECT id FROM variations WHERE gameId = ? AND branchPly = ?')
+          .get(gameId, branchPly) as { id: number } | undefined
+        if (variationRow) {
+          this.db
+            .prepare('DELETE FROM comments WHERE gameId = ? AND ply = 0 AND variationId = ?')
+            .run(gameId, variationRow.id)
+        }
+        this.db.prepare('DELETE FROM variations WHERE gameId = ? AND branchPly = ?').run(gameId, branchPly)
+      })
+      deleteWithComment()
     } catch (error) {
       logError('GameDatabase', 'deleteVariation', { dbPath: this.dbPath, gameId, branchPly }, error)
       throw error
@@ -368,7 +379,8 @@ export class GameDatabase {
   }
 
   /**
-   * Get all mainline comments for a game (variationId = 0), ordered by ply.
+   * Get all comments for a game (mainline + variation), ordered by ply.
+   * Renderer is responsible for partitioning by variationId.
    *
    * @param gameId - Database ID of the game
    * @returns Array of comment records
@@ -376,7 +388,7 @@ export class GameDatabase {
   getComments(gameId: number): CommentData[] {
     try {
       const stmt = this.db.prepare(
-        'SELECT id, gameId, ply, variationId, text FROM comments WHERE gameId = ? AND variationId = 0 ORDER BY ply'
+        'SELECT id, gameId, ply, variationId, text FROM comments WHERE gameId = ? ORDER BY ply'
       )
       return stmt.all(gameId) as CommentData[]
     } catch (error) {
