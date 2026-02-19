@@ -39,18 +39,20 @@ interface MoveListProps {
   onJump: (ply: number) => void
   variations?: VariationData[]
   activeVariationBranchPly?: number | null
+  activeVariationId?: number | null
   variationMoves?: string[]
   variationPly?: number
-  onVariationJump?: (branchPly: number, ply: number) => void
-  onDismissVariation?: (branchPly: number) => void
+  onVariationJump?: (id: number, branchPly: number, ply: number) => void
+  onDismissVariation?: (id: number) => void
+  onReorderVariations?: (branchPly: number, orderedIds: number[]) => void
   isInVariation?: boolean
   commentHandlers?: CommentHandlers
 }
 
 export default function MoveList({
   moves, result, currentPly, onJump,
-  variations, activeVariationBranchPly, variationMoves,
-  variationPly, onVariationJump, onDismissVariation, isInVariation,
+  variations, activeVariationBranchPly, activeVariationId, variationMoves,
+  variationPly, onVariationJump, onDismissVariation, onReorderVariations, isInVariation,
   commentHandlers,
 }: MoveListProps) {
   const {
@@ -67,6 +69,35 @@ export default function MoveList({
     onDeleteVariationComment,
   } = commentHandlers ?? {}
   const currentMoveRef = useRef<HTMLTableCellElement>(null)
+
+  // Drag-to-reorder state
+  const [draggedVariationId, setDraggedVariationId] = useState<number | null>(null)
+
+  const handleVariationDragStart = useCallback((e: React.DragEvent, id: number) => {
+    setDraggedVariationId(id)
+    e.dataTransfer.setData('variationId', String(id))
+    e.dataTransfer.effectAllowed = 'move'
+  }, [])
+
+  const handleVariationDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }, [])
+
+  const handleVariationDrop = useCallback((e: React.DragEvent, targetId: number, branchPly: number) => {
+    e.preventDefault()
+    const sourceId = parseInt(e.dataTransfer.getData('variationId'), 10)
+    if (!sourceId || sourceId === targetId || !variations || !onReorderVariations) return
+    const plyVariations = variations.filter(v => v.branchPly === branchPly)
+    const sourceIdx = plyVariations.findIndex(v => v.id === sourceId)
+    const targetIdx = plyVariations.findIndex(v => v.id === targetId)
+    if (sourceIdx === -1 || targetIdx === -1) return
+    const reordered = [...plyVariations]
+    reordered.splice(sourceIdx, 1)
+    reordered.splice(targetIdx, 0, plyVariations[sourceIdx])
+    onReorderVariations(branchPly, reordered.map(v => v.id!))
+    setDraggedVariationId(null)
+  }, [variations, onReorderVariations])
 
   // Track which ply has the comment trigger icon visible (hover / right-click)
   const [commentMenuPly, setCommentMenuPly] = useState<number | null>(null)
@@ -326,10 +357,10 @@ export default function MoveList({
                 {/* Variations branching after white's move */}
                 {variationsAfterWhite.map(sl => (
                   <VariationRow
-                    key={`sl-${sl.branchPly}`}
+                    key={`sl-${sl.id ?? sl.branchPly}`}
                     variation={sl}
-                    isActive={activeVariationBranchPly === sl.branchPly}
-                    variationMoves={activeVariationBranchPly === sl.branchPly ? variationMoves : undefined}
+                    isActive={activeVariationBranchPly === sl.branchPly && activeVariationId === sl.id}
+                    variationMoves={activeVariationBranchPly === sl.branchPly && activeVariationId === sl.id ? variationMoves : undefined}
                     variationPly={variationPly}
                     onVariationJump={onVariationJump}
                     onDismiss={onDismissVariation}
@@ -337,6 +368,10 @@ export default function MoveList({
                     comment={sl.id != null ? variationComments?.get(sl.id) : undefined}
                     onSaveComment={onSaveVariationComment}
                     onDeleteComment={onDeleteVariationComment}
+                    onDragStart={onReorderVariations ? handleVariationDragStart : undefined}
+                    onDragOver={onReorderVariations ? handleVariationDragOver : undefined}
+                    onDrop={onReorderVariations ? (e, id) => handleVariationDrop(e, id, sl.branchPly) : undefined}
+                    isDragging={draggedVariationId === sl.id}
                   />
                 ))}
 
@@ -365,10 +400,10 @@ export default function MoveList({
                 {/* Variations branching after black's move */}
                 {variationsAfterBlack.map(sl => (
                   <VariationRow
-                    key={`sl-${sl.branchPly}`}
+                    key={`sl-${sl.id ?? sl.branchPly}`}
                     variation={sl}
-                    isActive={activeVariationBranchPly === sl.branchPly}
-                    variationMoves={activeVariationBranchPly === sl.branchPly ? variationMoves : undefined}
+                    isActive={activeVariationBranchPly === sl.branchPly && activeVariationId === sl.id}
+                    variationMoves={activeVariationBranchPly === sl.branchPly && activeVariationId === sl.id ? variationMoves : undefined}
                     variationPly={variationPly}
                     onVariationJump={onVariationJump}
                     onDismiss={onDismissVariation}
@@ -376,6 +411,10 @@ export default function MoveList({
                     comment={sl.id != null ? variationComments?.get(sl.id) : undefined}
                     onSaveComment={onSaveVariationComment}
                     onDeleteComment={onDeleteVariationComment}
+                    onDragStart={onReorderVariations ? handleVariationDragStart : undefined}
+                    onDragOver={onReorderVariations ? handleVariationDragOver : undefined}
+                    onDrop={onReorderVariations ? (e, id) => handleVariationDrop(e, id, sl.branchPly) : undefined}
+                    isDragging={draggedVariationId === sl.id}
                   />
                 ))}
               </Fragment>

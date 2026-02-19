@@ -145,6 +145,10 @@ import { resultNumericToDisplay } from '../../shared/converters/resultConverter.
 import { extractGameData } from '../../shared/pgn/gameExtractor.js'
 ```
 
+### No Database Migrations (Pre-Release)
+
+Schema is defined in `src/shared/database/schema.ts` with `CREATE TABLE IF NOT EXISTS` — it only runs on a fresh DB. There is **no migration system**. When schema changes are needed, delete the collection directories and reimport PGN files.
+
 ### Database Main-Process Only
 
 SQLite unavailable in renderer. Access path: renderer → `window.electron.fn()` → preload → `src/main/ipc/` handler.

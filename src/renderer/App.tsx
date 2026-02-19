@@ -12,7 +12,6 @@ import PanelHandle from './components/PanelHandle.js'
 import { TooltipProvider } from '@/components/ui/tooltip.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { getCheckColor } from './utils/chessHelpers.js'
-import { formatMovePreview } from './utils/variationFormatter.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardState } from './hooks/useBoardState.js'
@@ -339,10 +338,17 @@ export default function App() {
                     }}
                     variations={variationState.variations}
                     activeVariationBranchPly={variationState.activeBranchPly}
+                    activeVariationId={variationState.activeVariationId}
                     variationMoves={variationState.variationMoves}
                     variationPly={variationState.variationPly}
                     onVariationJump={variationState.jumpToVariationMove}
                     onDismissVariation={variationState.requestDeletion}
+                    onReorderVariations={selectedGameCollectionId && selectedGame
+                      ? async (branchPly, orderedIds) => {
+                          await window.electron.reorderVariations(selectedGameCollectionId, selectedGame.id, branchPly, orderedIds)
+                          variationState.loadVariations(selectedGameCollectionId, selectedGame.id)
+                        }
+                      : undefined}
                     isInVariation={variationState.isInVariation}
                     commentHandlers={{
                       comments: commentState.comments,
@@ -451,19 +457,6 @@ export default function App() {
           confirmIcon="trash"
         />
 
-        {/* Variation replacement confirmation */}
-        <ConfirmDialog
-          isOpen={variationState.pendingReplacement !== null}
-          title="Replace Variation"
-          message={
-            variationState.pendingReplacement
-              ? `Replace existing variation (${formatMovePreview(variationState.pendingReplacement.existingMoves)}) with new move (${variationState.pendingReplacement.newMove})? This cannot be undone.`
-              : ''
-          }
-          onConfirm={variationState.confirmReplacement}
-          onCancel={variationState.cancelReplacement}
-          confirmIcon="trash"
-        />
       </div>
     </TooltipProvider>
   )

@@ -30,17 +30,17 @@ export const GAMES_SCHEMA_SQL = `
  * SQLite schema for variations table.
  *
  * ON DELETE CASCADE: deleting a game automatically cleans up its variations.
- * UNIQUE(gameId, branchPly): enforces one variation per branch point — upsert overwrites
- * rather than creating duplicates.
+ * Multiple variations per (gameId, branchPly) are allowed — stacked in the UI.
+ * displayOrder: 0-indexed ordering within a ply group, updated by drag-to-reorder.
  */
 export const VARIATIONS_SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS variations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     gameId INTEGER NOT NULL,
     branchPly INTEGER NOT NULL,
+    displayOrder INTEGER NOT NULL DEFAULT 0,
     moves TEXT NOT NULL,
-    FOREIGN KEY (gameId) REFERENCES games(id) ON DELETE CASCADE,
-    UNIQUE(gameId, branchPly)
+    FOREIGN KEY (gameId) REFERENCES games(id) ON DELETE CASCADE
   );
   CREATE INDEX IF NOT EXISTS idx_variations_game ON variations(gameId);
 `

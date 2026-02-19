@@ -316,11 +316,11 @@ export class GameDatabase {
    * Get all variations for a game
    *
    * @param gameId - Database ID of the game
-   * @returns Array of variation records ordered by branchPly
+   * @returns Array of variation records ordered by branchPly then displayOrder
    */
   getVariations(gameId: number): VariationData[] {
     try {
-      const stmt = this.db.prepare('SELECT id, gameId, branchPly, moves FROM variations WHERE gameId = ? ORDER BY branchPly')
+      const stmt = this.db.prepare('SELECT id, gameId, branchPly, displayOrder, moves FROM variations WHERE gameId = ? ORDER BY branchPly, displayOrder')
       return stmt.all(gameId) as VariationData[]
     } catch (error) {
       logError('GameDatabase', 'getVariations', { dbPath: this.dbPath, gameId }, error)
@@ -329,54 +329,89 @@ export class GameDatabase {
   }
 
   /**
-   * Insert or update a variation
+   * Insert a new variation. displayOrder is assigned as the current count at that ply.
    *
    * @param gameId - Database ID of the game
    * @param branchPly - Mainline ply where variation departs (1-based)
    * @param moves - Space-separated SAN moves
-   * @returns The created/updated variation record
+   * @returns The created variation record
    */
-  upsertVariation(gameId: number, branchPly: number, moves: string): VariationData {
+  createVariation(gameId: number, branchPly: number, moves: string): VariationData {
     try {
-      const stmt = this.db.prepare(`
-        INSERT INTO variations (gameId, branchPly, moves)
-        VALUES (?, ?, ?)
-        ON CONFLICT(gameId, branchPly) DO UPDATE SET moves = excluded.moves
-        RETURNING id, gameId, branchPly, moves
-      `)
-      const result = stmt.get(gameId, branchPly, moves) as VariationData
+      const result = this.db.transaction(() => {
+        const countRow = this.db
+          .prepare('SELECT COUNT(*) as cnt FROM variations WHERE gameId = ? AND branchPly = ?')
+          .get(gameId, branchPly) as { cnt: number }
+        const displayOrder = countRow.cnt
+        return this.db.prepare(`
+          INSERT INTO variations (gameId, branchPly, displayOrder, moves)
+          VALUES (?, ?, ?, ?)
+          RETURNING id, gameId, branchPly, displayOrder, moves
+        `).get(gameId, branchPly, displayOrder, moves) as VariationData
+      })()
       return result
     } catch (error) {
-      logError('GameDatabase', 'upsertVariation', { dbPath: this.dbPath, gameId, branchPly }, error)
+      logError('GameDatabase', 'createVariation', { dbPath: this.dbPath, gameId, branchPly }, error)
       throw error
     }
   }
 
   /**
-   * Delete a variation and its associated comment (if any) in a transaction.
-   * The FK CASCADE on variationId provides automatic cleanup for new-schema DBs.
-   * The manual comment delete provides backwards compatibility with old-schema DBs.
+   * Update the moves of an existing variation by id.
+   *
+   * @param id - Variation database ID
+   * @param moves - New space-separated SAN moves
+   * @returns The updated variation record
+   */
+  updateVariation(id: number, moves: string): VariationData {
+    try {
+      const stmt = this.db.prepare(`
+        UPDATE variations SET moves = ? WHERE id = ?
+        RETURNING id, gameId, branchPly, displayOrder, moves
+      `)
+      const result = stmt.get(moves, id) as VariationData | undefined
+      if (!result) throw new Error(`Variation ${id} not found`)
+      return result
+    } catch (error) {
+      logError('GameDatabase', 'updateVariation', { dbPath: this.dbPath, id }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Delete a variation by id (FK CASCADE handles comment cleanup).
    *
    * @param gameId - Database ID of the game
-   * @param branchPly - Mainline ply where variation departs
+   * @param id - Variation database ID
    */
-  deleteVariation(gameId: number, branchPly: number): void {
+  deleteVariation(gameId: number, id: number): void {
     try {
-      const deleteWithComment = this.db.transaction(() => {
-        const variationRow = this.db
-          .prepare('SELECT id FROM variations WHERE gameId = ? AND branchPly = ?')
-          .get(gameId, branchPly) as { id: number } | undefined
-        if (variationRow) {
-          // Manual delete for backwards compat; FK CASCADE handles this for new-schema DBs.
-          this.db
-            .prepare('DELETE FROM comments WHERE gameId = ? AND ply = 0 AND variationId IS ?')
-            .run(gameId, variationRow.id)
-        }
-        this.db.prepare('DELETE FROM variations WHERE gameId = ? AND branchPly = ?').run(gameId, branchPly)
-      })
-      deleteWithComment()
+      this.db.prepare('DELETE FROM variations WHERE id = ? AND gameId = ?').run(id, gameId)
     } catch (error) {
-      logError('GameDatabase', 'deleteVariation', { dbPath: this.dbPath, gameId, branchPly }, error)
+      logError('GameDatabase', 'deleteVariation', { dbPath: this.dbPath, gameId, id }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Update displayOrder for a set of variations at a given ply.
+   * orderedIds must all belong to the same (gameId, branchPly).
+   *
+   * @param gameId - Database ID of the game
+   * @param branchPly - The ply group being reordered
+   * @param orderedIds - Variation IDs in their new display order (index = new displayOrder)
+   */
+  reorderVariations(gameId: number, branchPly: number, orderedIds: number[]): void {
+    try {
+      const reorder = this.db.transaction(() => {
+        const stmt = this.db.prepare('UPDATE variations SET displayOrder = ? WHERE id = ? AND gameId = ? AND branchPly = ?')
+        orderedIds.forEach((id, index) => {
+          stmt.run(index, id, gameId, branchPly)
+        })
+      })
+      reorder()
+    } catch (error) {
+      logError('GameDatabase', 'reorderVariations', { dbPath: this.dbPath, gameId, branchPly }, error)
       throw error
     }
   }

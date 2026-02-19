@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { Trash2, ChevronDown, ChevronRight } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronRight, GripVertical } from 'lucide-react'
 import {
   parseVariationMoves,
   variationMoveNumber,
@@ -18,12 +18,17 @@ export interface VariationRowProps {
   isActive: boolean
   variationMoves?: string[]
   variationPly?: number
-  onVariationJump?: (branchPly: number, ply: number) => void
-  onDismiss?: (branchPly: number) => void
+  onVariationJump?: (id: number, branchPly: number, ply: number) => void
+  onDismiss?: (id: number) => void
   isInVariation?: boolean
   comment?: CommentData
   onSaveComment?: (variationId: number, text: string) => void
   onDeleteComment?: (variationId: number) => void
+  // Drag-to-reorder props (omit when reorder is not enabled)
+  onDragStart?: (e: React.DragEvent, id: number) => void
+  onDragOver?: (e: React.DragEvent) => void
+  onDrop?: (e: React.DragEvent, id: number) => void
+  isDragging?: boolean
 }
 
 export function VariationRow({
@@ -37,6 +42,10 @@ export function VariationRow({
   comment,
   onSaveComment,
   onDeleteComment,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  isDragging,
 }: VariationRowProps) {
   const [expanded, setExpanded] = useState(false)
   const [localValue, setLocalValue] = useState(comment?.text ?? '')
@@ -95,8 +104,8 @@ export function VariationRow({
   }
 
   const handleTextareaFocus = () => {
-    if (!isActive) {
-      onVariationJump?.(variation.branchPly, 1)
+    if (!isActive && variation.id != null) {
+      onVariationJump?.(variation.id, variation.branchPly, 1)
     }
   }
 
@@ -144,7 +153,7 @@ export function VariationRow({
 
   const trashButton = trashVisible ? (
     <button
-      onClick={(e) => { e.stopPropagation(); onDismiss?.(variation.branchPly) }}
+      onClick={(e) => { e.stopPropagation(); if (variation.id != null) onDismiss?.(variation.id) }}
       className="text-ui-text-dimmer hover:text-red-400 p-0.5 cursor-pointer animate-in fade-in-0 zoom-in-95"
       title="Dismiss variation"
     >
@@ -162,6 +171,14 @@ export function VariationRow({
       onMouseLeave={handleHeaderMouseLeave}
       onClick={() => setExpanded(!expanded)}
     >
+      {onDragStart && (
+        <span title="Drag to reorder">
+          <GripVertical
+            size={12}
+            className="text-ui-text-dimmer shrink-0 cursor-grab active:cursor-grabbing"
+          />
+        </span>
+      )}
       <button
         onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
         className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer"
@@ -187,7 +204,14 @@ export function VariationRow({
   return (
     <TableRow className="border-0 hover:bg-transparent">
       <TableCell colSpan={3} className="p-0 border-0">
-        <div className={containerClass}>
+        <div
+          className={containerClass}
+          style={{ opacity: isDragging ? 0.5 : 1 }}
+          draggable={!!onDragStart}
+          onDragStart={onDragStart && variation.id != null ? e => onDragStart(e, variation.id!) : undefined}
+          onDragOver={onDragOver}
+          onDrop={onDrop && variation.id != null ? e => onDrop(e, variation.id!) : undefined}
+        >
           {/* Header row: toggle + first move preview + dismiss */}
           {!expanded ? (
             <Tooltip>
@@ -219,7 +243,7 @@ export function VariationRow({
                         </span>
                       )}
                       <span
-                        onClick={() => onVariationJump?.(variation.branchPly, ply)}
+                        onClick={() => variation.id != null && onVariationJump?.(variation.id, variation.branchPly, ply)}
                         className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
                           isCurrent ? 'bg-ui-accent text-white font-bold' : ''
                         }`}

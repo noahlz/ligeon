@@ -24,31 +24,18 @@ export interface UseVariationStateParams {
   forceBoardSync: () => void
 }
 
-/**
- * Pending variation replacement request awaiting user confirmation.
- * Set when user makes a move that would replace an existing variation at the same branch point.
- */
-export interface PendingVariationReplacement {
-  /** 1-based mainline ply where the variation branches */
-  branchPly: number
-  /** Space-separated SAN moves of the existing variation that would be replaced */
-  existingMoves: string
-  /** SAN of the new move the user attempted */
-  newMove: string
-}
-
 export interface UseVariationStateReturn {
   variations: VariationData[]
   isInVariation: boolean
   activeBranchPly: number | null
+  activeVariationId: number | null
   variationMoves: string[]
   variationPly: number
   variationMaxPly: number
   handleUserMove: (from: string, to: string) => void
   exitVariation: () => void
-  enterVariation: (branchPly: number, targetPly?: number) => void
-  jumpToVariationMove: (branchPly: number, ply: number) => void
-  dismissVariation: (branchPly: number) => void
+  jumpToVariationMove: (id: number, branchPly: number, ply: number) => void
+  dismissVariation: (id: number) => void
   advanceVariation: () => boolean
   variationNav: {
     first: () => void
@@ -61,23 +48,10 @@ export interface UseVariationStateReturn {
   dests: Map<Key, Key[]>
   turnColor: 'white' | 'black'
   checkColor: 'white' | 'black' | false
-  pendingReplacement: PendingVariationReplacement | null
-  confirmReplacement: () => void
-  cancelReplacement: () => void
   pendingDeletion: number | null
-  requestDeletion: (branchPly: number) => void
+  requestDeletion: (id: number) => void
   confirmDeletion: () => void
   cancelDeletion: () => void
-}
-
-/**
- * Calculate maximum allowed variations based on game length.
- * Formula: max(1, floor(totalPlies / 12))
- * @param totalPlies - Total half-moves in the game
- * @returns Maximum number of variations allowed
- */
-export function getMaxVariations(totalPlies: number): number {
-  return Math.max(1, Math.floor(totalPlies / 12))
 }
 
 export function useVariationState({
@@ -92,19 +66,22 @@ export function useVariationState({
   const [variations, setVariations] = useState<VariationData[]>([])
   const [activeVariation, setActiveVariation] = useState<VariationManager | null>(null)
   const [activeBranchPly, setActiveBranchPly] = useState<number | null>(null)
+  const [activeVariationId, setActiveVariationId] = useState<number | null>(null)
   const [variationPly, setVariationPly] = useState(0)
   const [variationMaxPly, setVariationMaxPly] = useState(0)
   const [variationMoves, setVariationMoves] = useState<string[]>([])
   const [dests, setDests] = useState<Map<Key, Key[]>>(new Map())
   const [turnColor, setTurnColor] = useState<'white' | 'black'>('white')
   const [checkColor, setCheckColor] = useState<'white' | 'black' | false>(false)
-  const [pendingReplacement, setPendingReplacement] = useState<PendingVariationReplacement | null>(null)
   const [pendingDeletion, setPendingDeletion] = useState<number | null>(null)
 
   // Mirror currentPly in a ref to avoid re-creating handleUserMove on every ply change.
-  // Keeps callback reference stable for performance and prevents unnecessary re-renders.
   const currentPlyRef = useRef(currentPly)
   currentPlyRef.current = currentPly
+
+  // Ref for the active variation id — allows persistVariation to access it synchronously
+  // without being in its dependency array (avoids stale closures).
+  const activeVariationIdRef = useRef<number | null>(null)
 
   const isInVariation = activeVariation !== null
 
@@ -126,6 +103,8 @@ export function useVariationState({
     autoPlayStop()
     setActiveVariation(null)
     setActiveBranchPly(null)
+    setActiveVariationId(null)
+    activeVariationIdRef.current = null
     setVariationMoves([])
     setVariationPly(0)
     setVariationMaxPly(0)
@@ -133,11 +112,11 @@ export function useVariationState({
     setCheckColor(false)
   }, [autoPlayStop])
 
-  /** Enter an existing saved variation by branchPly, optionally jumping to a target ply. */
-  const enterVariation = useCallback((branchPly: number, targetPly?: number) => {
+  /** Enter an existing saved variation by id, optionally jumping to a target ply. */
+  const enterVariation = useCallback((id: number, branchPly: number, targetPly?: number) => {
     if (!chessManager) return
     autoPlayStop()
-    const variationData = variations.find(s => s.branchPly === branchPly)
+    const variationData = variations.find(s => s.id === id)
     if (!variationData) return
     const fen = chessManager.getFenAtPly(branchPly - 1)
     if (!fen) return
@@ -146,6 +125,8 @@ export function useVariationState({
     manager.goto(ply)
     setActiveVariation(manager)
     setActiveBranchPly(branchPly)
+    setActiveVariationId(id)
+    activeVariationIdRef.current = id
     updateBoardState(manager, ply)
     syncVariationState(manager)
   }, [chessManager, variations, updateBoardState, syncVariationState, autoPlayStop])
@@ -153,83 +134,69 @@ export function useVariationState({
   const loadVariations = useCallback(async (colId: string, gId: number) => {
     const data = await window.electron.getVariations(colId, gId)
     setVariations(data)
-    // Clear active variation when loading new game
     exitVariation()
   }, [exitVariation])
 
-  const dismissVariation = useCallback(async (branchPly: number) => {
+  const dismissVariation = useCallback(async (id: number) => {
     if (!collectionId || gameId === null) return
+    // Capture before removal so we can navigate mainline after dismissal
+    const dismissed = variations.find(s => s.id === id)
 
     try {
-      await window.electron.deleteVariation(collectionId, gameId, branchPly)
-      setVariations(prev => prev.filter(s => s.branchPly !== branchPly))
+      await window.electron.deleteVariation(collectionId, gameId, id)
+      setVariations(prev => prev.filter(s => s.id !== id))
 
-      // If we're dismissing the active variation, exit and navigate to the mainline move that was replaced
-      if (activeBranchPly === branchPly) {
+      if (activeVariationId === id) {
         exitVariation()
-        if (chessManager) {
-          updateBoardState(chessManager, branchPly)
+        if (chessManager && dismissed) {
+          updateBoardState(chessManager, dismissed.branchPly)
         }
       }
     } catch (error) {
       console.error('Failed to delete variation:', error)
     }
-  }, [collectionId, gameId, activeBranchPly, exitVariation, chessManager, updateBoardState])
+  }, [collectionId, gameId, activeVariationId, exitVariation, chessManager, updateBoardState, variations])
 
-  /** Persist variation to database and update local state */
+  /**
+   * Persist variation to database and update local state.
+   * Uses activeVariationIdRef to determine create vs update — the ref is updated
+   * synchronously when a variation is entered or created, so it's always current.
+   */
   const persistVariation = useCallback((branchPly: number, movesStr: string) => {
     if (!collectionId || gameId === null) return
 
-    window.electron.upsertVariation(collectionId, gameId, branchPly, movesStr)
-      .then(saved => {
-        if (saved) {
-          setVariations(prev => {
-            const idx = prev.findIndex(s => s.branchPly === branchPly)
-            if (idx >= 0) {
-              const updated = [...prev]
-              updated[idx] = saved
-              return updated
-            }
-            return [...prev, saved]
-          })
-        }
-      })
-      .catch(error => {
-        console.error('Failed to persist variation:', error)
-      })
+    const currentId = activeVariationIdRef.current
+
+    if (currentId !== null) {
+      // Update existing variation
+      window.electron.updateVariation(collectionId, gameId, currentId, movesStr)
+        .then(saved => {
+          if (saved) {
+            setVariations(prev => prev.map(s => s.id === currentId ? saved : s))
+          }
+        })
+        .catch(error => {
+          console.error('Failed to update variation:', error)
+        })
+    } else {
+      // Create new variation
+      window.electron.createVariation(collectionId, gameId, branchPly, movesStr)
+        .then(saved => {
+          if (saved) {
+            activeVariationIdRef.current = saved.id ?? null
+            setActiveVariationId(saved.id ?? null)
+            setVariations(prev => [...prev, saved])
+          }
+        })
+        .catch(error => {
+          console.error('Failed to create variation:', error)
+        })
+    }
   }, [collectionId, gameId])
 
-  /** Confirm replacement of existing variation */
-  const confirmReplacement = useCallback(() => {
-    if (!pendingReplacement || !chessManager) return
-
-    const { branchPly, newMove } = pendingReplacement
-    const ply = branchPly - 1
-    const fen = chessManager.getFenAtPly(ply)
-    if (!fen) return
-
-    // Create new variation with just the new move (replaces existing via upsert)
-    const manager = createVariationManager(fen)
-    if (!manager.appendMove(newMove)) return
-
-    setActiveVariation(manager)
-    setActiveBranchPly(branchPly)
-    updateBoardState(manager, manager.getCurrentPly())
-    syncVariationState(manager)
-    persistVariation(branchPly, manager.getMovesString())
-
-    setPendingReplacement(null)
-  }, [pendingReplacement, chessManager, updateBoardState, syncVariationState, persistVariation])
-
-  /** Cancel replacement of existing variation */
-  const cancelReplacement = useCallback(() => {
-    setPendingReplacement(null)
-    forceBoardSync()
-  }, [forceBoardSync])
-
   /** Request deletion of a variation (shows confirmation dialog) */
-  const requestDeletion = useCallback((branchPly: number) => {
-    setPendingDeletion(branchPly)
+  const requestDeletion = useCallback((id: number) => {
+    setPendingDeletion(id)
   }, [])
 
   /** Confirm deletion of pending variation */
@@ -250,17 +217,12 @@ export function useVariationState({
 
     autoPlayStop()
 
-    /** Attempt move and handle success/failure paths. Returns true on success. */
     const attemptMove = (): boolean => {
-      // Three-way branch: already in variation, matches mainline, or creates new variation.
-      // Priority: extend active variation first, then check if move continues mainline,
-      // finally create a new variation if the move differs from mainline.
       if (activeVariation && activeBranchPly !== null) {
         // Already in a variation — try appending the move
         const san = activeVariation.tryMove(from, to)
         if (!san) return false
 
-        // Check if this move matches the next existing move in the variation
         const nextSan = activeVariation.getNextSan()
         if (nextSan === san) {
           // Advance through existing variation without truncation
@@ -273,18 +235,13 @@ export function useVariationState({
 
         // Different move — truncate and append
         activeVariation.appendMove(san)
-
-        // Update board from variation manager
         updateBoardState(activeVariation, activeVariation.getCurrentPly())
         syncVariationState(activeVariation)
-
-        // Persist
         persistVariation(activeBranchPly, activeVariation.getMovesString())
         return true
       }
 
       // Not in a variation — check if the move matches the mainline.
-      // If it matches, just advance the mainline without creating a variation.
       const ply = currentPlyRef.current
       const san = chessManager.tryMove(from, to)
       if (!san) return false
@@ -296,40 +253,26 @@ export function useVariationState({
         return true
       }
 
-      // Different move — create a variation.
-      // Density limit prevents UI clutter: max 1 variation per 12 plys (6 full moves).
-      // Short games get fewer variation slots.
-      const totalPlies = chessManager.getTotalPlies()
-      const maxVariations = getMaxVariations(totalPlies)
-      if (variations.length >= maxVariations) {
-        console.warn(`Variation density limit reached (${maxVariations})`)
-        return false
-      }
-
-      // Check if a variation already exists at this branch point.
-      // branchPly is ply + 1 (1-indexed) — it's the mainline ply the variation *replaces*.
+      // Different move — check for a matching existing variation at this branch point.
       const branchPly = ply + 1
-      const existing = variations.find(s => s.branchPly === branchPly)
+      const matchingVariation = variations.find(s => {
+        if (s.branchPly !== branchPly) return false
+        return s.moves.split(' ')[0] === san
+      })
 
-      if (existing) {
-        const firstVariationMove = existing.moves.split(' ')[0]
-        if (firstVariationMove === san) {
-          // Move matches first variation move — enter the variation
-          enterVariation(branchPly, 1)
-          return true
-        }
-        // Different move but variation already exists at this branch point — request confirmation
-        setPendingReplacement({
-          branchPly,
-          existingMoves: existing.moves,
-          newMove: san,
-        })
-        return false
+      if (matchingVariation) {
+        // Enter the matching variation
+        enterVariation(matchingVariation.id!, branchPly, 1)
+        return true
       }
 
-      // No existing variation — create new one
+      // No matching variation — create a new one (stacks with any existing at this ply).
       const fen = chessManager.getFenAtPly(ply)
       if (!fen) return false
+
+      // Reset id ref so persistVariation calls createVariation
+      activeVariationIdRef.current = null
+      setActiveVariationId(null)
 
       const manager = createVariationManager(fen)
       if (!manager.appendMove(san)) return false
@@ -347,10 +290,7 @@ export function useVariationState({
     }
   }, [chessManager, collectionId, gameId, activeVariation, activeBranchPly, variations, enterVariation, updateBoardState, syncVariationState, autoPlayStop, persistVariation, forceBoardSync])
 
-  /** Navigate variation to a computed ply. Returns true if navigation occurred.
-   * Takes a compute function instead of a ply number to DRY the null-check + goto + sync pattern.
-   * Each nav direction (first/prev/next/last) just provides its own compute logic.
-   */
+  /** Navigate variation to a computed ply. */
   const navigateVariation = useCallback((computePly: (manager: VariationManager) => number | null): boolean => {
     if (!activeVariation) return false
     const ply = computePly(activeVariation)
@@ -362,7 +302,7 @@ export function useVariationState({
     return true
   }, [activeVariation, updateBoardState, syncVariationState])
 
-  /** Advance variation by one ply. Returns true if advanced, false if at end or not in variation. */
+  /** Advance variation by one ply. Returns true if advanced. */
   const advanceVariation = useCallback((): boolean => {
     return navigateVariation(m => {
       const ply = m.getCurrentPly()
@@ -370,7 +310,6 @@ export function useVariationState({
     })
   }, [navigateVariation])
 
-  // Variation navigation
   const variationNav = {
     first: useCallback(() => {
       navigateVariation(() => 0)
@@ -400,28 +339,28 @@ export function useVariationState({
   }
 
   /**
-   * Jump to a specific move in a variation.
+   * Jump to a specific move in a variation by id.
    * If already in the target variation, navigates to the ply.
    * Otherwise, enters the variation and navigates to the ply.
    */
-  const jumpToVariationMove = useCallback((branchPly: number, ply: number) => {
-    if (activeBranchPly === branchPly && isInVariation) {
+  const jumpToVariationMove = useCallback((id: number, branchPly: number, ply: number) => {
+    if (activeBranchPly === branchPly && activeVariationId === id && isInVariation) {
       navigateVariation(() => ply)
     } else {
-      enterVariation(branchPly, ply)
+      enterVariation(id, branchPly, ply)
     }
-  }, [activeBranchPly, isInVariation, navigateVariation, enterVariation])
+  }, [activeBranchPly, activeVariationId, isInVariation, navigateVariation, enterVariation])
 
   return {
     variations,
     isInVariation,
     activeBranchPly,
+    activeVariationId,
     variationMoves,
     variationPly,
     variationMaxPly,
     handleUserMove,
     exitVariation,
-    enterVariation,
     jumpToVariationMove,
     dismissVariation,
     advanceVariation,
@@ -430,9 +369,6 @@ export function useVariationState({
     dests,
     turnColor,
     checkColor,
-    pendingReplacement,
-    confirmReplacement,
-    cancelReplacement,
     pendingDeletion,
     requestDeletion,
     confirmDeletion,
