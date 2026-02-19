@@ -1,15 +1,16 @@
 # Ligeon TODOs
 
-### Features 
+## Multiple variations
+- Support multiple variations per ply
+- Remove variations limit. Let the user make themselves miserable.
 
-**PGN Export**
+## PGN Export
 - Extend buildFullPgn to export game to PGN with all variations
 - Add tests for PGN export with variations 
 - Verify exported PGN opens correctly in Lichess
 
-**Error Reporting**
-- If user tries to create one more variation but max reached, show toast error "Max variations reached (1 per 6 moves)"
-- Any error that originates from a user action should have a toast in addition to a console log.
+## Error Reporting
+- Any error or warning that originates from a user action should have a toast in addition to a console log.
 
 ## Code Quality
 
