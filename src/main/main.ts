@@ -8,7 +8,7 @@ import {
   deleteCollection,
 } from './ipc/collectionHandlers.js'
 import { searchGames, getGameMoves, getGameCount, getAvailableDates, getAvailableEcoCodes } from './ipc/gameHandlers.js'
-import { getVariations, upsertVariation, deleteVariation } from './ipc/variationHandlers.js'
+import { getVariations, createVariation, updateVariation, deleteVariation, reorderVariations } from './ipc/variationHandlers.js'
 import { getComments, upsertComment, deleteComment, upsertVariationComment, deleteVariationComment } from './ipc/commentHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
@@ -180,12 +180,20 @@ function setupIpcHandlers() {
     getVariations(collectionId, parseInt(gameId, 10))
   )
 
-  ipcMain.handle('upsert-variation', async (_event, { collectionId, gameId, branchPly, moves }) =>
-    upsertVariation(collectionId, parseInt(gameId, 10), branchPly, moves)
+  ipcMain.handle('create-variation', async (_event, { collectionId, gameId, branchPly, moves }) =>
+    createVariation(collectionId, parseInt(gameId, 10), branchPly, moves)
   )
 
-  ipcMain.handle('delete-variation', async (_event, { collectionId, gameId, branchPly }) =>
-    deleteVariation(collectionId, parseInt(gameId, 10), branchPly)
+  ipcMain.handle('update-variation', async (_event, { collectionId, gameId, id, moves }) =>
+    updateVariation(collectionId, parseInt(gameId, 10), id, moves)
+  )
+
+  ipcMain.handle('delete-variation', async (_event, { collectionId, gameId, id }) =>
+    deleteVariation(collectionId, parseInt(gameId, 10), id)
+  )
+
+  ipcMain.handle('reorder-variations', async (_event, { collectionId, gameId, branchPly, orderedIds }) =>
+    reorderVariations(collectionId, parseInt(gameId, 10), branchPly, orderedIds)
   )
 
   // Comment handlers

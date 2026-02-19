@@ -145,6 +145,10 @@ import { resultNumericToDisplay } from '../../shared/converters/resultConverter.
 import { extractGameData } from '../../shared/pgn/gameExtractor.js'
 ```
 
+### No Database Migrations (Pre-Release)
+
+Project is pre-release, so don't bother with database schema migrations. Users will delete / re-import game collections.
+
 ### Database Main-Process Only
 
 SQLite unavailable in renderer. Access path: renderer → `window.electron.fn()` → preload → `src/main/ipc/` handler.

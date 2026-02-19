@@ -18,12 +18,18 @@ export interface VariationRowProps {
   isActive: boolean
   variationMoves?: string[]
   variationPly?: number
-  onVariationJump?: (branchPly: number, ply: number) => void
-  onDismiss?: (branchPly: number) => void
+  onVariationJump?: (id: number, branchPly: number, ply: number) => void
+  onDismiss?: (id: number) => void
   isInVariation?: boolean
   comment?: CommentData
   onSaveComment?: (variationId: number, text: string) => void
   onDeleteComment?: (variationId: number) => void
+  // Drag-to-reorder props (omit when reorder is not enabled)
+  onDragStart?: (e: React.DragEvent, id: number) => void
+  onDragOver?: (e: React.DragEvent) => void
+  onDrop?: (e: React.DragEvent, id: number) => void
+  onDragEnd?: (e: React.DragEvent) => void
+  isDragging?: boolean
 }
 
 export function VariationRow({
@@ -37,10 +43,17 @@ export function VariationRow({
   comment,
   onSaveComment,
   onDeleteComment,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  isDragging,
 }: VariationRowProps) {
   const [expanded, setExpanded] = useState(false)
   const [localValue, setLocalValue] = useState(comment?.text ?? '')
   const [trashVisible, setTrashVisible] = useState(false)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const dragEnterCountRef = useRef(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const trashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -95,8 +108,8 @@ export function VariationRow({
   }
 
   const handleTextareaFocus = () => {
-    if (!isActive) {
-      onVariationJump?.(variation.branchPly, 1)
+    if (!isActive && variation.id != null) {
+      onVariationJump?.(variation.id, variation.branchPly, 1)
     }
   }
 
@@ -114,6 +127,25 @@ export function VariationRow({
   useEffect(() => {
     if (isActive) setExpanded(true)
   }, [isActive])
+
+  // Use depth counter to avoid flicker when dragging over nested elements
+  const handleDragEnter = useCallback(() => {
+    dragEnterCountRef.current++
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = useCallback(() => {
+    dragEnterCountRef.current--
+    if (dragEnterCountRef.current === 0) {
+      setIsDragOver(false)
+    }
+  }, [])
+
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    dragEnterCountRef.current = 0
+    setIsDragOver(false)
+    onDragEnd?.(e)
+  }, [onDragEnd])
 
   // Use live activeVariationMoves if this variation is active (may include new moves not yet persisted).
   // Otherwise fall back to the persisted variation.moves from the database.
@@ -136,58 +168,72 @@ export function VariationRow({
     return move
   }).join(' ')
 
-  // Show full accent border when in variation but no move is highlighted
-  const showAccentBorder = isActive && isInVariation && (!variationPly || variationPly === 0)
+  // Show full accent border when in variation but no move is highlighted, or when dragging over
+  const showAccentBorder = (isActive && isInVariation && (!variationPly || variationPly === 0)) || isDragOver
   const containerClass = showAccentBorder
     ? 'ml-4 border-2 border-ui-accent bg-ui-bg-page rounded-sm my-0.5'
     : 'ml-4 border-l-2 border-ui-accent bg-ui-bg-page rounded-r-sm my-0.5'
 
-  const trashButton = trashVisible ? (
+  const trashButton = (
     <button
-      onClick={(e) => { e.stopPropagation(); onDismiss?.(variation.branchPly) }}
-      className="text-ui-text-dimmer hover:text-red-400 p-0.5 cursor-pointer animate-in fade-in-0 zoom-in-95"
+      onClick={(e) => { e.stopPropagation(); if (variation.id != null) onDismiss?.(variation.id) }}
+      className="text-ui-text-dimmer hover:text-red-400 p-0 cursor-pointer animate-in fade-in-0 zoom-in-95"
       title="Dismiss variation"
     >
       <Trash2 size={12} />
     </button>
-  ) : (
-    // Reserve space so layout doesn't shift when trash appears
-    <span className="w-5 shrink-0" />
   )
 
   const header = (
     <div
-      className="flex items-center gap-1 px-2 py-0.5 cursor-pointer hover:bg-ui-bg-hover"
+      className={`relative flex items-center gap-1 px-2 py-0.5 ${onDragStart ? 'cursor-grab' : 'cursor-pointer'} hover:bg-ui-bg-hover${expanded && onDragStart ? ' draggable-dot-bg' : ''}`}
       onMouseEnter={handleHeaderMouseEnter}
       onMouseLeave={handleHeaderMouseLeave}
       onClick={() => setExpanded(!expanded)}
     >
-      <button
-        onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
-        className="text-ui-text-dimmer hover:text-ui-text p-0.5 cursor-pointer"
-      >
-        {expanded
-          ? <ChevronDown size={12} />
-          : <ChevronRight size={12} />
-        }
-      </button>
+      <span className="inline-flex items-center bg-background border border-white/25 rounded-sm p-1 relative z-10">
+        <button
+          onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
+          className="text-ui-text-dimmer hover:text-ui-text p-0 cursor-pointer"
+        >
+          {expanded
+            ? <ChevronDown size={12} />
+            : <ChevronRight size={12} />
+          }
+        </button>
+      </span>
 
       {!expanded && (
-        <span className="text-sm text-ui-text-dimmer italic truncate flex-1">
+        <span className="text-sm text-ui-text-dimmer italic truncate flex-1 relative z-10 pl-2">
           {collapsedPrefix}{moves.slice(0, 3).join(' ')}{moves.length > 3 ? '…' : ''}
         </span>
       )}
+      {expanded && <span className="flex-1 relative z-10" />}
 
-      {expanded && <span className="flex-1" />}
-
-      {trashButton}
+      {trashVisible ? (
+        <span className="inline-flex items-center bg-background border border-white/25 rounded-sm p-1 relative z-10">
+          {trashButton}
+        </span>
+      ) : (
+        <span className="w-5 shrink-0" />
+      )}
     </div>
   )
 
   return (
     <TableRow className="border-0 hover:bg-transparent">
       <TableCell colSpan={3} className="p-0 border-0">
-        <div className={containerClass}>
+        <div
+          className={containerClass}
+          style={{ opacity: isDragging ? 0.5 : 1 }}
+          draggable={!!onDragStart}
+          onDragStart={onDragStart && variation.id != null ? e => onDragStart(e, variation.id!) : undefined}
+          onDragOver={onDragOver}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDrop={onDrop && variation.id != null ? e => { onDrop(e, variation.id!); dragEnterCountRef.current = 0; setIsDragOver(false) } : undefined}
+          onDragEnd={handleDragEnd}
+        >
           {/* Header row: toggle + first move preview + dismiss */}
           {!expanded ? (
             <Tooltip>
@@ -219,7 +265,7 @@ export function VariationRow({
                         </span>
                       )}
                       <span
-                        onClick={() => onVariationJump?.(variation.branchPly, ply)}
+                        onClick={() => variation.id != null && onVariationJump?.(variation.id, variation.branchPly, ply)}
                         className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
                           isCurrent ? 'bg-ui-accent text-white font-bold' : ''
                         }`}
@@ -235,7 +281,7 @@ export function VariationRow({
                 <textarea
                   ref={textareaRef}
                   value={localValue}
-                  placeholder="Add a comment..."
+                  placeholder="Optional comment..."
                   rows={1}
                   maxLength={500}
                   style={{ resize: 'none', height: 'auto', overflow: 'hidden' }}

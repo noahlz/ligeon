@@ -55,11 +55,17 @@ contextBridge.exposeInMainWorld('electron', {
   getVariations: (collectionId: string, gameId: number) =>
     ipcRenderer.invoke('get-variations', { collectionId, gameId }),
 
-  upsertVariation: (collectionId: string, gameId: number, branchPly: number, moves: string) =>
-    ipcRenderer.invoke('upsert-variation', { collectionId, gameId, branchPly, moves }),
+  createVariation: (collectionId: string, gameId: number, branchPly: number, moves: string) =>
+    ipcRenderer.invoke('create-variation', { collectionId, gameId, branchPly, moves }),
 
-  deleteVariation: (collectionId: string, gameId: number, branchPly: number) =>
-    ipcRenderer.invoke('delete-variation', { collectionId, gameId, branchPly }),
+  updateVariation: (collectionId: string, gameId: number, id: number, moves: string) =>
+    ipcRenderer.invoke('update-variation', { collectionId, gameId, id, moves }),
+
+  deleteVariation: (collectionId: string, gameId: number, id: number) =>
+    ipcRenderer.invoke('delete-variation', { collectionId, gameId, id }),
+
+  reorderVariations: (collectionId: string, gameId: number, branchPly: number, orderedIds: number[]) =>
+    ipcRenderer.invoke('reorder-variations', { collectionId, gameId, branchPly, orderedIds }),
 
   // === Comments ===
   getComments: (collectionId: string, gameId: number) =>

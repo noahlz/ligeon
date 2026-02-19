@@ -63,8 +63,10 @@ export interface ElectronAPI {
 
   // Variations
   getVariations: (collectionId: string, gameId: number) => Promise<VariationData[]>
-  upsertVariation: (collectionId: string, gameId: number, branchPly: number, moves: string) => Promise<VariationData | null>
-  deleteVariation: (collectionId: string, gameId: number, branchPly: number) => Promise<{ success: boolean }>
+  createVariation: (collectionId: string, gameId: number, branchPly: number, moves: string) => Promise<VariationData | null>
+  updateVariation: (collectionId: string, gameId: number, id: number, moves: string) => Promise<VariationData | null>
+  deleteVariation: (collectionId: string, gameId: number, id: number) => Promise<{ success: boolean }>
+  reorderVariations: (collectionId: string, gameId: number, branchPly: number, orderedIds: number[]) => Promise<{ success: boolean }>
 
   // Comments
   getComments: (collectionId: string, gameId: number) => Promise<CommentData[]>

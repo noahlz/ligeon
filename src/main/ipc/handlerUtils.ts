@@ -11,7 +11,8 @@ export function getValidatedDb(
   module: string,
   handler: string,
   collectionId: string,
-  gameId: number
+  gameId: number,
+  basePath: string = getCollectionsPath()
 ): GameDatabase | null {
   if (!validateCollectionId(collectionId)) {
     logError(module, handler, { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
@@ -23,5 +24,5 @@ export function getValidatedDb(
     return null
   }
 
-  return DatabaseManager.getInstance(collectionId, getCollectionsPath())
+  return DatabaseManager.getInstance(collectionId, basePath)
 }

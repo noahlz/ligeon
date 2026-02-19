@@ -195,3 +195,23 @@ html {
 .board-appear-animation {
   animation: board-appear 350ms ease-out;
 }
+
+/* Dot pattern background for draggable header bars */
+.draggable-dot-bg {
+  background-color: inherit;
+  position: relative;
+}
+
+.draggable-dot-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image:
+    radial-gradient(circle, currentColor 0.7px, transparent 1.5px);
+  background-size: 4px 4px;
+  background-position: 2px 2px;
+  color: var(--color-foreground, #888);
+}

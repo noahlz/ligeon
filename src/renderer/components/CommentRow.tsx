@@ -31,11 +31,10 @@ export function CommentRow({
   const trashRef = useRef<HTMLButtonElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
 
-  // Auto-focus and select all text when entering edit mode
+  // Auto-focus when entering edit mode
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus()
-      inputRef.current.select()
     }
   }, [isEditing])
 

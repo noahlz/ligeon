@@ -510,29 +510,30 @@ describe('GameDatabase', () => {
       expect(variations).toEqual([])
     })
 
-    test('upsertVariation inserts new variation', () => {
-      const result = db.upsertVariation(gameId, 3, 'd6 3. Bb5')
+    test('createVariation inserts new variation', () => {
+      const result = db.createVariation(gameId, 3, 'd6 3. Bb5')
       expect(result.gameId).toBe(gameId)
       expect(result.branchPly).toBe(3)
       expect(result.moves).toBe('d6 3. Bb5')
+      expect(result.displayOrder).toBe(0)
       expect(result.id).toBeDefined()
     })
 
-    test('upsertVariation updates existing variation at same branchPly', () => {
-      const first = db.upsertVariation(gameId, 3, 'd6')
-      const second = db.upsertVariation(gameId, 3, 'd6 3. Bb5 a6')
+    test('updateVariation updates moves of existing variation', () => {
+      const first = db.createVariation(gameId, 3, 'd6')
+      const updated = db.updateVariation(first.id!, 'd6 3. Bb5 a6')
 
-      expect(second.id).toBe(first.id)
-      expect(second.moves).toBe('d6 3. Bb5 a6')
+      expect(updated.id).toBe(first.id)
+      expect(updated.moves).toBe('d6 3. Bb5 a6')
 
       const variations = db.getVariations(gameId)
       expect(variations.length).toBe(1)
     })
 
     test('getVariations returns variations ordered by branchPly', () => {
-      db.upsertVariation(gameId, 5, 'Nc6')
-      db.upsertVariation(gameId, 1, 'd5')
-      db.upsertVariation(gameId, 3, 'd6')
+      db.createVariation(gameId, 5, 'Nc6')
+      db.createVariation(gameId, 1, 'd5')
+      db.createVariation(gameId, 3, 'd6')
 
       const variations = db.getVariations(gameId)
       expect(variations.length).toBe(3)
@@ -541,33 +542,35 @@ describe('GameDatabase', () => {
       expect(variations[2].branchPly).toBe(5)
     })
 
-    test('deleteVariation removes variation', () => {
-      db.upsertVariation(gameId, 3, 'd6')
-      db.deleteVariation(gameId, 3)
+    test('deleteVariation removes variation by id', () => {
+      const v = db.createVariation(gameId, 3, 'd6')
+      db.deleteVariation(gameId, v.id!)
 
       const variations = db.getVariations(gameId)
       expect(variations.length).toBe(0)
     })
 
     test('deleteVariation is idempotent', () => {
-      db.upsertVariation(gameId, 3, 'd6')
-      db.deleteVariation(gameId, 3)
-      expect(() => db.deleteVariation(gameId, 3)).not.toThrow()
+      const v = db.createVariation(gameId, 3, 'd6')
+      db.deleteVariation(gameId, v.id!)
+      expect(() => db.deleteVariation(gameId, v.id!)).not.toThrow()
     })
 
-    test('unique constraint prevents duplicate branchPly', () => {
-      db.upsertVariation(gameId, 3, 'first')
-      // Second insert at same ply should update (upsert behavior)
-      const result = db.upsertVariation(gameId, 3, 'second')
-      expect(result.moves).toBe('second')
+    test('allows multiple variations at same branchPly', () => {
+      const first = db.createVariation(gameId, 3, 'first')
+      const second = db.createVariation(gameId, 3, 'second')
+
+      expect(first.id).not.toBe(second.id)
+      expect(first.displayOrder).toBe(0)
+      expect(second.displayOrder).toBe(1)
 
       const variations = db.getVariations(gameId)
-      expect(variations.length).toBe(1)
+      expect(variations.length).toBe(2)
     })
 
     test('variations cascade delete with game', () => {
-      db.upsertVariation(gameId, 3, 'd6')
-      db.upsertVariation(gameId, 5, 'Nc6')
+      db.createVariation(gameId, 3, 'd6')
+      db.createVariation(gameId, 5, 'Nc6')
 
       // Verify variations exist
       let variations = db.getVariations(gameId)
