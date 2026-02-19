@@ -1,15 +1,17 @@
 name: Claude Code Review
 
 on:
-  pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
-    paths:
-      - '*.html'
-      - '*.json'
-      - '*.ts'
-      - '**/*/*.json'
-      - '**/*/*.ts'
-      - '**/*/*.tsx'
+  # Manual only for now as automatic PR review ran for > 15 mins
+  workflow_dispatch:
+  # - pull_request:
+  #    types: [opened, synchronize, ready_for_review, reopened]
+  #    paths:
+  #      - '*.html'
+  #      - '*.json'
+  #      - '*.ts'
+  #      - '**/*/*.json'
+  #      - '**/*/*.ts'
+  #      - '**/*/*.tsx'
 
 jobs:
   claude-review:
