@@ -247,7 +247,7 @@ export function useVariationState({
     autoPlayStop()
 
     const attemptMove = (): boolean => {
-      if (activeVariation && activeBranchPly !== null) {
+      if (activeVariation && activeBranchPly !== null && activeVariation.getCurrentPly() > 0) {
         // Already in a variation — try appending the move
         const san = activeVariation.tryMove(from, to)
         if (!san) return false
@@ -268,6 +268,12 @@ export function useVariationState({
         syncVariationState(activeVariation)
         persistVariation(activeBranchPly, activeVariation.getMovesString())
         return true
+      }
+
+      // At ply 0 of a variation — user navigated back to the branch point.
+      // Exit so the mainline logic handles this move correctly.
+      if (activeVariation && activeBranchPly !== null && activeVariation.getCurrentPly() === 0) {
+        exitVariation()
       }
 
       // Not in a variation — check if the move matches the mainline.
@@ -317,7 +323,7 @@ export function useVariationState({
     if (!attemptMove()) {
       forceBoardSync()
     }
-  }, [chessManager, collectionId, gameId, activeVariation, activeBranchPly, variations, enterVariation, updateBoardState, syncVariationState, autoPlayStop, persistVariation, forceBoardSync])
+  }, [chessManager, collectionId, gameId, activeVariation, activeBranchPly, variations, enterVariation, exitVariation, updateBoardState, syncVariationState, autoPlayStop, persistVariation, forceBoardSync])
 
   /** Navigate variation to a computed ply. */
   const navigateVariation = useCallback((computePly: (manager: VariationManager) => number | null): boolean => {

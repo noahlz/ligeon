@@ -267,7 +267,7 @@ export default function MoveList({
     const triggerIcon = showTriggerIcon ? (
       <button
         onClick={e => { e.stopPropagation(); handleCommentIconClick(ply) }}
-        className="text-white/70 hover:text-white p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95"
+        className="text-white/50 hover:text-ui-accent p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95"
         title="Add comment"
       >
         <MessageSquareMore size={14} />

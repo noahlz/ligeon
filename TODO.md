@@ -1,9 +1,5 @@
 # Ligeon TODOs
 
-## Multiple variations
-- Support multiple variations per ply
-- Remove variations limit. Let the user make themselves miserable.
-
 ## PGN Export
 - Extend buildFullPgn to export game to PGN with all variations
 - Add tests for PGN export with variations 
