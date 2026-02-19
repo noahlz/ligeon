@@ -60,9 +60,9 @@ export function useCommentState(): UseCommentStateReturn {
 
   const loadComments = useCallback(async (collectionId: string, gameId: number) => {
     const all = await window.electron.getComments(collectionId, gameId)
-    setComments(all.filter(c => c.variationId === 0))
+    setComments(all.filter(c => c.variationId === null))
     setVariationComments(new Map(
-      all.filter(c => c.variationId !== 0).map(c => [c.variationId!, c])
+      all.filter(c => c.variationId !== null).map(c => [c.variationId as number, c])
     ))
     setEditingPly(null)
     setEditValue('')
@@ -70,9 +70,10 @@ export function useCommentState(): UseCommentStateReturn {
   }, [])
 
   const updateVariationComment = useCallback((comment: CommentData) => {
+    if (comment.variationId === null) return // should not happen, but guard just in case
     setVariationComments(prev => {
       const next = new Map(prev)
-      next.set(comment.variationId!, comment)
+      next.set(comment.variationId as number, comment)
       return next
     })
   }, [])

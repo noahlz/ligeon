@@ -135,8 +135,14 @@ export default function App() {
     updateBoardState(manager, 0)
 
     // Load variations and comments for this game
-    variationState.loadVariations(selectedCollectionId, game.id)
-    commentState.loadComments(selectedCollectionId, game.id)
+    try {
+      await Promise.all([
+        variationState.loadVariations(selectedCollectionId, game.id),
+        commentState.loadComments(selectedCollectionId, game.id),
+      ])
+    } catch (error) {
+      console.error('Failed to load variations or comments:', error)
+    }
   }
 
   // Compute interactive board values — variation overrides mainline.
@@ -338,34 +344,42 @@ export default function App() {
                     onVariationJump={variationState.jumpToVariationMove}
                     onDismissVariation={variationState.requestDeletion}
                     isInVariation={variationState.isInVariation}
-                    comments={commentState.comments}
-                    editingCommentPly={commentState.editingPly}
-                    editCommentValue={commentState.editValue}
-                    onCommentEdit={commentState.startEditing}
-                    onCommentValueChange={commentState.setEditValue}
-                    onCommentSave={() => {
-                      if (selectedGameCollectionId && selectedGame) {
-                        commentState.saveComment(selectedGameCollectionId, selectedGame.id)
-                      }
-                    }}
-                    onCommentCancel={commentState.cancelEditing}
-                    onCommentDeleteRequest={commentState.requestDeletion}
-                    variationComments={commentState.variationComments}
-                    onSaveVariationComment={async (variationId, text) => {
-                      if (selectedGameCollectionId && selectedGame) {
-                        const saved = await window.electron.upsertVariationComment(
-                          selectedGameCollectionId, selectedGame.id, variationId, text
-                        )
-                        if (saved) commentState.updateVariationComment(saved)
-                      }
-                    }}
-                    onDeleteVariationComment={async (variationId) => {
-                      if (selectedGameCollectionId && selectedGame) {
-                        await window.electron.deleteVariationComment(
-                          selectedGameCollectionId, selectedGame.id, variationId
-                        )
-                        commentState.removeVariationComment(variationId)
-                      }
+                    commentHandlers={{
+                      comments: commentState.comments,
+                      editingPly: commentState.editingPly,
+                      editValue: commentState.editValue,
+                      onEdit: commentState.startEditing,
+                      onValueChange: commentState.setEditValue,
+                      onSave: selectedGameCollectionId && selectedGame
+                        ? () => commentState.saveComment(selectedGameCollectionId, selectedGame.id)
+                        : undefined,
+                      onCancel: commentState.cancelEditing,
+                      onDeleteRequest: commentState.requestDeletion,
+                      variationComments: commentState.variationComments,
+                      onSaveVariationComment: async (variationId: number, text: string) => {
+                        if (selectedGameCollectionId && selectedGame) {
+                          try {
+                            const saved = await window.electron.upsertVariationComment(
+                              selectedGameCollectionId, selectedGame.id, variationId, text
+                            )
+                            if (saved) commentState.updateVariationComment(saved)
+                          } catch (error) {
+                            console.error('Failed to save variation comment:', error)
+                          }
+                        }
+                      },
+                      onDeleteVariationComment: async (variationId: number) => {
+                        if (selectedGameCollectionId && selectedGame) {
+                          try {
+                            await window.electron.deleteVariationComment(
+                              selectedGameCollectionId, selectedGame.id, variationId
+                            )
+                            commentState.removeVariationComment(variationId)
+                          } catch (error) {
+                            console.error('Failed to delete variation comment:', error)
+                          }
+                        }
+                      },
                     }}
                   />
                 )}

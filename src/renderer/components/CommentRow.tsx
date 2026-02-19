@@ -40,12 +40,13 @@ export function CommentRow({
   }, [isEditing])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation()
     if (e.key === 'Enter') {
       e.preventDefault()
       onSave()
     } else if (e.key === 'Escape') {
       e.preventDefault()
-      onSave()
+      onCancel()
     }
   }
 

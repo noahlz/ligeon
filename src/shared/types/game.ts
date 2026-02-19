@@ -71,13 +71,13 @@ export interface VariationData {
  * Comment data structure.
  *
  * Two contexts:
- * - Mainline move comment: ply = 1-based mainline ply, variationId = 0
- * - Variation comment (future UI): ply = 0, variationId = variation DB id
+ * - Mainline move comment: ply = 1-based mainline ply, variationId = null
+ * - Variation comment: ply = 0, variationId = variation DB id
  */
 export interface CommentData {
-  id?: number          // DB auto-increment (undefined before first save)
-  gameId: number       // FK to games.id
-  ply: number          // 1-based mainline ply (0 for variation-level comments)
-  variationId: number  // 0 for mainline comments, variation DB id for variation comments
-  text: string         // comment text (max 500 chars)
+  id?: number               // DB auto-increment (undefined before first save)
+  gameId: number            // FK to games.id
+  ply: number               // 1-based mainline ply (0 for variation-level comments)
+  variationId: number | null  // null for mainline comments, variation DB id for variation comments
+  text: string              // comment text (max 500 chars)
 }

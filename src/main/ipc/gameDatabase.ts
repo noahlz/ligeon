@@ -354,6 +354,8 @@ export class GameDatabase {
 
   /**
    * Delete a variation and its associated comment (if any) in a transaction.
+   * The FK CASCADE on variationId provides automatic cleanup for new-schema DBs.
+   * The manual comment delete provides backwards compatibility with old-schema DBs.
    *
    * @param gameId - Database ID of the game
    * @param branchPly - Mainline ply where variation departs
@@ -365,8 +367,9 @@ export class GameDatabase {
           .prepare('SELECT id FROM variations WHERE gameId = ? AND branchPly = ?')
           .get(gameId, branchPly) as { id: number } | undefined
         if (variationRow) {
+          // Manual delete for backwards compat; FK CASCADE handles this for new-schema DBs.
           this.db
-            .prepare('DELETE FROM comments WHERE gameId = ? AND ply = 0 AND variationId = ?')
+            .prepare('DELETE FROM comments WHERE gameId = ? AND ply = 0 AND variationId IS ?')
             .run(gameId, variationRow.id)
         }
         this.db.prepare('DELETE FROM variations WHERE gameId = ? AND branchPly = ?').run(gameId, branchPly)
@@ -398,20 +401,20 @@ export class GameDatabase {
   }
 
   /**
-   * Insert or update a comment. Uses upsert semantics on (gameId, ply, variationId).
+   * Insert or update a comment. Uses upsert semantics per partial unique index.
    *
    * @param gameId - Database ID of the game
    * @param ply - 1-based mainline ply (0 for variation-level comments)
    * @param text - Comment text (max 500 chars)
-   * @param variationId - 0 for mainline, variation DB id for variation comments
+   * @param variationId - null for mainline, variation DB id for variation comments
    * @returns The created/updated comment record
    */
-  upsertComment(gameId: number, ply: number, text: string, variationId = 0): CommentData {
+  upsertComment(gameId: number, ply: number, text: string, variationId: number | null = null): CommentData {
     try {
       const stmt = this.db.prepare(`
         INSERT INTO comments (gameId, ply, variationId, text)
         VALUES (?, ?, ?, ?)
-        ON CONFLICT(gameId, ply, variationId) DO UPDATE SET text = excluded.text
+        ON CONFLICT DO UPDATE SET text = excluded.text
         RETURNING id, gameId, ply, variationId, text
       `)
       return stmt.get(gameId, ply, variationId, text) as CommentData
@@ -426,12 +429,12 @@ export class GameDatabase {
    *
    * @param gameId - Database ID of the game
    * @param ply - 1-based mainline ply
-   * @param variationId - 0 for mainline, variation DB id for variation comments
+   * @param variationId - null for mainline, variation DB id for variation comments
    */
-  deleteComment(gameId: number, ply: number, variationId = 0): void {
+  deleteComment(gameId: number, ply: number, variationId: number | null = null): void {
     try {
       this.db.prepare(
-        'DELETE FROM comments WHERE gameId = ? AND ply = ? AND variationId = ?'
+        'DELETE FROM comments WHERE gameId = ? AND ply = ? AND variationId IS ?'
       ).run(gameId, ply, variationId)
     } catch (error) {
       logError('GameDatabase', 'deleteComment', { dbPath: this.dbPath, gameId, ply, variationId }, error)

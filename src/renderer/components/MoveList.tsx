@@ -1,4 +1,4 @@
-import { Fragment, useRef, useEffect, useState, useCallback } from 'react'
+import { Fragment, useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { MessageSquareMore } from 'lucide-react'
 import { getResultDisplay } from '../utils/chessManager.js'
 import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
@@ -18,6 +18,20 @@ import {
 import { CommentRow } from './CommentRow.js'
 import { VariationRow } from './VariationRow.js'
 
+export interface CommentHandlers {
+  comments?: CommentData[]
+  editingPly?: number | null
+  editValue?: string
+  onEdit?: (ply: number) => void
+  onValueChange?: (value: string) => void
+  onSave?: () => void
+  onCancel?: () => void
+  onDeleteRequest?: (ply: number) => void
+  variationComments?: Map<number, CommentData>
+  onSaveVariationComment?: (variationId: number, text: string) => void
+  onDeleteVariationComment?: (variationId: number) => void
+}
+
 interface MoveListProps {
   moves: string[]
   result: string | null
@@ -30,30 +44,28 @@ interface MoveListProps {
   onVariationJump?: (branchPly: number, ply: number) => void
   onDismissVariation?: (branchPly: number) => void
   isInVariation?: boolean
-  // Comments
-  comments?: CommentData[]
-  editingCommentPly?: number | null
-  editCommentValue?: string
-  onCommentEdit?: (ply: number) => void
-  onCommentValueChange?: (value: string) => void
-  onCommentSave?: () => void
-  onCommentCancel?: () => void
-  onCommentDeleteRequest?: (ply: number) => void
-  // Variation comments
-  variationComments?: Map<number, CommentData>
-  onSaveVariationComment?: (variationId: number, text: string) => void
-  onDeleteVariationComment?: (variationId: number) => void
+  commentHandlers?: CommentHandlers
 }
 
 export default function MoveList({
   moves, result, currentPly, onJump,
   variations, activeVariationBranchPly, variationMoves,
   variationPly, onVariationJump, onDismissVariation, isInVariation,
-  comments, editingCommentPly, editCommentValue,
-  onCommentEdit, onCommentValueChange, onCommentSave, onCommentCancel,
-  onCommentDeleteRequest,
-  variationComments, onSaveVariationComment, onDeleteVariationComment,
+  commentHandlers,
 }: MoveListProps) {
+  const {
+    comments,
+    editingPly: editingCommentPly,
+    editValue: editCommentValue,
+    onEdit: onCommentEdit,
+    onValueChange: onCommentValueChange,
+    onSave: onCommentSave,
+    onCancel: onCommentCancel,
+    onDeleteRequest: onCommentDeleteRequest,
+    variationComments,
+    onSaveVariationComment,
+    onDeleteVariationComment,
+  } = commentHandlers ?? {}
   const currentMoveRef = useRef<HTMLTableCellElement>(null)
 
   // Track which ply has the comment trigger icon visible (hover / right-click)
@@ -162,8 +174,12 @@ export default function MoveList({
 
   const movePairs = groupMovesIntoPairs(moves)
 
-  const getCommentAtPly = (ply: number): CommentData | undefined =>
-    comments?.find(c => c.ply === ply)
+  // O(1) ply lookup instead of O(n) find on every render cell
+  const commentsByPly = useMemo(() => {
+    const map = new Map<number, CommentData>()
+    comments?.forEach(c => map.set(c.ply, c))
+    return map
+  }, [comments])
 
   /**
    * Render a move cell with hover/right-click comment trigger.
@@ -175,7 +191,7 @@ export default function MoveList({
     isCurrent: boolean,
     refProp?: React.Ref<HTMLTableCellElement>
   ) => {
-    const comment = getCommentAtPly(ply)
+    const comment = commentsByPly.get(ply)
     const hasComment = !!comment
     const isCollapsed = collapsedCommentPlies.has(ply)
     // Trigger icon only for moves WITHOUT a comment — comment icon handles the rest
@@ -263,8 +279,8 @@ export default function MoveList({
             const variationsAfterWhite = variations ? getVariationsAtPly(variations, whitePly1) : []
             const variationsAfterBlack = variations ? getVariationsAtPly(variations, blackPly1) : []
 
-            const commentOnWhite = getCommentAtPly(whitePly1)
-            const commentOnBlack = getCommentAtPly(blackPly1)
+            const commentOnWhite = commentsByPly.get(whitePly1)
+            const commentOnBlack = commentsByPly.get(blackPly1)
             const editingWhite = editingCommentPly === whitePly1
             const editingBlack = editingCommentPly === blackPly1
 

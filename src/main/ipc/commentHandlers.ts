@@ -1,8 +1,9 @@
-import { DatabaseManager } from './gameDatabase.js'
 import type { CommentData } from './types.js'
-import { getCollectionsPath } from '../config/paths.js'
-import { validateCollectionId, validateGameId, validateCommentPly, validateCommentText, validateVariationId } from './validators.js'
+import { validateCommentPly, validateCommentText, validateVariationId } from './validators.js'
 import { logError } from '../config/logger.js'
+import { getValidatedDb } from './handlerUtils.js'
+
+const MODULE = 'commentHandlers'
 
 /**
  * Get all mainline comments for a game
@@ -15,21 +16,12 @@ export async function getComments(
   collectionId: string,
   gameId: number
 ): Promise<CommentData[]> {
-  if (!validateCollectionId(collectionId)) {
-    logError('commentHandlers', 'getComments', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return []
-  }
-
-  if (!validateGameId(gameId)) {
-    logError('commentHandlers', 'getComments', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
-    return []
-  }
-
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
+  const db = getValidatedDb(MODULE, 'getComments', collectionId, gameId)
+  if (!db) return []
   try {
     return db.getComments(gameId)
   } catch (error) {
-    logError('commentHandlers', 'getComments', { collectionId, gameId }, error)
+    logError(MODULE, 'getComments', { collectionId, gameId }, error)
     return []
   }
 }
@@ -49,31 +41,23 @@ export async function upsertComment(
   ply: number,
   text: string
 ): Promise<CommentData | null> {
-  if (!validateCollectionId(collectionId)) {
-    logError('commentHandlers', 'upsertComment', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return null
-  }
-
-  if (!validateGameId(gameId)) {
-    logError('commentHandlers', 'upsertComment', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
-    return null
-  }
+  const db = getValidatedDb(MODULE, 'upsertComment', collectionId, gameId)
+  if (!db) return null
 
   if (!validateCommentPly(ply)) {
-    logError('commentHandlers', 'upsertComment', { ply, reason: 'invalid comment ply' }, new Error('Validation failed'))
+    logError(MODULE, 'upsertComment', { ply, reason: 'invalid comment ply' }, new Error('Validation failed'))
     return null
   }
 
   if (!validateCommentText(text)) {
-    logError('commentHandlers', 'upsertComment', { reason: 'invalid comment text' }, new Error('Validation failed'))
+    logError(MODULE, 'upsertComment', { reason: 'invalid comment text' }, new Error('Validation failed'))
     return null
   }
 
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
   try {
     return db.upsertComment(gameId, ply, text.trim())
   } catch (error) {
-    logError('commentHandlers', 'upsertComment', { collectionId, gameId, ply }, error)
+    logError(MODULE, 'upsertComment', { collectionId, gameId, ply }, error)
     return null
   }
 }
@@ -93,31 +77,23 @@ export async function upsertVariationComment(
   variationId: number,
   text: string
 ): Promise<CommentData | null> {
-  if (!validateCollectionId(collectionId)) {
-    logError('commentHandlers', 'upsertVariationComment', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return null
-  }
-
-  if (!validateGameId(gameId)) {
-    logError('commentHandlers', 'upsertVariationComment', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
-    return null
-  }
+  const db = getValidatedDb(MODULE, 'upsertVariationComment', collectionId, gameId)
+  if (!db) return null
 
   if (!validateVariationId(variationId)) {
-    logError('commentHandlers', 'upsertVariationComment', { variationId, reason: 'invalid variation ID' }, new Error('Validation failed'))
+    logError(MODULE, 'upsertVariationComment', { variationId, reason: 'invalid variation ID' }, new Error('Validation failed'))
     return null
   }
 
   if (!validateCommentText(text)) {
-    logError('commentHandlers', 'upsertVariationComment', { reason: 'invalid comment text' }, new Error('Validation failed'))
+    logError(MODULE, 'upsertVariationComment', { reason: 'invalid comment text' }, new Error('Validation failed'))
     return null
   }
 
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
   try {
     return db.upsertComment(gameId, 0, text.trim(), variationId)
   } catch (error) {
-    logError('commentHandlers', 'upsertVariationComment', { collectionId, gameId, variationId }, error)
+    logError(MODULE, 'upsertVariationComment', { collectionId, gameId, variationId }, error)
     return null
   }
 }
@@ -135,27 +111,19 @@ export async function deleteVariationComment(
   gameId: number,
   variationId: number
 ): Promise<{ success: boolean }> {
-  if (!validateCollectionId(collectionId)) {
-    logError('commentHandlers', 'deleteVariationComment', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return { success: false }
-  }
-
-  if (!validateGameId(gameId)) {
-    logError('commentHandlers', 'deleteVariationComment', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
-    return { success: false }
-  }
+  const db = getValidatedDb(MODULE, 'deleteVariationComment', collectionId, gameId)
+  if (!db) return { success: false }
 
   if (!validateVariationId(variationId)) {
-    logError('commentHandlers', 'deleteVariationComment', { variationId, reason: 'invalid variation ID' }, new Error('Validation failed'))
+    logError(MODULE, 'deleteVariationComment', { variationId, reason: 'invalid variation ID' }, new Error('Validation failed'))
     return { success: false }
   }
 
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
   try {
     db.deleteComment(gameId, 0, variationId)
     return { success: true }
   } catch (error) {
-    logError('commentHandlers', 'deleteVariationComment', { collectionId, gameId, variationId }, error)
+    logError(MODULE, 'deleteVariationComment', { collectionId, gameId, variationId }, error)
     return { success: false }
   }
 }
@@ -173,27 +141,19 @@ export async function deleteComment(
   gameId: number,
   ply: number
 ): Promise<{ success: boolean }> {
-  if (!validateCollectionId(collectionId)) {
-    logError('commentHandlers', 'deleteComment', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    return { success: false }
-  }
-
-  if (!validateGameId(gameId)) {
-    logError('commentHandlers', 'deleteComment', { gameId, reason: 'invalid game ID' }, new Error('Validation failed'))
-    return { success: false }
-  }
+  const db = getValidatedDb(MODULE, 'deleteComment', collectionId, gameId)
+  if (!db) return { success: false }
 
   if (!validateCommentPly(ply)) {
-    logError('commentHandlers', 'deleteComment', { ply, reason: 'invalid comment ply' }, new Error('Validation failed'))
+    logError(MODULE, 'deleteComment', { ply, reason: 'invalid comment ply' }, new Error('Validation failed'))
     return { success: false }
   }
 
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
   try {
     db.deleteComment(gameId, ply)
     return { success: true }
   } catch (error) {
-    logError('commentHandlers', 'deleteComment', { collectionId, gameId, ply }, error)
+    logError(MODULE, 'deleteComment', { collectionId, gameId, ply }, error)
     return { success: false }
   }
 }
