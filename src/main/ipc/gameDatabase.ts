@@ -1,8 +1,8 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
-import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters, VariationData, CommentData } from './types.js'
-import { GAMES_SCHEMA_SQL, VARIATIONS_SCHEMA_SQL, COMMENTS_SCHEMA_SQL } from '../../shared/database/schema.js'
+import type { GameData, GameRow, GameSearchResult, GameFilters, OptionFilters, VariationData, CommentData, AnnotationData } from './types.js'
+import { GAMES_SCHEMA_SQL, VARIATIONS_SCHEMA_SQL, COMMENTS_SCHEMA_SQL, ANNOTATIONS_SCHEMA_SQL } from '../../shared/database/schema.js'
 import { logError, logger } from '../config/logger.js'
 
 /**
@@ -44,6 +44,7 @@ export class GameDatabase {
     this.db.exec(GAMES_SCHEMA_SQL)
     this.db.exec(VARIATIONS_SCHEMA_SQL)
     this.db.exec(COMMENTS_SCHEMA_SQL)
+    this.db.exec(ANNOTATIONS_SCHEMA_SQL)
     logger.info('✓ Database schema created')
   }
 
@@ -485,6 +486,64 @@ export class GameDatabase {
       ).run(gameId, ply, variationId)
     } catch (error) {
       logError('GameDatabase', 'deleteComment', { dbPath: this.dbPath, gameId, ply, variationId }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Get all annotations for a game, ordered by ply.
+   *
+   * @param gameId - Database ID of the game
+   * @returns Array of annotation records
+   */
+  getAnnotations(gameId: number): AnnotationData[] {
+    try {
+      const stmt = this.db.prepare(
+        'SELECT id, gameId, ply, nag FROM annotations WHERE gameId = ? ORDER BY ply'
+      )
+      return stmt.all(gameId) as AnnotationData[]
+    } catch (error) {
+      logError('GameDatabase', 'getAnnotations', { dbPath: this.dbPath, gameId }, error)
+      return []
+    }
+  }
+
+  /**
+   * Insert or update an annotation. Uses upsert semantics per unique index.
+   *
+   * @param gameId - Database ID of the game
+   * @param ply - 1-based mainline ply
+   * @param nag - NAG code
+   * @returns The created/updated annotation record
+   */
+  upsertAnnotation(gameId: number, ply: number, nag: number): AnnotationData {
+    try {
+      const stmt = this.db.prepare(`
+        INSERT INTO annotations (gameId, ply, nag)
+        VALUES (?, ?, ?)
+        ON CONFLICT(gameId, ply) DO UPDATE SET nag = excluded.nag
+        RETURNING id, gameId, ply, nag
+      `)
+      return stmt.get(gameId, ply, nag) as AnnotationData
+    } catch (error) {
+      logError('GameDatabase', 'upsertAnnotation', { dbPath: this.dbPath, gameId, ply, nag }, error)
+      throw error
+    }
+  }
+
+  /**
+   * Delete an annotation by (gameId, ply).
+   *
+   * @param gameId - Database ID of the game
+   * @param ply - 1-based mainline ply
+   */
+  deleteAnnotation(gameId: number, ply: number): void {
+    try {
+      this.db.prepare(
+        'DELETE FROM annotations WHERE gameId = ? AND ply = ?'
+      ).run(gameId, ply)
+    } catch (error) {
+      logError('GameDatabase', 'deleteAnnotation', { dbPath: this.dbPath, gameId, ply }, error)
       throw error
     }
   }

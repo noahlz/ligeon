@@ -82,3 +82,16 @@ export interface CommentData {
   variationId: number | null  // null for mainline comments, variation DB id for variation comments
   text: string              // comment text (max 500 chars)
 }
+
+/**
+ * Annotation data structure.
+ *
+ * Stores a single NAG (Numeric Annotation Glyph) per mainline ply.
+ * One annotation per (gameId, ply) enforced by unique index.
+ */
+export interface AnnotationData {
+  id?: number     // DB auto-increment (undefined before first save)
+  gameId: number  // FK to games.id
+  ply: number     // 1-based mainline ply
+  nag: number     // NAG code (e.g. 1=!, 2=?, 3=!!, 4=??, 5=!?, 6=?!)
+}

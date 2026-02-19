@@ -12,9 +12,13 @@ interface BoardDisplayProps {
   turnColor?: 'white' | 'black'
   onMove?: (from: string, to: string) => void
   boardSyncKey?: number
+  /** NAG symbol to show as a badge on the board (e.g. "!", "?") */
+  annotationGlyph?: string | null
+  /** Destination square to place the annotation badge (e.g. "e5") */
+  annotationSquare?: string | null
 }
 
-export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove, boardSyncKey }: BoardDisplayProps) {
+export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove, boardSyncKey, annotationGlyph, annotationSquare }: BoardDisplayProps) {
   const boardRef = useRef<HTMLDivElement>(null)
   const cgRef = useRef<Api | null>(null)
   const onMoveRef = useRef(onMove)
@@ -79,12 +83,42 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
     // boardSyncKey: incremented to force chessground re-sync when board state is stale
   }, [fen, lastMove, orientation, check, dests, turnColor, boardSyncKey])
 
+  // Compute badge position from square notation (e.g. "e5")
+  let badgeStyle: React.CSSProperties | null = null
+  if (annotationGlyph && annotationSquare && annotationSquare.length === 2) {
+    const fileIndex = annotationSquare.charCodeAt(0) - 'a'.charCodeAt(0) // 0–7
+    const rankIndex = parseInt(annotationSquare[1]) - 1 // 0–7
+    const leftPct = orientation === 'white' ? fileIndex * 12.5 : (7 - fileIndex) * 12.5
+    const bottomPct = orientation === 'white' ? rankIndex * 12.5 : (7 - rankIndex) * 12.5
+    badgeStyle = {
+      left: `${leftPct + 7}%`,
+      bottom: `${bottomPct + 7}%`,
+    }
+  }
+
   return (
-    <div
-      ref={boardRef}
-      className="chessground-board board-appear-animation cursor-pointer"
-      data-orientation={orientation}
-      style={{ width: '100%', height: '100%' }}
-    />
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <div
+        ref={boardRef}
+        className="chessground-board board-appear-animation cursor-pointer"
+        data-orientation={orientation}
+        style={{ width: '100%', height: '100%' }}
+      />
+      {annotationGlyph && badgeStyle && (
+        <div
+          className="pointer-events-none absolute flex items-center justify-center rounded-full bg-black/65 text-white font-bold font-mono select-none"
+          style={{
+            ...badgeStyle,
+            width: '6.5%',
+            height: '6.5%',
+            fontSize: '2.5%',
+            minWidth: 20,
+            minHeight: 20,
+          }}
+        >
+          {annotationGlyph}
+        </div>
+      )}
+    </div>
   )
 }

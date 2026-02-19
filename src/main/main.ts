@@ -10,6 +10,7 @@ import {
 import { searchGames, getGameMoves, getGameCount, getAvailableDates, getAvailableEcoCodes } from './ipc/gameHandlers.js'
 import { getVariations, createVariation, updateVariation, deleteVariation, reorderVariations } from './ipc/variationHandlers.js'
 import { getComments, upsertComment, deleteComment, upsertVariationComment, deleteVariationComment } from './ipc/commentHandlers.js'
+import { getAnnotations, upsertAnnotation, deleteAnnotation } from './ipc/annotationHandlers.js'
 import { importAndIndexPgn } from './ipc/importHandlers.js'
 import { getCollectionsPath } from './config/paths.js'
 import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
@@ -215,6 +216,19 @@ function setupIpcHandlers() {
 
   ipcMain.handle('delete-variation-comment', async (_event, { collectionId, gameId, variationId }) =>
     deleteVariationComment(collectionId, parseInt(gameId, 10), variationId)
+  )
+
+  // Annotation handlers
+  ipcMain.handle('get-annotations', async (_event, { collectionId, gameId }) =>
+    getAnnotations(collectionId, parseInt(gameId, 10))
+  )
+
+  ipcMain.handle('upsert-annotation', async (_event, { collectionId, gameId, ply, nag }) =>
+    upsertAnnotation(collectionId, parseInt(gameId, 10), ply, nag)
+  )
+
+  ipcMain.handle('delete-annotation', async (_event, { collectionId, gameId, ply }) =>
+    deleteAnnotation(collectionId, parseInt(gameId, 10), ply)
   )
 
   // Settings handlers

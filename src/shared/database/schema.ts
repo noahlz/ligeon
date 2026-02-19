@@ -58,6 +58,25 @@ export const VARIATIONS_SCHEMA_SQL = `
  * - idx_comments_mainline: one comment per mainline ply (variationId IS NULL)
  * - idx_comments_variation: one comment per variation (variationId IS NOT NULL)
  */
+/**
+ * SQLite schema for annotations table.
+ *
+ * Stores a single NAG (Numeric Annotation Glyph) per mainline ply.
+ * ON DELETE CASCADE: deleting a game automatically cleans up its annotations.
+ * Unique index enforces one annotation per (gameId, ply).
+ */
+export const ANNOTATIONS_SCHEMA_SQL = `
+  CREATE TABLE IF NOT EXISTS annotations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    gameId INTEGER NOT NULL,
+    ply INTEGER NOT NULL,
+    nag INTEGER NOT NULL,
+    FOREIGN KEY (gameId) REFERENCES games(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_annotations_game ON annotations(gameId);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_annotations_ply ON annotations(gameId, ply);
+`
+
 export const COMMENTS_SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

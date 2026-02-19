@@ -1,6 +1,6 @@
 // Type definitions for Electron IPC bridge exposed via preload.ts
 
-import type { GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData } from '../../shared/types/game.js'
+import type { GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
 
 export interface CollectionMetadata {
   id: string
@@ -32,7 +32,7 @@ export type ImportProgressData =
   | { type: 'complete'; success?: boolean; collectionId: string; gamesIndexed: number; error?: string }
 
 // Re-export types from lib
-export type { GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData }
+export type { GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData, AnnotationData }
 
 export interface EcoCodeWithCount {
   eco: string
@@ -74,6 +74,11 @@ export interface ElectronAPI {
   deleteComment: (collectionId: string, gameId: number, ply: number) => Promise<{ success: boolean }>
   upsertVariationComment: (collectionId: string, gameId: number, variationId: number, text: string) => Promise<CommentData | null>
   deleteVariationComment: (collectionId: string, gameId: number, variationId: number) => Promise<{ success: boolean }>
+
+  // Annotations
+  getAnnotations: (collectionId: string, gameId: number) => Promise<AnnotationData[]>
+  upsertAnnotation: (collectionId: string, gameId: number, ply: number, nag: number) => Promise<AnnotationData | null>
+  deleteAnnotation: (collectionId: string, gameId: number, ply: number) => Promise<{ success: boolean }>
 
   // Settings
   getSettings: () => Promise<AppSettings>

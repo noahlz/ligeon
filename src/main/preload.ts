@@ -83,6 +83,16 @@ contextBridge.exposeInMainWorld('electron', {
   deleteVariationComment: (collectionId: string, gameId: number, variationId: number) =>
     ipcRenderer.invoke('delete-variation-comment', { collectionId, gameId, variationId }),
 
+  // === Annotations ===
+  getAnnotations: (collectionId: string, gameId: number) =>
+    ipcRenderer.invoke('get-annotations', { collectionId, gameId }),
+
+  upsertAnnotation: (collectionId: string, gameId: number, ply: number, nag: number) =>
+    ipcRenderer.invoke('upsert-annotation', { collectionId, gameId, ply, nag }),
+
+  deleteAnnotation: (collectionId: string, gameId: number, ply: number) =>
+    ipcRenderer.invoke('delete-annotation', { collectionId, gameId, ply }),
+
   // === Settings ===
   getSettings: () => ipcRenderer.invoke('get-settings'),
 

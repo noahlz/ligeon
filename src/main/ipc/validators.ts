@@ -520,3 +520,20 @@ export function validateCommentText(text: unknown): text is string {
   }
   return true
 }
+
+/** Valid NAG codes supported by the annotation system */
+const VALID_NAG_CODES = new Set([1, 2, 3, 4, 5, 6, 7, 10, 13, 14, 15, 16, 17, 18, 19])
+
+/**
+ * Validate NAG (Numeric Annotation Glyph) code
+ *
+ * @param nag - NAG code to validate
+ * @returns True if valid (one of the supported NAG codes), false otherwise
+ */
+export function validateNag(nag: unknown): nag is number {
+  if (typeof nag !== 'number' || !Number.isInteger(nag) || !VALID_NAG_CODES.has(nag)) {
+    logger.warn('Validation failed: nag must be a valid NAG code')
+    return false
+  }
+  return true
+}

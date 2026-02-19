@@ -1,9 +1,10 @@
 import { Fragment, useRef, useEffect, useState, useCallback, useMemo } from 'react'
-import { MessageSquareMore } from 'lucide-react'
+import { MessageSquareMore, Tag } from 'lucide-react'
 import { getResultDisplay } from '../utils/chessManager.js'
 import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
 import { getVariationsAtPly } from '../utils/variationFormatter.js'
-import type { VariationData, CommentData } from '../../shared/types/game.js'
+import type { VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
+import { NAG_DEFINITIONS, getNagSymbol } from '../utils/nag.js'
 import {
   Table,
   TableBody,
@@ -15,6 +16,12 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip.js'
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from '@/components/ui/popover.js'
+import { Button } from '@/components/ui/button.js'
 import { CommentRow } from './CommentRow.js'
 import { VariationRow } from './VariationRow.js'
 
@@ -47,6 +54,13 @@ interface MoveListProps {
   onReorderVariations?: (branchPly: number, orderedIds: number[]) => void
   isInVariation?: boolean
   commentHandlers?: CommentHandlers
+  annotationHandlers?: AnnotationHandlers
+}
+
+export interface AnnotationHandlers {
+  annotations?: AnnotationData[]
+  onSetAnnotation?: (ply: number, nag: number) => void
+  onClearAnnotation?: (ply: number) => void
 }
 
 export default function MoveList({
@@ -54,6 +68,7 @@ export default function MoveList({
   variations, activeVariationBranchPly, activeVariationId, variationMoves,
   variationPly, onVariationJump, onDismissVariation, onReorderVariations, isInVariation,
   commentHandlers,
+  annotationHandlers,
 }: MoveListProps) {
   const {
     comments,
@@ -108,6 +123,21 @@ export default function MoveList({
   const [commentMenuPly, setCommentMenuPly] = useState<number | null>(null)
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Track which ply has its annotation Popover open
+  const [annotationMenuPly, setAnnotationMenuPly] = useState<number | null>(null)
+
+  // O(1) ply lookup for annotations
+  const annotationsByPly = useMemo(() => {
+    const map = new Map<number, AnnotationData>()
+    annotationHandlers?.annotations?.forEach(a => map.set(a.ply, a))
+    return map
+  }, [annotationHandlers?.annotations])
+
+  // Close annotation Popover when navigating to a different move
+  useEffect(() => {
+    setAnnotationMenuPly(null)
+  }, [currentPly])
 
   // Track which plies have their comment row collapsed (hidden).
   // All comments start collapsed; seenPliesRef ensures each ply is only initialized once.
@@ -167,10 +197,26 @@ export default function MoveList({
     hoverTimerRef.current = setTimeout(() => setCommentMenuPly(ply), 150)
   }, [clearHoverTimer, clearHideTimer])
 
-  const handleMoveMouseLeave = useCallback(() => {
+  const handleMoveMouseLeave = useCallback((ply: number) => {
     clearHoverTimer()
-    hideTimerRef.current = setTimeout(() => setCommentMenuPly(null), 600)
-  }, [clearHoverTimer])
+    // Don't hide hover buttons while the annotation Popover for this ply is open
+    hideTimerRef.current = setTimeout(() => {
+      if (annotationMenuPly !== ply) setCommentMenuPly(null)
+    }, 600)
+  }, [clearHoverTimer, annotationMenuPly])
+
+  const handleAnnotationTriggerClick = useCallback((e: React.MouseEvent, ply: number) => {
+    e.stopPropagation()
+    setAnnotationMenuPly(prev => prev === ply ? null : ply)
+    // Keep hover buttons visible while Popover is open
+    setCommentMenuPly(ply)
+    clearHideTimer()
+  }, [clearHideTimer])
+
+  const handleAnnotationPopoverClose = useCallback(() => {
+    setAnnotationMenuPly(null)
+    setCommentMenuPly(null)
+  }, [])
 
   const handleMoveContextMenu = useCallback((e: React.MouseEvent, ply: number) => {
     e.preventDefault()
@@ -186,6 +232,7 @@ export default function MoveList({
   }, [onJump, onCommentEdit, currentPly, isInVariation])
 
   const handleCommentIconClick = useCallback((ply: number) => {
+    setAnnotationMenuPly(null)
     setCommentMenuPly(null)
     handleCommentEdit(ply)
   }, [handleCommentEdit])
@@ -218,7 +265,7 @@ export default function MoveList({
   }, [comments])
 
   /**
-   * Render a move cell with hover/right-click comment trigger.
+   * Render a move cell with hover annotation/comment triggers.
    * @param ply - 1-based mainline ply
    */
   const renderMoveCell = (
@@ -230,8 +277,16 @@ export default function MoveList({
     const comment = commentsByPly.get(ply)
     const hasComment = !!comment
     const isCollapsed = collapsedCommentPlies.has(ply)
+    const annotation = annotationsByPly.get(ply)
+    const nagSymbol = annotation ? getNagSymbol(annotation.nag) : undefined
+    const isHovered = commentMenuPly === ply
+    const isAnnotationOpen = annotationMenuPly === ply
+
+    // Show annotation trigger when: hovering, or annotation popover is open
+    const showAnnotationTrigger = (isHovered || isAnnotationOpen) && !editingCommentPly
+
     // Trigger icon only for moves WITHOUT a comment — comment icon handles the rest
-    const showTriggerIcon = commentMenuPly === ply && !editingCommentPly && !hasComment
+    const showCommentTrigger = isHovered && !editingCommentPly && !hasComment
 
     // Icon button for existing comment — always visible, toggles collapse
     const commentIcon = hasComment ? (
@@ -264,7 +319,7 @@ export default function MoveList({
     ) : null
 
     // Hover/right-click triggered icon — only for moves with no comment
-    const triggerIcon = showTriggerIcon ? (
+    const triggerIcon = showCommentTrigger ? (
       <button
         onClick={e => { e.stopPropagation(); handleCommentIconClick(ply) }}
         className="text-white/50 hover:text-ui-accent p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95"
@@ -274,20 +329,111 @@ export default function MoveList({
       </button>
     ) : null
 
+    // Annotation trigger button — appears on hover, opens picker Popover
+    const annotationTrigger = showAnnotationTrigger ? (
+      <Popover
+        open={isAnnotationOpen}
+        onOpenChange={(open) => { if (!open) handleAnnotationPopoverClose() }}
+      >
+        <PopoverTrigger asChild>
+          <button
+            onClick={e => handleAnnotationTriggerClick(e, ply)}
+            className={`p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 font-mono text-sm leading-none ${
+              nagSymbol
+                ? 'text-ui-text-dim hover:text-ui-text'
+                : 'text-white/50 hover:text-ui-accent'
+            }`}
+            title={nagSymbol ? 'Change annotation' : 'Add annotation'}
+          >
+            {nagSymbol ?? <Tag size={12} />}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          side="bottom"
+          align="center"
+          className="w-auto p-2"
+          onOpenAutoFocus={e => e.preventDefault()}
+        >
+          <div className="flex flex-col gap-1" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-1 gap-4">
+              <span className="text-xs text-ui-text-dimmer">Annotation</span>
+              <button
+                onClick={() => handleAnnotationPopoverClose()}
+                className="text-ui-text-dimmer hover:text-ui-text leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="grid grid-cols-5 gap-1">
+              {NAG_DEFINITIONS.map(def => (
+                <Button
+                  key={def.nag}
+                  variant="ghost"
+                  size="sm"
+                  title={def.description}
+                  onClick={() => {
+                    if (annotation?.nag === def.nag) {
+                      annotationHandlers?.onClearAnnotation?.(ply)
+                    } else {
+                      annotationHandlers?.onSetAnnotation?.(ply, def.nag)
+                    }
+                    setAnnotationMenuPly(null)
+                    setCommentMenuPly(null)
+                  }}
+                  className={`h-7 w-8 font-mono text-sm p-0 ${
+                    annotation?.nag === def.nag
+                      ? 'ring-1 ring-ui-accent bg-ui-accent/20 text-white'
+                      : ''
+                  }`}
+                >
+                  {def.symbol}
+                </Button>
+              ))}
+            </div>
+            {annotation && (
+              <div className="border-t border-ui-bg-hover mt-1 pt-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs text-ui-text-dim h-6"
+                  onClick={() => {
+                    annotationHandlers?.onClearAnnotation?.(ply)
+                    setAnnotationMenuPly(null)
+                    setCommentMenuPly(null)
+                  }}
+                >
+                  Clear annotation
+                </Button>
+              </div>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    ) : null
+
     return (
       <TableCell
         ref={refProp}
         onClick={san ? () => onJump(ply) : undefined}
         onMouseEnter={() => handleMoveMouseEnter(ply)}
-        onMouseLeave={handleMoveMouseLeave}
+        onMouseLeave={() => handleMoveMouseLeave(ply)}
         onContextMenu={e => handleMoveContextMenu(e, ply)}
         className={`px-2 py-0.5 rounded border-0 text-lg ${
           san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
         } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
       >
         <span className="flex items-center w-full">
-          <span className="flex-1">{san || ''}</span>
-          {/* Fixed-width slot so the column never resizes when the icon appears */}
+          <span className="flex-1">
+            {san || ''}
+            {nagSymbol && !showAnnotationTrigger && (
+              <span className="text-ui-text-dim ml-0.5 text-sm font-mono font-normal">{nagSymbol}</span>
+            )}
+          </span>
+          {/* Annotation trigger slot */}
+          <span className="w-5 shrink-0 flex items-center justify-center">
+            {annotationTrigger}
+          </span>
+          {/* Comment icon slot */}
           <span className="w-5 shrink-0 flex items-center justify-end">
             {commentIcon ?? triggerIcon}
           </span>
@@ -299,7 +445,7 @@ export default function MoveList({
   return (
     <div
       className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono"
-      onClick={() => setCommentMenuPly(null)}
+      onClick={() => { setCommentMenuPly(null); setAnnotationMenuPly(null) }}
     >
       <Table>
         <TableBody>
