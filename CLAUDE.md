@@ -1,11 +1,23 @@
 # Ligeon
 
-Electron.js desktop app for chess game viewing (PGN). Pre-release — move fast, break things.
+Electron.js desktop app for chess game viewing (PGN). 
 
-Links:
+*Pre-release — move fast, break things.*
+
+Stack:
+- Electron
+- React
+- SQLite
+- Tailwind
+- ShadCN
+- ChessGround
+- ChessOps
+- Build: NPM and Vite
+
+Reference Links:
 - [chessops](https://github.com/niklasf/chessops) (move logic)
 - [chessground](https://github.com/lichess-org/chessground) (board UI)
-- [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) (display options ref).
+- [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) (display options ref)
 
 ## Commands
 
@@ -21,38 +33,16 @@ npm run package          # Build + package → out/
 
 ## After Changes
 
-1. `npm test`
-2. `npm run typecheck`
-3. `npm run app` — window opens, console shows "✓ IPC handlers set up"
+1. Use `getDiagnostics` to check for issues with edited files.
+2. `npm test`
+3. `npm run typecheck`
+4. `npm run app` — window opens, console shows "✓ IPC handlers set up"
 
-## Architecture
+## Source Code Navigation
 
-Three compilation targets share `src/shared/`:
-
-```
-src/main/*.ts + src/shared/*.ts  →  tsc (ESM)  →  dist-electron/main/     # Node.js: lifecycle, SQLite, IPC
-src/main/preload.ts              →  tsc (CJS)  →  dist-electron/preload/  # Sandboxed bridge: window.electron.*
-src/renderer/*.tsx               →  Vite       →  dist/                   # React UI, calls window.electron.*
-```
-
-**Dev:** Vite on `localhost:5173`  
-**Prod:** Electron loads `dist/index.html`
-
-### Variation Architecture
-
-Two managers implement `NavigableManager` interface:
-- **ChessManager**: read-only mainline navigation
-- **VariationManager**: mutable variation sequences (branching from mainline positions)
-
-Key concepts:
-- `branchPly` (1-based): mainline ply the variation replaces
-- Positions stored as FEN strings; Chess objects reconstructed on demand
-- Density limit: `max(1, floor(totalPlies / 12))` variations per game
-- UNIQUE constraint: one variation per branch point (upsert semantics)
+Use LSP (`goToDefinition`, `findReferences`, `documentSymbol`) first for navigation; fall back to Find/Glob/Grep.
 
 ## Project Structure
-
-Export from each subdirectory via `index.ts` barrel.
 
 ```
 __tests__/             # Vitest: integration/, performance/, unit/
@@ -64,8 +54,9 @@ src/
     config/            # paths, logger, settings
     ipc/               # handlers, validators, types
   renderer/            # React + Chessground
-    components/        # UI components (see Component Map)
+    components/        # UI components
       ui/              # shadcn/ui primitives (copied, not imported — see Styling)
+    data/              # Static assets (openings.json)
     hooks/             # Custom React hooks
     lib/               # Shared utilities (cn helper)
     styles/            # CSS + Tailwind
@@ -78,96 +69,70 @@ src/
     types/             # GameData interface
 ```
 
-## Key Entry Points
+## Architecture
 
-| File | Purpose |
-|------|---------|
-| `src/shared/types/game.ts` | `GameData` interface |
-| `src/shared/pgn/gameExtractor.ts` | PGN → GameData |
-| `src/shared/database/schema.ts` | SQLite schema |
-| `src/shared/converters/resultConverter.ts` | Result numeric ↔ display |
-| `src/main/config/paths.ts` | Centralized paths |
-| `src/main/ipc/gameDatabase.ts` | `DatabaseManager` singleton |
-| `src/main/ipc/validators.ts` | IPC input validation |
-| `src/main/ipc/importHandlers.ts` | PGN import orchestration |
-| `src/main/ipc/variationHandlers.ts` | Variation CRUD IPC handlers |
-| `src/main/preload.ts` | `window.electron.*` bridge |
-| `src/renderer/types/electron.ts` | IPC API ambient type definitions |
-| `src/renderer/types/navigableManager.ts` | Shared navigation interface |
-| `src/renderer/App.tsx` | Root layout + state |
-| `src/renderer/components/BoardDisplay.tsx` | Chessground board + interactive move input |
-| `src/renderer/components/GameListSidebar.tsx` | Search, filter, game list |
-| `src/renderer/components/MoveNavigation.tsx` | Nav buttons + keyboard shortcuts |
-| `src/renderer/hooks/useVariationState.ts` | Variation state + persistence |
-| `src/renderer/utils/chessManager.ts` | Move parsing, FEN, ply navigation (read-only) |
-| `src/renderer/utils/variationManager.ts` | Mutable variation move sequences |
-| `src/renderer/utils/chessHelpers.ts` | FEN-based position helpers |
-| `src/renderer/utils/audioManager.ts` | Move sounds |
+Three compilation targets share `src/shared/`:
 
-### LSP First, Glob/Grep Second
+```
+src/main/*.ts + src/shared/*.ts  →  tsc (ESM)  →  dist-electron/main/     # Node.js: lifecycle, SQLite, IPC
+src/main/preload.ts              →  tsc (CJS)  →  dist-electron/preload/  # Sandboxed bridge: window.electron.*
+src/renderer/*.tsx               →  Vite       →  dist/                   # React UI, calls window.electron.*
+```
 
-Use LSP tools: `goToDefinition`, `findReferences`, `documentSymbol`, `incomingCalls`/`outgoingCalls`, `hover`. Fall back to Glob/Grep for text, comments, config values.
+**Dev:** Vite on `localhost:5173` | **Prod:** Electron loads `dist/index.html`
+
+### Variation Architecture
+
+Two managers implement `NavigableManager`:
+- **ChessManager**: read-only mainline navigation
+- **VariationManager**: mutable variation sequences (branching from mainline)
+
+Key concepts:
+- `branchPly` (1-based): mainline ply the variation *replaces*, not branches from. Odd = white, even = black.
+- Positions stored as FEN strings; Chess objects reconstructed on demand
+- UNIQUE constraint: one variation per branch point (upsert semantics)
 
 ## UI Layout
 
 ```
-┌─────────────────┬─────────────────────────────────┬─────────────────────┐
-│ Left (w-72)     │Center (flex-1)                  │ Right (w-80)        │
-├─────────────────┼─────────────────────────────────┼─────────────────────┤
-│ CollectionSel.  │[spacer] BoardDisplay [CtrlStrip]│ GameInfo            │
-│ GameListSidebar │        MoveNavigation           │ MoveList            │
-│ ImportDialog    │                                 │                     │
-│ ConfirmDialog   │                                 │                     │
-└─────────────────┴─────────────────────────────────┴─────────────────────┘
+┌─────────────────┬──────────────────────────────────┬────────────────────┐
+│ Left (w-72)     │ Center (flex-1)                  │ Right (w-80)       │
+├─────────────────┼──────────────────────────────────┼────────────────────┤
+│ CollectionSel.  │[spacer] BoardDisplay [CtrlStrip] │ GameInfo           │
+│ GameListSidebar │                                  │ MoveList           │
+│                 │                                  │                    │
+│                 │     MoveNavigationButtons        │                    │
+└─────────────────┴──────────────────────────────────┴────────────────────┘
 ```
-
-| Component | File | Responsibility |
-|-----------|------|----------------|
-| CollectionSelector | `components/CollectionSelector.tsx` | Collection dropdown + rename/delete |
-| GameListSidebar | `components/GameListSidebar.tsx` | Filter panel (search, result radio) + game list |
-| BoardDisplay | `components/BoardDisplay.tsx` | Chessground board + coords + interactive moves |
-| MoveNavigation | `components/MoveNavigation.tsx` | Nav buttons + keyboard shortcuts |
-| ControlStrip | `components/ControlStrip.tsx` | Lichess link, sound toggle, flip |
-| GameInfo | `components/GameInfo.tsx` | Collapsible game header |
-| MoveList | `components/MoveList.tsx` | Scrollable move grid + variation variations |
-| ImportDialog | `components/ImportDialog.tsx` | PGN import |
-| ConfirmDialog | `components/ConfirmDialog.tsx` | Delete confirmation |
-
-### Keyboard Shortcuts
-
-| Key | Action |
-|-----|--------|
-| `←` / `→` | Previous / next move |
-| `Home` / `End` | First / last position |
-| `Space` | Toggle auto-play |
-| Mouse wheel | Prev/next move (only over board or move list) |
-| Drag piece | Play move (advances mainline or creates/extends variation) |
 
 ## Styling
 
-**[shadcn/ui](https://ui.shadcn.com):** Dialogs and buttons use shadcn/ui components in `components/ui/` — **copy-pasted source code**, not npm imports. Add components via `npx shadcn@latest add <name>`. Config: `components.json`. Keep `ui/` customizations minimal; compose around them in app components.
+**[shadcn/ui](https://ui.shadcn.com):** `components/ui/` contains copy-pasted source (not npm imports). Add via `npx shadcn@latest add <name>`. Keep `ui/` customizations minimal; compose in app components.
 
 **Colors** — `tailwind.config.ts` + `styles/index.css`:
 - App: `ui-bg-page` → `ui-bg-box` → `ui-bg-element` → `ui-bg-hover`; `ui-text` → `ui-text-dim` → `ui-text-dimmer`; `ui-accent` (orange)
-- shadcn: CSS variables (`--color-background`, `--color-primary`, `--color-destructive`, etc.) in `index.css` — used by `ui/` components
+- shadcn: CSS variables (`--color-background`, `--color-primary`, `--color-destructive`, etc.)
 
-**Layout:** Flex only (no absolute positioning). Left spacer width = ControlStrip width. Board + MoveNavigation = flex-col.
+**Layout:** Flex only (no absolute positioning). Left spacer width = ControlStrip width.
 
-**Chessground:** Use `.board-coords-wrapper` for coord padding. Coords: `.cg-wrap coords.ranks/files`. Flip: `data-orientation="black"`.
+**Chessground:** Use `.board-coords-wrapper` for coord padding. Flip: `data-orientation="black"`.
 
 ## Gotchas
 
 **Update this section after non-trivial fixes.**
 
+### User Barrel Imports
+
+Export from each subdirectory via `index.ts` barrel. 
+
+
 ### `.js` Extension in All Imports
 
-ESM requires `.js` extension even for `.ts` source. `src/main/` = `.ts` source only; `.js` output → `dist-electron/`.
+ESM requires `.js` extension even for `.ts` source files.
 
 ### Import Paths by Context
 
-Use relative paths to `shared/` (all targets: renderer, main, tests, CLI). No `@shared` alias. Use `@/` for renderer-internal imports only.
-
-`../` depth = file's distance from `src/shared/`:
+Use relative paths to `shared/` from all targets (renderer, main, tests, CLI). No `@shared` alias. Use `@/` for renderer-internal imports only.
 
 ```typescript
 // Renderer root (src/renderer/*.tsx):
@@ -178,46 +143,35 @@ import { resultNumericToDisplay } from '../../shared/converters/resultConverter.
 
 // Main IPC (src/main/ipc/*.ts):
 import { extractGameData } from '../../shared/pgn/gameExtractor.js'
-
-// Main IPC utils (src/main/ipc/utils/*.ts):
-export * from '../../../shared/converters/resultConverter.js'
-
-// CLI scripts (scripts/*.ts):
-import { extractGameData, GAMES_SCHEMA_SQL, type GameData } from '../src/shared/index.js'
 ```
 
 ### Database Main-Process Only
 
-SQLite unavailable in renderer. DB access: renderer → `window.electron.fn()` → preload → `src/main/ipc/` handler → return.
+SQLite unavailable in renderer. Access path: renderer → `window.electron.fn()` → preload → `src/main/ipc/` handler.
 
 ### Validate IPC Inputs
 
-Validate all IPC handler inputs before use. See `src/main/ipc/validators.ts`. Follow patterns in `gameHandlers.ts`, `importHandlers.ts`, or `variationHandlers.ts`.
-
-### Variation Ply Arithmetic
-
-`branchPly` is 1-based and represents the mainline ply the variation *replaces*, not the position it branches from. Odd plies = white moves, even = black. See `variationFormatter.ts` for conversion helpers.
+Validate all IPC handler inputs. See `src/main/ipc/validators.ts` and follow patterns in existing handlers.
 
 ### TypeScript Configs
 
 | Config | Module | outDir | Constraints |
 |--------|--------|--------|-------------|
 | `src/main/tsconfig.json` | ESM | `dist-electron/` | Excludes `preload.ts` |
-| `src/main/tsconfig.preload.json` | **CJS** | `dist-electron/preload/` | `rootDir=src/` — covers `shared/` pulled in via `import type` chains |
+| `src/main/tsconfig.preload.json` | **CJS** | `dist-electron/preload/` | `rootDir=src/` |
 | `src/renderer/tsconfig.json` | ESM | `dist/` | — |
 
-- Preload = CJS (Electron sandbox forbids ESM).
-- Preload = separate `outDir` (else CJS output overwrites main's ESM `shared/`).
-- Multi-subdir config → `rootDir` = common ancestor  
-- Different module systems → different `outDir`s.
+Preload = CJS (Electron sandbox forbids ESM). Separate `outDir` prevents CJS output from overwriting ESM `shared/`.
 
 ### Rebuild better-sqlite3
 
-`npm test` auto-rebuilds for Node.js. Manual:
-- `npm run rebuild:sqlite` (tests)
-- `npm run rebuild:electron` (app)
+`npm test` auto-rebuilds for Node.js. Manual: `npm run rebuild:sqlite` (tests) / `npm run rebuild:electron` (app).
 
 If rebuild succeeds but fails at runtime: `rm -rf node_modules/better-sqlite3/build` and retry.
+
+### shadcn/ui Import Fix
+
+`npx shadcn@latest add` generates `import { cn } from "src/renderer/lib"` — must manually fix to `"@/lib/utils.js"` after adding components.
 
 ### Ignore DevTools Warnings
 
@@ -225,6 +179,4 @@ If rebuild succeeds but fails at runtime: `rm -rf node_modules/better-sqlite3/bu
 
 ### Knip False Positives
 
-`npm run knip` reports expected "unused exports" from shadcn/ui components (`components/ui/**`). These are library components designed to export comprehensive APIs even when not all exports are used. Do not remove these exports. See `knip.json` for configured ignores:
-- `electron.ts` marked as entry point (ambient type declarations, no explicit imports)
-- `tailwindcss` ignored (peer dependency of `@tailwindcss/vite`)
+`npm run knip` reports expected "unused exports" from `components/ui/**`. Do not remove. See `knip.json`.
