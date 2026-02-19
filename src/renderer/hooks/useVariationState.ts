@@ -45,6 +45,7 @@ export interface UseVariationStateReturn {
     jump: (ply: number) => void
   }
   loadVariations: (collectionId: string, gameId: number) => Promise<void>
+  reorderLocalVariations: (branchPly: number, orderedIds: number[]) => void
   dests: Map<Key, Key[]>
   turnColor: 'white' | 'black'
   checkColor: 'white' | 'black' | false
@@ -137,6 +138,20 @@ export function useVariationState({
     exitVariation()
   }, [exitVariation])
 
+  /**
+   * Optimistically reorder local variation state after a drag-to-reorder IPC call.
+   * Does NOT call exitVariation, so the active variation is preserved.
+   */
+  const reorderLocalVariations = useCallback((branchPly: number, orderedIds: number[]) => {
+    setVariations(prev => {
+      const byId = new Map(prev.map(v => [v.id, v]))
+      const reorderedPly = orderedIds
+        .map(id => byId.get(id))
+        .filter((v): v is VariationData => v !== undefined)
+      return [...prev.filter(v => v.branchPly !== branchPly), ...reorderedPly]
+    })
+  }, [])
+
   const dismissVariation = useCallback(async (id: number) => {
     if (!collectionId || gameId === null) return
     // Capture before removal so we can navigate mainline after dismissal
@@ -161,11 +176,21 @@ export function useVariationState({
    * Persist variation to database and update local state.
    * Uses activeVariationIdRef to determine create vs update — the ref is updated
    * synchronously when a variation is entered or created, so it's always current.
+   *
+   * Sentinel: ref is set to -1 while createVariation is in flight to prevent a
+   * second rapid move from issuing a duplicate create. Moves made during the
+   * sentinel window are skipped; the next move after creation completes will
+   * call updateVariation with the full movesString, so nothing is lost.
    */
   const persistVariation = useCallback((branchPly: number, movesStr: string) => {
     if (!collectionId || gameId === null) return
 
     const currentId = activeVariationIdRef.current
+
+    if (currentId === -1) {
+      // Creation in progress — skip; next move will updateVariation with full string
+      return
+    }
 
     if (currentId !== null) {
       // Update existing variation
@@ -179,17 +204,21 @@ export function useVariationState({
           console.error('Failed to update variation:', error)
         })
     } else {
-      // Create new variation
+      // Create new variation — sentinel prevents duplicate creates during IPC round-trip
+      activeVariationIdRef.current = -1
       window.electron.createVariation(collectionId, gameId, branchPly, movesStr)
         .then(saved => {
           if (saved) {
             activeVariationIdRef.current = saved.id ?? null
             setActiveVariationId(saved.id ?? null)
             setVariations(prev => [...prev, saved])
+          } else {
+            activeVariationIdRef.current = null
           }
         })
         .catch(error => {
           console.error('Failed to create variation:', error)
+          activeVariationIdRef.current = null
         })
     }
   }, [collectionId, gameId])
@@ -366,6 +395,7 @@ export function useVariationState({
     advanceVariation,
     variationNav,
     loadVariations,
+    reorderLocalVariations,
     dests,
     turnColor,
     checkColor,

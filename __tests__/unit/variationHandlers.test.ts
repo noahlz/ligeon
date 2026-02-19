@@ -41,6 +41,10 @@ describe('getVariations', () => {
     await createVariation(TEST_COLLECTION, 1, 5, 'd4', tmpDir)
     const result = await getVariations(TEST_COLLECTION, 1, tmpDir)
     expect(result.length).toBe(2)
+    expect(result[0].branchPly).toBe(3)
+    expect(result[0].moves).toBe('e4')
+    expect(result[1].branchPly).toBe(5)
+    expect(result[1].moves).toBe('d4')
   })
 
   test('returns empty array for invalid collectionId', async () => {
@@ -119,6 +123,11 @@ describe('updateVariation', () => {
     expect(result).toBeNull()
   })
 
+  test('returns null for non-existent variation id', async () => {
+    const result = await updateVariation(TEST_COLLECTION, 1, 9999, 'e4', tmpDir)
+    expect(result).toBeNull()
+  })
+
   test('returns null for invalid collectionId', async () => {
     const result = await updateVariation('', 1, 1, 'e4', tmpDir)
     expect(result).toBeNull()
@@ -183,6 +192,29 @@ describe('reorderVariations', () => {
 
   test('returns false for orderedIds containing invalid id', async () => {
     const result = await reorderVariations(TEST_COLLECTION, 1, 3, [1, 0], tmpDir)
+    expect(result.success).toBe(false)
+  })
+
+  test('no-ops and returns success for empty orderedIds', async () => {
+    await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const result = await reorderVariations(TEST_COLLECTION, 1, 3, [], tmpDir)
+    expect(result.success).toBe(true)
+    // Existing variation unaffected
+    const variations = db.getVariations(1)
+    expect(variations.length).toBe(1)
+  })
+
+  test('returns false for IDs belonging to a different game', async () => {
+    // Insert a second game
+    db.insertGame({
+      white: 'A', black: 'B', event: null, date: null,
+      result: 0.5, ecoCode: null, whiteElo: null, blackElo: null,
+      site: null, round: null, moveCount: 10, moves: 'd4 d5',
+    })
+    const game1Var = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const game2Var = await createVariation(TEST_COLLECTION, 2, 3, 'd4', tmpDir)
+    // Try to reorder game 1's ply using a mix of IDs from both games
+    const result = await reorderVariations(TEST_COLLECTION, 1, 3, [game1Var!.id!, game2Var!.id!], tmpDir)
     expect(result.success).toBe(false)
   })
 })

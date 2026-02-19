@@ -64,7 +64,7 @@ export interface VariationData {
   id?: number           // DB auto-increment (undefined before first save)
   gameId: number        // FK to games.id
   branchPly: number     // mainline ply where variation departs (1-based)
-  displayOrder: number  // 0-indexed position within ply group (for drag-to-reorder)
+  displayOrder?: number // 0-indexed position within ply group (for drag-to-reorder); undefined before first DB save
   moves: string         // space-separated SAN: "Nf3 d5 Bg5"
 }
 

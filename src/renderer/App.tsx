@@ -224,6 +224,14 @@ export default function App() {
     setCollections(cols)
   }
 
+  // Stable callback for drag-to-reorder variations.
+  // Updates local state optimistically (no exitVariation side-effect) after IPC.
+  const handleReorderVariations = useCallback(async (branchPly: number, orderedIds: number[]) => {
+    if (!selectedGameCollectionId || !selectedGame) return
+    await window.electron.reorderVariations(selectedGameCollectionId, selectedGame.id, branchPly, orderedIds)
+    variationState.reorderLocalVariations(branchPly, orderedIds)
+  }, [selectedGameCollectionId, selectedGame, variationState.reorderLocalVariations])
+
   return (
     <TooltipProvider>
       <div className="h-screen bg-ui-bg-page text-ui-text flex flex-col">
@@ -343,12 +351,7 @@ export default function App() {
                     variationPly={variationState.variationPly}
                     onVariationJump={variationState.jumpToVariationMove}
                     onDismissVariation={variationState.requestDeletion}
-                    onReorderVariations={selectedGameCollectionId && selectedGame
-                      ? async (branchPly, orderedIds) => {
-                          await window.electron.reorderVariations(selectedGameCollectionId, selectedGame.id, branchPly, orderedIds)
-                          variationState.loadVariations(selectedGameCollectionId, selectedGame.id)
-                        }
-                      : undefined}
+                    onReorderVariations={selectedGameCollectionId && selectedGame ? handleReorderVariations : undefined}
                     isInVariation={variationState.isInVariation}
                     commentHandlers={{
                       comments: commentState.comments,

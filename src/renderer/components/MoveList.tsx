@@ -79,6 +79,11 @@ export default function MoveList({
     e.dataTransfer.effectAllowed = 'move'
   }, [])
 
+  const handleVariationDragEnd = useCallback(() => {
+    // Clear dragging state when drag ends outside a valid drop target
+    setDraggedVariationId(null)
+  }, [])
+
   const handleVariationDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
@@ -87,7 +92,7 @@ export default function MoveList({
   const handleVariationDrop = useCallback((e: React.DragEvent, targetId: number, branchPly: number) => {
     e.preventDefault()
     const sourceId = parseInt(e.dataTransfer.getData('variationId'), 10)
-    if (!sourceId || sourceId === targetId || !variations || !onReorderVariations) return
+    if (isNaN(sourceId) || sourceId <= 0 || sourceId === targetId || !variations || !onReorderVariations) return
     const plyVariations = variations.filter(v => v.branchPly === branchPly)
     const sourceIdx = plyVariations.findIndex(v => v.id === sourceId)
     const targetIdx = plyVariations.findIndex(v => v.id === targetId)
@@ -371,6 +376,7 @@ export default function MoveList({
                     onDragStart={onReorderVariations ? handleVariationDragStart : undefined}
                     onDragOver={onReorderVariations ? handleVariationDragOver : undefined}
                     onDrop={onReorderVariations ? (e, id) => handleVariationDrop(e, id, sl.branchPly) : undefined}
+                    onDragEnd={onReorderVariations ? handleVariationDragEnd : undefined}
                     isDragging={draggedVariationId === sl.id}
                   />
                 ))}
@@ -414,6 +420,7 @@ export default function MoveList({
                     onDragStart={onReorderVariations ? handleVariationDragStart : undefined}
                     onDragOver={onReorderVariations ? handleVariationDragOver : undefined}
                     onDrop={onReorderVariations ? (e, id) => handleVariationDrop(e, id, sl.branchPly) : undefined}
+                    onDragEnd={onReorderVariations ? handleVariationDragEnd : undefined}
                     isDragging={draggedVariationId === sl.id}
                   />
                 ))}

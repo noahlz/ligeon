@@ -387,6 +387,9 @@ export class GameDatabase {
   deleteVariation(gameId: number, id: number): void {
     try {
       this.db.prepare('DELETE FROM variations WHERE id = ? AND gameId = ?').run(id, gameId)
+      // Note: this leaves gaps in displayOrder for sibling variations at the same ply.
+      // Gaps are harmless — ORDER BY displayOrder preserves relative order — and the
+      // next createVariation at this ply assigns displayOrder = COUNT(*), which fills correctly.
     } catch (error) {
       logError('GameDatabase', 'deleteVariation', { dbPath: this.dbPath, gameId, id }, error)
       throw error
@@ -402,8 +405,17 @@ export class GameDatabase {
    * @param orderedIds - Variation IDs in their new display order (index = new displayOrder)
    */
   reorderVariations(gameId: number, branchPly: number, orderedIds: number[]): void {
+    if (orderedIds.length === 0) return
     try {
       const reorder = this.db.transaction(() => {
+        // Verify all IDs belong to (gameId, branchPly) before updating anything.
+        const placeholders = orderedIds.map(() => '?').join(',')
+        const owned = this.db
+          .prepare(`SELECT id FROM variations WHERE id IN (${placeholders}) AND gameId = ? AND branchPly = ?`)
+          .all(...orderedIds, gameId, branchPly) as { id: number }[]
+        if (owned.length !== orderedIds.length) {
+          throw new Error(`One or more variation IDs do not belong to game ${gameId} at ply ${branchPly}`)
+        }
         const stmt = this.db.prepare('UPDATE variations SET displayOrder = ? WHERE id = ? AND gameId = ? AND branchPly = ?')
         orderedIds.forEach((id, index) => {
           stmt.run(index, id, gameId, branchPly)

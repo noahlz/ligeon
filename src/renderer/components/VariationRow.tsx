@@ -28,6 +28,7 @@ export interface VariationRowProps {
   onDragStart?: (e: React.DragEvent, id: number) => void
   onDragOver?: (e: React.DragEvent) => void
   onDrop?: (e: React.DragEvent, id: number) => void
+  onDragEnd?: (e: React.DragEvent) => void
   isDragging?: boolean
 }
 
@@ -45,6 +46,7 @@ export function VariationRow({
   onDragStart,
   onDragOver,
   onDrop,
+  onDragEnd,
   isDragging,
 }: VariationRowProps) {
   const [expanded, setExpanded] = useState(false)
@@ -211,6 +213,7 @@ export function VariationRow({
           onDragStart={onDragStart && variation.id != null ? e => onDragStart(e, variation.id!) : undefined}
           onDragOver={onDragOver}
           onDrop={onDrop && variation.id != null ? e => onDrop(e, variation.id!) : undefined}
+          onDragEnd={onDragEnd}
         >
           {/* Header row: toggle + first move preview + dismiss */}
           {!expanded ? (
