@@ -38,10 +38,6 @@ npm run package          # Build + package → out/
 3. `npm run typecheck`
 4. `npm run app` — window opens, console shows "✓ IPC handlers set up"
 
-## Source Code Navigation
-
-Use LSP (`goToDefinition`, `findReferences`, `documentSymbol`) first for navigation; fall back to Find/Glob/Grep.
-
 ## Project Structure
 
 ```
@@ -113,7 +109,9 @@ Key concepts:
 - App: `ui-bg-page` → `ui-bg-box` → `ui-bg-element` → `ui-bg-hover`; `ui-text` → `ui-text-dim` → `ui-text-dimmer`; `ui-accent` (orange)
 - shadcn: CSS variables (`--color-background`, `--color-primary`, `--color-destructive`, etc.)
 
-**Layout:** Flex only (no absolute positioning). Left spacer width = ControlStrip width.
+**Layout:** 
+- Flex only (no absolute positioning, unless justified by a comment).
+- Left spacer width = ControlStrip width.
 
 **Chessground:** Use `.board-coords-wrapper` for coord padding. Flip: `data-orientation="black"`.
 
@@ -124,7 +122,6 @@ Key concepts:
 ### User Barrel Imports
 
 Export from each subdirectory via `index.ts` barrel. 
-
 
 ### `.js` Extension in All Imports
 
