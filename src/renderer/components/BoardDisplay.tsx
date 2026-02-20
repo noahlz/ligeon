@@ -106,14 +106,14 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
       />
       {annotationGlyph && badgeStyle && (
         <div
-          className="pointer-events-none absolute flex items-center justify-center rounded-full bg-black/65 text-white font-bold font-mono select-none"
+          className="pointer-events-none absolute flex items-center justify-center rounded-full bg-black/75 text-white font-bold select-none leading-none"
           style={{
             ...badgeStyle,
-            width: '6.5%',
-            height: '6.5%',
-            fontSize: '2.5%',
-            minWidth: 20,
-            minHeight: 20,
+            width: '8%',
+            height: '8%',
+            fontSize: 'clamp(14px, 4.5%, 20px)',
+            minWidth: 28,
+            minHeight: 28,
           }}
         >
           {annotationGlyph}

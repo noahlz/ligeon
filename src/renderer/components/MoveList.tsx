@@ -1,5 +1,5 @@
 import { Fragment, useRef, useEffect, useState, useCallback, useMemo } from 'react'
-import { MessageSquareMore, Tag } from 'lucide-react'
+import { MessageSquareMore, NotebookPen } from 'lucide-react'
 import { getResultDisplay } from '../utils/chessManager.js'
 import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
 import { getVariationsAtPly } from '../utils/variationFormatter.js'
@@ -126,6 +126,8 @@ export default function MoveList({
 
   // Track which ply has its annotation Popover open
   const [annotationMenuPly, setAnnotationMenuPly] = useState<number | null>(null)
+  // When navigating via annotation click, hold the ply so the useEffect re-opens the popover
+  const pendingAnnotationPlyRef = useRef<number | null>(null)
 
   // O(1) ply lookup for annotations
   const annotationsByPly = useMemo(() => {
@@ -134,8 +136,14 @@ export default function MoveList({
     return map
   }, [annotationHandlers?.annotations])
 
-  // Close annotation Popover when navigating to a different move
+  // Close annotation Popover when navigating — unless navigation was triggered by annotation click
   useEffect(() => {
+    if (pendingAnnotationPlyRef.current !== null) {
+      const ply = pendingAnnotationPlyRef.current
+      pendingAnnotationPlyRef.current = null
+      setAnnotationMenuPly(ply)
+      return
+    }
     setAnnotationMenuPly(null)
   }, [currentPly])
 
@@ -208,7 +216,6 @@ export default function MoveList({
   const handleAnnotationTriggerClick = useCallback((e: React.MouseEvent, ply: number) => {
     e.stopPropagation()
     setAnnotationMenuPly(prev => prev === ply ? null : ply)
-    // Keep hover buttons visible while Popover is open
     setCommentMenuPly(ply)
     clearHideTimer()
   }, [clearHideTimer])
@@ -329,8 +336,105 @@ export default function MoveList({
       </button>
     ) : null
 
-    // Annotation trigger button — appears on hover, opens picker Popover
-    const annotationTrigger = showAnnotationTrigger ? (
+    // Shared popover content for annotation picker
+    const annotationPopoverContent = (
+      <PopoverContent
+        side="bottom"
+        align="center"
+        className="w-auto p-2"
+        onOpenAutoFocus={e => e.preventDefault()}
+      >
+        <div className="flex flex-col gap-1" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-1 gap-4">
+            <span className="text-xs text-ui-text-dimmer">Select annotation</span>
+            <button
+              onClick={() => handleAnnotationPopoverClose()}
+              className="text-ui-text-dimmer hover:text-ui-text leading-none cursor-pointer"
+            >
+              ×
+            </button>
+          </div>
+          <div className="grid grid-cols-5 gap-1.5">
+            {NAG_DEFINITIONS.map(def => (
+              <Tooltip key={def.nag}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (annotation?.nag === def.nag) {
+                        annotationHandlers?.onClearAnnotation?.(ply)
+                      } else {
+                        annotationHandlers?.onSetAnnotation?.(ply, def.nag)
+                      }
+                      setAnnotationMenuPly(null)
+                      setCommentMenuPly(null)
+                    }}
+                    className={`h-10 w-11 font-mono text-base text-white p-0 ${
+                      annotation?.nag === def.nag
+                        ? 'ring-1 ring-ui-accent bg-ui-accent/20'
+                        : 'hover:text-white'
+                    }`}
+                  >
+                    {def.symbol}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{def.description}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
+          {annotation && (
+            <div className="border-t border-ui-bg-hover mt-1 pt-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-ui-text-dim h-6"
+                onClick={() => {
+                  annotationHandlers?.onClearAnnotation?.(ply)
+                  setAnnotationMenuPly(null)
+                  setCommentMenuPly(null)
+                }}
+              >
+                Clear annotation
+              </Button>
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    )
+
+    // Inline annotation — always visible when annotation exists, clickable to open picker
+    const inlineAnnotation = nagSymbol ? (
+      <Popover
+        open={isAnnotationOpen}
+        onOpenChange={(open) => { if (!open) handleAnnotationPopoverClose() }}
+      >
+        <PopoverTrigger asChild>
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              if (!isCurrent) {
+                pendingAnnotationPlyRef.current = ply
+                onJump(ply)
+              }
+              setAnnotationMenuPly(prev => prev === ply ? null : ply)
+              setCommentMenuPly(ply)
+              clearHideTimer()
+            }}
+            className="ml-0.5 cursor-pointer opacity-80 hover:opacity-100"
+            title="Change annotation"
+          >
+            {nagSymbol}
+          </button>
+        </PopoverTrigger>
+        {annotationPopoverContent}
+      </Popover>
+    ) : null
+
+    // Annotation trigger slot — NotebookPen on hover, only when no annotation
+    const annotationTrigger = !nagSymbol && showAnnotationTrigger ? (
       <Popover
         open={isAnnotationOpen}
         onOpenChange={(open) => { if (!open) handleAnnotationPopoverClose() }}
@@ -338,76 +442,13 @@ export default function MoveList({
         <PopoverTrigger asChild>
           <button
             onClick={e => handleAnnotationTriggerClick(e, ply)}
-            className={`p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 font-mono text-sm leading-none ${
-              nagSymbol
-                ? 'text-ui-text-dim hover:text-ui-text'
-                : 'text-white/50 hover:text-ui-accent'
-            }`}
-            title={nagSymbol ? 'Change annotation' : 'Add annotation'}
+            className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
+            title="Add annotation"
           >
-            {nagSymbol ?? <Tag size={12} />}
+            <NotebookPen size={12} />
           </button>
         </PopoverTrigger>
-        <PopoverContent
-          side="bottom"
-          align="center"
-          className="w-auto p-2"
-          onOpenAutoFocus={e => e.preventDefault()}
-        >
-          <div className="flex flex-col gap-1" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-1 gap-4">
-              <span className="text-xs text-ui-text-dimmer">Annotation</span>
-              <button
-                onClick={() => handleAnnotationPopoverClose()}
-                className="text-ui-text-dimmer hover:text-ui-text leading-none"
-              >
-                ×
-              </button>
-            </div>
-            <div className="grid grid-cols-5 gap-1">
-              {NAG_DEFINITIONS.map(def => (
-                <Button
-                  key={def.nag}
-                  variant="ghost"
-                  size="sm"
-                  title={def.description}
-                  onClick={() => {
-                    if (annotation?.nag === def.nag) {
-                      annotationHandlers?.onClearAnnotation?.(ply)
-                    } else {
-                      annotationHandlers?.onSetAnnotation?.(ply, def.nag)
-                    }
-                    setAnnotationMenuPly(null)
-                    setCommentMenuPly(null)
-                  }}
-                  className={`h-7 w-8 font-mono text-sm p-0 ${
-                    annotation?.nag === def.nag
-                      ? 'ring-1 ring-ui-accent bg-ui-accent/20 text-white'
-                      : ''
-                  }`}
-                >
-                  {def.symbol}
-                </Button>
-              ))}
-            </div>
-            {annotation && (
-              <div className="border-t border-ui-bg-hover mt-1 pt-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-xs text-ui-text-dim h-6"
-                  onClick={() => {
-                    annotationHandlers?.onClearAnnotation?.(ply)
-                    setAnnotationMenuPly(null)
-                    setCommentMenuPly(null)
-                  }}
-                >
-                  Clear annotation
-                </Button>
-              </div>
-            )}
-          </div>
-        </PopoverContent>
+        {annotationPopoverContent}
       </Popover>
     ) : null
 
@@ -425,9 +466,7 @@ export default function MoveList({
         <span className="flex items-center w-full">
           <span className="flex-1">
             {san || ''}
-            {nagSymbol && !showAnnotationTrigger && (
-              <span className="text-ui-text-dim ml-0.5 text-sm font-mono font-normal">{nagSymbol}</span>
-            )}
+            {inlineAnnotation}
           </span>
           {/* Annotation trigger slot */}
           <span className="w-5 shrink-0 flex items-center justify-center">
