@@ -227,8 +227,8 @@ function setupIpcHandlers() {
     upsertAnnotation(collectionId, parseInt(gameId, 10), ply, nag)
   )
 
-  ipcMain.handle('delete-annotation', async (_event, { collectionId, gameId, ply }) =>
-    deleteAnnotation(collectionId, parseInt(gameId, 10), ply)
+  ipcMain.handle('delete-annotation', async (_event, { collectionId, gameId, ply, nag }) =>
+    deleteAnnotation(collectionId, parseInt(gameId, 10), ply, nag)
   )
 
   // Settings handlers

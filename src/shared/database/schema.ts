@@ -61,9 +61,11 @@ export const VARIATIONS_SCHEMA_SQL = `
 /**
  * SQLite schema for annotations table.
  *
- * Stores a single NAG (Numeric Annotation Glyph) per mainline ply.
+ * Stores multiple NAG (Numeric Annotation Glyph) codes per mainline ply — one row
+ * per (gameId, ply, nag) triple. Multiple NAGs of different categories may coexist
+ * at the same ply; category exclusivity is enforced at the UI level, not here.
  * ON DELETE CASCADE: deleting a game automatically cleans up its annotations.
- * Unique index enforces one annotation per (gameId, ply).
+ * Unique index enforces at most one instance of each NAG code per ply.
  */
 export const ANNOTATIONS_SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS annotations (
@@ -74,7 +76,7 @@ export const ANNOTATIONS_SCHEMA_SQL = `
     FOREIGN KEY (gameId) REFERENCES games(id) ON DELETE CASCADE
   );
   CREATE INDEX IF NOT EXISTS idx_annotations_game ON annotations(gameId);
-  CREATE UNIQUE INDEX IF NOT EXISTS idx_annotations_ply ON annotations(gameId, ply);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_annotations_ply_nag ON annotations(gameId, ply, nag);
 `
 
 export const COMMENTS_SCHEMA_SQL = `

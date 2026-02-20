@@ -25,7 +25,7 @@ export interface MoveCellAnnotationCallbacks {
   onAnnotationTriggerClick: (e: React.MouseEvent, ply: number) => void
   onAnnotationPopoverClose: () => void
   onSetAnnotation?: (ply: number, nag: number) => void
-  onClearAnnotation?: (ply: number) => void
+  onRemoveAnnotation?: (ply: number, nag: number) => void
 }
 
 export interface MoveCellProps {
@@ -35,7 +35,7 @@ export interface MoveCellProps {
   refProp?: React.Ref<HTMLTableCellElement>
   comment?: CommentData
   isCollapsed: boolean
-  annotationNag?: number
+  annotationNags?: number[]
   isHovered: boolean
   isAnnotationOpen: boolean
   editingCommentPly: number | null
@@ -54,7 +54,7 @@ export function MoveCell({
   refProp,
   comment,
   isCollapsed,
-  annotationNag,
+  annotationNags,
   isHovered,
   isAnnotationOpen,
   editingCommentPly,
@@ -65,7 +65,11 @@ export function MoveCell({
   commentCallbacks,
   annotationCallbacks,
 }: MoveCellProps) {
-  const nagSymbol = annotationNag !== undefined ? getNagSymbol(annotationNag) : undefined
+  // Concatenate all annotation symbols for inline display (e.g. "!□" or "=⊕")
+  const nagSymbols = (annotationNags ?? [])
+    .map(nag => getNagSymbol(nag))
+    .filter(Boolean)
+    .join('')
   const hasComment = !!comment
 
   const showAnnotationTrigger = (isHovered || isAnnotationOpen) && !editingCommentPly
@@ -110,8 +114,8 @@ export function MoveCell({
     </button>
   ) : null
 
-  // Inline annotation — always visible when annotation exists, clickable to open picker
-  const inlineAnnotation = nagSymbol ? (
+  // Inline annotation — always visible when annotations exist, clickable to open picker
+  const inlineAnnotation = nagSymbols ? (
     <Popover
       open={isAnnotationOpen}
       onOpenChange={(open) => { if (!open) annotationCallbacks.onAnnotationPopoverClose() }}
@@ -122,14 +126,14 @@ export function MoveCell({
           className="ml-1.5 cursor-pointer opacity-80 hover:opacity-100"
           title="Change annotation"
         >
-          {nagSymbol}
+          {nagSymbols}
         </button>
       </PopoverTrigger>
       <AnnotationPicker
         ply={ply}
-        currentAnnotationNag={annotationNag}
+        currentAnnotationNags={annotationNags ?? []}
         onSetAnnotation={annotationCallbacks.onSetAnnotation}
-        onClearAnnotation={annotationCallbacks.onClearAnnotation}
+        onRemoveAnnotation={annotationCallbacks.onRemoveAnnotation}
         onClose={annotationCallbacks.onAnnotationPopoverClose}
       />
     </Popover>
@@ -139,7 +143,7 @@ export function MoveCell({
   // When annotation exists: plain button (inlineAnnotation Popover handles rendering)
   // When no annotation: NotebookPen is the Popover trigger
   const annotationTrigger = showAnnotationTrigger ? (
-    nagSymbol ? (
+    nagSymbols ? (
       <button
         onClick={e => annotationCallbacks.onAnnotationTriggerClick(e, ply)}
         className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
@@ -163,9 +167,9 @@ export function MoveCell({
         </PopoverTrigger>
         <AnnotationPicker
           ply={ply}
-          currentAnnotationNag={annotationNag}
+          currentAnnotationNags={annotationNags ?? []}
           onSetAnnotation={annotationCallbacks.onSetAnnotation}
-          onClearAnnotation={annotationCallbacks.onClearAnnotation}
+          onRemoveAnnotation={annotationCallbacks.onRemoveAnnotation}
           onClose={annotationCallbacks.onAnnotationPopoverClose}
         />
       </Popover>

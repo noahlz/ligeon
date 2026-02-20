@@ -11,17 +11,19 @@ import { Button } from '@/components/ui/button.js'
 
 export interface AnnotationPickerProps {
   ply: number
-  currentAnnotationNag?: number
+  /** All NAG codes currently set at this ply */
+  currentAnnotationNags: number[]
   onSetAnnotation?: (ply: number, nag: number) => void
-  onClearAnnotation?: (ply: number) => void
+  /** Remove a specific annotation by NAG code (toggle-off behavior) */
+  onRemoveAnnotation?: (ply: number, nag: number) => void
   onClose: () => void
 }
 
 export function AnnotationPicker({
   ply,
-  currentAnnotationNag,
+  currentAnnotationNags,
   onSetAnnotation,
-  onClearAnnotation,
+  onRemoveAnnotation,
   onClose,
 }: AnnotationPickerProps) {
   return (
@@ -42,50 +44,38 @@ export function AnnotationPicker({
           </button>
         </div>
         <div className="grid grid-cols-5 gap-1.5">
-          {NAG_DEFINITIONS.map(def => (
-            <Tooltip key={def.nag}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    if (currentAnnotationNag === def.nag) {
-                      onClearAnnotation?.(ply)
-                    } else {
-                      onSetAnnotation?.(ply, def.nag)
-                    }
-                    onClose()
-                  }}
-                  className={`h-10 w-11 font-mono text-base text-white p-0 ${
-                    currentAnnotationNag === def.nag
-                      ? 'ring-1 ring-ui-accent bg-ui-accent/20'
-                      : 'hover:text-white'
-                  }`}
-                >
-                  {def.symbol}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>{def.description}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
+          {NAG_DEFINITIONS.map(def => {
+            const isActive = currentAnnotationNags.includes(def.nag)
+            return (
+              <Tooltip key={def.nag}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (isActive) {
+                        onRemoveAnnotation?.(ply, def.nag)
+                      } else {
+                        onSetAnnotation?.(ply, def.nag)
+                      }
+                      onClose()
+                    }}
+                    className={`h-10 w-11 font-mono text-base text-white p-0 ${
+                      isActive
+                        ? 'ring-1 ring-ui-accent bg-ui-accent/20'
+                        : 'hover:text-white'
+                    }`}
+                  >
+                    {def.symbol}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{def.description}</p>
+                </TooltipContent>
+              </Tooltip>
+            )
+          })}
         </div>
-        {currentAnnotationNag !== undefined && (
-          <div className="border-t border-ui-bg-hover mt-1 pt-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs text-ui-text-dim h-6"
-              onClick={() => {
-                onClearAnnotation?.(ply)
-                onClose()
-              }}
-            >
-              Clear annotation
-            </Button>
-          </div>
-        )}
       </div>
     </PopoverContent>
   )

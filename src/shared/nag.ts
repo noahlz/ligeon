@@ -5,5 +5,5 @@
  * src/renderer/utils/nag.ts.
  */
 export const VALID_NAG_CODES: readonly number[] = [
-  1, 2, 3, 4, 5, 6, 7, 10, 13, 14, 15, 16, 17, 18, 19
+  1, 2, 3, 4, 5, 6, 7, 10, 13, 14, 15, 16, 17, 18, 19, 32
 ]

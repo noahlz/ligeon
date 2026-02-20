@@ -1,6 +1,7 @@
 # Ligeon TODOs
 
-## PGN Export
+## PGN Import/Export
+- Support parsing game annotations, variations and comments (i.e. ! good move) in parsing
 - Extend buildFullPgn to export game to PGN with all variations
 - Add tests for PGN export with variations 
 - Verify exported PGN opens correctly in Lichess

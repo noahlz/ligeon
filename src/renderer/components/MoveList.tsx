@@ -3,6 +3,7 @@ import { getResultDisplay } from '../utils/chessManager.js'
 import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
 import { getVariationsAtPly } from '../utils/variationFormatter.js'
 import type { VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
+import { groupAnnotationsByPly } from '../hooks/useAnnotationState.js'
 import {
   Table,
   TableBody,
@@ -49,7 +50,7 @@ interface MoveListProps {
 export interface AnnotationHandlers {
   annotations?: AnnotationData[]
   onSetAnnotation?: (ply: number, nag: number) => void
-  onClearAnnotation?: (ply: number) => void
+  onRemoveAnnotation?: (ply: number, nag: number) => void
 }
 
 export default function MoveList({
@@ -117,12 +118,11 @@ export default function MoveList({
   // When navigating via annotation click, hold the ply so the useEffect re-opens the popover
   const pendingAnnotationPlyRef = useRef<number | null>(null)
 
-  // O(1) ply lookup for annotations
-  const annotationsByPly = useMemo(() => {
-    const map = new Map<number, AnnotationData>()
-    annotationHandlers?.annotations?.forEach(a => map.set(a.ply, a))
-    return map
-  }, [annotationHandlers?.annotations])
+  // O(1) ply lookup for annotations (array per ply — multiple NAGs allowed)
+  const annotationsByPly = useMemo(
+    () => groupAnnotationsByPly(annotationHandlers?.annotations ?? []),
+    [annotationHandlers?.annotations]
+  )
 
   // Close annotation Popover when navigating — unless navigation was triggered by annotation click
   useEffect(() => {
@@ -271,7 +271,7 @@ export default function MoveList({
     onAnnotationTriggerClick: handleAnnotationTriggerClick,
     onAnnotationPopoverClose: handleAnnotationPopoverClose,
     onSetAnnotation: annotationHandlers?.onSetAnnotation,
-    onClearAnnotation: annotationHandlers?.onClearAnnotation,
+    onRemoveAnnotation: annotationHandlers?.onRemoveAnnotation,
   }
 
   return (
@@ -326,7 +326,7 @@ export default function MoveList({
                     refProp={isWhiteCurrent ? currentMoveRef : undefined}
                     comment={commentsByPly.get(whitePly1)}
                     isCollapsed={collapsedCommentPlies.has(whitePly1)}
-                    annotationNag={annotationsByPly.get(whitePly1)?.nag}
+                    annotationNags={(annotationsByPly.get(whitePly1) ?? []).map(a => a.nag)}
                     isHovered={commentMenuPly === whitePly1}
                     isAnnotationOpen={annotationMenuPly === whitePly1}
                     editingCommentPly={editingCommentPly ?? null}
@@ -346,7 +346,7 @@ export default function MoveList({
                         refProp={isBlackCurrent ? currentMoveRef : undefined}
                         comment={commentsByPly.get(blackPly1)}
                         isCollapsed={collapsedCommentPlies.has(blackPly1)}
-                        annotationNag={annotationsByPly.get(blackPly1)?.nag}
+                        annotationNags={(annotationsByPly.get(blackPly1) ?? []).map(a => a.nag)}
                         isHovered={commentMenuPly === blackPly1}
                         isAnnotationOpen={annotationMenuPly === blackPly1}
                         editingCommentPly={editingCommentPly ?? null}
@@ -407,7 +407,7 @@ export default function MoveList({
                       refProp={isBlackCurrent ? currentMoveRef : undefined}
                       comment={commentsByPly.get(blackPly1)}
                       isCollapsed={collapsedCommentPlies.has(blackPly1)}
-                      annotationNag={annotationsByPly.get(blackPly1)?.nag}
+                      annotationNags={(annotationsByPly.get(blackPly1) ?? []).map(a => a.nag)}
                       isHovered={commentMenuPly === blackPly1}
                       isAnnotationOpen={annotationMenuPly === blackPly1}
                       editingCommentPly={editingCommentPly ?? null}

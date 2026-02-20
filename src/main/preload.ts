@@ -90,8 +90,8 @@ contextBridge.exposeInMainWorld('electron', {
   upsertAnnotation: (collectionId: string, gameId: number, ply: number, nag: number) =>
     ipcRenderer.invoke('upsert-annotation', { collectionId, gameId, ply, nag }),
 
-  deleteAnnotation: (collectionId: string, gameId: number, ply: number) =>
-    ipcRenderer.invoke('delete-annotation', { collectionId, gameId, ply }),
+  deleteAnnotation: (collectionId: string, gameId: number, ply: number, nag: number) =>
+    ipcRenderer.invoke('delete-annotation', { collectionId, gameId, ply, nag }),
 
   // === Settings ===
   getSettings: () => ipcRenderer.invoke('get-settings'),

@@ -521,7 +521,7 @@ export class GameDatabase {
       const stmt = this.db.prepare(`
         INSERT INTO annotations (gameId, ply, nag)
         VALUES (?, ?, ?)
-        ON CONFLICT(gameId, ply) DO UPDATE SET nag = excluded.nag
+        ON CONFLICT(gameId, ply, nag) DO UPDATE SET nag = excluded.nag
         RETURNING id, gameId, ply, nag
       `)
       return stmt.get(gameId, ply, nag) as AnnotationData
@@ -532,18 +532,19 @@ export class GameDatabase {
   }
 
   /**
-   * Delete an annotation by (gameId, ply).
+   * Delete a specific annotation by (gameId, ply, nag).
    *
    * @param gameId - Database ID of the game
    * @param ply - 1-based mainline ply
+   * @param nag - NAG code to remove
    */
-  deleteAnnotation(gameId: number, ply: number): void {
+  deleteAnnotation(gameId: number, ply: number, nag: number): void {
     try {
       this.db.prepare(
-        'DELETE FROM annotations WHERE gameId = ? AND ply = ?'
-      ).run(gameId, ply)
+        'DELETE FROM annotations WHERE gameId = ? AND ply = ? AND nag = ?'
+      ).run(gameId, ply, nag)
     } catch (error) {
-      logError('GameDatabase', 'deleteAnnotation', { dbPath: this.dbPath, gameId, ply }, error)
+      logError('GameDatabase', 'deleteAnnotation', { dbPath: this.dbPath, gameId, ply, nag }, error)
       throw error
     }
   }
