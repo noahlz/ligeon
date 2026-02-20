@@ -151,6 +151,18 @@ describe('chessManager', () => {
         manager.last()
         expect(manager.getLastMove()).toEqual(['g1', 'f3'])
       })
+
+      test('tracks king destination for white kingside castle', () => {
+        const manager = createChessManager('1. e4 e5 2. Nf3 Nf6 3. Bc4 Bc5 4. O-O')
+        manager.last()
+        expect(manager.getLastMove()).toEqual(['e1', 'g1'])
+      })
+
+      test('tracks king destination for black kingside castle', () => {
+        const manager = createChessManager('1. e4 e5 2. Nf3 Nf6 3. Bc4 Bc5 4. O-O O-O')
+        manager.last()
+        expect(manager.getLastMove()).toEqual(['e8', 'g8'])
+      })
     })
 
     describe('move type detection', () => {

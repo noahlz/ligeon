@@ -1,6 +1,7 @@
 import fs from 'fs'
 import type { GameFilters, OptionFilters } from './types.js'
 import { logger } from '../config/logger.js'
+import { VALID_NAG_CODES } from '../../shared/nag.js'
 
 /**
  * Validation error details
@@ -516,6 +517,23 @@ export function validateCommentText(text: unknown): text is string {
   }
   if (text.length > 500) {
     logger.warn('Validation failed: comment text must be 500 characters or less')
+    return false
+  }
+  return true
+}
+
+/** Set of valid NAG codes, derived from the shared canonical list */
+const VALID_NAG_CODE_SET = new Set(VALID_NAG_CODES)
+
+/**
+ * Validate NAG (Numeric Annotation Glyph) code
+ *
+ * @param nag - NAG code to validate
+ * @returns True if valid (one of the supported NAG codes), false otherwise
+ */
+export function validateNag(nag: unknown): nag is number {
+  if (typeof nag !== 'number' || !Number.isInteger(nag) || !VALID_NAG_CODE_SET.has(nag)) {
+    logger.warn('Validation failed: nag must be a valid NAG code')
     return false
   }
   return true

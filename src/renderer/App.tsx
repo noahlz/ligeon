@@ -19,6 +19,8 @@ import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
 import { useVariationState } from './hooks/useVariationState.js'
 import { useCommentState } from './hooks/useCommentState.js'
+import { useAnnotationState } from './hooks/useAnnotationState.js'
+import { getNagSymbol } from './utils/nag.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 import type { Key } from '@lichess-org/chessground/types'
 
@@ -86,6 +88,9 @@ export default function App() {
   // Comment state
   const commentState = useCommentState()
 
+  // Annotation state
+  const annotationState = useAnnotationState()
+
   // Variation state (uses stable stop ref — only called during user interactions, never during render)
   const variationState = useVariationState({
     chessManager,
@@ -133,14 +138,15 @@ export default function App() {
     // Reset to initial position
     updateBoardState(manager, 0)
 
-    // Load variations and comments for this game
+    // Load variations, comments, and annotations for this game
     try {
       await Promise.all([
         variationState.loadVariations(selectedCollectionId, game.id),
         commentState.loadComments(selectedCollectionId, game.id),
+        annotationState.loadAnnotations(selectedCollectionId, game.id),
       ])
     } catch (error) {
-      console.error('Failed to load variations or comments:', error)
+      console.error('Failed to load variations, comments, or annotations:', error)
     }
   }
 
@@ -158,6 +164,15 @@ export default function App() {
   const boardCheckColor = variationState.isInVariation
     ? variationState.checkColor
     : (chessManager ? getCheckColor(chessManager.getMoveType(currentPly), boardTurnColor) : false)
+
+  // Annotation badge for the board — show current ply's annotation at the destination square
+  const currentAnnotation = annotationState.annotationsByPly.get(currentPly)
+  const boardAnnotationGlyph = (!variationState.isInVariation && currentAnnotation)
+    ? getNagSymbol(currentAnnotation.nag) ?? null
+    : null
+  const boardAnnotationSquare = boardAnnotationGlyph && lastMove && lastMove.length >= 2
+    ? (lastMove[1] as string)
+    : null
 
   const handleTogglePlay = () => {
     if (autoPlay.isPlaying) {
@@ -280,6 +295,8 @@ export default function App() {
                       turnColor={boardTurnColor}
                       onMove={variationState.handleUserMove}
                       boardSyncKey={boardSyncKey}
+                      annotationGlyph={boardAnnotationGlyph}
+                      annotationSquare={boardAnnotationSquare}
                     />
                   </div>
 
@@ -327,7 +344,7 @@ export default function App() {
 
           {/* Right panel: Game info and move list */}
           <div
-            className={`${rightPanelOpen ? 'w-80' : 'w-0 overflow-hidden'} bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-200`}
+            className={`${rightPanelOpen ? 'w-96' : 'w-0 overflow-hidden'} bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-200`}
             data-testid="move-list-panel"
           >
             {selectedGame ? (
@@ -353,6 +370,19 @@ export default function App() {
                     onDismissVariation={variationState.requestDeletion}
                     onReorderVariations={selectedGameCollectionId && selectedGame ? handleReorderVariations : undefined}
                     isInVariation={variationState.isInVariation}
+                    annotationHandlers={{
+                      annotations: annotationState.annotations,
+                      onSetAnnotation: (ply, nag) => {
+                        if (selectedGameCollectionId && selectedGame) {
+                          annotationState.setAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
+                        }
+                      },
+                      onClearAnnotation: (ply) => {
+                        if (selectedGameCollectionId && selectedGame) {
+                          annotationState.clearAnnotation(selectedGameCollectionId, selectedGame.id, ply)
+                        }
+                      },
+                    }}
                     commentHandlers={{
                       comments: commentState.comments,
                       editingPly: commentState.editingPly,

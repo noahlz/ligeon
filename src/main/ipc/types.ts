@@ -1,5 +1,5 @@
-import type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData } from '../../shared/types/game.js'
-export type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData }
+import type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
+export type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData, AnnotationData }
 
 /**
  * Filters for searching games

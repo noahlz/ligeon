@@ -1,22 +1,18 @@
 import { Fragment, useRef, useEffect, useState, useCallback, useMemo } from 'react'
-import { MessageSquareMore } from 'lucide-react'
 import { getResultDisplay } from '../utils/chessManager.js'
 import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
 import { getVariationsAtPly } from '../utils/variationFormatter.js'
-import type { VariationData, CommentData } from '../../shared/types/game.js'
+import type { VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
 import {
   Table,
   TableBody,
   TableRow,
   TableCell,
 } from '@/components/ui/table.js'
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip.js'
 import { CommentRow } from './CommentRow.js'
 import { VariationRow } from './VariationRow.js'
+import { MoveCell } from './MoveCell.js'
+import type { MoveCellCommentCallbacks, MoveCellAnnotationCallbacks } from './MoveCell.js'
 
 export interface CommentHandlers {
   comments?: CommentData[]
@@ -47,6 +43,13 @@ interface MoveListProps {
   onReorderVariations?: (branchPly: number, orderedIds: number[]) => void
   isInVariation?: boolean
   commentHandlers?: CommentHandlers
+  annotationHandlers?: AnnotationHandlers
+}
+
+export interface AnnotationHandlers {
+  annotations?: AnnotationData[]
+  onSetAnnotation?: (ply: number, nag: number) => void
+  onClearAnnotation?: (ply: number) => void
 }
 
 export default function MoveList({
@@ -54,6 +57,7 @@ export default function MoveList({
   variations, activeVariationBranchPly, activeVariationId, variationMoves,
   variationPly, onVariationJump, onDismissVariation, onReorderVariations, isInVariation,
   commentHandlers,
+  annotationHandlers,
 }: MoveListProps) {
   const {
     comments,
@@ -80,7 +84,6 @@ export default function MoveList({
   }, [])
 
   const handleVariationDragEnd = useCallback(() => {
-    // Clear dragging state when drag ends outside a valid drop target
     setDraggedVariationId(null)
   }, [])
 
@@ -109,6 +112,29 @@ export default function MoveList({
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Track which ply has its annotation Popover open
+  const [annotationMenuPly, setAnnotationMenuPly] = useState<number | null>(null)
+  // When navigating via annotation click, hold the ply so the useEffect re-opens the popover
+  const pendingAnnotationPlyRef = useRef<number | null>(null)
+
+  // O(1) ply lookup for annotations
+  const annotationsByPly = useMemo(() => {
+    const map = new Map<number, AnnotationData>()
+    annotationHandlers?.annotations?.forEach(a => map.set(a.ply, a))
+    return map
+  }, [annotationHandlers?.annotations])
+
+  // Close annotation Popover when navigating — unless navigation was triggered by annotation click
+  useEffect(() => {
+    if (pendingAnnotationPlyRef.current !== null) {
+      const ply = pendingAnnotationPlyRef.current
+      pendingAnnotationPlyRef.current = null
+      setAnnotationMenuPly(ply)
+      return
+    }
+    setAnnotationMenuPly(null)
+  }, [currentPly])
+
   // Track which plies have their comment row collapsed (hidden).
   // All comments start collapsed; seenPliesRef ensures each ply is only initialized once.
   const [collapsedCommentPlies, setCollapsedCommentPlies] = useState<Set<number>>(new Set())
@@ -126,7 +152,6 @@ export default function MoveList({
         seenPliesRef.current.add(c.ply)
       }
     })
-    // Don't collapse a ply the user just created — leave it visible.
     const justCreated = justCreatedPlyRef.current
     justCreatedPlyRef.current = null
     const toCollapse = newPlies.filter(p => p !== justCreated)
@@ -167,10 +192,28 @@ export default function MoveList({
     hoverTimerRef.current = setTimeout(() => setCommentMenuPly(ply), 150)
   }, [clearHoverTimer, clearHideTimer])
 
-  const handleMoveMouseLeave = useCallback(() => {
+  const handleMoveMouseLeave = useCallback((ply: number) => {
     clearHoverTimer()
-    hideTimerRef.current = setTimeout(() => setCommentMenuPly(null), 600)
-  }, [clearHoverTimer])
+    hideTimerRef.current = setTimeout(() => {
+      if (annotationMenuPly !== ply) setCommentMenuPly(null)
+    }, 600)
+  }, [clearHoverTimer, annotationMenuPly])
+
+  const handleAnnotationTriggerClick = useCallback((e: React.MouseEvent, ply: number) => {
+    e.stopPropagation()
+    if (ply !== currentPly || isInVariation) {
+      pendingAnnotationPlyRef.current = ply
+      onJump(ply)
+    }
+    setAnnotationMenuPly(prev => prev === ply ? null : ply)
+    setCommentMenuPly(ply)
+    clearHideTimer()
+  }, [clearHideTimer, onJump, currentPly, isInVariation])
+
+  const handleAnnotationPopoverClose = useCallback(() => {
+    setAnnotationMenuPly(null)
+    setCommentMenuPly(null)
+  }, [])
 
   const handleMoveContextMenu = useCallback((e: React.MouseEvent, ply: number) => {
     e.preventDefault()
@@ -186,6 +229,7 @@ export default function MoveList({
   }, [onJump, onCommentEdit, currentPly, isInVariation])
 
   const handleCommentIconClick = useCallback((ply: number) => {
+    setAnnotationMenuPly(null)
     setCommentMenuPly(null)
     handleCommentEdit(ply)
   }, [handleCommentEdit])
@@ -217,91 +261,25 @@ export default function MoveList({
     return map
   }, [comments])
 
-  /**
-   * Render a move cell with hover/right-click comment trigger.
-   * @param ply - 1-based mainline ply
-   */
-  const renderMoveCell = (
-    ply: number,
-    san: string | null | undefined,
-    isCurrent: boolean,
-    refProp?: React.Ref<HTMLTableCellElement>
-  ) => {
-    const comment = commentsByPly.get(ply)
-    const hasComment = !!comment
-    const isCollapsed = collapsedCommentPlies.has(ply)
-    // Trigger icon only for moves WITHOUT a comment — comment icon handles the rest
-    const showTriggerIcon = commentMenuPly === ply && !editingCommentPly && !hasComment
+  const moveCellCommentCallbacks: MoveCellCommentCallbacks = {
+    onCommentIconClick: handleCommentIconClick,
+    onExpandComment: handleExpandComment,
+    onCollapseComment: handleCollapseComment,
+  }
 
-    // Icon button for existing comment — always visible, toggles collapse
-    const commentIcon = hasComment ? (
-      isCollapsed ? (
-        // Collapsed: tooltip previews the comment text
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={e => { e.stopPropagation(); handleExpandComment(ply) }}
-              className="text-white/70 hover:text-white p-0.5 cursor-pointer shrink-0"
-              title="Expand comment"
-            >
-              <MessageSquareMore size={14} />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">
-            <p className="max-w-48 italic">{comment.text}</p>
-          </TooltipContent>
-        </Tooltip>
-      ) : (
-        // Expanded: click collapses
-        <button
-          onClick={e => { e.stopPropagation(); handleCollapseComment(ply) }}
-          className="text-white/70 hover:text-white p-0.5 cursor-pointer shrink-0"
-          title="Collapse comment"
-        >
-          <MessageSquareMore size={14} />
-        </button>
-      )
-    ) : null
-
-    // Hover/right-click triggered icon — only for moves with no comment
-    const triggerIcon = showTriggerIcon ? (
-      <button
-        onClick={e => { e.stopPropagation(); handleCommentIconClick(ply) }}
-        className="text-white/50 hover:text-ui-accent p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95"
-        title="Add comment"
-      >
-        <MessageSquareMore size={14} />
-      </button>
-    ) : null
-
-    return (
-      <TableCell
-        ref={refProp}
-        onClick={san ? () => onJump(ply) : undefined}
-        onMouseEnter={() => handleMoveMouseEnter(ply)}
-        onMouseLeave={handleMoveMouseLeave}
-        onContextMenu={e => handleMoveContextMenu(e, ply)}
-        className={`px-2 py-0.5 rounded border-0 text-lg ${
-          san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
-        } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
-      >
-        <span className="flex items-center w-full">
-          <span className="flex-1">{san || ''}</span>
-          {/* Fixed-width slot so the column never resizes when the icon appears */}
-          <span className="w-5 shrink-0 flex items-center justify-end">
-            {commentIcon ?? triggerIcon}
-          </span>
-        </span>
-      </TableCell>
-    )
+  const moveCellAnnotationCallbacks: MoveCellAnnotationCallbacks = {
+    onAnnotationTriggerClick: handleAnnotationTriggerClick,
+    onAnnotationPopoverClose: handleAnnotationPopoverClose,
+    onSetAnnotation: annotationHandlers?.onSetAnnotation,
+    onClearAnnotation: annotationHandlers?.onClearAnnotation,
   }
 
   return (
     <div
-      className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono"
-      onClick={() => setCommentMenuPly(null)}
+      className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono text-sm"
+      onClick={() => { setCommentMenuPly(null); setAnnotationMenuPly(null) }}
     >
-      <Table>
+      <Table className="table-fixed">
         <TableBody>
           {movePairs.map((pair, pairIndex) => {
             const whitePly1 = pairIndex * 2 + 1   // 1-based white ply
@@ -341,10 +319,44 @@ export default function MoveList({
                   <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0">
                     {pair.moveNumber}.
                   </TableCell>
-                  {renderMoveCell(whitePly1, pair.white, isWhiteCurrent, isWhiteCurrent ? currentMoveRef : undefined)}
+                  <MoveCell
+                    ply={whitePly1}
+                    san={pair.white}
+                    isCurrent={isWhiteCurrent}
+                    refProp={isWhiteCurrent ? currentMoveRef : undefined}
+                    comment={commentsByPly.get(whitePly1)}
+                    isCollapsed={collapsedCommentPlies.has(whitePly1)}
+                    annotationNag={annotationsByPly.get(whitePly1)?.nag}
+                    isHovered={commentMenuPly === whitePly1}
+                    isAnnotationOpen={annotationMenuPly === whitePly1}
+                    editingCommentPly={editingCommentPly ?? null}
+                    onJump={onJump}
+                    onMouseEnter={handleMoveMouseEnter}
+                    onMouseLeave={handleMoveMouseLeave}
+                    onContextMenu={handleMoveContextMenu}
+                    commentCallbacks={moveCellCommentCallbacks}
+                    annotationCallbacks={moveCellAnnotationCallbacks}
+                  />
                   {hasSplitAfterWhite
                     ? <TableCell className="border-0" />
-                    : renderMoveCell(blackPly1, pair.black, isBlackCurrent, isBlackCurrent ? currentMoveRef : undefined)
+                    : <MoveCell
+                        ply={blackPly1}
+                        san={pair.black}
+                        isCurrent={isBlackCurrent}
+                        refProp={isBlackCurrent ? currentMoveRef : undefined}
+                        comment={commentsByPly.get(blackPly1)}
+                        isCollapsed={collapsedCommentPlies.has(blackPly1)}
+                        annotationNag={annotationsByPly.get(blackPly1)?.nag}
+                        isHovered={commentMenuPly === blackPly1}
+                        isAnnotationOpen={annotationMenuPly === blackPly1}
+                        editingCommentPly={editingCommentPly ?? null}
+                        onJump={onJump}
+                        onMouseEnter={handleMoveMouseEnter}
+                        onMouseLeave={handleMoveMouseLeave}
+                        onContextMenu={handleMoveContextMenu}
+                        commentCallbacks={moveCellCommentCallbacks}
+                        annotationCallbacks={moveCellAnnotationCallbacks}
+                      />
                   }
                 </TableRow>
 
@@ -388,7 +400,24 @@ export default function MoveList({
                     <TableCell className="border-0 py-0.5">
                       <span className="text-ui-text-dimmer">...</span>
                     </TableCell>
-                    {renderMoveCell(blackPly1, pair.black, isBlackCurrent, isBlackCurrent ? currentMoveRef : undefined)}
+                    <MoveCell
+                      ply={blackPly1}
+                      san={pair.black}
+                      isCurrent={isBlackCurrent}
+                      refProp={isBlackCurrent ? currentMoveRef : undefined}
+                      comment={commentsByPly.get(blackPly1)}
+                      isCollapsed={collapsedCommentPlies.has(blackPly1)}
+                      annotationNag={annotationsByPly.get(blackPly1)?.nag}
+                      isHovered={commentMenuPly === blackPly1}
+                      isAnnotationOpen={annotationMenuPly === blackPly1}
+                      editingCommentPly={editingCommentPly ?? null}
+                      onJump={onJump}
+                      onMouseEnter={handleMoveMouseEnter}
+                      onMouseLeave={handleMoveMouseLeave}
+                      onContextMenu={handleMoveContextMenu}
+                      commentCallbacks={moveCellCommentCallbacks}
+                      annotationCallbacks={moveCellAnnotationCallbacks}
+                    />
                   </TableRow>
                 )}
 
