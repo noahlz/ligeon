@@ -1,7 +1,12 @@
 /**
  * NAG (Numeric Annotation Glyph) definitions for chess move annotations.
  * Based on: https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Annotation_symbols
+ *
+ * Valid NAG codes are defined in src/shared/nag.ts (single source of truth).
+ * NAG_DEFINITIONS below must cover every code in that list — the dev-time
+ * assertion at the bottom of this file catches any divergence.
  */
+import { VALID_NAG_CODES } from '../../shared/nag.js'
 
 export interface NagDefinition {
   nag: number
@@ -41,4 +46,16 @@ const NAG_SYMBOL_MAP = new Map<number, string>(
  */
 export function getNagSymbol(nag: number): string | undefined {
   return NAG_SYMBOL_MAP.get(nag)
+}
+
+// Startup assertion: every valid NAG code must have a definition here.
+// If this fires, a code was added to src/shared/nag.ts without a matching
+// entry in NAG_DEFINITIONS above.
+{
+  const defined = new Set(NAG_DEFINITIONS.map(d => d.nag))
+  for (const code of VALID_NAG_CODES) {
+    if (!defined.has(code)) {
+      console.warn(`[nag.ts] NAG code ${code} in VALID_NAG_CODES has no entry in NAG_DEFINITIONS`)
+    }
+  }
 }

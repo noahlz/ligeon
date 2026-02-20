@@ -104,6 +104,12 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
         data-orientation={orientation}
         style={{ width: '100%', height: '100%' }}
       />
+      {/* Annotation badge: intentional exception to the flex-only layout rule.
+          Chessground renders no individual square DOM elements — the board is a
+          single canvas/SVG. We overlay the badge using absolute positioning over
+          a `position: relative` wrapper, computing percentage offsets from file
+          and rank indices. The +9%/+8% offsets in badgeStyle are deliberate
+          fine-tuning to position the badge at the upper-right corner of the target piece. */}
       {annotationGlyph && badgeStyle && (
         <div
           className="pointer-events-none absolute flex items-center justify-center rounded-full bg-zinc-600 text-zinc-100 font-black select-none leading-none ring-3 ring-zinc-800 shadow-lg"
