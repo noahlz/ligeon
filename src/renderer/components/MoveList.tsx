@@ -423,7 +423,7 @@ export default function MoveList({
               setCommentMenuPly(ply)
               clearHideTimer()
             }}
-            className="ml-2 cursor-pointer opacity-80 hover:opacity-100"
+            className="ml-1.5 cursor-pointer opacity-80 hover:opacity-100"
             title="Change annotation"
           >
             {nagSymbol}

@@ -91,8 +91,8 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
     const leftPct = orientation === 'white' ? fileIndex * 12.5 : (7 - fileIndex) * 12.5
     const bottomPct = orientation === 'white' ? rankIndex * 12.5 : (7 - rankIndex) * 12.5
     badgeStyle = {
-      left: `${leftPct + 7}%`,
-      bottom: `${bottomPct + 7}%`,
+      left: `${leftPct + 9}%`,
+      bottom: `${bottomPct + 8}%`,
     }
   }
 
@@ -106,14 +106,15 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
       />
       {annotationGlyph && badgeStyle && (
         <div
-          className="pointer-events-none absolute flex items-center justify-center rounded-full bg-black/75 text-white font-bold select-none leading-none"
+          className="pointer-events-none absolute flex items-center justify-center rounded-full bg-zinc-600 text-zinc-100 font-black select-none leading-none ring-3 ring-zinc-800 shadow-lg"
           style={{
             ...badgeStyle,
-            width: '8%',
-            height: '8%',
-            fontSize: 'clamp(14px, 4.5%, 20px)',
-            minWidth: 28,
-            minHeight: 28,
+            width: '5%',
+            height: '5%',
+            fontSize: 'clamp(20px, 5.2%, 24px)',
+            minWidth: 22,
+            minHeight: 22,
+            zIndex: 10,
           }}
         >
           {annotationGlyph}
