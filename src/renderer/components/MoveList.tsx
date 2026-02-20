@@ -215,10 +215,14 @@ export default function MoveList({
 
   const handleAnnotationTriggerClick = useCallback((e: React.MouseEvent, ply: number) => {
     e.stopPropagation()
+    if (ply !== currentPly || isInVariation) {
+      pendingAnnotationPlyRef.current = ply
+      onJump(ply)
+    }
     setAnnotationMenuPly(prev => prev === ply ? null : ply)
     setCommentMenuPly(ply)
     clearHideTimer()
-  }, [clearHideTimer])
+  }, [clearHideTimer, onJump, currentPly, isInVariation])
 
   const handleAnnotationPopoverClose = useCallback(() => {
     setAnnotationMenuPly(null)
@@ -433,23 +437,35 @@ export default function MoveList({
       </Popover>
     ) : null
 
-    // Annotation trigger slot — NotebookPen on hover, only when no annotation
-    const annotationTrigger = !nagSymbol && showAnnotationTrigger ? (
-      <Popover
-        open={isAnnotationOpen}
-        onOpenChange={(open) => { if (!open) handleAnnotationPopoverClose() }}
-      >
-        <PopoverTrigger asChild>
-          <button
-            onClick={e => handleAnnotationTriggerClick(e, ply)}
-            className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
-            title="Add annotation"
-          >
-            <NotebookPen size={12} />
-          </button>
-        </PopoverTrigger>
-        {annotationPopoverContent}
-      </Popover>
+    // Annotation trigger slot — NotebookPen on hover
+    // When annotation exists: plain button (inlineAnnotation Popover handles rendering)
+    // When no annotation: NotebookPen is the Popover trigger
+    const annotationTrigger = showAnnotationTrigger ? (
+      nagSymbol ? (
+        <button
+          onClick={e => handleAnnotationTriggerClick(e, ply)}
+          className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
+          title="Change annotation"
+        >
+          <NotebookPen size={12} />
+        </button>
+      ) : (
+        <Popover
+          open={isAnnotationOpen}
+          onOpenChange={(open) => { if (!open) handleAnnotationPopoverClose() }}
+        >
+          <PopoverTrigger asChild>
+            <button
+              onClick={e => handleAnnotationTriggerClick(e, ply)}
+              className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
+              title="Add annotation"
+            >
+              <NotebookPen size={12} />
+            </button>
+          </PopoverTrigger>
+          {annotationPopoverContent}
+        </Popover>
+      )
     ) : null
 
     return (
