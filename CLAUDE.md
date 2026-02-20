@@ -181,3 +181,7 @@ If rebuild succeeds but fails at runtime: `rm -rf node_modules/better-sqlite3/bu
 ### Knip False Positives
 
 `npm run knip` reports expected "unused exports" from `components/ui/**`. Do not remove. See `knip.json`.
+
+### Component File Size
+
+Keep `components/` files under ~350 lines. When adding substantial new UI (a new popover, picker, or interactive widget), create a new `.tsx` file rather than growing an existing component. Follow the `CommentRow` / `VariationRow` / `MoveCell` / `AnnotationPicker` pattern: clear `Props` interface, all state passed as props, no direct store/context access.
