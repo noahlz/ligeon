@@ -179,7 +179,7 @@ export function MoveCell({
       onMouseEnter={() => onMouseEnter(ply)}
       onMouseLeave={() => onMouseLeave(ply)}
       onContextMenu={e => onContextMenu(e, ply)}
-      className={`px-2 py-0.5 rounded border-0 text-lg ${
+      className={`px-2 py-0.5 rounded border-0 text-lg overflow-hidden ${
         san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
       } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
     >

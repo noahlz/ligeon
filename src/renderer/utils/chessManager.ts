@@ -13,7 +13,7 @@ import { Chess } from 'chessops/chess'
 import { parseFen, makeFen, INITIAL_FEN } from 'chessops/fen'
 import { parseSan } from 'chessops/san'
 import { parsePgn } from 'chessops/pgn'
-import { makeSquare, squareFile } from 'chessops/util'
+import { makeSquare, squareFile, squareRank } from 'chessops/util'
 import type { NormalMove } from 'chessops/types'
 import type { NavigableManager } from '../types/navigableManager.js'
 import type { MoveType } from '../types/moveTypes.js'
@@ -76,13 +76,21 @@ export function playAndRecord(chess: Chess, san: string): ParsedMove | null {
   }
   const normal = move as NormalMove
   const from = makeSquare(normal.from)
-  const to = makeSquare(normal.to)
 
   // Detect castle and capture from pre-move position state
   const role = chess.board.getRole(normal.from)
   const isCastle = role === 'king' && chess.board[chess.turn].has(normal.to)
   const isCapture = chess.board.occupied.has(normal.to) ||
     (role === 'pawn' && squareFile(normal.from) !== squareFile(normal.to))
+
+  // For castling, chessops uses king-captures-rook: normal.to is the rook square.
+  // Compute the king's actual destination (g-file for kingside, c-file for queenside).
+  let to = makeSquare(normal.to)
+  if (isCastle) {
+    const rank = squareRank(normal.from)
+    const isKingside = squareFile(normal.to) > squareFile(normal.from)
+    to = makeSquare(rank * 8 + (isKingside ? 6 : 2))
+  }
 
   // Play move, then detect check/checkmate from resulting position
   chess.play(move)

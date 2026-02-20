@@ -279,7 +279,7 @@ export default function MoveList({
       className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono text-sm"
       onClick={() => { setCommentMenuPly(null); setAnnotationMenuPly(null) }}
     >
-      <Table>
+      <Table className="table-fixed">
         <TableBody>
           {movePairs.map((pair, pairIndex) => {
             const whitePly1 = pairIndex * 2 + 1   // 1-based white ply
