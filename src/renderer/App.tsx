@@ -344,7 +344,7 @@ export default function App() {
 
           {/* Right panel: Game info and move list */}
           <div
-            className={`${rightPanelOpen ? 'w-80' : 'w-0 overflow-hidden'} bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-200`}
+            className={`${rightPanelOpen ? 'w-96' : 'w-0 overflow-hidden'} bg-ui-bg-box border-l border-ui-border p-2 flex flex-col gap-2 overflow-y-auto transition-all duration-200`}
             data-testid="move-list-panel"
           >
             {selectedGame ? (

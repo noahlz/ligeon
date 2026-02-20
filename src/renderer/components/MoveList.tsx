@@ -423,7 +423,7 @@ export default function MoveList({
               setCommentMenuPly(ply)
               clearHideTimer()
             }}
-            className="ml-0.5 cursor-pointer opacity-80 hover:opacity-100"
+            className="ml-2 cursor-pointer opacity-80 hover:opacity-100"
             title="Change annotation"
           >
             {nagSymbol}
@@ -464,7 +464,7 @@ export default function MoveList({
         } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
       >
         <span className="flex items-center w-full">
-          <span className="flex-1">
+          <span className="flex-1 whitespace-nowrap">
             {san || ''}
             {inlineAnnotation}
           </span>
@@ -483,7 +483,7 @@ export default function MoveList({
 
   return (
     <div
-      className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono"
+      className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono text-sm"
       onClick={() => { setCommentMenuPly(null); setAnnotationMenuPly(null) }}
     >
       <Table>
