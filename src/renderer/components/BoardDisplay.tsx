@@ -12,13 +12,13 @@ interface BoardDisplayProps {
   turnColor?: 'white' | 'black'
   onMove?: (from: string, to: string) => void
   boardSyncKey?: number
-  /** NAG symbol to show as a badge on the board (e.g. "!", "?") */
-  annotationGlyph?: string | null
-  /** Destination square to place the annotation badge (e.g. "e5") */
+  /** NAG symbols to show as badges on the board, ordered: move → position → observation */
+  annotationGlyphs?: string[] | null
+  /** Destination square to place the annotation badges (e.g. "e5") */
   annotationSquare?: string | null
 }
 
-export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove, boardSyncKey, annotationGlyph, annotationSquare }: BoardDisplayProps) {
+export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove, boardSyncKey, annotationGlyphs, annotationSquare }: BoardDisplayProps) {
   const boardRef = useRef<HTMLDivElement>(null)
   const cgRef = useRef<Api | null>(null)
   const onMoveRef = useRef(onMove)
@@ -83,16 +83,14 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
     // boardSyncKey: incremented to force chessground re-sync when board state is stale
   }, [fen, lastMove, orientation, check, dests, turnColor, boardSyncKey])
 
-  // Compute badge position from square notation (e.g. "e5")
-  let badgeStyle: React.CSSProperties | null = null
-  if (annotationGlyph && annotationSquare && annotationSquare.length === 2) {
+  // Compute base badge position from square notation (e.g. "e5")
+  let baseBadgePos: { leftPct: number; bottomPct: number } | null = null
+  if (annotationGlyphs?.length && annotationSquare && annotationSquare.length === 2) {
     const fileIndex = annotationSquare.charCodeAt(0) - 'a'.charCodeAt(0) // 0–7
     const rankIndex = parseInt(annotationSquare[1]) - 1 // 0–7
-    const leftPct = orientation === 'white' ? fileIndex * 12.5 : (7 - fileIndex) * 12.5
-    const bottomPct = orientation === 'white' ? rankIndex * 12.5 : (7 - rankIndex) * 12.5
-    badgeStyle = {
-      left: `${leftPct + 9}%`,
-      bottom: `${bottomPct + 8}%`,
+    baseBadgePos = {
+      leftPct: orientation === 'white' ? fileIndex * 12.5 : (7 - fileIndex) * 12.5,
+      bottomPct: orientation === 'white' ? rankIndex * 12.5 : (7 - rankIndex) * 12.5,
     }
   }
 
@@ -104,28 +102,31 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
         data-orientation={orientation}
         style={{ width: '100%', height: '100%' }}
       />
-      {/* Annotation badge: intentional exception to the flex-only layout rule.
+      {/* Annotation badges: intentional exception to the flex-only layout rule.
           Chessground renders no individual square DOM elements — the board is a
-          single canvas/SVG. We overlay the badge using absolute positioning over
+          single canvas/SVG. We overlay badges using absolute positioning over
           a `position: relative` wrapper, computing percentage offsets from file
-          and rank indices. The +9%/+8% offsets in badgeStyle are deliberate
-          fine-tuning to position the badge at the upper-right corner of the target piece. */}
-      {annotationGlyph && badgeStyle && (
+          and rank indices. The +9%/+8% base offsets position the first badge at
+          the upper-right corner of the target piece. Multiple badges are staggered
+          ~30% of badge width (~1.5%) to the right so they mostly overlap. */}
+      {baseBadgePos && annotationGlyphs?.map((glyph, i) => (
         <div
+          key={glyph}
           className="pointer-events-none absolute flex items-center justify-center rounded-full bg-zinc-600 text-zinc-100 font-black select-none leading-none ring-3 ring-zinc-800 shadow-lg"
           style={{
-            ...badgeStyle,
+            left: `${baseBadgePos!.leftPct + 9 + i * 1.5}%`,
+            bottom: `${baseBadgePos!.bottomPct + 8}%`,
             width: '5%',
             height: '5%',
             fontSize: 'clamp(20px, 5.2%, 24px)',
             minWidth: 22,
             minHeight: 22,
-            zIndex: 10,
+            zIndex: 10 + i,
           }}
         >
-          {annotationGlyph}
+          {glyph}
         </div>
-      )}
+      ))}
     </div>
   )
 }

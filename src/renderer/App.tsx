@@ -20,7 +20,7 @@ import { useGameMoves } from './hooks/useGameMoves.js'
 import { useVariationState } from './hooks/useVariationState.js'
 import { useCommentState } from './hooks/useCommentState.js'
 import { useAnnotationState } from './hooks/useAnnotationState.js'
-import { getNagSymbol } from './utils/nag.js'
+import { getNagSymbol, sortNagsByCategory } from './utils/nag.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 import type { Key } from '@lichess-org/chessground/types'
 
@@ -165,12 +165,15 @@ export default function App() {
     ? variationState.checkColor
     : (chessManager ? getCheckColor(chessManager.getMoveType(currentPly), boardTurnColor) : false)
 
-  // Annotation badge for the board — show current ply's annotation at the destination square
-  const currentAnnotation = annotationState.annotationsByPly.get(currentPly)
-  const boardAnnotationGlyph = (!variationState.isInVariation && currentAnnotation)
-    ? getNagSymbol(currentAnnotation.nag) ?? null
-    : null
-  const boardAnnotationSquare = boardAnnotationGlyph && lastMove && lastMove.length >= 2
+  // Annotation badges for the board — show current ply's annotations at the destination square
+  // Sorted move → position → observation; only shown on mainline (not in variations)
+  const currentAnnotations = annotationState.annotationsByPly.get(currentPly) ?? []
+  const boardAnnotationGlyphs = (!variationState.isInVariation && currentAnnotations.length > 0)
+    ? sortNagsByCategory(currentAnnotations.map(a => a.nag))
+        .map(nag => getNagSymbol(nag))
+        .filter((s): s is string => s !== undefined)
+    : []
+  const boardAnnotationSquare = boardAnnotationGlyphs.length > 0 && lastMove && lastMove.length >= 2
     ? (lastMove[1] as string)
     : null
 
@@ -295,7 +298,7 @@ export default function App() {
                       turnColor={boardTurnColor}
                       onMove={variationState.handleUserMove}
                       boardSyncKey={boardSyncKey}
-                      annotationGlyph={boardAnnotationGlyph}
+                      annotationGlyphs={boardAnnotationGlyphs}
                       annotationSquare={boardAnnotationSquare}
                     />
                   </div>
@@ -377,9 +380,9 @@ export default function App() {
                           annotationState.setAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
                         }
                       },
-                      onClearAnnotation: (ply) => {
+                      onRemoveAnnotation: (ply: number, nag: number) => {
                         if (selectedGameCollectionId && selectedGame) {
-                          annotationState.clearAnnotation(selectedGameCollectionId, selectedGame.id, ply)
+                          annotationState.removeAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
                         }
                       },
                     }}

@@ -78,7 +78,7 @@ export interface ElectronAPI {
   // Annotations
   getAnnotations: (collectionId: string, gameId: number) => Promise<AnnotationData[]>
   upsertAnnotation: (collectionId: string, gameId: number, ply: number, nag: number) => Promise<AnnotationData | null>
-  deleteAnnotation: (collectionId: string, gameId: number, ply: number) => Promise<{ success: boolean }>
+  deleteAnnotation: (collectionId: string, gameId: number, ply: number, nag: number) => Promise<{ success: boolean }>
 
   // Settings
   getSettings: () => Promise<AppSettings>
