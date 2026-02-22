@@ -19,6 +19,7 @@ export interface MoveCellCommentCallbacks {
   onCommentIconClick: (ply: number) => void
   onExpandComment: (ply: number) => void
   onCollapseComment: (ply: number) => void
+  onCancelComment?: () => void
 }
 
 export interface MoveCellAnnotationCallbacks {
@@ -70,7 +71,11 @@ export function MoveCell({
   const hasAnnotations = (annotationNags?.length ?? 0) > 0
   const hasComment = !!comment
 
-  const showCommentTrigger = isHovered && !editingCommentPly && !hasComment
+  // Don't show hover buttons on the cell that currently has the comment input open
+  const isBeingEdited = editingCommentPly === ply
+  // Show buttons on hover only, not while editing
+  const showButtons = isHovered && !isBeingEdited
+  const showCommentTrigger = showButtons && !hasComment
 
   // Icon for existing comments — always visible, toggles collapse
   const commentIcon = hasComment ? (
@@ -103,7 +108,11 @@ export function MoveCell({
   // Hover-triggered icon — only for moves with no comment
   const triggerIcon = showCommentTrigger ? (
     <button
-      onClick={e => { e.stopPropagation(); commentCallbacks.onCommentIconClick(ply) }}
+      onClick={e => {
+        e.stopPropagation()
+        if (editingCommentPly != null) commentCallbacks.onCancelComment?.()
+        commentCallbacks.onCommentIconClick(ply)
+      }}
       className="text-white/50 hover:text-ui-accent p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95"
       title="Add comment"
     >
@@ -141,11 +150,14 @@ export function MoveCell({
     </button>
   ) : null
 
-  // Annotation trigger slot — NotebookPen shown on hover when picker is closed.
+  // Annotation trigger slot — NotebookPen shown on hover (or always for 2+ NAGs) when picker is closed.
   // Plain button; the cell-level Popover handles opening/closing.
-  const annotationTrigger = isHovered && !isAnnotationOpen && !editingCommentPly ? (
+  const annotationTrigger = showButtons && !isAnnotationOpen ? (
     <button
-      onClick={e => annotationCallbacks.onAnnotationTriggerClick(e, ply)}
+      onClick={e => {
+        if (editingCommentPly != null) commentCallbacks.onCancelComment?.()
+        annotationCallbacks.onAnnotationTriggerClick(e, ply)
+      }}
       className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
       title={hasAnnotations ? 'Change annotation' : 'Add annotation'}
     >
@@ -170,24 +182,24 @@ export function MoveCell({
         onMouseLeave={() => onMouseLeave(ply)}
         onMouseMove={() => onMouseMove(ply)}
         onContextMenu={e => onContextMenu(e, ply)}
-        className={`px-2 py-0.5 rounded border-0 text-lg overflow-hidden ${
-          san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
+        className={`px-2 py-0.5 rounded border-0 text-lg ${
+          san ? `cursor-pointer ${isCurrent ? '' : 'hover:bg-ui-bg-hover'}` : ''
         } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
       >
         <PopoverAnchor asChild>
-          <span className="flex items-center w-full">
-            <span className="flex-1 whitespace-nowrap">
+          {/* relative container so hover button pill can overlay right side */}
+          <span className="flex items-center w-full relative">
+            <span className={`flex-1 whitespace-nowrap transition-opacity ${isHovered ? 'opacity-30' : 'opacity-100'}`}>
               {san || ''}
               {inlineAnnotation}
             </span>
-            {/* Annotation trigger slot */}
-            <span className="w-5 shrink-0 flex items-center justify-center">
-              {annotationTrigger}
-            </span>
-            {/* Comment icon slot */}
-            <span className="w-5 shrink-0 flex items-center justify-end">
-              {commentIcon ?? triggerIcon}
-            </span>
+            {/* Hover button pill: dark background makes it clearly a separate layer */}
+            {(annotationTrigger || commentIcon || triggerIcon) && (
+              <span className={`absolute -right-1 inset-y-0 flex items-center gap-0.5 rounded px-0.5 ${isCurrent ? 'bg-orange-800/50' : 'bg-ui-bg-hover'}`}>
+                {annotationTrigger}
+                {commentIcon ?? triggerIcon}
+              </span>
+            )}
           </span>
         </PopoverAnchor>
       </TableCell>

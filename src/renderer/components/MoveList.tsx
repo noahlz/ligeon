@@ -276,6 +276,7 @@ export default function MoveList({
     onCommentIconClick: handleCommentIconClick,
     onExpandComment: handleExpandComment,
     onCollapseComment: handleCollapseComment,
+    onCancelComment: onCommentCancel,
   }
 
   const moveCellAnnotationCallbacks: MoveCellAnnotationCallbacks = {
@@ -327,7 +328,7 @@ export default function MoveList({
               <Fragment key={pairIndex}>
                 {/* Main row: move number + white + black (or split placeholder) */}
                 <TableRow className="border-0 hover:bg-transparent">
-                  <TableCell className="text-ui-text-dimmer text-right pr-2 w-8 py-0.75 border-0">
+                  <TableCell className="text-ui-text-dimmer text-right pr-3 w-10 py-0.75 border-0">
                     {pair.moveNumber}.
                   </TableCell>
                   <MoveCell

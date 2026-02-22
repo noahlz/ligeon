@@ -25,7 +25,7 @@ export function useAutoPlay(options: UseAutoPlayOptions): UseAutoPlayReturn {
   const { onAdvance, currentPly, maxPly } = options
 
   const [isPlaying, setIsPlaying] = useState(false)
-  const [speed, setSpeed] = useState<number>(3000)
+  const [speed, setSpeed] = useState<number>(1000)
   const intervalRef = useRef<number | null>(null)
 
   // Store onAdvance in a ref so the interval callback always reads the latest

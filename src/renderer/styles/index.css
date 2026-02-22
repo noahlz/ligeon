@@ -49,8 +49,8 @@
   --color-destructive-foreground: hsl(0, 0%, 100%);
   --color-border: hsl(37, 7%, 25%);
   --color-input: hsl(37, 7%, 25%);
-  --color-popover: hsl(37, 7%, 18%);
-  --color-popover-foreground: hsl(0, 0%, 73%);
+  --color-popover: hsl(37, 7%, 22%);
+  --color-popover-foreground: hsl(0, 0%, 88%);
   --color-ring: hsl(22, 100%, 42%);
 
   @keyframes collapsible-down {

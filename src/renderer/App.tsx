@@ -249,7 +249,7 @@ export default function App() {
   }, [selectedGameCollectionId, selectedGame, variationState.reorderLocalVariations])
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={300}>
       <div className="h-screen bg-ui-bg-page text-ui-text flex flex-col">
         {/* Main content */}
         <div className="flex flex-1 overflow-hidden">
@@ -305,10 +305,10 @@ export default function App() {
                   {/* Route keyboard/button nav to whichever manager is active (variation or mainline). */}
                   <div className="mt-2">
                     <MoveNavigation
-                      onFirst={variationState.isInVariation ? variationState.variationNav.first : handleFirst}
-                      onPrev={variationState.isInVariation ? variationState.variationNav.prev : handlePrev}
-                      onNext={variationState.isInVariation ? variationState.variationNav.next : () => handleNext()}
-                      onLast={variationState.isInVariation ? variationState.variationNav.last : handleLast}
+                      onFirst={() => { autoPlay.stop(); (variationState.isInVariation ? variationState.variationNav.first : handleFirst)() }}
+                      onPrev={() => { autoPlay.stop(); (variationState.isInVariation ? variationState.variationNav.prev : handlePrev)() }}
+                      onNext={() => { autoPlay.stop(); (variationState.isInVariation ? variationState.variationNav.next : handleNext)() }}
+                      onLast={() => { autoPlay.stop(); (variationState.isInVariation ? variationState.variationNav.last : handleLast)() }}
                       onTogglePlay={handleTogglePlay}
                       isPlaying={autoPlay.isPlaying}
                       speed={autoPlay.speed}
@@ -358,6 +358,7 @@ export default function App() {
                     result={result}
                     currentPly={currentPly}
                     onJump={(ply) => {
+                      autoPlay.stop()
                       // Clicking a mainline move exits variation first to return navigation to mainline.
                       if (variationState.isInVariation) variationState.exitVariation()
                       handleJump(ply)
