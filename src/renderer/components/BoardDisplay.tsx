@@ -2,6 +2,12 @@ import { useRef, useEffect } from 'react'
 import { Chessground } from '@lichess-org/chessground'
 import type { Api } from '@lichess-org/chessground/api'
 import type { Key } from '@lichess-org/chessground/types'
+import { getNagDescription, getNagSymbol } from '../utils/nag.js'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip.js'
 
 interface BoardDisplayProps {
   fen: string
@@ -12,13 +18,13 @@ interface BoardDisplayProps {
   turnColor?: 'white' | 'black'
   onMove?: (from: string, to: string) => void
   boardSyncKey?: number
-  /** NAG symbols to show as badges on the board, ordered: move → position → observation */
-  annotationGlyphs?: string[] | null
+  /** NAG codes to show as badges on the board, ordered: move → position → observation */
+  annotationNags?: number[] | null
   /** Destination square to place the annotation badges (e.g. "e5") */
   annotationSquare?: string | null
 }
 
-export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove, boardSyncKey, annotationGlyphs, annotationSquare }: BoardDisplayProps) {
+export default function BoardDisplay({ fen, lastMove, orientation = 'white', check = false, dests, turnColor, onMove, boardSyncKey, annotationNags, annotationSquare }: BoardDisplayProps) {
   const boardRef = useRef<HTMLDivElement>(null)
   const cgRef = useRef<Api | null>(null)
   const onMoveRef = useRef(onMove)
@@ -83,16 +89,23 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
     // boardSyncKey: incremented to force chessground re-sync when board state is stale
   }, [fen, lastMove, orientation, check, dests, turnColor, boardSyncKey])
 
+  // Reverse a copy so move annotation (first in sorted order) renders on top (highest z-index).
+  // Never mutate the prop array directly.
+  const badgeNags = annotationNags ? [...annotationNags].reverse() : []
+
   // Compute base badge position from square notation (e.g. "e5")
   let baseBadgePos: { leftPct: number; bottomPct: number } | null = null
-  if (annotationGlyphs?.length && annotationSquare && annotationSquare.length === 2) {
+  if (annotationNags?.length && annotationSquare && annotationSquare.length === 2) {
     const fileIndex = annotationSquare.charCodeAt(0) - 'a'.charCodeAt(0) // 0–7
-    const rankIndex = parseInt(annotationSquare[1]) - 1 // 0–7
+    const rankIndex = parseInt(annotationSquare[1], 10) - 1 // 0–7
     baseBadgePos = {
       leftPct: orientation === 'white' ? fileIndex * 12.5 : (7 - fileIndex) * 12.5,
       bottomPct: orientation === 'white' ? rankIndex * 12.5 : (7 - rankIndex) * 12.5,
     }
   }
+
+  // Bind to const so TypeScript narrows away null inside map callbacks
+  const pos = baseBadgePos
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -108,24 +121,37 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
           a `position: relative` wrapper, computing percentage offsets from file
           and rank indices. The +9%/+8% base offsets position the first badge at
           the upper-right corner of the target piece. Multiple badges are staggered
-          ~30% of badge width (~1.5%) to the right so they mostly overlap. */}
-      {baseBadgePos && annotationGlyphs?.map((glyph, i) => (
-        <div
-          key={glyph}
-          className="pointer-events-none absolute flex items-center justify-center rounded-full bg-zinc-600 text-zinc-100 font-black select-none leading-none ring-3 ring-zinc-800 shadow-lg"
-          style={{
-            left: `${baseBadgePos!.leftPct + 9 + i * 1.5}%`,
-            bottom: `${baseBadgePos!.bottomPct + 8}%`,
-            width: '5%',
-            height: '5%',
-            fontSize: 'clamp(20px, 5.2%, 24px)',
-            minWidth: 22,
-            minHeight: 22,
-            zIndex: 10 + i,
-          }}
-        >
-          {glyph}
-        </div>
+          ~30% of badge width (~1.5%) to the right so they mostly overlap.
+          Each badge is its own Tooltip trigger (all showing the full annotation list),
+          and elevates to the foreground on hover. */}
+      {pos && badgeNags.map((nag, i) => (
+        <Tooltip key={nag}>
+          <TooltipTrigger asChild>
+            <div
+              className="pointer-events-auto absolute flex items-center justify-center rounded-full bg-zinc-600 text-zinc-100 font-black select-none leading-none ring-3 ring-zinc-800 shadow-lg cursor-default hover:!z-[50]"
+              style={{
+                left: `${pos.leftPct + 9 + i * 1.5}%`,
+                bottom: `${pos.bottomPct + 8}%`,
+                width: '5%',
+                height: '5%',
+                fontSize: 'clamp(20px, 5.2%, 24px)',
+                minWidth: 22,
+                minHeight: 22,
+                zIndex: 10 + i,
+              }}
+            >
+              {getNagSymbol(nag)}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="flex flex-col gap-1">
+            {badgeNags.map(n => (
+              <div key={n} className="flex items-center gap-2">
+                <span className="font-black w-6 text-center">{getNagSymbol(n)}</span>
+                <span>{getNagDescription(n)}</span>
+              </div>
+            ))}
+          </TooltipContent>
+        </Tooltip>
       ))}
     </div>
   )

@@ -20,7 +20,7 @@ import { useGameMoves } from './hooks/useGameMoves.js'
 import { useVariationState } from './hooks/useVariationState.js'
 import { useCommentState } from './hooks/useCommentState.js'
 import { useAnnotationState } from './hooks/useAnnotationState.js'
-import { getNagSymbol, sortNagsByCategory } from './utils/nag.js'
+import { sortNagsByCategory } from './utils/nag.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 import type { Key } from '@lichess-org/chessground/types'
 
@@ -168,12 +168,10 @@ export default function App() {
   // Annotation badges for the board — show current ply's annotations at the destination square
   // Sorted move → position → observation; only shown on mainline (not in variations)
   const currentAnnotations = annotationState.annotationsByPly.get(currentPly) ?? []
-  const boardAnnotationGlyphs = (!variationState.isInVariation && currentAnnotations.length > 0)
+  const boardAnnotationNags = (!variationState.isInVariation && currentAnnotations.length > 0)
     ? sortNagsByCategory(currentAnnotations.map(a => a.nag))
-        .map(nag => getNagSymbol(nag))
-        .filter((s): s is string => s !== undefined)
     : []
-  const boardAnnotationSquare = boardAnnotationGlyphs.length > 0 && lastMove && lastMove.length >= 2
+  const boardAnnotationSquare = boardAnnotationNags.length > 0 && lastMove && lastMove.length >= 2
     ? (lastMove[1] as string)
     : null
 
@@ -298,7 +296,7 @@ export default function App() {
                       turnColor={boardTurnColor}
                       onMove={variationState.handleUserMove}
                       boardSyncKey={boardSyncKey}
-                      annotationGlyphs={boardAnnotationGlyphs}
+                      annotationNags={boardAnnotationNags}
                       annotationSquare={boardAnnotationSquare}
                     />
                   </div>

@@ -212,7 +212,9 @@ export default function MoveList({
 
   const handleAnnotationPopoverClose = useCallback(() => {
     setAnnotationMenuPly(null)
-    setCommentMenuPly(null)
+    // Don't clear commentMenuPly here — it causes a blink when closing via the
+    // annotation trigger button because this callback races with the click handler's
+    // setCommentMenuPly(ply). Hover state clears naturally via the mouse leave timer.
   }, [])
 
   const handleMoveContextMenu = useCallback((e: React.MouseEvent, ply: number) => {

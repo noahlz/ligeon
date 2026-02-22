@@ -48,10 +48,25 @@ const NAG_SYMBOL_MAP = new Map<number, string>(
   NAG_DEFINITIONS.map(d => [d.nag, d.symbol])
 )
 
+/** Fast lookup map: nag → description */
+const NAG_DESCRIPTION_MAP = new Map<number, string>(
+  NAG_DEFINITIONS.map(d => [d.nag, d.description])
+)
+
 /** Fast lookup map: nag → category */
 const NAG_CATEGORY_MAP = new Map<number, NagCategory>(
   NAG_DEFINITIONS.map(d => [d.nag, d.category])
 )
+
+/**
+ * Get the description for a NAG code.
+ *
+ * @param nag - NAG code
+ * @returns Description string (e.g. "Good move", "Forced move") or undefined if not found
+ */
+export function getNagDescription(nag: number): string | undefined {
+  return NAG_DESCRIPTION_MAP.get(nag)
+}
 
 /**
  * Get the display symbol for a NAG code.
