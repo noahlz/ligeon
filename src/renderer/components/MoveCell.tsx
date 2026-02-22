@@ -42,6 +42,7 @@ export interface MoveCellProps {
   onJump: (ply: number) => void
   onMouseEnter: (ply: number) => void
   onMouseLeave: (ply: number) => void
+  onMouseMove: (ply: number) => void
   onContextMenu: (e: React.MouseEvent, ply: number) => void
   commentCallbacks: MoveCellCommentCallbacks
   annotationCallbacks: MoveCellAnnotationCallbacks
@@ -61,6 +62,7 @@ export function MoveCell({
   onJump,
   onMouseEnter,
   onMouseLeave,
+  onMouseMove,
   onContextMenu,
   commentCallbacks,
   annotationCallbacks,
@@ -166,6 +168,7 @@ export function MoveCell({
         onClick={san ? () => onJump(ply) : undefined}
         onMouseEnter={() => onMouseEnter(ply)}
         onMouseLeave={() => onMouseLeave(ply)}
+        onMouseMove={() => onMouseMove(ply)}
         onContextMenu={e => onContextMenu(e, ply)}
         className={`px-2 py-0.5 rounded border-0 text-lg overflow-hidden ${
           san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''

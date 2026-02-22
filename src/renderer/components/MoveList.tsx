@@ -212,10 +212,19 @@ export default function MoveList({
 
   const handleAnnotationPopoverClose = useCallback(() => {
     setAnnotationMenuPly(null)
-    // Don't clear commentMenuPly here — it causes a blink when closing via the
-    // annotation trigger button because this callback races with the click handler's
-    // setCommentMenuPly(ply). Hover state clears naturally via the mouse leave timer.
+    // Clear hover state — it restores on the next mouse movement inside the cell,
+    // preventing the buttons from flashing into view on a click with no movement.
+    setCommentMenuPly(null)
   }, [])
+
+  // Restore hover state after a popover close cleared it.
+  // Using mousemove (not mouseenter) means buttons reappear on movement, not on entry —
+  // so a click-to-close without moving the mouse never shows the buttons.
+  // Functional updater avoids re-render if already hovered on this ply.
+  const handleMoveMouseMove = useCallback((ply: number) => {
+    clearHideTimer()
+    setCommentMenuPly(prev => prev === ply ? prev : ply)
+  }, [clearHideTimer])
 
   const handleMoveContextMenu = useCallback((e: React.MouseEvent, ply: number) => {
     e.preventDefault()
@@ -335,6 +344,7 @@ export default function MoveList({
                     onJump={onJump}
                     onMouseEnter={handleMoveMouseEnter}
                     onMouseLeave={handleMoveMouseLeave}
+                    onMouseMove={handleMoveMouseMove}
                     onContextMenu={handleMoveContextMenu}
                     commentCallbacks={moveCellCommentCallbacks}
                     annotationCallbacks={moveCellAnnotationCallbacks}
@@ -355,6 +365,7 @@ export default function MoveList({
                         onJump={onJump}
                         onMouseEnter={handleMoveMouseEnter}
                         onMouseLeave={handleMoveMouseLeave}
+                        onMouseMove={handleMoveMouseMove}
                         onContextMenu={handleMoveContextMenu}
                         commentCallbacks={moveCellCommentCallbacks}
                         annotationCallbacks={moveCellAnnotationCallbacks}
@@ -416,6 +427,7 @@ export default function MoveList({
                       onJump={onJump}
                       onMouseEnter={handleMoveMouseEnter}
                       onMouseLeave={handleMoveMouseLeave}
+                      onMouseMove={handleMoveMouseMove}
                       onContextMenu={handleMoveContextMenu}
                       commentCallbacks={moveCellCommentCallbacks}
                       annotationCallbacks={moveCellAnnotationCallbacks}
