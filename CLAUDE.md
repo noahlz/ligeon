@@ -182,6 +182,10 @@ If rebuild succeeds but fails at runtime: `rm -rf node_modules/better-sqlite3/bu
 
 `npm run knip` reports expected "unused exports" from `components/ui/**`. Do not remove. See `knip.json`.
 
+### Radix Popover: Click-to-Toggle on External Trigger
+
+Radix fires `onOpenChange(false)` on `pointerdown` before `onClick` fires, causing toggle logic to reopen the popover. Fix: use `onInteractOutside` + `e.preventDefault()` on `PopoverContent` to veto the auto-close when the click is on your own trigger. See `AnnotationPicker.tsx` for implementation.
+
 ### Component File Size
 
 Keep `components/` files under ~350 lines. When adding substantial new UI (a new popover, picker, or interactive widget), create a new `.tsx` file rather than growing an existing component. Follow the `CommentRow` / `VariationRow` / `MoveCell` / `AnnotationPicker` pattern: clear `Props` interface, all state passed as props, no direct store/context access.

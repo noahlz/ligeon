@@ -107,6 +107,15 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
   // Bind to const so TypeScript narrows away null inside map callbacks
   const pos = baseBadgePos
 
+  // Container spans all badge positions. Badges are positioned within the container
+  // using the same stagger offsets (1.5% per badge, expressed as a fraction of
+  // container width) so layout is identical to the old per-badge approach.
+  // Using a single container as the TooltipTrigger means one shared Tooltip
+  // stays open while the pointer is anywhere in the badge group — no blink
+  // when moving between overlapping badges.
+  const containerWidthPct = badgeNags.length > 0 ? 5 + (badgeNags.length - 1) * 1.5 : 5
+  const badgeWidthInContainerPct = (5 / containerWidthPct) * 100
+
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <div
@@ -122,25 +131,42 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
           and rank indices. The +9%/+8% base offsets position the first badge at
           the upper-right corner of the target piece. Multiple badges are staggered
           ~30% of badge width (~1.5%) to the right so they mostly overlap.
-          Each badge is its own Tooltip trigger (all showing the full annotation list),
-          and elevates to the foreground on hover. */}
-      {pos && badgeNags.map((nag, i) => (
-        <Tooltip key={nag}>
+          All badges share one Tooltip (via a single container trigger) so the
+          popover never closes and reopens when hovering between badges. Each
+          badge elevates to the foreground on hover via hover:!z-[50]. */}
+      {pos && badgeNags.length > 0 && (
+        <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
             <div
-              className="pointer-events-auto absolute flex items-center justify-center rounded-full bg-zinc-600 text-zinc-100 font-black select-none leading-none ring-3 ring-zinc-800 shadow-lg cursor-default hover:!z-[50]"
+              className="pointer-events-auto absolute cursor-default"
               style={{
-                left: `${pos.leftPct + 9 + i * 1.5}%`,
+                left: `${pos.leftPct + 9}%`,
                 bottom: `${pos.bottomPct + 8}%`,
-                width: '5%',
+                width: `${containerWidthPct}%`,
                 height: '5%',
-                fontSize: 'clamp(20px, 5.2%, 24px)',
                 minWidth: 22,
                 minHeight: 22,
-                zIndex: 10 + i,
+                zIndex: 10,
               }}
             >
-              {getNagSymbol(nag)}
+              {badgeNags.map((nag, i) => (
+                <div
+                  key={nag}
+                  className="absolute flex items-center justify-center rounded-full bg-zinc-600 text-zinc-100 font-black select-none leading-none ring-3 ring-zinc-800 shadow-lg hover:!z-[50]"
+                  style={{
+                    left: `${(i * 1.5 / containerWidthPct) * 100}%`,
+                    top: 0,
+                    width: `${badgeWidthInContainerPct}%`,
+                    height: '100%',
+                    fontSize: 'clamp(20px, 5.2%, 24px)',
+                    minWidth: 22,
+                    minHeight: 22,
+                    zIndex: i,
+                  }}
+                >
+                  {getNagSymbol(nag)}
+                </div>
+              ))}
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="flex flex-col gap-1">
@@ -152,7 +178,7 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
             ))}
           </TooltipContent>
         </Tooltip>
-      ))}
+      )}
     </div>
   )
 }

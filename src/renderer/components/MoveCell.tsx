@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/tooltip.js'
 import {
   Popover,
-  PopoverTrigger,
+  PopoverAnchor,
 } from '@/components/ui/popover.js'
 import { AnnotationPicker } from './AnnotationPicker.js'
 
@@ -68,7 +68,6 @@ export function MoveCell({
   const hasAnnotations = (annotationNags?.length ?? 0) > 0
   const hasComment = !!comment
 
-  const showAnnotationTrigger = (isHovered || isAnnotationOpen) && !editingCommentPly
   const showCommentTrigger = isHovered && !editingCommentPly && !hasComment
 
   // Icon for existing comments — always visible, toggles collapse
@@ -119,90 +118,77 @@ export function MoveCell({
     onClose: annotationCallbacks.onAnnotationPopoverClose,
   }
 
-  // Inline annotation — always visible when annotations exist, clickable to open picker
-  // Each NAG symbol rendered individually with its own tooltip
+  // Inline annotation — always visible when annotations exist, plain button that opens the picker.
+  // No Popover here; the single cell-level Popover (below) owns the picker lifecycle.
   const inlineAnnotation = hasAnnotations ? (
+    <button
+      data-annotation-trigger
+      onClick={e => annotationCallbacks.onAnnotationTriggerClick(e, ply)}
+      className="ml-0.5 cursor-pointer opacity-80 hover:opacity-100"
+    >
+      {(annotationNags ?? []).map(nag => (
+        <Tooltip key={nag}>
+          <TooltipTrigger asChild>
+            <span className="mr-1.5">{getNagSymbol(nag)}</span>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p>{getNagDescription(nag)}</p>
+          </TooltipContent>
+        </Tooltip>
+      ))}
+    </button>
+  ) : null
+
+  // Annotation trigger slot — NotebookPen shown on hover when picker is closed.
+  // Plain button; the cell-level Popover handles opening/closing.
+  const annotationTrigger = isHovered && !isAnnotationOpen && !editingCommentPly ? (
+    <button
+      onClick={e => annotationCallbacks.onAnnotationTriggerClick(e, ply)}
+      className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
+      title={hasAnnotations ? 'Change annotation' : 'Add annotation'}
+    >
+      <NotebookPen size={12} />
+    </button>
+  ) : null
+
+  // Single Popover wrapping the cell so the picker has a stable, layout-independent anchor.
+  // PopoverAnchor is on the inner flex span (a stable element that doesn't shift when
+  // annotation symbols appear/change), so Radix never repositions the popover when
+  // the annotation display updates. All buttons above are plain triggers that just call
+  // onAnnotationTriggerClick — no nested Popover/PopoverTrigger needed.
+  return (
     <Popover
       open={isAnnotationOpen}
       onOpenChange={(open) => { if (!open) annotationCallbacks.onAnnotationPopoverClose() }}
     >
-      <PopoverTrigger asChild>
-        <button
-          onClick={e => annotationCallbacks.onAnnotationTriggerClick(e, ply)}
-          className="ml-0.5 cursor-pointer opacity-80 hover:opacity-100"
-        >
-          {(annotationNags ?? []).map(nag => (
-            <Tooltip key={nag}>
-              <TooltipTrigger asChild>
-                <span className="mr-1.5">{getNagSymbol(nag)}</span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>{getNagDescription(nag)}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </button>
-      </PopoverTrigger>
+      <TableCell
+        ref={refProp}
+        onClick={san ? () => onJump(ply) : undefined}
+        onMouseEnter={() => onMouseEnter(ply)}
+        onMouseLeave={() => onMouseLeave(ply)}
+        onContextMenu={e => onContextMenu(e, ply)}
+        className={`px-2 py-0.5 rounded border-0 text-lg overflow-hidden ${
+          san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
+        } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
+      >
+        <PopoverAnchor asChild>
+          <span className="flex items-center w-full">
+            <span className="flex-1 whitespace-nowrap">
+              {san || ''}
+              {inlineAnnotation}
+            </span>
+            {/* Annotation trigger slot */}
+            <span className="w-5 shrink-0 flex items-center justify-center">
+              {annotationTrigger}
+            </span>
+            {/* Comment icon slot */}
+            <span className="w-5 shrink-0 flex items-center justify-end">
+              {commentIcon ?? triggerIcon}
+            </span>
+          </span>
+        </PopoverAnchor>
+      </TableCell>
       <AnnotationPicker {...pickerProps} />
     </Popover>
-  ) : null
-
-  // Annotation trigger slot — NotebookPen on hover, hidden when popover is open
-  // When annotation exists: plain button (inlineAnnotation Popover handles rendering)
-  // When no annotation: NotebookPen is the Popover trigger
-  const annotationTrigger = showAnnotationTrigger && !isAnnotationOpen ? (
-    hasAnnotations ? (
-      <button
-        onClick={e => annotationCallbacks.onAnnotationTriggerClick(e, ply)}
-        className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
-        title="Change annotation"
-      >
-        <NotebookPen size={12} />
-      </button>
-    ) : (
-      <Popover
-        open={isAnnotationOpen}
-        onOpenChange={(open) => { if (!open) annotationCallbacks.onAnnotationPopoverClose() }}
-      >
-        <PopoverTrigger asChild>
-          <button
-            onClick={e => annotationCallbacks.onAnnotationTriggerClick(e, ply)}
-            className="p-0.5 cursor-pointer shrink-0 animate-in fade-in-0 zoom-in-95 text-white/50 hover:text-ui-accent"
-            title="Add annotation"
-          >
-            <NotebookPen size={12} />
-          </button>
-        </PopoverTrigger>
-        <AnnotationPicker {...pickerProps} />
-      </Popover>
-    )
-  ) : null
-
-  return (
-    <TableCell
-      ref={refProp}
-      onClick={san ? () => onJump(ply) : undefined}
-      onMouseEnter={() => onMouseEnter(ply)}
-      onMouseLeave={() => onMouseLeave(ply)}
-      onContextMenu={e => onContextMenu(e, ply)}
-      className={`px-2 py-0.5 rounded border-0 text-lg overflow-hidden ${
-        san ? 'cursor-pointer hover:bg-ui-bg-hover' : ''
-      } ${isCurrent ? 'bg-ui-accent text-white font-bold' : ''}`}
-    >
-      <span className="flex items-center w-full">
-        <span className="flex-1 whitespace-nowrap">
-          {san || ''}
-          {inlineAnnotation}
-        </span>
-        {/* Annotation trigger slot */}
-        <span className="w-5 shrink-0 flex items-center justify-center">
-          {annotationTrigger}
-        </span>
-        {/* Comment icon slot */}
-        <span className="w-5 shrink-0 flex items-center justify-end">
-          {commentIcon ?? triggerIcon}
-        </span>
-      </span>
-    </TableCell>
   )
 }

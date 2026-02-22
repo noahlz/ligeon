@@ -69,24 +69,30 @@ export function useAnnotationState(): UseAnnotationStateReturn {
     try {
       const category = getNagCategory(nag)
 
-      // For exclusive categories ('move', 'position'), remove any existing
-      // same-category annotation at this ply before inserting the new one.
-      // Read from ref to avoid stale closure over annotations state.
+      // For exclusive categories ('move', 'position'), find any existing same-category
+      // annotation at this ply. Delete it via IPC first, then upsert the new one.
+      // Both IPC calls complete before touching state so the UI updates in one render
+      // (no intermediate flash where the old symbol disappears before the new one appears).
+      let replacedNag: number | undefined
       if (category === 'move' || category === 'position') {
         const currentAtPly = annotationsRef.current.filter(a => a.ply === ply)
         const sameCategory = currentAtPly.find(a => getNagCategory(a.nag) === category)
         if (sameCategory) {
           await window.electron.deleteAnnotation(collectionId, gameId, ply, sameCategory.nag)
-          setAnnotations(prev => prev.filter(a => !(a.ply === ply && a.nag === sameCategory.nag)))
+          replacedNag = sameCategory.nag
         }
       }
 
       const saved = await window.electron.upsertAnnotation(collectionId, gameId, ply, nag)
       if (saved) {
+        // Single state update: remove the replaced annotation (if any) and add the new one.
         setAnnotations(prev => {
+          const without = replacedNag !== undefined
+            ? prev.filter(a => !(a.ply === ply && a.nag === replacedNag))
+            : prev
           // Idempotent: skip if (ply, nag) already present
-          if (prev.some(a => a.ply === ply && a.nag === nag)) return prev
-          return [...prev, saved].sort((a, b) => a.ply - b.ply || a.nag - b.nag)
+          if (without.some(a => a.ply === ply && a.nag === nag)) return without
+          return [...without, saved].sort((a, b) => a.ply - b.ply || a.nag - b.nag)
         })
       }
     } catch (error) {

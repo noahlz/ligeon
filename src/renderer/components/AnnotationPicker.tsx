@@ -32,6 +32,17 @@ export function AnnotationPicker({
       align="center"
       className="w-auto p-2"
       onOpenAutoFocus={e => e.preventDefault()}
+      onInteractOutside={e => {
+        // Prevent Radix from closing when the user clicks the NAG annotation trigger.
+        // Without this, Radix closes on pointerdown, React re-renders, then the
+        // button's onClick fires with isAnnotationOpen=false and reopens the popover.
+        // By vetoing the close here, the button's onClick sees isAnnotationOpen=true
+        // and correctly toggles it shut.
+        const target = (e as CustomEvent<{ originalEvent: PointerEvent }>).detail?.originalEvent?.target
+        if (target instanceof Element && target.closest('[data-annotation-trigger]')) {
+          e.preventDefault()
+        }
+      }}
     >
       <div className="flex flex-col gap-1" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-1 gap-4">
@@ -58,7 +69,6 @@ export function AnnotationPicker({
                       } else {
                         onSetAnnotation?.(ply, def.nag)
                       }
-                      onClose()
                     }}
                     className={`h-10 w-11 font-mono text-base text-white p-0 ${
                       isActive
