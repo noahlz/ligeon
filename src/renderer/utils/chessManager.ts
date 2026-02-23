@@ -110,7 +110,6 @@ export function playAndRecord(chess: Chess, san: string): ParsedMove | null {
 export function createChessManager(movesString: string): ChessManager {
   const positions: ParsedMove[] = []
   let currentPly = 0
-  let hasReportedFenError = false
 
   // Parse moves using chessops PGN parser — handles move numbers, results, NAGs
   const games = parsePgn(movesString)
@@ -189,14 +188,7 @@ export function createChessManager(movesString: string): ChessManager {
 
     getTotalPlies: () => positions.length - 1, // Don't count initial position as a ply
 
-    getDests: () => {
-      const fen = positions[currentPly].fen
-      if (!hasReportedFenError && parseFen(fen).isErr) {
-        hasReportedFenError = true
-        showErrorToast('Game data error: invalid position')
-      }
-      return getDestsFromFen(fen)
-    },
+    getDests: () => getDestsFromFen(positions[currentPly].fen),
 
     getTurnColor: () => getTurnColorFromFen(positions[currentPly].fen),
 

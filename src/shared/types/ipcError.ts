@@ -1,4 +1,4 @@
-const IPC_ERROR_PREFIX = 'IPC_ERROR:'
+export const IPC_ERROR_PREFIX = 'IPC_ERROR:'
 
 export class IpcError extends Error {
   constructor(
@@ -22,7 +22,9 @@ export class IpcError extends Error {
     if (!(error instanceof Error)) return null
     if (!error.message.startsWith(IPC_ERROR_PREFIX)) return null
     try {
-      return JSON.parse(error.message.slice(IPC_ERROR_PREFIX.length)).userMessage as string
+      const payload = JSON.parse(error.message.slice(IPC_ERROR_PREFIX.length))
+      const msg = payload?.userMessage
+      return typeof msg === 'string' ? msg : null
     } catch { return null }
   }
 }

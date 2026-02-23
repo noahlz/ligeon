@@ -55,7 +55,11 @@ export function useGameSearch({
       return
     }
 
-    window.electron.getGameCount(collectionId).then(setTotalGameCount)
+    window.electron.getGameCount(collectionId)
+      .then(setTotalGameCount)
+      .catch((error) => {
+        showErrorToast('Failed to load game count', error)
+      })
     setStaleDateFrom(false)
     setStaleDateTo(false)
     onCollectionChange?.()
@@ -85,27 +89,23 @@ export function useGameSearch({
 
   // Search games whenever filters change
   useEffect(() => {
-    const searchGames = async () => {
-      if (!collectionId) {
-        setGames([])
-        return
-      }
-
-      try {
-        const results = await window.electron.searchGames(collectionId, {
-          player: searchTerm || undefined,
-          results: filters.results.length > 0 ? filters.results : undefined,
-          dateFrom: filters.dateFrom ?? undefined,
-          dateTo: filters.dateTo ?? undefined,
-          ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
-          limit: 200,
-        })
-        setGames(results)
-      } catch (error) {
-        showErrorToast('Failed to load games', error)
-      }
+    if (!collectionId) {
+      setGames([])
+      return
     }
-    searchGames()
+
+    window.electron.searchGames(collectionId, {
+      player: searchTerm || undefined,
+      results: filters.results.length > 0 ? filters.results : undefined,
+      dateFrom: filters.dateFrom ?? undefined,
+      dateTo: filters.dateTo ?? undefined,
+      ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
+      limit: 200,
+    })
+      .then(setGames)
+      .catch((error) => {
+        showErrorToast('Failed to load games', error)
+      })
   }, [collectionId, searchTerm, filters])
 
   return {

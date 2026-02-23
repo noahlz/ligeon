@@ -63,8 +63,7 @@ export async function getGameMoves(
   try {
     return db.getGameWithMoves(gameId)
   } catch (error) {
-    logError('gameHandlers', 'getGameMoves', { collectionId, gameId }, error)
-    return null
+    logAndThrow('gameHandlers', 'getGameMoves', { collectionId, gameId }, error, 'Failed to open game')
   }
 }
 

@@ -128,9 +128,15 @@ export default function App() {
     if (!selectedCollectionId) return
 
     // Fetch full game data with moves
-    const fullGame = await window.electron.getGameMoves(selectedCollectionId, game.id)
+    let fullGame
+    try {
+      fullGame = await window.electron.getGameMoves(selectedCollectionId, game.id)
+    } catch (error) {
+      showErrorToast('Failed to open game', error)
+      return
+    }
     if (!fullGame) {
-      showErrorToast('Failed to open game', new Error('getGameMoves returned null'))
+      showErrorToast('Failed to open game')
       return
     }
 

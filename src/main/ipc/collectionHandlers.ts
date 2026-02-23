@@ -5,6 +5,7 @@ import { getCollectionsPath } from '../config/paths.js'
 import { DatabaseManager } from './gameDatabase.js'
 import { validateCollectionId, validateCollectionName } from './validators.js'
 import { logError, logAndThrow, logger } from '../config/logger.js'
+import { IpcError } from '../../shared/types/ipcError.js'
 
 /**
  * List all collections with their metadata
@@ -58,15 +59,13 @@ export async function renameCollection(
 ): Promise<CollectionMetadata> {
   // Validate inputs
   if (!validateCollectionId(collectionId)) {
-    const error = new Error('Invalid collection ID')
     logError('collectionHandlers', 'renameCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    throw error
+    throw new IpcError('Invalid collection ID', 'collectionHandlers', 'renameCollection', { collectionId })
   }
 
   if (!validateCollectionName(newName)) {
-    const error = new Error('Invalid collection name')
     logError('collectionHandlers', 'renameCollection', { newName, reason: 'invalid collection name' }, new Error('Validation failed'))
-    throw error
+    throw new IpcError('Invalid collection name', 'collectionHandlers', 'renameCollection', { newName })
   }
 
   const collectionsPath = getCollectionsPath()
@@ -99,9 +98,8 @@ export async function deleteCollection(
 ): Promise<{ success: boolean }> {
   // Validate input
   if (!validateCollectionId(collectionId)) {
-    const error = new Error('Invalid collection ID')
     logError('collectionHandlers', 'deleteCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    throw error
+    throw new IpcError('Invalid collection ID', 'collectionHandlers', 'deleteCollection', { collectionId })
   }
 
   const collectionsPath = getCollectionsPath()

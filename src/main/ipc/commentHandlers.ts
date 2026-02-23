@@ -5,7 +5,7 @@
 // Cover: happy path CRUD, invalid collectionId/gameId, invalid ply/text validation.
 import type { CommentData } from './types.js'
 import { validateCommentPly, validateCommentText, validateVariationId } from './validators.js'
-import { logError } from '../config/logger.js'
+import { logError, logAndThrow } from '../config/logger.js'
 import { getValidatedDb } from './handlerUtils.js'
 import { getCollectionsPath } from '../config/paths.js'
 
@@ -65,8 +65,7 @@ export async function upsertComment(
   try {
     return db.upsertComment(gameId, ply, text.trim())
   } catch (error) {
-    logError(MODULE, 'upsertComment', { collectionId, gameId, ply }, error)
-    return null
+    logAndThrow(MODULE, 'upsertComment', { collectionId, gameId, ply }, error, 'Failed to save comment')
   }
 }
 
@@ -102,8 +101,7 @@ export async function upsertVariationComment(
   try {
     return db.upsertComment(gameId, 0, text.trim(), variationId)
   } catch (error) {
-    logError(MODULE, 'upsertVariationComment', { collectionId, gameId, variationId }, error)
-    return null
+    logAndThrow(MODULE, 'upsertVariationComment', { collectionId, gameId, variationId }, error, 'Failed to save comment')
   }
 }
 
@@ -133,8 +131,7 @@ export async function deleteVariationComment(
     db.deleteComment(gameId, 0, variationId)
     return { success: true }
   } catch (error) {
-    logError(MODULE, 'deleteVariationComment', { collectionId, gameId, variationId }, error)
-    return { success: false }
+    logAndThrow(MODULE, 'deleteVariationComment', { collectionId, gameId, variationId }, error, 'Failed to delete comment')
   }
 }
 
@@ -164,7 +161,6 @@ export async function deleteComment(
     db.deleteComment(gameId, ply)
     return { success: true }
   } catch (error) {
-    logError(MODULE, 'deleteComment', { collectionId, gameId, ply }, error)
-    return { success: false }
+    logAndThrow(MODULE, 'deleteComment', { collectionId, gameId, ply }, error, 'Failed to delete comment')
   }
 }
