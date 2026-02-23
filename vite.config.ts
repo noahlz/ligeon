@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config'; // Use the vitest/config import
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
+import { coverageExcludes } from './vitest.coverage.excludes.js';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -24,7 +25,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', '__tests__/', '*.config.*', 'dist/', 'dist-electron/'],
+      exclude: coverageExcludes,
       thresholds: {
         lines: 60,
         functions: 60,

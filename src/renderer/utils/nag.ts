@@ -1,3 +1,11 @@
+// TODO: Add unit tests for this module.
+// Pure functions — no mocking needed:
+//   getNagSymbol(nag)      → correct symbol or undefined for unknown code
+//   getNagDescription(nag) → correct description or undefined
+//   getNagCategory(nag)    → correct category or undefined
+//   sortNagsByCategory     → move < position < observation ordering
+// Also verify the startup assertion: NAG_DEFINITIONS covers all VALID_NAG_CODES.
+
 /**
  * NAG (Numeric Annotation Glyph) definitions for chess move annotations.
  * Based on: https://en.wikipedia.org/wiki/Algebraic_notation_(chess)#Annotation_symbols

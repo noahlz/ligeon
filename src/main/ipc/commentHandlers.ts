@@ -1,3 +1,8 @@
+// TODO: Add unit tests for this module.
+// Pattern: identical to annotationHandlers — copy __tests__/unit/annotationHandlers.test.ts,
+// replace annotation calls with comment equivalents (getComments, upsertComment,
+// upsertVariationComment, deleteComment, deleteVariationComment).
+// Cover: happy path CRUD, invalid collectionId/gameId, invalid ply/text validation.
 import type { CommentData } from './types.js'
 import { validateCommentPly, validateCommentText, validateVariationId } from './validators.js'
 import { logError } from '../config/logger.js'

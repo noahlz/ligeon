@@ -1,3 +1,8 @@
+// TODO: Add unit tests for this module.
+// Pattern: same DB test harness as __tests__/unit/database.test.ts — create an
+// in-memory DB, seed it with games, then call searchGames/getGameMoves/getGameCount/
+// getAvailableDates/getAvailableEcoCodes directly (no IPC layer needed).
+// Cover: invalid collectionId returns empty/null, filter combinations, missing game ID.
 import { DatabaseManager } from './gameDatabase.js'
 import type { GameFilters, GameSearchResult, GameRow } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'

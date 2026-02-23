@@ -1,3 +1,9 @@
+// TODO: Add unit tests for this module.
+// Pure functions — no mocking needed (openings.json is a static asset):
+//   searchAvailableOpenings → empty query returns all available; ECO prefix match;
+//                             name substring match (case-insensitive); no match returns []
+//   getOpeningByEco         → known ECO returns correct record; unknown returns undefined
+
 /**
  * Chess openings search utility
  */
