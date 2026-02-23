@@ -1,5 +1,4 @@
 import type { MoveType } from '../types/moveTypes.js'
-import { toast } from 'sonner'
 
 // Sound file paths (relative to public directory)
 const SOUND_PATHS: Record<MoveType, string> = {
@@ -59,6 +58,5 @@ export function playMoveSound(type: MoveType): void {
   } catch (error) {
     // Log but don't throw - audio is non-critical
     console.error(`Failed to play ${type} sound:`, error)
-    toast.error('Failed to play sound')
   }
 }

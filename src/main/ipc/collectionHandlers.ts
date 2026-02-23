@@ -4,7 +4,7 @@ import type { CollectionMetadata } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
 import { DatabaseManager } from './gameDatabase.js'
 import { validateCollectionId, validateCollectionName } from './validators.js'
-import { logError, logger } from '../config/logger.js'
+import { logError, logAndThrow, logger } from '../config/logger.js'
 
 /**
  * List all collections with their metadata
@@ -84,8 +84,7 @@ export async function renameCollection(
     fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2))
     return metadata
   } catch (error) {
-    logError('collectionHandlers', 'renameCollection', { collectionId, newName }, error)
-    throw error
+    logAndThrow('collectionHandlers', 'renameCollection', { collectionId, newName }, error, 'Failed to rename collection')
   }
 }
 
@@ -119,7 +118,6 @@ export async function deleteCollection(
     fs.rmSync(collDir, { recursive: true, force: true })
     return { success: true }
   } catch (error) {
-    logError('collectionHandlers', 'deleteCollection', { collectionId }, error)
-    throw error
+    logAndThrow('collectionHandlers', 'deleteCollection', { collectionId }, error, 'Failed to delete collection')
   }
 }

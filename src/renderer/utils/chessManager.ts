@@ -18,7 +18,7 @@ import type { NormalMove } from 'chessops/types'
 import type { NavigableManager } from '../types/navigableManager.js'
 import type { MoveType } from '../types/moveTypes.js'
 import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
-import { toast } from 'sonner'
+import { showErrorToast } from './errorToast.js'
 
 // Re-export MoveType for backward compatibility
 export type { MoveType } from '../types/moveTypes.js'
@@ -110,6 +110,7 @@ export function playAndRecord(chess: Chess, san: string): ParsedMove | null {
 export function createChessManager(movesString: string): ChessManager {
   const positions: ParsedMove[] = []
   let currentPly = 0
+  let hasReportedFenError = false
 
   // Parse moves using chessops PGN parser — handles move numbers, results, NAGs
   const games = parsePgn(movesString)
@@ -138,7 +139,7 @@ export function createChessManager(movesString: string): ChessManager {
     const parsed = playAndRecord(chess, san)
     if (!parsed) {
       console.error(`Failed to parse move: ${san}`)
-      toast.error('Failed to load game: invalid move data')
+      showErrorToast('Failed to load game: invalid move data')
       break
     }
     positions.push(parsed)
@@ -188,7 +189,14 @@ export function createChessManager(movesString: string): ChessManager {
 
     getTotalPlies: () => positions.length - 1, // Don't count initial position as a ply
 
-    getDests: () => getDestsFromFen(positions[currentPly].fen),
+    getDests: () => {
+      const fen = positions[currentPly].fen
+      if (!hasReportedFenError && parseFen(fen).isErr) {
+        hasReportedFenError = true
+        showErrorToast('Game data error: invalid position')
+      }
+      return getDestsFromFen(fen)
+    },
 
     getTurnColor: () => getTurnColorFromFen(positions[currentPly].fen),
 

@@ -13,7 +13,6 @@ import { parseSquare } from 'chessops/util'
 import { chessgroundDests } from 'chessops/compat'
 import type { NormalMove, Role } from 'chessops/types'
 import type { MoveType } from '../types/moveTypes.js'
-import { toast } from 'sonner'
 
 /**
  * Get legal move destinations from a FEN position for chessground.
@@ -23,13 +22,11 @@ export function getDestsFromFen(fen: string): Map<string, string[]> {
   const setup = parseFen(fen)
   if (setup.isErr) {
     console.error('Failed to parse FEN for getDests:', fen, setup.error)
-    toast.error('Invalid FEN!', { id: 'invalid-fen' })
     return new Map()
   }
   const pos = Chess.fromSetup(setup.value)
   if (pos.isErr) {
     console.error('Failed to create Chess position from FEN:', fen, pos.error)
-    toast.error('Invalid FEN!', { id: 'invalid-fen' })
     return new Map()
   }
   return chessgroundDests(pos.value)
@@ -43,7 +40,6 @@ export function getTurnColorFromFen(fen: string): 'white' | 'black' {
   const setup = parseFen(fen)
   if (setup.isErr) {
     console.error('Failed to parse FEN for getTurnColor:', fen, setup.error)
-    toast.error('Invalid FEN!', { id: 'invalid-fen' })
     return 'white' // Default to white on error
   }
   return setup.value.turn === 'black' ? 'black' : 'white'
@@ -67,13 +63,11 @@ export function tryMoveFromFen(
   const setup = parseFen(fen)
   if (setup.isErr) {
     console.error('Failed to parse FEN for tryMove:', fen, setup.error)
-    toast.error('Invalid FEN!', { id: 'invalid-fen' })
     return null
   }
   const pos = Chess.fromSetup(setup.value)
   if (pos.isErr) {
     console.error('Failed to create Chess position from FEN:', fen, pos.error)
-    toast.error('Invalid FEN!', { id: 'invalid-fen' })
     return null
   }
 

@@ -1,3 +1,5 @@
+const IPC_ERROR_PREFIX = 'IPC_ERROR:'
+
 export class IpcError extends Error {
   constructor(
     readonly userMessage: string,
@@ -6,15 +8,21 @@ export class IpcError extends Error {
     readonly context: Record<string, unknown>
   ) {
     // Encode into message — structured clone only preserves message/name/stack across IPC
-    super(`IPC_ERROR:${JSON.stringify({ userMessage, module, operation, context })}`)
+    let payload: string
+    try {
+      payload = JSON.stringify({ userMessage, module, operation, context })
+    } catch {
+      payload = JSON.stringify({ userMessage, module, operation, context: '[unserializable]' })
+    }
+    super(`${IPC_ERROR_PREFIX}${payload}`)
     this.name = 'IpcError'
   }
 
   static getUserMessage(error: unknown): string | null {
     if (!(error instanceof Error)) return null
-    if (!error.message.startsWith('IPC_ERROR:')) return null
+    if (!error.message.startsWith(IPC_ERROR_PREFIX)) return null
     try {
-      return JSON.parse(error.message.slice(10)).userMessage as string
+      return JSON.parse(error.message.slice(IPC_ERROR_PREFIX.length)).userMessage as string
     } catch { return null }
   }
 }
