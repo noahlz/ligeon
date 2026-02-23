@@ -19,7 +19,8 @@ import { logError } from '../config/logger.js'
  */
 export async function searchGames(
   collectionId: string,
-  filters: GameFilters
+  filters: GameFilters,
+  basePath: string = getCollectionsPath()
 ): Promise<GameSearchResult[]> {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'searchGames', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
@@ -28,7 +29,7 @@ export async function searchGames(
 
   const sanitizedFilters = validateSearchFilters(filters)
 
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
+  const db = DatabaseManager.getInstance(collectionId, basePath)
   try {
     return db.searchGames(sanitizedFilters, sanitizedFilters.limit ?? 1000)
   } catch (error) {
@@ -46,7 +47,8 @@ export async function searchGames(
  */
 export async function getGameMoves(
   collectionId: string,
-  gameId: number
+  gameId: number,
+  basePath: string = getCollectionsPath()
 ): Promise<GameRow | null> {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getGameMoves', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
@@ -58,7 +60,7 @@ export async function getGameMoves(
     return null
   }
 
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
+  const db = DatabaseManager.getInstance(collectionId, basePath)
   try {
     return db.getGameWithMoves(gameId)
   } catch (error) {
@@ -73,13 +75,13 @@ export async function getGameMoves(
  * @param collectionId - ID of the collection
  * @returns Number of games in the collection
  */
-export async function getGameCount(collectionId: string): Promise<number> {
+export async function getGameCount(collectionId: string, basePath: string = getCollectionsPath()): Promise<number> {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getGameCount', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return 0
   }
 
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
+  const db = DatabaseManager.getInstance(collectionId, basePath)
   try {
     return db.getGameCount()
   } catch (error) {
@@ -94,14 +96,14 @@ export async function getGameCount(collectionId: string): Promise<number> {
  * @param collectionId - ID of the collection
  * @returns Array of YYYYMMDD integers sorted ascending (e.g., [19560101, 19560315, 19571231])
  */
-export async function getAvailableDates(collectionId: string, filters?: OptionFilters): Promise<number[]> {
+export async function getAvailableDates(collectionId: string, filters?: OptionFilters, basePath: string = getCollectionsPath()): Promise<number[]> {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getAvailableDates', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
   }
 
   const sanitizedFilters = validateOptionFilters(filters)
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
+  const db = DatabaseManager.getInstance(collectionId, basePath)
   try {
     return db.getAvailableDates(sanitizedFilters)
   } catch (error) {
@@ -110,14 +112,14 @@ export async function getAvailableDates(collectionId: string, filters?: OptionFi
   }
 }
 
-export async function getAvailableEcoCodes(collectionId: string, filters?: OptionFilters): Promise<{ eco: string; count: number }[]> {
+export async function getAvailableEcoCodes(collectionId: string, filters?: OptionFilters, basePath: string = getCollectionsPath()): Promise<{ eco: string; count: number }[]> {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getAvailableEcoCodes', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
   }
 
   const sanitizedFilters = validateOptionFilters(filters)
-  const db = DatabaseManager.getInstance(collectionId, getCollectionsPath())
+  const db = DatabaseManager.getInstance(collectionId, basePath)
 
   try {
     return db.getAvailableEcoCodes(sanitizedFilters)

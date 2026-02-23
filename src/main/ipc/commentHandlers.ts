@@ -7,6 +7,7 @@ import type { CommentData } from './types.js'
 import { validateCommentPly, validateCommentText, validateVariationId } from './validators.js'
 import { logError } from '../config/logger.js'
 import { getValidatedDb } from './handlerUtils.js'
+import { getCollectionsPath } from '../config/paths.js'
 
 const MODULE = 'commentHandlers'
 
@@ -19,9 +20,10 @@ const MODULE = 'commentHandlers'
  */
 export async function getComments(
   collectionId: string,
-  gameId: number
+  gameId: number,
+  basePath: string = getCollectionsPath()
 ): Promise<CommentData[]> {
-  const db = getValidatedDb(MODULE, 'getComments', collectionId, gameId)
+  const db = getValidatedDb(MODULE, 'getComments', collectionId, gameId, basePath)
   if (!db) return []
   try {
     return db.getComments(gameId)
@@ -44,9 +46,10 @@ export async function upsertComment(
   collectionId: string,
   gameId: number,
   ply: number,
-  text: string
+  text: string,
+  basePath: string = getCollectionsPath()
 ): Promise<CommentData | null> {
-  const db = getValidatedDb(MODULE, 'upsertComment', collectionId, gameId)
+  const db = getValidatedDb(MODULE, 'upsertComment', collectionId, gameId, basePath)
   if (!db) return null
 
   if (!validateCommentPly(ply)) {
@@ -80,9 +83,10 @@ export async function upsertVariationComment(
   collectionId: string,
   gameId: number,
   variationId: number,
-  text: string
+  text: string,
+  basePath: string = getCollectionsPath()
 ): Promise<CommentData | null> {
-  const db = getValidatedDb(MODULE, 'upsertVariationComment', collectionId, gameId)
+  const db = getValidatedDb(MODULE, 'upsertVariationComment', collectionId, gameId, basePath)
   if (!db) return null
 
   if (!validateVariationId(variationId)) {
@@ -114,9 +118,10 @@ export async function upsertVariationComment(
 export async function deleteVariationComment(
   collectionId: string,
   gameId: number,
-  variationId: number
+  variationId: number,
+  basePath: string = getCollectionsPath()
 ): Promise<{ success: boolean }> {
-  const db = getValidatedDb(MODULE, 'deleteVariationComment', collectionId, gameId)
+  const db = getValidatedDb(MODULE, 'deleteVariationComment', collectionId, gameId, basePath)
   if (!db) return { success: false }
 
   if (!validateVariationId(variationId)) {
@@ -144,9 +149,10 @@ export async function deleteVariationComment(
 export async function deleteComment(
   collectionId: string,
   gameId: number,
-  ply: number
+  ply: number,
+  basePath: string = getCollectionsPath()
 ): Promise<{ success: boolean }> {
-  const db = getValidatedDb(MODULE, 'deleteComment', collectionId, gameId)
+  const db = getValidatedDb(MODULE, 'deleteComment', collectionId, gameId, basePath)
   if (!db) return { success: false }
 
   if (!validateCommentPly(ply)) {
