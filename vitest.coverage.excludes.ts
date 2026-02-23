@@ -70,6 +70,9 @@ export const coverageExcludes: string[] = [
   // Browser-only — depends on HTMLAudioElement, not unit-testable
   'src/renderer/utils/audioManager.ts',
 
+  // Low-value in unit testing - delegates to other functions.
+  'src/renderer/utils/errorToast.ts',
+
   // ===========================================================================
   // FUTURE: React Testing Library
   // ===========================================================================
