@@ -3,6 +3,7 @@ import DailyRotateFile from 'winston-daily-rotate-file'
 import path from 'path'
 import os from 'os'
 import { loadSettings } from './settingsStore.js'
+import { IpcError } from '../../shared/types/ipcError.js'
 
 // Not configurable...
 const LOG_DIR = path.join(os.homedir(), '.ligeon', 'logs')
@@ -35,7 +36,18 @@ export const logger = winston.createLogger({
   ]
 })
 
-/** 
+export function logAndThrow(
+  module: string,
+  operation: string,
+  context: Record<string, unknown>,
+  error: unknown,
+  userMessage: string
+): never {
+  logError(module, operation, context, error)
+  throw new IpcError(userMessage, module, operation, context)
+}
+
+/**
  * Convenience function to log errors with context */
 export function logError(
   module: string,

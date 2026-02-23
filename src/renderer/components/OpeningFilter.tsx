@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command.js'
 import { Badge } from '@/components/ui/badge.js'
 import { buildOptionFilters } from '../hooks/useGameFilters.js'
+import { showErrorToast } from '../utils/errorToast.js'
 
 interface OpeningFilterProps {
   collectionId: string
@@ -33,17 +34,21 @@ export default function OpeningFilter({ collectionId, value, onChange, player, r
         dateFrom,
         dateTo,
       })
-      const codes = await window.electron.getAvailableEcoCodes(collectionId, optionFilters)
-      setAvailableEcoCodes(codes)
+      try {
+        const codes = await window.electron.getAvailableEcoCodes(collectionId, optionFilters)
+        setAvailableEcoCodes(codes)
 
-      // Clear selected ECO codes that are no longer available
-      const availableSet = new Set(codes.map((c) => c.eco))
-      const stillValid = value.filter((eco) => availableSet.has(eco))
-      if (stillValid.length !== value.length) {
-        onChange(stillValid)
+        // Clear selected ECO codes that are no longer available
+        const availableSet = new Set(codes.map((c) => c.eco))
+        const stillValid = value.filter((eco) => availableSet.has(eco))
+        if (stillValid.length !== value.length) {
+          onChange(stillValid)
+        }
+      } catch (error) {
+        showErrorToast('Failed to load opening filters', error)
+      } finally {
+        setIsLoading(false)
       }
-
-      setIsLoading(false)
     }
     fetchAvailableEcoCodes()
   }, [collectionId, player, results, dateFrom, dateTo]) // eslint-disable-line react-hooks/exhaustive-deps
