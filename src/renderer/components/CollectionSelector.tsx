@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { showErrorToast } from '../utils/errorToast.js'
 import { LibraryBig, Trash2, Pencil, Check, X } from 'lucide-react'
 import ConfirmDialog from './ConfirmDialog.js'
 import { validateCollectionName } from '../utils/collectionValidator.js'
@@ -87,7 +88,7 @@ export default function CollectionSelector({
       setEditValue('')
       onRename?.()
     } catch (error) {
-      console.error('Failed to rename collection:', error)
+      showErrorToast('Failed to rename collection', error)
     }
   }
 

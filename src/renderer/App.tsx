@@ -10,6 +10,8 @@ import ConfirmDialog from './components/ConfirmDialog.js'
 import ControlStrip from './components/ControlStrip.js'
 import PanelHandle from './components/PanelHandle.js'
 import { TooltipProvider } from '@/components/ui/tooltip.js'
+import { Toaster } from '@/components/ui/sonner.js'
+import { showErrorToast } from './utils/errorToast.js'
 import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { getCheckColor } from './utils/chessHelpers.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
@@ -146,7 +148,7 @@ export default function App() {
         annotationState.loadAnnotations(selectedCollectionId, game.id),
       ])
     } catch (error) {
-      console.error('Failed to load variations, comments, or annotations:', error)
+      showErrorToast('Failed to load game data', error)
     }
   }
 
@@ -205,12 +207,16 @@ export default function App() {
     setShowImportDialog(false)
     setImportFilePath(null)
     // Reload collections
-    const cols = await window.electron.listCollections()
-    setCollections(cols)
-    // Switch to the newly imported collection
-    setSelectedCollectionId(collectionId)
-    // Note: selectedGame state is intentionally NOT cleared
-    // This allows the user to keep viewing the current game
+    try {
+      const cols = await window.electron.listCollections()
+      setCollections(cols)
+      // Switch to the newly imported collection
+      setSelectedCollectionId(collectionId)
+      // Note: selectedGame state is intentionally NOT cleared
+      // This allows the user to keep viewing the current game
+    } catch (error) {
+      showErrorToast('Failed to reload collections', error)
+    }
   }
 
   // Handle import dialog close (cancelled)
@@ -221,15 +227,19 @@ export default function App() {
 
   // Handle collection deletion
   const handleDeleteCollection = async (collectionId: string) => {
-    await window.electron.deleteCollection(collectionId)
-    // Reload collections
-    const cols = await window.electron.listCollections()
-    setCollections(cols)
-    // Clear selection if deleted collection was selected
-    if (selectedCollectionId === collectionId) {
-      setSelectedCollectionId(cols.length > 0 ? cols[0].id : null)
-      setSelectedGame(null)
-      setChessManager(null)
+    try {
+      await window.electron.deleteCollection(collectionId)
+      // Reload collections
+      const cols = await window.electron.listCollections()
+      setCollections(cols)
+      // Clear selection if deleted collection was selected
+      if (selectedCollectionId === collectionId) {
+        setSelectedCollectionId(cols.length > 0 ? cols[0].id : null)
+        setSelectedGame(null)
+        setChessManager(null)
+      }
+    } catch (error) {
+      showErrorToast('Failed to delete collection', error)
     }
   }
 
@@ -244,8 +254,12 @@ export default function App() {
   // Updates local state optimistically (no exitVariation side-effect) after IPC.
   const handleReorderVariations = useCallback(async (branchPly: number, orderedIds: number[]) => {
     if (!selectedGameCollectionId || !selectedGame) return
-    await window.electron.reorderVariations(selectedGameCollectionId, selectedGame.id, branchPly, orderedIds)
-    variationState.reorderLocalVariations(branchPly, orderedIds)
+    try {
+      await window.electron.reorderVariations(selectedGameCollectionId, selectedGame.id, branchPly, orderedIds)
+      variationState.reorderLocalVariations(branchPly, orderedIds)
+    } catch (error) {
+      showErrorToast('Failed to save variation order', error)
+    }
   }, [selectedGameCollectionId, selectedGame, variationState.reorderLocalVariations])
 
   return (
@@ -405,7 +419,7 @@ export default function App() {
                             )
                             if (saved) commentState.updateVariationComment(saved)
                           } catch (error) {
-                            console.error('Failed to save variation comment:', error)
+                            showErrorToast('Failed to save variation comment', error)
                           }
                         }
                       },
@@ -417,7 +431,7 @@ export default function App() {
                             )
                             commentState.removeVariationComment(variationId)
                           } catch (error) {
-                            console.error('Failed to delete variation comment:', error)
+                            showErrorToast('Failed to delete variation comment', error)
                           }
                         }
                       },
@@ -493,6 +507,7 @@ export default function App() {
         />
 
       </div>
+      <Toaster richColors position="bottom-right" />
     </TooltipProvider>
   )
 }
