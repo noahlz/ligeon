@@ -11,6 +11,7 @@
  */
 
 import { useState, useCallback, useRef, useMemo } from 'react'
+import { showErrorToast } from '../utils/errorToast.js'
 import type { AnnotationData } from '../../shared/types/game.js'
 import { getNagCategory } from '../utils/nag.js'
 
@@ -96,7 +97,7 @@ export function useAnnotationState(): UseAnnotationStateReturn {
         })
       }
     } catch (error) {
-      console.error('Failed to save annotation:', error)
+      showErrorToast('Failed to save annotation', error)
     }
   }, [])
 
@@ -110,7 +111,7 @@ export function useAnnotationState(): UseAnnotationStateReturn {
       await window.electron.deleteAnnotation(collectionId, gameId, ply, nag)
       setAnnotations(prev => prev.filter(a => !(a.ply === ply && a.nag === nag)))
     } catch (error) {
-      console.error('Failed to delete annotation:', error)
+      showErrorToast('Failed to remove annotation', error)
     }
   }, [])
 

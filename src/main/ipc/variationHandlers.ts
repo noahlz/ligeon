@@ -1,6 +1,6 @@
 import type { VariationData } from './types.js'
 import { validateBranchPly, validateVariationMoves, validateVariationId } from './validators.js'
-import { logError } from '../config/logger.js'
+import { logError, logAndThrow } from '../config/logger.js'
 import { getValidatedDb } from './handlerUtils.js'
 import { getCollectionsPath } from '../config/paths.js'
 
@@ -60,8 +60,7 @@ export async function createVariation(
   try {
     return db.createVariation(gameId, branchPly, moves.trim())
   } catch (error) {
-    logError(MODULE, 'createVariation', { collectionId, gameId, branchPly }, error)
-    return null
+    logAndThrow(MODULE, 'createVariation', { collectionId, gameId, branchPly }, error, 'Failed to save variation')
   }
 }
 
@@ -97,8 +96,7 @@ export async function updateVariation(
   try {
     return db.updateVariation(id, moves.trim())
   } catch (error) {
-    logError(MODULE, 'updateVariation', { collectionId, gameId, id }, error)
-    return null
+    logAndThrow(MODULE, 'updateVariation', { collectionId, gameId, id }, error, 'Failed to save variation')
   }
 }
 
@@ -128,8 +126,7 @@ export async function deleteVariation(
     db.deleteVariation(gameId, id)
     return { success: true }
   } catch (error) {
-    logError(MODULE, 'deleteVariation', { collectionId, gameId, id }, error)
-    return { success: false }
+    logAndThrow(MODULE, 'deleteVariation', { collectionId, gameId, id }, error, 'Failed to delete variation')
   }
 }
 
@@ -166,7 +163,6 @@ export async function reorderVariations(
     db.reorderVariations(gameId, branchPly, orderedIds)
     return { success: true }
   } catch (error) {
-    logError(MODULE, 'reorderVariations', { collectionId, gameId, branchPly }, error)
-    return { success: false }
+    logAndThrow(MODULE, 'reorderVariations', { collectionId, gameId, branchPly }, error, 'Failed to reorder variations')
   }
 }

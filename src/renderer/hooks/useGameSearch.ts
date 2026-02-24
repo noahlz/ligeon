@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { GameSearchResult } from '../../shared/types/game.js'
 import type { GameFilterValues } from './useGameFilters.js'
 import { buildOptionFilters } from './useGameFilters.js'
+import { showErrorToast } from '../utils/errorToast.js'
 
 export interface UseGameSearchParams {
   /** Currently selected collection ID */
@@ -54,7 +55,11 @@ export function useGameSearch({
       return
     }
 
-    window.electron.getGameCount(collectionId).then(setTotalGameCount)
+    window.electron.getGameCount(collectionId)
+      .then(setTotalGameCount)
+      .catch((error) => {
+        showErrorToast('Failed to load game count', error)
+      })
     setStaleDateFrom(false)
     setStaleDateTo(false)
     onCollectionChange?.()
@@ -77,28 +82,30 @@ export function useGameSearch({
       // Set stale flags if date selections are no longer available
       setStaleDateFrom(filters.dateFrom != null && !dates.includes(filters.dateFrom))
       setStaleDateTo(filters.dateTo != null && !dates.includes(filters.dateTo))
+    }).catch((error) => {
+      showErrorToast('Failed to load date filters', error)
     })
   }, [collectionId, searchTerm, filters.results]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Search games whenever filters change
   useEffect(() => {
-    const searchGames = async () => {
-      if (!collectionId) {
-        setGames([])
-        return
-      }
-
-      const results = await window.electron.searchGames(collectionId, {
-        player: searchTerm || undefined,
-        results: filters.results.length > 0 ? filters.results : undefined,
-        dateFrom: filters.dateFrom ?? undefined,
-        dateTo: filters.dateTo ?? undefined,
-        ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
-        limit: 200,
-      })
-      setGames(results)
+    if (!collectionId) {
+      setGames([])
+      return
     }
-    searchGames()
+
+    window.electron.searchGames(collectionId, {
+      player: searchTerm || undefined,
+      results: filters.results.length > 0 ? filters.results : undefined,
+      dateFrom: filters.dateFrom ?? undefined,
+      dateTo: filters.dateTo ?? undefined,
+      ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
+      limit: 200,
+    })
+      .then(setGames)
+      .catch((error) => {
+        showErrorToast('Failed to load games', error)
+      })
   }, [collectionId, searchTerm, filters])
 
   return {

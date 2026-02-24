@@ -6,9 +6,6 @@
 - Add tests for PGN export with variations 
 - Verify exported PGN opens correctly in Lichess
 
-## Error Reporting
-- Any error or warning that originates from a user action should have a toast in addition to a console log.
-
 ## Code Quality
 
 - Extract business logic out of React components.
@@ -22,8 +19,7 @@
 ## Testing
 
 - Improve coverage of React/Electron files.
-- Coverage for UI components? 
-- Exclude ShadCN copy/pasted components from coverage.
+- Coverage for UI components with React Testing
 
 ## Packaging
 

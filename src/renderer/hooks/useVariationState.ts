@@ -7,6 +7,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react'
+import { showErrorToast } from '../utils/errorToast.js'
 import type { Key } from '@lichess-org/chessground/types'
 import type { VariationData } from '../../shared/types/game.js'
 import type { ChessManager } from '../utils/chessManager.js'
@@ -168,7 +169,7 @@ export function useVariationState({
         }
       }
     } catch (error) {
-      console.error('Failed to delete variation:', error)
+      showErrorToast('Failed to delete variation', error)
     }
   }, [collectionId, gameId, activeVariationId, exitVariation, chessManager, updateBoardState, variations])
 
@@ -201,7 +202,7 @@ export function useVariationState({
           }
         })
         .catch(error => {
-          console.error('Failed to update variation:', error)
+          showErrorToast('Failed to save variation', error)
         })
     } else {
       // Create new variation — sentinel prevents duplicate creates during IPC round-trip
@@ -217,7 +218,7 @@ export function useVariationState({
           }
         })
         .catch(error => {
-          console.error('Failed to create variation:', error)
+          showErrorToast('Failed to save variation', error)
           activeVariationIdRef.current = null
         })
     }

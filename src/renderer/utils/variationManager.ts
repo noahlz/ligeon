@@ -15,6 +15,7 @@ import { parsePgn } from 'chessops/pgn'
 import type { NavigableManager } from '../types/navigableManager.js'
 import { type ParsedMove, playAndRecord } from './chessManager.js'
 import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
+import { showErrorToast } from './errorToast.js'
 
 export interface VariationManager extends NavigableManager {
   /** Legal move destinations for chessground from current position */
@@ -75,6 +76,7 @@ export function createVariationManager(
       const parsed = playAndRecord(chess, san)
       if (!parsed) {
         console.error(`Failed to parse variation move: ${san}`)
+        showErrorToast('Failed to load variation: invalid move data')
         break
       }
       positions.push(parsed)

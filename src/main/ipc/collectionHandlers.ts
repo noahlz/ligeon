@@ -4,7 +4,7 @@ import type { CollectionMetadata } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
 import { DatabaseManager } from './gameDatabase.js'
 import { validateCollectionId, validateCollectionName } from './validators.js'
-import { logError, logger } from '../config/logger.js'
+import { logError, logAndThrow, logger } from '../config/logger.js'
 
 /**
  * List all collections with their metadata
@@ -58,15 +58,11 @@ export async function renameCollection(
 ): Promise<CollectionMetadata> {
   // Validate inputs
   if (!validateCollectionId(collectionId)) {
-    const error = new Error('Invalid collection ID')
-    logError('collectionHandlers', 'renameCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    throw error
+    logAndThrow('collectionHandlers', 'renameCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'), 'Invalid collection ID')
   }
 
   if (!validateCollectionName(newName)) {
-    const error = new Error('Invalid collection name')
-    logError('collectionHandlers', 'renameCollection', { newName, reason: 'invalid collection name' }, new Error('Validation failed'))
-    throw error
+    logAndThrow('collectionHandlers', 'renameCollection', { newName, reason: 'invalid collection name' }, new Error('Validation failed'), 'Invalid collection name')
   }
 
   const collectionsPath = getCollectionsPath()
@@ -84,8 +80,7 @@ export async function renameCollection(
     fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2))
     return metadata
   } catch (error) {
-    logError('collectionHandlers', 'renameCollection', { collectionId, newName }, error)
-    throw error
+    logAndThrow('collectionHandlers', 'renameCollection', { collectionId, newName }, error, 'Failed to rename collection')
   }
 }
 
@@ -100,9 +95,7 @@ export async function deleteCollection(
 ): Promise<{ success: boolean }> {
   // Validate input
   if (!validateCollectionId(collectionId)) {
-    const error = new Error('Invalid collection ID')
-    logError('collectionHandlers', 'deleteCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
-    throw error
+    logAndThrow('collectionHandlers', 'deleteCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'), 'Invalid collection ID')
   }
 
   const collectionsPath = getCollectionsPath()
@@ -119,7 +112,6 @@ export async function deleteCollection(
     fs.rmSync(collDir, { recursive: true, force: true })
     return { success: true }
   } catch (error) {
-    logError('collectionHandlers', 'deleteCollection', { collectionId }, error)
-    throw error
+    logAndThrow('collectionHandlers', 'deleteCollection', { collectionId }, error, 'Failed to delete collection')
   }
 }

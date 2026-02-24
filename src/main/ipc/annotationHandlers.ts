@@ -1,6 +1,6 @@
 import type { AnnotationData } from './types.js'
 import { validateCommentPly, validateNag } from './validators.js'
-import { logError } from '../config/logger.js'
+import { logError, logAndThrow } from '../config/logger.js'
 import { getValidatedDb } from './handlerUtils.js'
 import { getCollectionsPath } from '../config/paths.js'
 
@@ -62,8 +62,7 @@ export async function upsertAnnotation(
   try {
     return db.upsertAnnotation(gameId, ply, nag)
   } catch (error) {
-    logError(MODULE, 'upsertAnnotation', { collectionId, gameId, ply, nag }, error)
-    return null
+    logAndThrow(MODULE, 'upsertAnnotation', { collectionId, gameId, ply, nag }, error, 'Failed to save annotation')
   }
 }
 
@@ -101,7 +100,6 @@ export async function deleteAnnotation(
     db.deleteAnnotation(gameId, ply, nag)
     return { success: true }
   } catch (error) {
-    logError(MODULE, 'deleteAnnotation', { collectionId, gameId, ply, nag }, error)
-    return { success: false }
+    logAndThrow(MODULE, 'deleteAnnotation', { collectionId, gameId, ply, nag }, error, 'Failed to remove annotation')
   }
 }

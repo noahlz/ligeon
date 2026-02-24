@@ -8,7 +8,7 @@ import type { GameFilters, GameSearchResult, GameRow } from './types.js'
 import { getCollectionsPath } from '../config/paths.js'
 import type { OptionFilters } from './types.js'
 import { validateCollectionId, validateSearchFilters, validateOptionFilters, validateGameId } from './validators.js'
-import { logError } from '../config/logger.js'
+import { logError, logAndThrow } from '../config/logger.js'
 
 /**
  * Search for games in a collection
@@ -33,8 +33,7 @@ export async function searchGames(
   try {
     return db.searchGames(sanitizedFilters, sanitizedFilters.limit ?? 1000)
   } catch (error) {
-    logError('gameHandlers', 'searchGames', { collectionId, filters: sanitizedFilters }, error)
-    return []
+    logAndThrow('gameHandlers', 'searchGames', { collectionId, filters: sanitizedFilters }, error, 'Failed to load games')
   }
 }
 
@@ -64,8 +63,7 @@ export async function getGameMoves(
   try {
     return db.getGameWithMoves(gameId)
   } catch (error) {
-    logError('gameHandlers', 'getGameMoves', { collectionId, gameId }, error)
-    return null
+    logAndThrow('gameHandlers', 'getGameMoves', { collectionId, gameId }, error, 'Failed to open game')
   }
 }
 
@@ -107,8 +105,7 @@ export async function getAvailableDates(collectionId: string, filters?: OptionFi
   try {
     return db.getAvailableDates(sanitizedFilters)
   } catch (error) {
-    logError('gameHandlers', 'getAvailableDates', { collectionId }, error)
-    return []
+    logAndThrow('gameHandlers', 'getAvailableDates', { collectionId }, error, 'Failed to load date filters')
   }
 }
 
@@ -124,7 +121,6 @@ export async function getAvailableEcoCodes(collectionId: string, filters?: Optio
   try {
     return db.getAvailableEcoCodes(sanitizedFilters)
   } catch (error) {
-    logError('gameHandlers', 'getAvailableEcoCodes', { collectionId }, error)
-    return []
+    logAndThrow('gameHandlers', 'getAvailableEcoCodes', { collectionId }, error, 'Failed to load opening filters')
   }
 }

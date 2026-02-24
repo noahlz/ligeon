@@ -123,9 +123,8 @@ describe('updateVariation', () => {
     expect(result).toBeNull()
   })
 
-  test('returns null for non-existent variation id', async () => {
-    const result = await updateVariation(TEST_COLLECTION, 1, 9999, 'e4', tmpDir)
-    expect(result).toBeNull()
+  test('throws for non-existent variation id', async () => {
+    await expect(updateVariation(TEST_COLLECTION, 1, 9999, 'e4', tmpDir)).rejects.toThrow()
   })
 
   test('returns null for invalid collectionId', async () => {
@@ -204,7 +203,7 @@ describe('reorderVariations', () => {
     expect(variations.length).toBe(1)
   })
 
-  test('returns false for IDs belonging to a different game', async () => {
+  test('throws for IDs belonging to a different game', async () => {
     // Insert a second game
     db.insertGame({
       white: 'A', black: 'B', event: null, date: null,
@@ -214,7 +213,8 @@ describe('reorderVariations', () => {
     const game1Var = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
     const game2Var = await createVariation(TEST_COLLECTION, 2, 3, 'd4', tmpDir)
     // Try to reorder game 1's ply using a mix of IDs from both games
-    const result = await reorderVariations(TEST_COLLECTION, 1, 3, [game1Var!.id!, game2Var!.id!], tmpDir)
-    expect(result.success).toBe(false)
+    await expect(
+      reorderVariations(TEST_COLLECTION, 1, 3, [game1Var!.id!, game2Var!.id!], tmpDir)
+    ).rejects.toThrow()
   })
 })

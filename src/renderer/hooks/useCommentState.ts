@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback } from 'react'
+import { showErrorToast } from '../utils/errorToast.js'
 import type { CommentData } from '../../shared/types/game.js'
 
 export interface UseCommentStateReturn {
@@ -131,7 +132,7 @@ export function useCommentState(): UseCommentStateReturn {
       setEditingPly(null)
       setEditValue('')
     } catch (error) {
-      console.error('Failed to save comment:', error)
+      showErrorToast('Failed to save comment', error)
     }
   }, [editingPly, editValue, comments])
 
@@ -154,7 +155,7 @@ export function useCommentState(): UseCommentStateReturn {
       setEditingPly(null)
       setEditValue('')
     } catch (error) {
-      console.error('Failed to delete comment:', error)
+      showErrorToast('Failed to delete comment', error)
     }
   }, [pendingDeletion])
 

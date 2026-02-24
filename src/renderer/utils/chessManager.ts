@@ -18,6 +18,7 @@ import type { NormalMove } from 'chessops/types'
 import type { NavigableManager } from '../types/navigableManager.js'
 import type { MoveType } from '../types/moveTypes.js'
 import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
+import { showErrorToast } from './errorToast.js'
 
 // Re-export MoveType for backward compatibility
 export type { MoveType } from '../types/moveTypes.js'
@@ -137,6 +138,7 @@ export function createChessManager(movesString: string): ChessManager {
     const parsed = playAndRecord(chess, san)
     if (!parsed) {
       console.error(`Failed to parse move: ${san}`)
+      showErrorToast('Failed to load game: invalid move data')
       break
     }
     positions.push(parsed)
