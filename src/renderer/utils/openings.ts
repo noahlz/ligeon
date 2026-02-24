@@ -12,16 +12,17 @@ import openingsData from '../data/openings.json' with { type: 'json' }
 export interface Opening {
   eco: string
   name: string
+  moves: string
   count?: number
 }
 
 const openings: Opening[] = openingsData
 
 /**
- * Build a lookup map from ECO code to opening name
+ * Build a lookup map from ECO code to Opening
  */
-const ecoToNameMap: Map<string, string> = new Map(
-  openings.map((o) => [o.eco, o.name])
+const ecoToOpeningsMap: Map<string, Opening> = new Map(
+  openings.map((o) => [o.eco, o])
 )
 
 /**
@@ -40,31 +41,42 @@ export function searchAvailableOpenings(
 
   // If no query, return all available openings with their names and counts
   if (normalizedQuery.length === 0) {
-    return availableEcoCodes.map(({ eco, count }) => ({
-      eco,
-      name: ecoToNameMap.get(eco) || 'Unknown Opening',
-      count,
-    }))
+    return availableEcoCodes.map(({ eco, count }) => {
+      const opening = ecoToOpeningsMap.get(eco)
+      return {
+         eco,
+         name: opening?.name || 'Unknown Opening',
+         moves: opening?.moves || '',
+         count}
+      })
   }
 
   return availableEcoCodes
     .filter(({ eco }) => {
+      const opening = ecoToOpeningsMap.get(eco)
+
       // ECO code prefix match
-      if (eco.toLowerCase().startsWith(normalizedQuery)) {
+      if (opening?.eco.toLowerCase().startsWith(normalizedQuery)) {
         return true
       }
+
       // Name substring match
-      const name = ecoToNameMap.get(eco)
+      const name = opening?.name
       if (name && name.toLowerCase().includes(normalizedQuery)) {
         return true
       }
+
       return false
     })
-    .map(({ eco, count }) => ({
-      eco,
-      name: ecoToNameMap.get(eco) || 'Unknown Opening',
-      count,
-    }))
+    .map(({ eco, count }) => {
+      const opening = ecoToOpeningsMap.get(eco)
+      return {
+        eco: eco,
+        name: opening?.name || 'Unknown Opening',
+        moves: opening?.moves || '',
+        count: count,
+      }
+    })
 }
 
 /**
