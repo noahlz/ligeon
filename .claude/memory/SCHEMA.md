@@ -19,7 +19,9 @@ Source of truth: `src/shared/database/schema.ts`
 ## Gotchas
 
 ### No Database Migrations (Pre-Release)
+
 Project is pre-release. Don't write migrations — users delete and re-import their collections.
 
 ### Database Main-Process Only
+
 SQLite is unavailable in the renderer. See `IPC.md` for the access path and validation patterns.

@@ -16,25 +16,20 @@ See `package.json` for dependencies and npm scripts.
 
 Load these files as needed based on your current task:
 
+Load `.claude/memory/TESTING.md` when:
+- Writing or modifying tests
+- Investigating test failures
+- Adding coverage exclusions
+
+Load `.claude/memory/ARCHITECTURE.md` when:
+- Exploring or searching the codebase — ALWAYS consult the project diagram first, narrow exploration accordingly
+- Planning or implementing a major refactor or new feature
+- Working with `src/shared/` or cross-target imports
+
 Load `.claude/memory/SCHEMA.md` when:
 - Adding or modifying database tables, columns, or data models
 - Working with game, variation, comment, or annotation data structures
 - Debugging data persistence or storage logic
-
-Load `.claude/memory/BUILD.md` when:
-- Debugging TypeScript or compile errors
-- Fixing import errors or module resolution failures
-- Rebuilding or troubleshooting `better-sqlite3` native bindings
-
-Load `.claude/memory/IPC.md` when:
-- Adding or modifying IPC handlers or the preload bridge
-- Calling `window.electron.*` from the renderer
-- Debugging renderer-to-main communication
-
-Load `.claude/memory/ARCHITECTURE.md` when:
-- Exploring or searching the codebase — ALWAYS consult the project diagram first, narrow exploration accordingly
-- Working with `src/shared/` or cross-target imports
-- Working with core manager classes like: `ChessManager`, `VariationManager`, or `NavigableManager`
 
 Load `.claude/memory/UX.md` when:
 - Changing layout, colors, or Tailwind tokens
@@ -47,17 +42,20 @@ Load `.claude/memory/REACT.md` when:
 - Using or debugging the `@/` import alias
 - Fixing React UI behavior bugs
 
-Load `.claude/memory/TESTING.md` when:
-- Writing or modifying tests
-- Investigating test failures
-- Adding coverage exclusions
+Load `.claude/memory/IPC.md` when:
+- Adding or modifying IPC handlers or the preload bridge
+- Calling `window.electron.*` from the renderer
+- Debugging renderer-to-main communication
+
+Load `.claude/memory/BUILD.md` when:
+- Debugging TypeScript or compile errors
+- Fixing import errors or module resolution failures
+- Rebuilding or troubleshooting `better-sqlite3` native bindings
 
 ## Reference Links
 
-This project is built on the following open source libraries:
+This application leverages OSS chess libraries – references the below links when developing board display, pgn/fen parsing or game logic:
 
-- [chessops](https://github.com/niklasf/chessops) — move logic
-- [chessground](https://github.com/lichess-org/chessground) — board UI
-- [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) — display options reference
-
-Consult these references when working on board display or move logic.
+- [chessops](https://github.com/niklasf/chessops) — chess move logic
+- [chessground](https://github.com/lichess-org/chessground) — chess board UI
+- [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) – display options 

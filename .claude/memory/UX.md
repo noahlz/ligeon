@@ -6,7 +6,7 @@
 ┌─────────────────┬──────────────────────────────────┬────────────────────┐
 │ Left (w-72)     │ Center (flex-1)                  │ Right (w-80)       │
 ├─────────────────┼──────────────────────────────────┼────────────────────┤
-│ CollectionSel.  │[spacer] BoardDisplay [CtrlStrip] │ GameInfo           │
+│ CollectionSel.  │[Spacer] BoardDisplay [CtrlStrip] │ GameInfo           │
 │ GameListSidebar │                                  │ MoveList           │
 │                 │                                  │                    │
 │                 │     MoveNavigationButtons        │                    │
@@ -37,13 +37,12 @@ npx shadcn@latest add <name>
 Keep `ui/` customizations minimal; compose in app components.
 
 ### Import Fix After Adding Components
+
 `npx shadcn@latest add` generates `import { cn } from "src/renderer/lib"` — manually fix to `"@/lib/utils.js"`.
 
-## Chessground
+## Chessground And ChessOps Integration
 
-- Use `.board-coords-wrapper` for coordinate padding.
-- Flip board: `data-orientation="black"` attribute.
-- Config reference: see chessground config link in CLAUDE.md.
+For board UI behavior, see `src/renderer/utils/chessManager.ts` and `variationManager.ts`. Both implement `NavigableManager` (`src/renderer/types/navigableManager.ts`).
 
 ## Gotchas
 
@@ -52,5 +51,8 @@ Radix fires `onOpenChange(false)` on `pointerdown` before `onClick` fires, causi
 
 Fix: use `onInteractOutside` + `e.preventDefault()` on `PopoverContent` to veto the auto-close when the click originates from your own trigger. See `AnnotationPicker.tsx` for implementation.
 
-### DevTools Warnings
-`Request Autofill.enable/setAddresses failed` — harmless in `npm run app`, ignore.
+### Circular Hook Dependencies via Refs
+`useAutoPlay` and `useVariationState` depend on each other. The dependency is broken by storing stop callbacks in refs (`autoPlayStopRef`) in `App.tsx`. Do not refactor this into state without understanding the cycle.
+
+### Chessground is Imperative — Two useEffect Pattern
+`BoardDisplay.tsx` uses two `useEffect` blocks: one to initialize Chessground on mount, one to update it via `.set()` when props change. Do not merge them. 

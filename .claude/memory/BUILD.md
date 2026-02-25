@@ -21,6 +21,7 @@ src/renderer/*.tsx               →  Vite       →  dist/
 ## Gotchas
 
 ### `.js` Extension in All Imports
+
 ESM requires `.js` extension even for `.ts` source files.
 
 ```typescript
@@ -29,6 +30,7 @@ import { extractGameData } from './gameExtractor'      // wrong — breaks ESM
 ```
 
 ### Rebuild better-sqlite3
+
 `npm test` auto-rebuilds for Node.js. Manual commands:
 - `npm run rebuild:sqlite` — for tests
 - `npm run rebuild:electron` — for the app

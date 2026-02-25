@@ -20,9 +20,3 @@ Note: still requires `.js` extension per ESM rules. If imports resolve at build 
 ## Hooks
 
 Custom hooks live in `src/renderer/hooks/`. They follow the same pattern as components — accept state as arguments, return derived state and handlers. No direct SQLite or IPC access; call `window.electron.*` for data.
-
-## Chessground Integration
-
-For board UI behavior, see `src/renderer/utils/chessManager.ts` and `variationManager.ts`. Both implement `NavigableManager` (`src/renderer/types/navigableManager.ts`).
-
-Move logic uses chessops. See chessops reference link in CLAUDE.md.
