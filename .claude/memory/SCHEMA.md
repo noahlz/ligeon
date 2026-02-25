@@ -24,4 +24,4 @@ Project is pre-release. Don't write migrations — users delete and re-import th
 
 ### Database Main-Process Only
 
-SQLite is unavailable in the renderer. See `IPC.md` for the access path and validation patterns.
+SQLite is unavailable in the renderer. Use IPC functions for access path and validation patterns.
