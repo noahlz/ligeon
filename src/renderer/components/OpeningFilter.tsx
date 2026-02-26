@@ -104,21 +104,26 @@ export default function OpeningFilter({ collectionId, value, onChange, player, r
       )}
 
       {/* Search with Command */}
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next)
+          if (!next) setQuery('')
+        }}
+      >
         <PopoverTrigger asChild>
-          <div className="w-full">
-            <Command className="border border-ui-border rounded-sm bg-ui-bg-element">
-              <CommandInput
-                placeholder="Openings..."
-                value={query}
-                onValueChange={setQuery}
-                className="h-8 text-sm placeholder-ui-text-dimmer"
-              />
-            </Command>
+          <div className="w-full border border-ui-border rounded-sm bg-ui-bg-element h-8 flex items-center px-2 cursor-pointer text-sm text-ui-text-dimmer">
+            {query || 'Openings...'}
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0 bg-ui-bg-box border-ui-border" align="start">
-          <Command>
+          <Command shouldFilter={false}>
+            <CommandInput
+              placeholder="Openings..."
+              value={query}
+              onValueChange={setQuery}
+              className="h-8 text-sm placeholder-ui-text-dimmer"
+            />
             <CommandList>
               <CommandEmpty className="text-ui-text-dim text-sm">
                 {isLoading ? 'Loading openings...' : 'No openings found'}
