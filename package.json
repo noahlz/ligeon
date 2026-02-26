@@ -22,6 +22,7 @@
     "typecheck": "tsc -p src/renderer/tsconfig.json --noEmit && tsc -p src/main/tsconfig.json --noEmit && tsc -p src/main/tsconfig.preload.json --noEmit",
     "lint": "eslint src/ --max-warnings 0",
     "lint:fix": "eslint src/ --fix",
+    "check": "npm run lint && npm run typecheck && npm run knip",
     "pgn-to-sqlite": "npm run rebuild:sqlite && tsx scripts/pgn-to-sqlite.ts",
     "knip": "knip"
   },

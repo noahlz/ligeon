@@ -9,7 +9,7 @@ See `package.json` for dependencies and npm scripts.
 ## After Changes
 
 1. Use MCP `getDiagnostics` tool to check for issues with edited files.
-2. `npm run typecheck`
+2. `npm run check`
 3. `npm test`
 
 ## Reference Files
