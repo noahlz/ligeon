@@ -5,7 +5,7 @@ export interface ImportProgress {
   parsed: number
   indexed: number
   skipped: number
-  logs: Array<{ message: string; type: 'info' | 'error' }>
+  logs: Array<{ message: string; type: 'info' | 'success' | 'warning' | 'error' | 'debug' }>
 }
 
 const INITIAL_PROGRESS: ImportProgress = {
@@ -44,7 +44,7 @@ export function useImportProgress({
 
   // Subscribe to IPC progress events for the lifetime of the component
   useEffect(() => {
-    const unsubscribe = window.electron.onImportProgress((data: any) => {
+    const unsubscribe = window.electron.onImportProgress((data) => {
       if (data.type === 'progress') {
         setProgress(prev => ({
           ...prev,

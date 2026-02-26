@@ -11,7 +11,7 @@ import { logError, logAndThrow, logger } from '../config/logger.js'
  *
  * @returns Array of collection metadata objects
  */
-export async function listCollections(): Promise<CollectionMetadata[]> {
+export function listCollections(): CollectionMetadata[] {
   logger.debug('Listing collections...')
   const collectionsPath = getCollectionsPath()
 
@@ -31,7 +31,7 @@ export async function listCollections(): Promise<CollectionMetadata[]> {
       const metaPath = path.join(collectionsPath, dir, 'metadata.json')
       if (fs.existsSync(metaPath)) {
         try {
-          const metadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
+          const metadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8')) as CollectionMetadata
           collections.push(metadata)
         } catch (error) {
           logError('collectionHandlers', 'readMetadata', { metaPath, dir }, error)
@@ -52,10 +52,10 @@ export async function listCollections(): Promise<CollectionMetadata[]> {
  * @param newName - New name for the collection
  * @returns Updated collection metadata
  */
-export async function renameCollection(
+export function renameCollection(
   collectionId: string,
   newName: string
-): Promise<CollectionMetadata> {
+): CollectionMetadata {
   // Validate inputs
   if (!validateCollectionId(collectionId)) {
     logAndThrow('collectionHandlers', 'renameCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'), 'Invalid collection ID')
@@ -73,7 +73,7 @@ export async function renameCollection(
       throw new Error('Collection not found')
     }
 
-    const metadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
+    const metadata = JSON.parse(fs.readFileSync(metaPath, 'utf-8')) as CollectionMetadata
     metadata.name = newName.trim()
     metadata.lastModified = new Date().toISOString()
 
@@ -90,9 +90,9 @@ export async function renameCollection(
  * @param collectionId - ID of collection to delete
  * @returns Success flag
  */
-export async function deleteCollection(
+export function deleteCollection(
   collectionId: string
-): Promise<{ success: boolean }> {
+): { success: boolean } {
   // Validate input
   if (!validateCollectionId(collectionId)) {
     logAndThrow('collectionHandlers', 'deleteCollection', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'), 'Invalid collection ID')

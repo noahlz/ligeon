@@ -17,11 +17,11 @@ import { logError, logAndThrow } from '../config/logger.js'
  * @param filters - Search filters
  * @returns Array of matching games
  */
-export async function searchGames(
+export function searchGames(
   collectionId: string,
   filters: GameFilters,
   basePath: string = getCollectionsPath()
-): Promise<GameSearchResult[]> {
+): GameSearchResult[] {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'searchGames', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
@@ -44,11 +44,11 @@ export async function searchGames(
  * @param gameId - Database ID of the game
  * @returns Full game data or null
  */
-export async function getGameMoves(
+export function getGameMoves(
   collectionId: string,
   gameId: number,
   basePath: string = getCollectionsPath()
-): Promise<GameRow | null> {
+): GameRow | null {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getGameMoves', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return null
@@ -73,7 +73,7 @@ export async function getGameMoves(
  * @param collectionId - ID of the collection
  * @returns Number of games in the collection
  */
-export async function getGameCount(collectionId: string, basePath: string = getCollectionsPath()): Promise<number> {
+export function getGameCount(collectionId: string, basePath: string = getCollectionsPath()): number {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getGameCount', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return 0
@@ -94,7 +94,7 @@ export async function getGameCount(collectionId: string, basePath: string = getC
  * @param collectionId - ID of the collection
  * @returns Array of YYYYMMDD integers sorted ascending (e.g., [19560101, 19560315, 19571231])
  */
-export async function getAvailableDates(collectionId: string, filters?: OptionFilters, basePath: string = getCollectionsPath()): Promise<number[]> {
+export function getAvailableDates(collectionId: string, filters?: OptionFilters, basePath: string = getCollectionsPath()): number[] {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getAvailableDates', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []
@@ -109,7 +109,7 @@ export async function getAvailableDates(collectionId: string, filters?: OptionFi
   }
 }
 
-export async function getAvailableEcoCodes(collectionId: string, filters?: OptionFilters, basePath: string = getCollectionsPath()): Promise<{ eco: string; count: number }[]> {
+export function getAvailableEcoCodes(collectionId: string, filters?: OptionFilters, basePath: string = getCollectionsPath()): { eco: string; count: number }[] {
   if (!validateCollectionId(collectionId)) {
     logError('gameHandlers', 'getAvailableEcoCodes', { collectionId, reason: 'invalid collection ID' }, new Error('Validation failed'))
     return []

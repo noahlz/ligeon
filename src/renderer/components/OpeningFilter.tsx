@@ -50,7 +50,7 @@ export default function OpeningFilter({ collectionId, value, onChange, player, r
         setIsLoading(false)
       }
     }
-    fetchAvailableEcoCodes()
+    void fetchAvailableEcoCodes()
   }, [collectionId, player, results, dateFrom, dateTo]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Search openings as user types

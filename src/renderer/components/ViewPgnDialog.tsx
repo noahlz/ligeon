@@ -37,7 +37,7 @@ export default function ViewPgnDialog({ pgn, open, onClose }: ViewPgnDialogProps
         />
         <DialogFooter>
           <Button variant="secondary" onClick={onClose}>Close</Button>
-          <Button onClick={handleCopy}>Copy</Button>
+          <Button onClick={() => { void handleCopy() }}>Copy</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

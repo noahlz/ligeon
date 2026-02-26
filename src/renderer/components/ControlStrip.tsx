@@ -41,12 +41,12 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
 
   const handleImportGame = () => {
     if (!game) return
-    window.electron.openExternal(buildLichessURL(buildFullPgn(game)))
+    void window.electron.openExternal(buildLichessURL(buildFullPgn(game)))
   }
 
   const handleAnalyzePosition = () => {
     if (!fen) return
-    window.electron.openExternal(buildLichessAnalysisURL(fen))
+    void window.electron.openExternal(buildLichessAnalysisURL(fen))
   }
 
   const openMenu = () => {

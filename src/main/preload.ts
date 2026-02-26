@@ -8,7 +8,7 @@ import type { GameFilters, AppSettings, OptionFilters } from './ipc/types.js'
  */
 type ImportProgressData =
   | { type: 'progress'; parsed: number; indexed: number; skipped: number }
-  | { type: 'log'; logs: Array<{ type: string; message: string; timestamp: number }> }
+  | { type: 'log'; logs: Array<{ type: 'info' | 'success' | 'warning' | 'error' | 'debug'; message: string; timestamp: number }> }
   | { type: 'complete'; success?: boolean; collectionId: string; gamesIndexed: number; error?: string }
 
 /**
@@ -113,15 +113,15 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.removeAllListeners('import-complete')
     }
 
-    ipcRenderer.on('import-progress', (_event, data) => {
+    ipcRenderer.on('import-progress', (_event, data: { parsed: number; indexed: number; skipped: number }) => {
       callback({ ...data, type: 'progress' })
     })
 
-    ipcRenderer.on('import-progress-log', (_event, log) => {
+    ipcRenderer.on('import-progress-log', (_event, log: { type: 'info' | 'success' | 'warning' | 'error' | 'debug'; message: string; timestamp: number }) => {
       callback({ logs: [log], type: 'log' })
     })
 
-    ipcRenderer.on('import-complete', (_event, data) => {
+    ipcRenderer.on('import-complete', (_event, data: { success?: boolean; collectionId: string; gamesIndexed: number; error?: string }) => {
       callback({ ...data, type: 'complete' })
     })
 

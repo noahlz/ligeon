@@ -49,10 +49,10 @@ export function playMoveSound(type: MoveType): void {
     const playPromise = audio.play()
 
     if (playPromise !== undefined) {
-      playPromise.catch(error => {
+      playPromise.catch((error: unknown) => {
         // Browser blocked autoplay - this is expected on first load
         // Silently ignore since sounds aren't critical to functionality
-        console.debug(`Audio playback blocked for ${type}:`, error.message)
+        console.debug(`Audio playback blocked for ${type}:`, error instanceof Error ? error.message : error)
       })
     }
   } catch (error) {

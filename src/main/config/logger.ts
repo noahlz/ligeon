@@ -30,7 +30,7 @@ export const logger = winston.createLogger({
       maxFiles: `${settings.logging.retentionDays}d`,
       format: winston.format.printf(({ timestamp, level, message, ...meta }) => {
         const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : ''
-        return `${timestamp} [${level.toUpperCase()}]: ${message}${metaStr}`
+        return `${String(timestamp)} [${String(level).toUpperCase()}]: ${String(message)}${metaStr}`
       })
     })
   ]

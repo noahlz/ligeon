@@ -13,11 +13,11 @@ const MODULE = 'variationHandlers'
  * @param gameId - Database ID of the game
  * @returns Array of variation records
  */
-export async function getVariations(
+export function getVariations(
   collectionId: string,
   gameId: number,
   basePath: string = getCollectionsPath()
-): Promise<VariationData[]> {
+): VariationData[] {
   const db = getValidatedDb(MODULE, 'getVariations', collectionId, gameId, basePath)
   if (!db) return []
   try {
@@ -37,13 +37,13 @@ export async function getVariations(
  * @param moves - Space-separated SAN moves
  * @returns The created variation record or null if validation fails
  */
-export async function createVariation(
+export function createVariation(
   collectionId: string,
   gameId: number,
   branchPly: number,
   moves: string,
   basePath: string = getCollectionsPath()
-): Promise<VariationData | null> {
+): VariationData | null {
   const db = getValidatedDb(MODULE, 'createVariation', collectionId, gameId, basePath)
   if (!db) return null
 
@@ -73,13 +73,13 @@ export async function createVariation(
  * @param moves - Space-separated SAN moves
  * @returns The updated variation record or null if validation fails
  */
-export async function updateVariation(
+export function updateVariation(
   collectionId: string,
   gameId: number,
   id: number,
   moves: string,
   basePath: string = getCollectionsPath()
-): Promise<VariationData | null> {
+): VariationData | null {
   const db = getValidatedDb(MODULE, 'updateVariation', collectionId, gameId, basePath)
   if (!db) return null
 
@@ -108,12 +108,12 @@ export async function updateVariation(
  * @param id - Variation database ID
  * @returns Success indicator
  */
-export async function deleteVariation(
+export function deleteVariation(
   collectionId: string,
   gameId: number,
   id: number,
   basePath: string = getCollectionsPath()
-): Promise<{ success: boolean }> {
+): { success: boolean } {
   const db = getValidatedDb(MODULE, 'deleteVariation', collectionId, gameId, basePath)
   if (!db) return { success: false }
 
@@ -139,13 +139,13 @@ export async function deleteVariation(
  * @param orderedIds - Variation IDs in new display order
  * @returns Success indicator
  */
-export async function reorderVariations(
+export function reorderVariations(
   collectionId: string,
   gameId: number,
   branchPly: number,
   orderedIds: number[],
   basePath: string = getCollectionsPath()
-): Promise<{ success: boolean }> {
+): { success: boolean } {
   const db = getValidatedDb(MODULE, 'reorderVariations', collectionId, gameId, basePath)
   if (!db) return { success: false }
 

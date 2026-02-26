@@ -18,11 +18,11 @@ const MODULE = 'commentHandlers'
  * @param gameId - Database ID of the game
  * @returns Array of comment records
  */
-export async function getComments(
+export function getComments(
   collectionId: string,
   gameId: number,
   basePath: string = getCollectionsPath()
-): Promise<CommentData[]> {
+): CommentData[] {
   const db = getValidatedDb(MODULE, 'getComments', collectionId, gameId, basePath)
   if (!db) return []
   try {
@@ -42,13 +42,13 @@ export async function getComments(
  * @param text - Comment text (max 500 chars)
  * @returns The created/updated comment record or null if validation fails
  */
-export async function upsertComment(
+export function upsertComment(
   collectionId: string,
   gameId: number,
   ply: number,
   text: string,
   basePath: string = getCollectionsPath()
-): Promise<CommentData | null> {
+): CommentData | null {
   const db = getValidatedDb(MODULE, 'upsertComment', collectionId, gameId, basePath)
   if (!db) return null
 
@@ -78,13 +78,13 @@ export async function upsertComment(
  * @param text - Comment text (max 500 chars)
  * @returns The created/updated comment record or null if validation fails
  */
-export async function upsertVariationComment(
+export function upsertVariationComment(
   collectionId: string,
   gameId: number,
   variationId: number,
   text: string,
   basePath: string = getCollectionsPath()
-): Promise<CommentData | null> {
+): CommentData | null {
   const db = getValidatedDb(MODULE, 'upsertVariationComment', collectionId, gameId, basePath)
   if (!db) return null
 
@@ -113,12 +113,12 @@ export async function upsertVariationComment(
  * @param variationId - Database ID of the variation
  * @returns Success indicator
  */
-export async function deleteVariationComment(
+export function deleteVariationComment(
   collectionId: string,
   gameId: number,
   variationId: number,
   basePath: string = getCollectionsPath()
-): Promise<{ success: boolean }> {
+): { success: boolean } {
   const db = getValidatedDb(MODULE, 'deleteVariationComment', collectionId, gameId, basePath)
   if (!db) return { success: false }
 
@@ -143,12 +143,12 @@ export async function deleteVariationComment(
  * @param ply - 1-based mainline ply
  * @returns Success indicator
  */
-export async function deleteComment(
+export function deleteComment(
   collectionId: string,
   gameId: number,
   ply: number,
   basePath: string = getCollectionsPath()
-): Promise<{ success: boolean }> {
+): { success: boolean } {
   const db = getValidatedDb(MODULE, 'deleteComment', collectionId, gameId, basePath)
   if (!db) return { success: false }
 

@@ -14,7 +14,7 @@ import { parseFen, makeFen, INITIAL_FEN } from 'chessops/fen'
 import { parseSan } from 'chessops/san'
 import { parsePgn } from 'chessops/pgn'
 import { makeSquare, squareFile, squareRank } from 'chessops/util'
-import type { NormalMove } from 'chessops/types'
+
 import type { NavigableManager } from '../types/navigableManager.js'
 import type { MoveType } from '../types/moveTypes.js'
 import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
@@ -75,7 +75,7 @@ export function playAndRecord(chess: Chess, san: string): ParsedMove | null {
     console.error(`Unexpected move type (not a NormalMove): ${JSON.stringify(move)}`)
     return null
   }
-  const normal = move as NormalMove
+  const normal = move
   const from = makeSquare(normal.from)
 
   // Detect castle and capture from pre-move position state

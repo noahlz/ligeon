@@ -5,6 +5,9 @@
     "src/renderer/index.tsx",
     "src/renderer/types/electron.ts"
   ],
+  "ignore": [
+    "src/renderer/components/ui/*"
+  ],
   "project": ["src/**/*.{ts,tsx}"],
   "ignoreDependencies": [
     "tailwindcss"

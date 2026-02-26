@@ -95,7 +95,7 @@ export default function CollectionSelector({
   const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
-      handleSaveEdit()
+      void handleSaveEdit()
     } else if (e.key === 'Escape') {
       e.preventDefault()
       handleCancelEdit()
@@ -146,7 +146,7 @@ export default function CollectionSelector({
                     variant="ghost"
                     size="icon"
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={handleSaveEdit}
+                    onClick={() => { void handleSaveEdit() }}
                     className="h-6 w-6 p-1 hover:bg-ui-bg-page opacity-60 hover:opacity-100"
                     title="Save"
                   >

@@ -116,7 +116,7 @@ export class GameDatabase {
   searchGames(filters: GameFilters, limit = 1000): GameSearchResult[] {
     const startTime = Date.now()
     let query = 'SELECT id, white, black, event, dateYYYYMMDD as date, result, whiteElo, blackElo, ecoCode FROM games WHERE 1=1'
-    const params: any[] = []
+    const params: (string | number)[] = []
 
     if (filters.player) {
       query += ' AND (white LIKE ? OR black LIKE ?)'
@@ -233,7 +233,7 @@ export class GameDatabase {
   getAvailableDates(filters?: OptionFilters): number[] {
     try {
       let query = 'SELECT DISTINCT dateYYYYMMDD FROM games WHERE dateYYYYMMDD IS NOT NULL'
-      const params: any[] = []
+      const params: (string | number)[] = []
 
       if (filters?.player) {
         query += ' AND (white LIKE ? OR black LIKE ?)'
@@ -261,7 +261,7 @@ export class GameDatabase {
   getAvailableEcoCodes(filters?: OptionFilters): { eco: string; count: number }[] {
     try {
       let query = `SELECT ecoCode, COUNT(*) as count FROM games WHERE ecoCode IS NOT NULL AND ecoCode != ''`
-      const params: any[] = []
+      const params: (string | number)[] = []
 
       if (filters?.player) {
         query += ' AND (white LIKE ? OR black LIKE ?)'
