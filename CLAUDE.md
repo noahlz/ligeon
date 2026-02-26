@@ -19,7 +19,6 @@ Load these files as needed based on your current task:
 Load `.claude/memory/TESTING.md` when:
 - Writing or modifying tests
 - Investigating test failures
-- Adding coverage exclusions
 
 Load `.claude/memory/ARCHITECTURE.md` when:
 - Exploring or searching the codebase — ALWAYS consult the project diagram first, narrow exploration accordingly
