@@ -67,6 +67,9 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
     return () => {
       cgRef.current?.destroy()
     }
+  // Intentionally runs once on mount — Chessground is initialized once and
+  // updated via cgRef.current.set() in subsequent effects below.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Update board when FEN or lastMove changes

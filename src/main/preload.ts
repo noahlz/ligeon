@@ -8,7 +8,7 @@ import type { GameFilters, AppSettings, OptionFilters } from './ipc/types.js'
  */
 type ImportProgressData =
   | { type: 'progress'; parsed: number; indexed: number; skipped: number }
-  | { type: 'log'; logs: Array<{ type: string; message: string; timestamp: number }> }
+  | { type: 'log'; logs: Array<{ type: 'info' | 'success' | 'warning' | 'error' | 'debug'; message: string; timestamp: number }> }
   | { type: 'complete'; success?: boolean; collectionId: string; gamesIndexed: number; error?: string }
 
 /**

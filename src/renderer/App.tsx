@@ -79,6 +79,9 @@ export default function App() {
       }
     }
     loadCollections()
+  // Run once on mount only — selectedCollectionId intentionally excluded to avoid
+  // re-fetching collections when a game is selected within the same session.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Break circular dependency between useAutoPlay and useVariationState via refs.
@@ -269,6 +272,8 @@ export default function App() {
     } catch (error) {
       showErrorToast('Failed to save variation order', error)
     }
+  // variationState object excluded — only its stable reorderLocalVariations method is needed.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGameCollectionId, selectedGame, variationState.reorderLocalVariations])
 
   return (
