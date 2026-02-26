@@ -219,7 +219,7 @@ export default function GameListSidebar({
           <div
             key={game.id}
             onClick={() => onGameSelect(game)}
-            className={`p-2 mb-1.5 rounded cursor-pointer text-sm ${selectedGame?.id === game.id && selectedGameCollectionId === collectionId
+            className={`p-2 mb-1.5 rounded text-sm cursor-pointer ${selectedGame?.id === game.id && selectedGameCollectionId === collectionId
               ? 'border-2 border-ui-accent bg-ui-bg-element'
               : 'bg-ui-bg-element hover:bg-ui-bg-hover'
               }`}

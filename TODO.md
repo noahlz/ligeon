@@ -1,8 +1,6 @@
 # Ligeon TODOs
 
 ## PGN View on Lichess 
-- Extend buildFullPgn to include headers for "view on Lichess."
-- Add "View PGN" so you can copy/paste into a Lichess study (since "view on lichess" uses Import Game)
 - Add note to readme: we don't support importing comments or annotations to games because they are copyrighted. Only the moves of the game and headers are copyright-free.
 
 ## Online Help

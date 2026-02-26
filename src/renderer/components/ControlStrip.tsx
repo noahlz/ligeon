@@ -14,6 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu.js'
+import ViewPgnDialog from './ViewPgnDialog.js'
 
 interface ControlStripProps {
   game?: GameRow
@@ -25,6 +26,7 @@ interface ControlStripProps {
 
 export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard }: ControlStripProps) {
   const [lichessMenuOpen, setLichessMenuOpen] = useState(false)
+  const [viewPgnOpen, setViewPgnOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -55,6 +57,13 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
 
   return (
     <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start">
+      {game && (
+        <ViewPgnDialog
+          pgn={buildFullPgn(game)}
+          open={viewPgnOpen}
+          onClose={() => setViewPgnOpen(false)}
+        />
+      )}
       {/* View on Lichess — hover shows clickable label, click opens dropdown */}
       <div
         className="relative"
@@ -78,6 +87,9 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleAnalyzePosition} disabled={!fen}>
               Analyze Position
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setLichessMenuOpen(false); setViewPgnOpen(true) }}>
+              View PGN
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
