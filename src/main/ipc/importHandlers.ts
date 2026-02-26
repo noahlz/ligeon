@@ -186,7 +186,7 @@ export async function importAndIndexPgn(
         } catch (error) {
           stats.totalSkipped++
           stats.skippedReasons.parseError++
-          sendProgressLog(sender, 'error', `Error processing game ${stats.totalParsed}: ${error}`)
+          sendProgressLog(sender, 'error', `Error processing game ${stats.totalParsed}: ${error instanceof Error ? error.message : String(error)}`)
         }
       })
 

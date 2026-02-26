@@ -86,7 +86,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  startImport()
+                  void startImport()
                 }
               }}
               className="bg-ui-bg-element border-ui-border"
@@ -95,7 +95,7 @@ export default function ImportDialog({ isOpen, filePath, onComplete, onClose }: 
               <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button onClick={startImport} className="bg-ui-primary hover:bg-blue-600 text-white">
+              <Button onClick={() => { void startImport() }} className="bg-ui-primary hover:bg-blue-600 text-white">
                 Import
               </Button>
             </DialogFooter>

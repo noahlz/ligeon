@@ -13,7 +13,7 @@ import { logError } from '../config/logger.js'
  *
  * @returns Current settings
  */
-export async function getSettings(): Promise<AppSettings> {
+export function getSettings(): AppSettings {
   try {
     return loadSettings()
   } catch (error) {
@@ -28,7 +28,7 @@ export async function getSettings(): Promise<AppSettings> {
  * @param updates - Partial settings to update
  * @returns Updated settings
  */
-export async function updateSettings(updates: Partial<AppSettings>): Promise<AppSettings> {
+export function updateSettings(updates: Partial<AppSettings>): AppSettings {
   try {
     const currentSettings = loadSettings()
 

@@ -14,11 +14,11 @@ const MODULE = 'annotationHandlers'
  * @param basePath - Base path for collections (defaults to app path; override in tests)
  * @returns Array of annotation records
  */
-export async function getAnnotations(
+export function getAnnotations(
   collectionId: string,
   gameId: number,
   basePath: string = getCollectionsPath()
-): Promise<AnnotationData[]> {
+): AnnotationData[] {
   const db = getValidatedDb(MODULE, 'getAnnotations', collectionId, gameId, basePath)
   if (!db) return []
   try {
@@ -39,13 +39,13 @@ export async function getAnnotations(
  * @param basePath - Base path for collections (defaults to app path; override in tests)
  * @returns The created/updated annotation record or null if validation fails
  */
-export async function upsertAnnotation(
+export function upsertAnnotation(
   collectionId: string,
   gameId: number,
   ply: number,
   nag: number,
   basePath: string = getCollectionsPath()
-): Promise<AnnotationData | null> {
+): AnnotationData | null {
   const db = getValidatedDb(MODULE, 'upsertAnnotation', collectionId, gameId, basePath)
   if (!db) return null
 
@@ -76,13 +76,13 @@ export async function upsertAnnotation(
  * @param basePath - Base path for collections (defaults to app path; override in tests)
  * @returns Success indicator
  */
-export async function deleteAnnotation(
+export function deleteAnnotation(
   collectionId: string,
   gameId: number,
   ply: number,
   nag: number,
   basePath: string = getCollectionsPath()
-): Promise<{ success: boolean }> {
+): { success: boolean } {
   const db = getValidatedDb(MODULE, 'deleteAnnotation', collectionId, gameId, basePath)
   if (!db) return { success: false }
 

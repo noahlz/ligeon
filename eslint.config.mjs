@@ -20,7 +20,7 @@ export default tseslint.config(
   },
   {
     files: ['src/**/*.{ts,tsx}'],
-    extends: tseslint.configs.recommended,
+    extends: tseslint.configs.recommendedTypeChecked,
     languageOptions: {
       parserOptions: {
         // Explicit paths required: src/shared/ has no own tsconfig,

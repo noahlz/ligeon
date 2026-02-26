@@ -36,7 +36,7 @@ export interface UseVariationStateReturn {
   handleUserMove: (from: string, to: string) => void
   exitVariation: () => void
   jumpToVariationMove: (id: number, branchPly: number, ply: number) => void
-  dismissVariation: (id: number) => void
+  dismissVariation: (id: number) => Promise<void>
   advanceVariation: () => boolean
   variationNav: {
     first: () => void
@@ -232,7 +232,7 @@ export function useVariationState({
   /** Confirm deletion of pending variation */
   const confirmDeletion = useCallback(() => {
     if (pendingDeletion !== null) {
-      dismissVariation(pendingDeletion)
+      void dismissVariation(pendingDeletion)
       setPendingDeletion(null)
     }
   }, [pendingDeletion, dismissVariation])

@@ -22,7 +22,7 @@ export class IpcError extends Error {
     if (!(error instanceof Error)) return null
     if (!error.message.startsWith(IPC_ERROR_PREFIX)) return null
     try {
-      const payload = JSON.parse(error.message.slice(IPC_ERROR_PREFIX.length))
+      const payload = JSON.parse(error.message.slice(IPC_ERROR_PREFIX.length)) as { userMessage?: unknown }
       const msg = payload?.userMessage
       return typeof msg === 'string' ? msg : null
     } catch { return null }

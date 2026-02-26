@@ -78,7 +78,7 @@ export default function App() {
         setSelectedCollectionId(cols[0].id)
       }
     }
-    loadCollections()
+    void loadCollections()
   // Run once on mount only — selectedCollectionId intentionally excluded to avoid
   // re-fetching collections when a game is selected within the same session.
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -287,13 +287,13 @@ export default function App() {
           >
             <GameListSidebar
               collectionId={selectedCollectionId}
-              onGameSelect={handleGameSelect}
+              onGameSelect={(game) => { void handleGameSelect(game) }}
               collections={collections}
               selectedCollectionId={selectedCollectionId}
               onSelectCollection={setSelectedCollectionId}
-              onImport={handleImportClick}
-              onDeleteCollection={handleDeleteCollection}
-              onRenameCollection={handleRenameCollection}
+              onImport={() => { void handleImportClick() }}
+              onDeleteCollection={(id) => { void handleDeleteCollection(id) }}
+              onRenameCollection={() => { void handleRenameCollection() }}
               selectedGame={selectedGame}
               selectedGameCollectionId={selectedGameCollectionId}
             />
@@ -398,18 +398,18 @@ export default function App() {
                     variationPly={variationState.variationPly}
                     onVariationJump={variationState.jumpToVariationMove}
                     onDismissVariation={variationState.requestDeletion}
-                    onReorderVariations={selectedGameCollectionId && selectedGame ? handleReorderVariations : undefined}
+                    onReorderVariations={selectedGameCollectionId && selectedGame ? (branchPly, orderedIds) => { void handleReorderVariations(branchPly, orderedIds) } : undefined}
                     isInVariation={variationState.isInVariation}
                     annotationHandlers={{
                       annotations: annotationState.annotations,
                       onSetAnnotation: (ply, nag) => {
                         if (selectedGameCollectionId && selectedGame) {
-                          annotationState.setAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
+                          void annotationState.setAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
                         }
                       },
                       onRemoveAnnotation: (ply: number, nag: number) => {
                         if (selectedGameCollectionId && selectedGame) {
-                          annotationState.removeAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
+                          void annotationState.removeAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
                         }
                       },
                     }}
@@ -420,33 +420,31 @@ export default function App() {
                       onEdit: commentState.startEditing,
                       onValueChange: commentState.setEditValue,
                       onSave: selectedGameCollectionId && selectedGame
-                        ? () => commentState.saveComment(selectedGameCollectionId, selectedGame.id)
+                        ? () => { void commentState.saveComment(selectedGameCollectionId, selectedGame.id) }
                         : undefined,
                       onCancel: commentState.cancelEditing,
                       onDeleteRequest: commentState.requestDeletion,
                       variationComments: commentState.variationComments,
-                      onSaveVariationComment: async (variationId: number, text: string) => {
+                      onSaveVariationComment: (variationId: number, text: string) => {
                         if (selectedGameCollectionId && selectedGame) {
-                          try {
-                            const saved = await window.electron.upsertVariationComment(
-                              selectedGameCollectionId, selectedGame.id, variationId, text
-                            )
+                          void window.electron.upsertVariationComment(
+                            selectedGameCollectionId, selectedGame.id, variationId, text
+                          ).then(saved => {
                             if (saved) commentState.updateVariationComment(saved)
-                          } catch (error) {
+                          }).catch((error: unknown) => {
                             showErrorToast('Failed to save variation comment', error)
-                          }
+                          })
                         }
                       },
-                      onDeleteVariationComment: async (variationId: number) => {
+                      onDeleteVariationComment: (variationId: number) => {
                         if (selectedGameCollectionId && selectedGame) {
-                          try {
-                            await window.electron.deleteVariationComment(
-                              selectedGameCollectionId, selectedGame.id, variationId
-                            )
+                          void window.electron.deleteVariationComment(
+                            selectedGameCollectionId, selectedGame.id, variationId
+                          ).then(() => {
                             commentState.removeVariationComment(variationId)
-                          } catch (error) {
+                          }).catch((error: unknown) => {
                             showErrorToast('Failed to delete variation comment', error)
-                          }
+                          })
                         }
                       },
                     }}
@@ -474,7 +472,7 @@ export default function App() {
                 {/* Skeleton MoveList */}
                 <div className="bg-ui-bg-element rounded-sm p-2 flex-1 font-mono min-h-0">
                   <div className="space-y-0.5">
-                    {[...Array(30)].map((_, i) => (
+                    {Array.from({ length: 30 }).map((_, i) => (
                       <div key={i} className="grid gap-2 py-0.5" style={{ gridTemplateColumns: '2rem 1fr 1fr' }}>
                         <div className="h-5 w-5 bg-ui-bg-hover rounded-sm animate-pulse" style={{ animationDelay: `${i * 50}ms` }} />
                         <div className="h-5 bg-ui-bg-hover rounded-sm animate-pulse" style={{ width: `${40 + (i * 7) % 35}%`, animationDelay: `${i * 50 + 25}ms` }} />
@@ -492,7 +490,7 @@ export default function App() {
         <ImportDialog
           isOpen={showImportDialog}
           filePath={importFilePath}
-          onComplete={handleImportComplete}
+          onComplete={(id) => { void handleImportComplete(id) }}
           onClose={handleImportClose}
         />
 
@@ -503,7 +501,7 @@ export default function App() {
           message="Delete this comment? This cannot be undone."
           onConfirm={() => {
             if (selectedGameCollectionId && selectedGame) {
-              commentState.confirmDeletion(selectedGameCollectionId, selectedGame.id)
+              void commentState.confirmDeletion(selectedGameCollectionId, selectedGame.id)
             }
           }}
           onCancel={commentState.cancelDeletion}
