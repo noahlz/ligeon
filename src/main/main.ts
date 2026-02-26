@@ -245,6 +245,9 @@ function setupIpcHandlers() {
  * App lifecycle events
  */
 app.on('ready', () => {
+  if (process.platform === 'darwin' && isDev) {
+    app.dock?.setIcon(path.join(__dirname, '..', '..', 'resources', 'icons', 'png', 'icon-dev.png'));
+  }
   logger.info('App ready')
   createWindow()
   initializeApp()
