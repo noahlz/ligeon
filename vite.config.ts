@@ -24,7 +24,7 @@ export default defineConfig({
     },
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: process.env.COVERAGE_TO_FILE ? ['text-file', 'json', 'html'] : ['text', 'json', 'html'],
       exclude: coverageExcludes,
       thresholds: {
         lines: 80,
