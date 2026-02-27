@@ -4,6 +4,7 @@ import { Check } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.js'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command.js'
 import { Badge } from '@/components/ui/badge.js'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip.js'
 import { buildOptionFilters } from '../hooks/useGameFilters.js'
 import { showErrorToast } from '../utils/errorToast.js'
 
@@ -91,13 +92,17 @@ export default function OpeningFilter({ collectionId, value, onChange, player, r
               className="inline-flex items-center gap-1 px-2 py-0.5 bg-ui-accent text-white text-xs hover:bg-ui-accent/80"
             >
               {eco}
-              <button
-                onClick={(e) => handleRemoveTag(eco, e)}
-                className="hover:opacity-80"
-                title="Remove"
-              >
-                ✕
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={(e) => handleRemoveTag(eco, e)}
+                    className="hover:opacity-80 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Remove</TooltipContent>
+              </Tooltip>
             </Badge>
           ))}
         </div>
@@ -136,13 +141,21 @@ export default function OpeningFilter({ collectionId, value, onChange, player, r
                     onSelect={() => handleToggle(opening)}
                     className="group cursor-pointer text-sm data-[selected=true]:bg-ui-accent"
                   >
-                    <div className="cursor-pointer flex items-center gap-2 w-full" title={`${opening.moves}`}>
-                      {isSelected(opening.eco) && <Check className="h-4 w-4 group-data-[selected=true]:text-white" />}
-                      <span className="font-semibold text-ui-accent group-data-[selected=true]:text-white">{opening.eco}</span>
-                      <span className="text-ui-text-dim group-data-[selected=true]:text-white">{opening.name}</span>
-                      <span className="w-2xs truncate text-ui-text-dim group-data-[selected=true]:text-white">{opening.moves && `(${opening.moves})`}</span>
-                      <span className="ml-auto text-ui-text-dimmer group-data-[selected=true]:text-white">{opening.count}</span>
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2 w-md min-w-0">
+                          {isSelected(opening.eco) && <Check className="h-4 w-4 shrink-0 group-data-[selected=true]:text-white" />}
+                          <span className="font-semibold shrink-0 text-ui-accent group-data-[selected=true]:text-white">{opening.eco}</span>
+                          <span className="whitespace-nowrap shrink-0 text-ui-text-dim group-data-[selected=true]:text-white">{opening.name}</span>
+                          <span className="flex-1 min-w-0 truncate text-ui-text-dim group-data-[selected=true]:text-white">{opening.moves && `(${opening.moves})`}</span>
+                        </div>
+                      </TooltipTrigger>
+                      {opening.moves && (
+                        <TooltipContent side="right" className="max-w-xs font-mono text-xs">
+                          {opening.moves}
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
                   </CommandItem>
                 ))}
               </CommandGroup>
