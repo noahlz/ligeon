@@ -3,71 +3,71 @@
 ## Project Structure
 
 ```
-__tests__/             # Vitest: integration/, performance/, unit/
-public/sounds/         # Audio
-resources/             # Icons, sample PGNs
-scripts/               # CLI tools
+__tests__/             # Unit and integration tests (Vitest)
+public/sounds/         # Audio files for move/capture/check sounds
+resources/             # Static assets (icons, sample PGNs)
+scripts/               # CLI utilities
+
 src/
-  main/                # Node.js only — .ts source, no .js
-    config/            # paths, logger, settings, settingsStore
-    ipc/               # handlers, validators, types, gameDatabase
-  renderer/            # React + Chessground
-    components/        # UI components
-      ui/              # shadcn/ui primitives (copied, not imported)
-    data/              # Static assets (openings.json)
-    hooks/             # Custom React hooks
-    lib/               # cn() helper
-    styles/            # CSS + Tailwind
-    types/             # electron.ts (IPC API), navigableManager.ts, moveTypes.ts
-    utils/             # chessManager, variationManager, chessHelpers, audioManager, etc.
-  shared/              # Single source for main + renderer + CLI
-    converters/        # resultConverter, dateConverter
-    database/          # schema
-    pgn/               # gameExtractor
-    types/             # GameData, GameRow interfaces
+  main/                # Electron main process (Node.js only, .ts source)
+    config/            # App paths, logger config, settings persistence
+    ipc/               # IPC event handlers for game operations, validation
+
+  renderer/            # React UI layer (Chessground board, move list, etc.)
+    components/        # React components, no business logic
+      ui/              # shadcn/ui primitives (bundled, not node_modules)
+    data/              # Static JSON (openings database)
+    hooks/             # Custom React hooks managing state and effects
+    lib/               # Helper functions (cn() for Tailwind)
+    styles/            # CSS + Tailwind config
+    types/             # TypeScript interfaces (IPC API, enums, type defs)
+    utils/             # Pure utility functions with unit tests — NO React deps
+
+  shared/              # Code used by main + renderer + CLI scripts
+    converters/        # Format conversion (date, result, etc.)
+    database/          # Schema definitions
+    pgn/               # PGN parsing and game data extraction
+    types/             # Shared TypeScript interfaces
 ```
 
 ## Import Path Conventions
 
-Use relative paths to `shared/` from all targets. No `@shared` alias. Use `@/` for renderer-internal imports only.
-
-```typescript
-// Renderer root (src/renderer/*.tsx):
-import type { GameRow } from '../shared/types/game.js'
-
-// Renderer components (src/renderer/components/*.tsx):
-import { resultNumericToDisplay } from '../../shared/converters/resultConverter.js'
-
-// Main IPC (src/main/ipc/*.ts):
-import { extractGameData } from '../../shared/pgn/gameExtractor.js'
-```
+- **`shared/`**: Always use relative paths (no `@shared` alias). Available to main, renderer, and CLI scripts.
+- **`@/`**: Renderer-only alias for `src/renderer/` — use for imports within renderer (e.g. UI components).
+- **renderer/utils/**: Import directly from file; no barrel (e.g. `'../utils/formatters.js'`).
+- **shared/** subdirs: Import from directory (barrel re-exports in `index.ts`).
 
 ## Barrel Exports
 
-Export from each subdirectory via `index.ts` barrel. Import from the directory, not the file directly (within the same target).
+`src/shared/` uses `index.ts` barrels — import from the directory.
+**`src/renderer/utils/` has NO barrel** — import directly from the individual file.
 
-## Key Classes
+## Business Logic Extraction Rule
 
-**`NavigableManager`** — interface for position-sequence navigation; implemented by both managers below, used by navigation hooks.
-**`ChessManager`** — read-only mainline replay from a PGN move string.
-**`VariationManager`** — mutable variation sequences; supports interactive move-making from a branch FEN.
+**Pure function with no React dependencies → extract to `renderer/utils/` and add a unit test.**
+**Logic that reads/mutates React state → stays in hooks or components.**
 
-Consumed by hooks: `useGameNavigation`, `useBoardState`, `useVariationState`.
+Before adding a utility, scan `renderer/utils/` for existing files that logically own the concept (e.g. board math → `boardUtils.ts`, string formatting → `formatters.ts`, move indexing → `moveFormatter.ts`). Do not create a new file when an existing one fits.
 
-## PGN / FEN Parsing
+## Core Abstractions
 
-Always use the ChessOps library for parsing / composing PGN and FEN strings.
+**Move Navigation**: Three factory functions manage board state:
+- **`NavigableManager`** interface — unified API for position-sequence navigation
+- **`ChessManager`** — read-only mainline game replay
+- **`VariationManager`** — mutable variation exploration (branch into alternatives)
 
-## Gotchas
+Used by hooks (`useGameNavigation`, `useBoardState`, `useVariationState`) to drive the board UI.
 
-### No Global State Store
-`App.tsx` manages all state via `useState` and custom hook composition. State flows down as props; callbacks flow up. This is intentional for the current scale.
+## Chess Logic Library
 
-### Managers Use Factory Functions, Not Classes
-`createChessManager()` and `createVariationManager()` are factory functions returning interface objects with closure-based state. There are no ES6 classes. Do not refactor to classes without a clear reason.
+**ChessOps** is the single source of truth for move validation, FEN parsing, and legal move generation. Do not hand-parse positions or validate moves — delegate to ChessOps. This ensures consistency across the app and prevents subtle rule bugs.
 
-### ElectronAPI Types Are Split
-`ElectronAPI` interface lives in `src/renderer/types/electron.ts` and is declared on `Window`. The preload (`src/main/preload.ts`) cannot import from it (separate CJS compilation), so `ImportProgressData` is duplicated there. Keep them in sync manually.
+## Design Notes
 
-### Preload Event Aggregation
-`window.electron.onImportProgress()` aggregates three IPC events into one typed callback, returning an explicit unsubscribe function. This is not a standard Electron pattern — don't replace it with direct `ipcRenderer.on()` calls in the renderer.
+**No Global State Store** — State lives in `App.tsx` via `useState` + custom hooks. Props flow down, callbacks flow up. This is intentional; avoid Redux/Zustand unless the prop tree becomes unmaintainable.
+
+**Factory Functions Over Classes** — Move managers (`createChessManager`, `createVariationManager`) use closures instead of ES6 classes. Maintain this pattern; do not refactor to classes.
+
+**Electron Preload Isolation** — The preload script runs in a separate context (CJS) and cannot import from the renderer (ESM). Type definitions may be duplicated; keep them synchronized manually when changing IPC APIs.
+
+**IPC Event Aggregation** — Progress updates aggregate multiple events into one callback with explicit unsubscribe. This pattern is intentional; don't bypass it with direct `ipcRenderer.on()` in the renderer.

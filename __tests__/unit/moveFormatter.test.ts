@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { groupMovesIntoPairs } from '../../src/renderer/utils/moveFormatter.js'
+import { groupMovesIntoPairs, pairIndexToPly, isCurrentMove } from '../../src/renderer/utils/moveFormatter.js'
 
 describe('moveFormatter', () => {
   describe('groupMovesIntoPairs', () => {
@@ -38,6 +38,50 @@ describe('moveFormatter', () => {
         { white: 'd4', black: 'd5', moveNumber: 2 },
         { white: 'Nc3', black: 'Nf6', moveNumber: 3 },
       ])
+    })
+  })
+
+  describe('pairIndexToPly', () => {
+    it('pair 0 white => ply 1', () => {
+      expect(pairIndexToPly(0, 'white')).toBe(1)
+    })
+
+    it('pair 0 black => ply 2', () => {
+      expect(pairIndexToPly(0, 'black')).toBe(2)
+    })
+
+    it('pair 1 white => ply 3', () => {
+      expect(pairIndexToPly(1, 'white')).toBe(3)
+    })
+
+    it('pair 1 black => ply 4', () => {
+      expect(pairIndexToPly(1, 'black')).toBe(4)
+    })
+
+    it('pair 5 white => ply 11 (move 6 white)', () => {
+      expect(pairIndexToPly(5, 'white')).toBe(11)
+    })
+
+    it('pair 5 black => ply 12 (move 6 black)', () => {
+      expect(pairIndexToPly(5, 'black')).toBe(12)
+    })
+  })
+
+  describe('isCurrentMove', () => {
+    it('returns true when currentPly matches targetPly1 on mainline', () => {
+      expect(isCurrentMove(3, 3, false)).toBe(true)
+    })
+
+    it('returns false when currentPly does not match', () => {
+      expect(isCurrentMove(3, 4, false)).toBe(false)
+    })
+
+    it('returns false when inside a variation regardless of ply match', () => {
+      expect(isCurrentMove(3, 3, true)).toBe(false)
+    })
+
+    it('returns false at start position (ply 0)', () => {
+      expect(isCurrentMove(0, 1, false)).toBe(false)
     })
   })
 })

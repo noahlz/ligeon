@@ -4,6 +4,7 @@ import {
   parseVariationMoves,
   variationMoveNumber,
   isVariationWhiteMove,
+  formatVariationMovesForDisplay,
 } from '../utils/variationFormatter.js'
 import type { VariationData, CommentData } from '../../shared/types/game.js'
 import { TableRow, TableCell } from '@/components/ui/table.js'
@@ -160,13 +161,7 @@ export function VariationRow({
   const collapsedPrefix = `${moveNum}.${firstIsWhite ? '' : '..'} `
 
   // Full move list for tooltip (all moves with proper notation, no comments)
-  const tooltipMoves = moves.map((move, i) => {
-    const isWhite = isVariationWhiteMove(variation.branchPly, i)
-    const num = variationMoveNumber(variation.branchPly, i)
-    if (isWhite) return `${num}. ${move}`
-    if (i === 0) return `${num}... ${move}`
-    return move
-  }).join(' ')
+  const tooltipMoves = formatVariationMovesForDisplay(moves, variation.branchPly)
 
   // Show full accent border when in variation but no move is highlighted, or when dragging over
   const showAccentBorder = (isActive && isInVariation && (!variationPly || variationPly === 0)) || isDragOver

@@ -83,5 +83,5 @@ export function searchAvailableOpenings(
  * Get opening by exact ECO code
  */
 export function getOpeningByEco(eco: string): Opening | undefined {
-  return openings.find((o) => o.eco === eco)
+  return ecoToOpeningsMap.get(eco)
 }

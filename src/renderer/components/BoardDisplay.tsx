@@ -3,6 +3,7 @@ import { Chessground } from '@lichess-org/chessground'
 import type { Api } from '@lichess-org/chessground/api'
 import type { Key } from '@lichess-org/chessground/types'
 import { getNagDescription, getNagSymbol } from '../utils/nag.js'
+import { squareToPercentPosition, badgeContainerLayout } from '../utils/boardUtils.js'
 import {
   Tooltip,
   TooltipTrigger,
@@ -97,18 +98,9 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
   const badgeNags = annotationNags ? [...annotationNags].reverse() : []
 
   // Compute base badge position from square notation (e.g. "e5")
-  let baseBadgePos: { leftPct: number; bottomPct: number } | null = null
-  if (annotationNags?.length && annotationSquare && annotationSquare.length === 2) {
-    const fileIndex = annotationSquare.charCodeAt(0) - 'a'.charCodeAt(0) // 0–7
-    const rankIndex = parseInt(annotationSquare[1], 10) - 1 // 0–7
-    baseBadgePos = {
-      leftPct: orientation === 'white' ? fileIndex * 12.5 : (7 - fileIndex) * 12.5,
-      bottomPct: orientation === 'white' ? rankIndex * 12.5 : (7 - rankIndex) * 12.5,
-    }
-  }
-
-  // Bind to const so TypeScript narrows away null inside map callbacks
-  const pos = baseBadgePos
+  const pos = (annotationNags?.length && annotationSquare)
+    ? squareToPercentPosition(annotationSquare, orientation)
+    : null
 
   // Container spans all badge positions. Badges are positioned within the container
   // using the same stagger offsets (1.5% per badge, expressed as a fraction of
@@ -116,8 +108,7 @@ export default function BoardDisplay({ fen, lastMove, orientation = 'white', che
   // Using a single container as the TooltipTrigger means one shared Tooltip
   // stays open while the pointer is anywhere in the badge group — no blink
   // when moving between overlapping badges.
-  const containerWidthPct = badgeNags.length > 0 ? 5 + (badgeNags.length - 1) * 1.5 : 5
-  const badgeWidthInContainerPct = (5 / containerWidthPct) * 100
+  const { containerWidthPct, badgeWidthInContainerPct } = badgeContainerLayout(badgeNags.length)
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>

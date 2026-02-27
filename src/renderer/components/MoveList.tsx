@@ -1,6 +1,6 @@
 import { Fragment, useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { getResultDisplay } from '../utils/chessManager.js'
-import { groupMovesIntoPairs } from '../utils/moveFormatter.js'
+import { groupMovesIntoPairs, pairIndexToPly, isCurrentMove } from '../utils/moveFormatter.js'
 import { getVariationsAtPly } from '../utils/variationFormatter.js'
 import type { VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
 import { groupAnnotationsByPly } from '../hooks/useAnnotationState.js'
@@ -294,13 +294,11 @@ export default function MoveList({
       <Table className="table-fixed">
         <TableBody>
           {movePairs.map((pair, pairIndex) => {
-            const whitePly1 = pairIndex * 2 + 1   // 1-based white ply
-            const blackPly1 = pairIndex * 2 + 2   // 1-based black ply
-            const whitePly0 = whitePly1 - 1       // 0-based for currentPly comparison
-            const blackPly0 = blackPly1 - 1
+            const whitePly1 = pairIndexToPly(pairIndex, 'white')
+            const blackPly1 = pairIndexToPly(pairIndex, 'black')
 
-            const isWhiteCurrent = !isInVariation && currentPly - 1 === whitePly0
-            const isBlackCurrent = !isInVariation && currentPly - 1 === blackPly0
+            const isWhiteCurrent = isCurrentMove(currentPly, whitePly1, !!isInVariation)
+            const isBlackCurrent = isCurrentMove(currentPly, blackPly1, !!isInVariation)
 
             const variationsAfterWhite = variations ? getVariationsAtPly(variations, whitePly1) : []
             const variationsAfterBlack = variations ? getVariationsAtPly(variations, blackPly1) : []
