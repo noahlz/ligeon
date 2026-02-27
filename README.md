@@ -1,6 +1,6 @@
 # Ligeon
 
-Simple desktop chess game brower and study tool built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and SQLite. Import, browse and replay chess games from plaintext PGN game files.
+Simple desktop chess game browser and study tool built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and SQLite. Import, browse and replay chess games from plaintext PGN game files.
 
 [![Node.js CI](https://github.com/noahlz/ligeon/actions/workflows/ci.yml/badge.svg)](https://github.com/noahlz/ligeon/actions/workflows/ci.yml)
 
