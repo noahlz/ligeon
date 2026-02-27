@@ -84,6 +84,8 @@ export interface ElectronAPI {
   getSettings: () => Promise<AppSettings>
   updateSettings: (updates: Partial<AppSettings>) => Promise<AppSettings>
   selectCollectionsDirectory: () => Promise<string | null>
+  getBoardTheme: () => Promise<string>
+  setBoardTheme: (theme: string) => Promise<void>
 
   // Event Listeners
   onImportProgress: (callback: (data: ImportProgressData) => void) => () => void

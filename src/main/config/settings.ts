@@ -4,6 +4,9 @@
 
 import path from 'path'
 import os from 'os'
+import type { BoardTheme } from '../../shared/types/game.js'
+
+export type { BoardTheme }
 
 /**
  * Application settings interface
@@ -11,7 +14,7 @@ import os from 'os'
 export interface AppSettings {
   collections: CollectionSettings
   logging: LogSettings
-
+  boardTheme: BoardTheme
 }
 
 export interface CollectionSettings {
@@ -55,6 +58,7 @@ export function getDefaultSettings(): AppSettings {
       level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
       maxSize: '10m',
       retentionDays: 90
-    }
+    },
+    boardTheme: 'brown'
   }
 }

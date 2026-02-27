@@ -47,6 +47,22 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(true)
   const { audioInitialized } = useAudioInit()
 
+  // Board theme
+  const [boardTheme, setBoardThemeState] = useState<string>('brown')
+
+  useEffect(() => {
+    void window.electron.getBoardTheme().then((theme) => {
+      setBoardThemeState(theme)
+      document.documentElement.dataset.boardTheme = theme
+    })
+  }, [])
+
+  const handleThemeChange = useCallback((theme: string) => {
+    setBoardThemeState(theme)
+    document.documentElement.dataset.boardTheme = theme
+    void window.electron.setBoardTheme(theme)
+  }, [])
+
   // Board orientation
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
 
@@ -358,6 +374,8 @@ export default function App() {
                   annotations={annotationState.annotations}
                   variations={variationState.variations}
                   variationComments={commentState.variationComments}
+                  boardTheme={boardTheme}
+                  onThemeChange={handleThemeChange}
                 />
               </>
             ) : (

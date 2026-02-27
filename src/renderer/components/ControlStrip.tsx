@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
-import { ExternalLink, Volume2, VolumeX, RefreshCcw } from 'lucide-react'
+import { ExternalLink, Volume2, VolumeX, RefreshCcw, Settings } from 'lucide-react'
 import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn, buildAnnotatedPgn } from '../utils/externalLinks.js'
 import type { GameRow, CommentData, AnnotationData, VariationData } from '../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu.js'
 import ViewPgnDialog from './ViewPgnDialog.js'
+import SettingsDialog from './SettingsDialog.js'
 
 interface ControlStripProps {
   game?: GameRow
@@ -26,11 +27,14 @@ interface ControlStripProps {
   annotations?: AnnotationData[]
   variations?: VariationData[]
   variationComments?: Map<number, CommentData>
+  boardTheme: string
+  onThemeChange: (theme: string) => void
 }
 
-export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map() }: ControlStripProps) {
+export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map(), boardTheme, onThemeChange }: ControlStripProps) {
   const [lichessMenuOpen, setLichessMenuOpen] = useState(false)
   const [viewPgnOpen, setViewPgnOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -68,6 +72,12 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
           onClose={() => setViewPgnOpen(false)}
         />
       )}
+      <SettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        boardTheme={boardTheme}
+        onThemeChange={onThemeChange}
+      />
       {/* View on Lichess — hover shows clickable label, click opens dropdown */}
       <div
         className="relative"
@@ -138,6 +148,21 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
           </Button>
         </TooltipTrigger>
         <TooltipContent side="left">Flip Board</TooltipContent>
+      </Tooltip>
+
+      {/* Settings */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSettingsOpen(true)}
+            className="bg-ui-bg-element hover:bg-ui-bg-hover"
+          >
+            <Settings size={18} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="left">Settings</TooltipContent>
       </Tooltip>
     </div>
   )

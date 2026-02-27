@@ -97,6 +97,36 @@ html {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Board theme overrides — keyed on data-board-theme attribute on <html> */
+/* Brown (default) — matches chessground.brown.css colors; also fires when no theme attribute is set */
+html:not([data-board-theme]) cg-board,
+[data-board-theme="brown"] cg-board {
+  background-color: #f0d9b5; /* fallback for browsers without conic-gradient support */
+  background-image: repeating-conic-gradient(#f0d9b5 0% 25%, #b58863 0% 50%);
+  background-size: 12.5% 12.5%;
+}
+
+/* Green */
+[data-board-theme="green"] cg-board {
+  background-color: #ffffdd;
+  background-image: repeating-conic-gradient(#ffffdd 0% 25%, #86a666 0% 50%);
+  background-size: 12.5% 12.5%;
+}
+
+/* Blue */
+[data-board-theme="blue"] cg-board {
+  background-color: #dee3e6;
+  background-image: repeating-conic-gradient(#dee3e6 0% 25%, #8ca2ad 0% 50%);
+  background-size: 12.5% 12.5%;
+}
+
+/* Grey */
+[data-board-theme="grey"] cg-board {
+  background-color: #c8c8c8;
+  background-image: repeating-conic-gradient(#c8c8c8 0% 25%, #7a7a7a 0% 50%);
+  background-size: 12.5% 12.5%;
+}
+
 /* Position coordinates outside the board (override default positioning) */
 .cg-wrap coords {
   font-weight: bolder;

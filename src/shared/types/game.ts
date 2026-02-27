@@ -41,6 +41,8 @@ export interface GameSearchResult {
 /**
  * Application settings
  */
+export type BoardTheme = 'brown' | 'green' | 'blue' | 'grey'
+
 export interface AppSettings {
   collectionsPath: string
   collectionsPathCustomized: boolean

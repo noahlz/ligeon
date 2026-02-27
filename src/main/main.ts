@@ -238,6 +238,19 @@ function setupIpcHandlers() {
   ipcMain.handle('update-settings', (_event, { updates }: { updates: Partial<AppSettings> }) => updateSettings(updates))
   ipcMain.handle('select-collections-directory', () => selectCollectionsDirectory())
 
+  // Board theme
+  ipcMain.handle('get-board-theme', () => {
+    const s = getSettings()
+    return s.boardTheme ?? 'brown'
+  })
+  ipcMain.handle('set-board-theme', (_event, { theme }: { theme: string }) => {
+    const VALID_THEMES = ['brown', 'green', 'blue', 'grey'] as const
+    if (!(VALID_THEMES as readonly string[]).includes(theme)) {
+      throw new Error(`Invalid board theme: ${theme}`)
+    }
+    return updateSettings({ boardTheme: theme as import('./config/settings.js').BoardTheme })
+  })
+
   logger.info('✓ IPC handlers set up')
 }
 
