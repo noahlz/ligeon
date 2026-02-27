@@ -94,7 +94,7 @@ describe('PGN Import Handler', () => {
     expect(moveCount).toBe(10) // 5 white + 5 black moves
   })
 
-  test('skips games with invalid results', () => {
+  test('parsePgn preserves * result header', () => {
     const pgn = `[White "Player1"]
 [Black "Player2"]
 [Result "*"]
@@ -271,10 +271,10 @@ describe('PGN Import Handler', () => {
     )
 
     expect(result.success).toBe(false)
-    expect(result.error).toBeTruthy()
+    expect(result.error).toMatch(/invalid file path|ENOENT|no such file|not found/i)
   })
 
-  test('skips games with both players unknown (malformed headers)', () => {
+  test('extractGameData returns null when White and Black headers are missing', () => {
     const pgn = `[Event "Test"]
 [White "Player1"]
 [Black "Player2"]

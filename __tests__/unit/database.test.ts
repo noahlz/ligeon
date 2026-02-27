@@ -5,6 +5,22 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 
+const makeGameData = (overrides: Partial<GameData> = {}): GameData => ({
+  white: 'Player1',
+  black: 'Player2',
+  event: 'Test',
+  date: 19560101,
+  result: 1.0,
+  ecoCode: null,
+  whiteElo: null,
+  blackElo: null,
+  site: null,
+  round: null,
+  moveCount: 1,
+  moves: '1. e4',
+  ...overrides,
+})
+
 describe('GameDatabase', () => {
   let db: GameDatabase
   let testDir: string
@@ -475,12 +491,16 @@ describe('GameDatabase', () => {
     insertFilterTestGames(db)
     const codes = db.getAvailableEcoCodes()
     expect(codes.length).toBe(5)
+    const ecoList = codes.map(c => c.eco)
+    expect(ecoList).toEqual(expect.arrayContaining(['B33', 'B90', 'C67', 'C95', 'D37']))
   })
 
   test('getAvailableEcoCodes with empty filters returns all codes', () => {
     insertFilterTestGames(db)
     const codes = db.getAvailableEcoCodes({})
     expect(codes.length).toBe(5)
+    const ecoList = codes.map(c => c.eco)
+    expect(ecoList).toEqual(expect.arrayContaining(['B33', 'B90', 'C67', 'C95', 'D37']))
   })
 
   describe('Variations', () => {

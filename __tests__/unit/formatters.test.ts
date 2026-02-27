@@ -40,10 +40,8 @@ describe('formatters', () => {
     })
 
     it('returns ECO code + opening name for known codes', () => {
-      // A00 is the first ECO code (Polish Opening or similar)
-      // The exact name depends on openings.json — we just check it has a space-separated format
       const result = formatEcoWithOpening('A00')
-      expect(result).toMatch(/^A00 .+/)
+      expect(result).toBe('A00 Uncommon Opening')
     })
 
     it('returns ECO code + name for B20 (Sicilian Defense)', () => {

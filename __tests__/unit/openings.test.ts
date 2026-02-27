@@ -93,7 +93,7 @@ describe('getOpeningByEco', () => {
     const result = getOpeningByEco('A00')
     expect(result).toBeDefined()
     expect(result!.eco).toBe('A00')
-    expect(result!.name).toBeTruthy()
+    expect(result!.name).toBe('Uncommon Opening')
   })
 
   test('known ECO A01 returns Nimzovich-Larsen Attack', () => {

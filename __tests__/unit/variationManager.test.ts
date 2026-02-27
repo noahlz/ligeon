@@ -4,10 +4,12 @@ import {
   type VariationManager,
 } from '../../src/renderer/utils/variationManager.js'
 
+const AFTER_E4_FEN = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+
 describe('VariationManager', () => {
   describe('creation', () => {
     test('creates from FEN with no existing moves', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       expect(manager.getCurrentPly()).toBe(0)
@@ -16,7 +18,7 @@ describe('VariationManager', () => {
     })
 
     test('creates from FEN with existing moves', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3')
 
       expect(manager.getTotalPlies()).toBe(2)
@@ -35,7 +37,7 @@ describe('VariationManager', () => {
     })
 
     test('handles existingMoves with move numbers', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, '1... e5 2. Nf3 Nc6')
 
       expect(manager.getTotalPlies()).toBe(3)
@@ -43,7 +45,7 @@ describe('VariationManager', () => {
     })
 
     test('handles existingMoves with annotations', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3 { Good move } Nc6')
 
       expect(manager.getTotalPlies()).toBe(3)
@@ -55,7 +57,7 @@ describe('VariationManager', () => {
     let manager: VariationManager
 
     test('goto, getCurrentPly, getTotalPlies work correctly', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       expect(manager.getCurrentPly()).toBe(0)
@@ -69,7 +71,7 @@ describe('VariationManager', () => {
     })
 
     test('getFen returns correct FEN at each ply', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       manager = createVariationManager(startFen, 'e5 Nf3')
 
       const fen0 = manager.getFen()
@@ -85,7 +87,7 @@ describe('VariationManager', () => {
     })
 
     test('getLastMove returns correct squares', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       manager = createVariationManager(startFen, 'e5 Nf3')
 
       expect(manager.getLastMove()).toBeUndefined() // Initial position
@@ -98,7 +100,7 @@ describe('VariationManager', () => {
     })
 
     test('getMoveType detects captures, checks, castles', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       expect(manager.getMoveType(1)).toBe('move') // e5
@@ -113,7 +115,7 @@ describe('VariationManager', () => {
 
   describe('getDests / getTurnColor / tryMove', () => {
     test('getDests returns legal moves from current position', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
       const dests = manager.getDests()
 
@@ -126,7 +128,7 @@ describe('VariationManager', () => {
     })
 
     test('getTurnColor reflects whose turn it is', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3')
 
       expect(manager.getTurnColor()).toBe('black')
@@ -139,7 +141,7 @@ describe('VariationManager', () => {
     })
 
     test('tryMove validates legal moves, rejects illegal ones', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       // Legal move
@@ -155,7 +157,7 @@ describe('VariationManager', () => {
 
   describe('appendMove', () => {
     test('appends a legal move and advances ply', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       const success = manager.appendMove('e5')
@@ -165,7 +167,7 @@ describe('VariationManager', () => {
     })
 
     test('returns false for illegal SAN', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       const success = manager.appendMove('e4') // Illegal for black from this position
@@ -175,7 +177,7 @@ describe('VariationManager', () => {
     })
 
     test('truncates future moves when appending from mid-sequence', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       expect(manager.getTotalPlies()).toBe(3)
@@ -189,7 +191,7 @@ describe('VariationManager', () => {
     })
 
     test('multiple appends build a move sequence', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       manager.appendMove('e5')
@@ -201,7 +203,7 @@ describe('VariationManager', () => {
     })
 
     test('rejects gibberish SAN', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       expect(manager.appendMove('Xyz123!@#')).toBe(false)
@@ -209,7 +211,7 @@ describe('VariationManager', () => {
     })
 
     test('rejects empty string', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       expect(manager.appendMove('')).toBe(false)
@@ -217,7 +219,7 @@ describe('VariationManager', () => {
     })
 
     test('rejects invalid move notation', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       expect(manager.appendMove('e2e4')).toBe(false) // Long algebraic not recognized
@@ -228,7 +230,7 @@ describe('VariationManager', () => {
 
   describe('truncateAfterCurrent', () => {
     test('removes moves after current ply', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       manager.goto(1)
@@ -239,7 +241,7 @@ describe('VariationManager', () => {
     })
 
     test('no-op when at last position', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3')
 
       manager.goto(2) // Last position
@@ -250,7 +252,7 @@ describe('VariationManager', () => {
     })
 
     test('can truncate all moves', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3')
 
       manager.goto(0) // Initial position
@@ -263,21 +265,21 @@ describe('VariationManager', () => {
 
   describe('getMovesString', () => {
     test('returns space-separated SAN string', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       expect(manager.getMovesString()).toBe('e5 Nf3 Nc6')
     })
 
     test('returns empty string for no moves', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       expect(manager.getMovesString()).toBe('')
     })
 
     test('reflects truncation', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       manager.goto(1)
@@ -287,7 +289,7 @@ describe('VariationManager', () => {
     })
 
     test('works after appendMove', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       manager.appendMove('e5')
@@ -299,7 +301,7 @@ describe('VariationManager', () => {
 
   describe('getNextSan', () => {
     test('returns next move SAN when moves exist after current ply', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       // At ply 0, next move is e5
@@ -313,7 +315,7 @@ describe('VariationManager', () => {
     })
 
     test('returns null when at last position', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3')
 
       manager.goto(2)
@@ -321,14 +323,14 @@ describe('VariationManager', () => {
     })
 
     test('returns null when no moves exist', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen)
 
       expect(manager.getNextSan()).toBeNull()
     })
 
     test('reflects truncation', () => {
-      const startFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+      const startFen = AFTER_E4_FEN
       const manager = createVariationManager(startFen, 'e5 Nf3 Nc6')
 
       manager.goto(1)

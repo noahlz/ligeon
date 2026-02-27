@@ -304,7 +304,9 @@ describe('chessManager', () => {
           const dests = manager.getDests()
 
           // Initial position has 20 legal moves: 16 pawn moves (2 per pawn) + 4 knight moves
-          expect(dests.size).toBeGreaterThan(0)
+          expect(dests.size).toBe(10) // 8 pawns + 2 knights
+          const totalMoves = [...dests.values()].reduce((acc, arr) => acc + arr.length, 0)
+          expect(totalMoves).toBe(20)
 
           // e2 pawn can move to e3 or e4
           const e2Dests = dests.get('e2')

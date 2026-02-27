@@ -431,11 +431,14 @@ describe('validators', () => {
     })
 
     test('returns multiple errors when applicable', () => {
-      // Empty string only triggers EMPTY, but we can verify the pattern works
-      const result = validateCollectionNameResult('')
+      // A whitespace-only string over 200 chars triggers both EMPTY and TOO_LONG
+      const result = validateCollectionNameResult(' '.repeat(201))
       expect(result.valid).toBe(false)
       if (!result.valid) {
-        expect(result.errors.length).toBeGreaterThan(0)
+        expect(result.errors.length).toBeGreaterThanOrEqual(2)
+        const codes = result.errors.map(e => e.code)
+        expect(codes).toContain('EMPTY')
+        expect(codes).toContain('TOO_LONG')
       }
     })
   })

@@ -18,7 +18,9 @@ describe('chessHelpers', () => {
   describe('getDestsFromFen', () => {
     test('returns legal destinations from initial position', () => {
       const dests = getDestsFromFen(INITIAL_FEN)
-      expect(dests.size).toBeGreaterThan(0)
+      expect(dests.size).toBe(10) // 8 pawns + 2 knights
+      const totalMoves = [...dests.values()].reduce((acc, arr) => acc + arr.length, 0)
+      expect(totalMoves).toBe(20)
       expect(dests.get('e2')).toContain('e4')
       expect(dests.get('g1')).toContain('f3')
     })
