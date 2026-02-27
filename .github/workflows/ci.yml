@@ -50,5 +50,5 @@ jobs:
     - name: Build
       run: npm run build
 
-    - name: Run tests
-      run: npm run rebuild:sqlite && npx vitest run
+    - name: Run tests with coverage
+      run: npm run rebuild:sqlite && npx vitest run --coverage
