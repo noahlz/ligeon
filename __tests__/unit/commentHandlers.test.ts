@@ -194,6 +194,8 @@ describe('deleteVariationComment', () => {
     await upsertVariationComment(TEST_COLLECTION, 1, variationId, 'Variation note', tmpDir)
     const result = await deleteVariationComment(TEST_COLLECTION, 1, variationId, tmpDir)
     expect(result.success).toBe(true)
+    const remaining = await getComments(TEST_COLLECTION, 1, tmpDir)
+    expect(remaining.filter(c => c.variationId === variationId)).toHaveLength(0)
   })
 
   test('is idempotent — deleting non-existent variation comment returns success', async () => {

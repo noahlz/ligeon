@@ -85,6 +85,10 @@ describe('createVariation', () => {
       )
     )
     expect(results.every(r => r !== null)).toBe(true)
+    results.forEach((r, i) => {
+      expect(r!.branchPly).toBe(i + 1)
+      expect(r!.id).toBeGreaterThan(0)
+    })
   })
 
   test('returns null for invalid branchPly', async () => {
@@ -203,15 +207,17 @@ describe('reorderVariations', () => {
     expect(variations.length).toBe(1)
   })
 
-  test('throws for IDs belonging to a different game', () => {
+  test('throws for IDs belonging to a different game', async () => {
     // Insert a second game
     db.insertGame({
       white: 'A', black: 'B', event: null, date: null,
       result: 0.5, ecoCode: null, whiteElo: null, blackElo: null,
       site: null, round: null, moveCount: 10, moves: 'd4 d5',
     })
-    const game1Var = createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
-    const game2Var = createVariation(TEST_COLLECTION, 2, 3, 'd4', tmpDir)
+    const game1Var = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const game2Var = await createVariation(TEST_COLLECTION, 2, 3, 'd4', tmpDir)
+    expect(game1Var).not.toBeNull()
+    expect(game2Var).not.toBeNull()
     // Try to reorder game 1's ply using a mix of IDs from both games
     expect(() =>
       reorderVariations(TEST_COLLECTION, 1, 3, [game1Var!.id!, game2Var!.id!], tmpDir)
