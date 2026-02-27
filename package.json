@@ -8,7 +8,7 @@
   "main": "dist-electron/main/main.js",
   "homepage": "./",
   "scripts": {
-    "clean": "rimraf dist dist-electron out .logs coverage",
+    "clean": "rimraf dist dist-electron release .logs coverage",
     "app": "npm run build:main && npm run rebuild:electron && concurrently \"vite\" \"wait-on http://localhost:5173 && ELECTRON_IS_DEV=true electron .\"",
     "rebuild:sqlite": "rm -rf node_modules/better-sqlite3/build && npm rebuild better-sqlite3",
     "rebuild:electron": "electron-rebuild -f -w better-sqlite3",

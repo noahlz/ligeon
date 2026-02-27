@@ -3,7 +3,7 @@
   "productName": "Ligeon",
   "directories": {
     "buildResources": "resources",
-    "output": "out"
+    "output": "release"
   },
   "files": [
     "dist/**/*",

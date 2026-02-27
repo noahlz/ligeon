@@ -1,8 +1,5 @@
 # Ligeon TODOs
 
-## PGN View on Lichess 
-- Add note to readme: we don't support importing comments or annotations to games because they are copyrighted. Only the moves of the game and headers are copyright-free.
-
 ## Online Help
 - Integrate driver.js to provide simple online help on first-open only.
 
@@ -14,7 +11,6 @@
 - Improve coverage of render module with React Testing
 
 ## Packaging
-- Update README.md with motivation, intentional limitations, FAQ.
 - Package game with sample-games pre-loaded
 - Game import should default to resources/sample-games/ in dev mode, home directory when deployed
 - CI/CD: release Mac/Win packages on tag push.
