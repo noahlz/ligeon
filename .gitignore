@@ -23,7 +23,6 @@ dist-electron/
 out/
 release/
 build/
-coverage/
 temp/
 tmp/
 *.dmg
@@ -80,6 +79,7 @@ vite.config.ts.timestamp-*
 
 # Logs
 .logs/
+.coverage/
 
 # Compiled Electron files
 src/main/*.js
