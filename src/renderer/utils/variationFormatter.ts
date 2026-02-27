@@ -49,17 +49,3 @@ export function isVariationWhiteMove(branchPly: number, moveIndex: number): bool
   const absolutePly = branchPly + moveIndex
   return absolutePly % 2 === 1
 }
-
-/**
- * Format a move sequence preview (first N moves with ellipsis if truncated).
- *
- * @param moves - Space-separated SAN moves string
- * @param maxMoves - Maximum number of moves to include in preview (default 3)
- * @returns Formatted preview string (e.g., "Nf3 d5 e4..." or "Nf3 d5" if not truncated)
- */
-export function formatMovePreview(moves: string, maxMoves = 3): string {
-  const moveArray = parseVariationMoves(moves)
-  if (moveArray.length === 0) return ''
-  const preview = moveArray.slice(0, maxMoves).join(' ')
-  return moveArray.length > maxMoves ? `${preview}...` : preview
-}

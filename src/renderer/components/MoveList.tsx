@@ -15,7 +15,7 @@ import { VariationRow } from './VariationRow.js'
 import { MoveCell } from './MoveCell.js'
 import type { MoveCellCommentCallbacks, MoveCellAnnotationCallbacks } from './MoveCell.js'
 
-export interface CommentHandlers {
+interface CommentHandlers {
   comments?: CommentData[]
   editingPly?: number | null
   editValue?: string
@@ -47,7 +47,7 @@ interface MoveListProps {
   annotationHandlers?: AnnotationHandlers
 }
 
-export interface AnnotationHandlers {
+interface AnnotationHandlers {
   annotations?: AnnotationData[]
   onSetAnnotation?: (ply: number, nag: number) => void
   onRemoveAnnotation?: (ply: number, nag: number) => void

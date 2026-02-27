@@ -24,7 +24,7 @@ import { VALID_NAG_CODES } from '../../shared/nag.js'
  */
 export type NagCategory = 'move' | 'position' | 'observation'
 
-export interface NagDefinition {
+interface NagDefinition {
   nag: number
   symbol: string
   description: string

@@ -1,4 +1,4 @@
-export const IPC_ERROR_PREFIX = 'IPC_ERROR:'
+const IPC_ERROR_PREFIX = 'IPC_ERROR:'
 
 export class IpcError extends Error {
   constructor(
