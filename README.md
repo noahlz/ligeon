@@ -1,6 +1,6 @@
 # Ligeon
 
-Chess game viewer built with Electron, React, and SQLite. Import, browse and replay chess games from plaintext PGN game files.
+Simple desktop chess game brower and study tool built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and SQLite. Import, browse and replay chess games from plaintext PGN game files.
 
 [![Node.js CI](https://github.com/noahlz/ligeon/actions/workflows/ci.yml/badge.svg)](https://github.com/noahlz/ligeon/actions/workflows/ci.yml)
 
@@ -11,7 +11,7 @@ Chess game viewer built with Electron, React, and SQLite. Import, browse and rep
 
 My chess coach recommended reviewing master games, but existing free browsers are limited: ChessBase costs money, SCID is outdated. This app lets you import and browse unlimited PGN files locally.
 
-Built as an experiment in using Claude Code to create a real desktop application. (Lichess studies are an alternative but limited to 64 chapters, and I wanted to build a desktop UI.)
+Built as an experiment in using Claude Code to create a real desktop application. (Lichess studies are an alternative but limited to 64 chapters, and I always wanted to build an Electron app).
 
 ## Limitations
 
