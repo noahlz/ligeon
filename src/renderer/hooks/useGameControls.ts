@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { isEditableInput } from '../utils/domUtils.js'
 
 const WHEEL_DEBOUNCE_MS = 50
 
@@ -33,9 +34,7 @@ export function useGameControls({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return
-      }
+      if (isEditableInput(e.target)) return
 
       switch (e.key) {
         case 'ArrowLeft':
@@ -58,9 +57,7 @@ export function useGameControls({
     }
 
     const handleWheel = (e: WheelEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return
-      }
+      if (isEditableInput(e.target)) return
 
       // Only navigate when wheel is over board or move-list panel
       const board = document.querySelector('.chessground-board')

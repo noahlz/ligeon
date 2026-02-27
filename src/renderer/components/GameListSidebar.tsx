@@ -4,7 +4,7 @@ import { yyyymmddToDisplay } from '../../shared/converters/dateConverter.js'
 import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../shared/converters/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
 import OpeningFilter from './OpeningFilter.js'
-import { getOpeningByEco } from '../utils/openings.js'
+import { formatEcoWithOpening } from '../utils/formatters.js'
 import { useGameFilters } from '../hooks/useGameFilters.js'
 import { useGameSearch } from '../hooks/useGameSearch.js'
 import type { GameRow, GameSearchResult } from '../../shared/types/game.js'
@@ -234,9 +234,9 @@ export default function GameListSidebar({
               {game.ecoCode && (
                 <span
                   className="truncate"
-                  title={`${game.ecoCode}${getOpeningByEco(game.ecoCode) ? ` ${getOpeningByEco(game.ecoCode)?.name}` : ''}`}
+                  title={formatEcoWithOpening(game.ecoCode)}
                 >
-                  - {game.ecoCode} {getOpeningByEco(game.ecoCode)?.name}
+                  - {formatEcoWithOpening(game.ecoCode)}
                 </span>
               )}
             </p>

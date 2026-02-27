@@ -4,6 +4,7 @@ import {
   parseVariationMoves,
   variationMoveNumber,
   isVariationWhiteMove,
+  formatVariationMovesForDisplay,
 } from '../../src/renderer/utils/variationFormatter.js'
 import type { VariationData } from '../../src/shared/types/game.js'
 
@@ -111,6 +112,43 @@ describe('variationFormatter', () => {
 
     test('branch at ply 10 (black), index 4 is black', () => {
       expect(isVariationWhiteMove(10, 4)).toBe(false)
+    })
+  })
+
+  describe('formatVariationMovesForDisplay', () => {
+    test('white-starting variation from ply 1', () => {
+      const result = formatVariationMovesForDisplay(['e4', 'e5', 'Nf3'], 1)
+      expect(result).toBe('1. e4 e5 2. Nf3')
+    })
+
+    test('black-starting variation (first move prefixed with ...)', () => {
+      // branchPly 2 = replacing 1...e5 (move 1 black, even ply = black)
+      // variationMoveNumber(2, 0) = ceil((2+1)/2) = ceil(1.5) = 2
+      // Second move: variationMoveNumber(2, 1) = ceil((3+1)/2) = ceil(2) = 2 (white)
+      const result = formatVariationMovesForDisplay(['c5', 'Nf3'], 2)
+      expect(result).toBe('2... c5 2. Nf3')
+    })
+
+    test('variation starting mid-game from white ply', () => {
+      // branchPly 5 = replacing move 3 white
+      const result = formatVariationMovesForDisplay(['Nf3', 'Nc6', 'Bb5'], 5)
+      expect(result).toBe('3. Nf3 Nc6 4. Bb5')
+    })
+
+    test('single move', () => {
+      const result = formatVariationMovesForDisplay(['d4'], 1)
+      expect(result).toBe('1. d4')
+    })
+
+    test('empty moves array', () => {
+      expect(formatVariationMovesForDisplay([], 1)).toBe('')
+    })
+
+    test('black-starting variation mid-game', () => {
+      // branchPly 10 = replacing 5...Nc6 (move 5 black, even = black)
+      // variationMoveNumber(10, 0) = ceil((10+1)/2) = ceil(5.5) = 6
+      const result = formatVariationMovesForDisplay(['d5'], 10)
+      expect(result).toBe('6... d5')
     })
   })
 })

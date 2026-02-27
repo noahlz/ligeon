@@ -49,3 +49,29 @@ export function isVariationWhiteMove(branchPly: number, moveIndex: number): bool
   const absolutePly = branchPly + moveIndex
   return absolutePly % 2 === 1
 }
+
+/**
+ * Build a compact, fully-annotated move string for tooltip display.
+ *
+ * Each move is prefixed with its move number following standard chess notation:
+ * - White moves: "N. move" (e.g. "3. Nf3")
+ * - First move if black: "N... move" (e.g. "3... Nc6")
+ * - Subsequent black moves: no prefix (concatenated after the preceding white move)
+ *
+ * @param moves     - Array of SAN move strings
+ * @param branchPly - 1-based mainline ply where the variation branches
+ * @returns Space-joined string, e.g. "3. Nf3 Nc6 4. Bb5"
+ *
+ * @example
+ * formatVariationMovesForDisplay(['Nf3', 'Nc6', 'Bb5'], 5)
+ * // => "3. Nf3 Nc6 4. Bb5"
+ */
+export function formatVariationMovesForDisplay(moves: string[], branchPly: number): string {
+  return moves.map((move, i) => {
+    const isWhite = isVariationWhiteMove(branchPly, i)
+    const num = variationMoveNumber(branchPly, i)
+    if (isWhite) return `${num}. ${move}`
+    if (i === 0) return `${num}... ${move}`
+    return move
+  }).join(' ')
+}

@@ -5,7 +5,7 @@
 
 ## Code Quality
 - Extract logic out of render/util classes - or at least make sure they are tested. 
-- Full project code review / refactoring / delete unused code.
+- Full project code review / refactoring
 
 ## Testing
 - Improve coverage of render module with React Testing

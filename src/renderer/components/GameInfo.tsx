@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { SquareChevronDown, SquareMinus } from 'lucide-react'
 import { yyyymmddToDisplay } from '../../shared/converters/dateConverter.js'
 import { resultNumericToDisplay } from '../../shared/converters/resultConverter.js'
-import { getOpeningByEco } from '../utils/openings.js'
+import { formatPlayerWithElo, formatEcoWithOpening } from '../utils/formatters.js'
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -24,7 +24,7 @@ interface GameInfoProps {
 
 export default function GameInfo({ game }: GameInfoProps) {
   const [minimized, setMinimized] = useState(true)
-  const openingName = game.ecoCode ? getOpeningByEco(game.ecoCode)?.name : null
+  const ecoDisplay = formatEcoWithOpening(game.ecoCode)
 
   return (
     <Collapsible open={!minimized} onOpenChange={(open) => setMinimized(!open)}>
@@ -42,8 +42,7 @@ export default function GameInfo({ game }: GameInfoProps) {
             </div>
             {minimized && (
               <p className="truncate text-ui-text-dim">
-                {yyyymmddToDisplay(game.date)} - {game.ecoCode}
-                {openingName ? ` ${openingName}` : ''}
+                {yyyymmddToDisplay(game.date)}{ecoDisplay ? ` - ${ecoDisplay}` : ''}
               </p>
             )}
           </div>
@@ -54,17 +53,11 @@ export default function GameInfo({ game }: GameInfoProps) {
           <div className="grid grid-cols-2 gap-x-3 gap-y-2">
             <div>
               <p className="text-ui-text-dim text-xs">White</p>
-              <p className="font-semibold">
-                {game.white}
-                {game.whiteElo ? ` (${game.whiteElo})` : ''}
-              </p>
+              <p className="font-semibold">{formatPlayerWithElo(game.white, game.whiteElo)}</p>
             </div>
             <div>
               <p className="text-ui-text-dim text-xs">Black</p>
-              <p className="font-semibold">
-                {game.black}
-                {game.blackElo ? ` (${game.blackElo})` : ''}
-              </p>
+              <p className="font-semibold">{formatPlayerWithElo(game.black, game.blackElo)}</p>
             </div>
             <div>
               <p className="text-ui-text-dim text-xs">Event</p>
@@ -81,9 +74,7 @@ export default function GameInfo({ game }: GameInfoProps) {
             {game.ecoCode && (
               <div>
                 <p className="text-ui-text-dim text-xs">Opening</p>
-                <p className="text-xs">
-                  {game.ecoCode}{openingName ? ` ${openingName}` : ''}
-                </p>
+                <p className="text-xs">{ecoDisplay}</p>
               </div>
             )}
           </div>
