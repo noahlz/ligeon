@@ -24,7 +24,6 @@ export default defineConfig({
     },
     coverage: {
       provider: 'v8',
-      reporter: process.env.COVERAGE_TO_FILE ? ['text-file', 'json', 'html'] : ['text', 'json', 'html'],
       exclude: coverageExcludes,
       thresholds: {
         lines: 90,
@@ -32,6 +31,8 @@ export default defineConfig({
         branches: 85,
         statements: 90,
       },
+      reportsDirectory: '.coverage',
+      reporter: process.env.GITHUB_ACTIONS ? ['text', 'clover'] : ['text', 'json', 'html', 'clover'],
     },
   },
 });

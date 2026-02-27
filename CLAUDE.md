@@ -9,14 +9,15 @@ See `package.json` for dependencies and npm scripts.
 ## After Changes
 
 1. Use MCP `getDiagnostics` tool to check for issues with edited files.
-2. Run `npm run check > check.log 2>&1` and inspect the log only if it fails (exit code != 0).
+2. Run `npm run check > .logs/check.log 2>&1 && echo "✓ Tests passed." || echo "✗ Tests failed";`
+3. Inspect the log only if it fails (exit code != 0).
 
 **If `npm run check` fails**, read `check.log` to diagnose:
 - **Lint errors** (ESLint) — style/convention violations, fix with `npm run lint:fix`
 - **Type errors** (TypeScript) — type mismatches, load `.claude/memory/BUILD.md` for guidance
 - **Unused code** (knip) — unreachable exports or imports
 - **Test failures** — view test output and stack traces in the log; load `.claude/memory/TESTING.md` for test guidance
-- **Coverage threshold failures** — check `coverage/coverage.txt` for the text report (lines/functions/branches/statements thresholds are 80%) 
+- **Coverage threshold failures** — check `.coverage/coverage.json`
 
 ## Reference Files
 
