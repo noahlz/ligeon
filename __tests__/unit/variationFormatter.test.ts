@@ -56,19 +56,41 @@ describe('variationFormatter', () => {
   })
 
   describe('variationMoveNumber', () => {
+    // Ply convention: 1-based, odd=white, even=black. Move number = Math.ceil(ply / 2).
+    // Ply 1=white move 1, ply 2=black move 1, ply 3=white move 2, ply 4=black move 2, etc.
+
+    test('ply convention: odd plies (white) — move number = ceil(ply / 2)', () => {
+      // Ply 1 = white move 1 → "1."
+      expect(variationMoveNumber(1, 0)).toBe(1)
+      // Ply 3 = white move 2 → "2."
+      expect(variationMoveNumber(3, 0)).toBe(2)
+      // Ply 5 = white move 3 → "3."
+      expect(variationMoveNumber(5, 0)).toBe(3)
+    })
+
+    test('ply convention: even plies (black) — move number = ply / 2', () => {
+      // Ply 2 = black move 1 → "1..."
+      expect(variationMoveNumber(2, 0)).toBe(1)
+      // Ply 4 = black move 2 → "2..."
+      expect(variationMoveNumber(4, 0)).toBe(2)
+      // Ply 10 = black move 5 → "5..."
+      expect(variationMoveNumber(10, 0)).toBe(5)
+    })
+
     test('branch after 1. e4 (ply 1) — first variation move is move 1', () => {
       expect(variationMoveNumber(1, 0)).toBe(1)
     })
 
-    test('branch after 1. e4 (ply 1) — second variation move is move 2', () => {
-      expect(variationMoveNumber(1, 1)).toBe(2)
+    test('branch after 1. e4 (ply 1) — second variation move (black response) is move 1', () => {
+      // absolutePly = 1+1 = 2 (black move 1) → "1..."
+      expect(variationMoveNumber(1, 1)).toBe(1)
     })
 
-    test('branch after 1...e5 (ply 2) — first variation move is move 2', () => {
-      expect(variationMoveNumber(2, 0)).toBe(2)
+    test('branch at 1...e5 (ply 2) — first variation move is move 1', () => {
+      expect(variationMoveNumber(2, 0)).toBe(1)
     })
 
-    test('branch after 1...e5 (ply 2) — second variation move is move 2', () => {
+    test('branch at 1...e5 (ply 2) — second variation move is move 2', () => {
       expect(variationMoveNumber(2, 1)).toBe(2)
     })
 
@@ -76,16 +98,16 @@ describe('variationFormatter', () => {
       expect(variationMoveNumber(9, 0)).toBe(5)
     })
 
-    test('branch after 5...Nc6 (ply 10) — first variation move is move 6', () => {
-      expect(variationMoveNumber(10, 0)).toBe(6)
+    test('branch at 5...Nc6 (ply 10) — first variation move is move 5', () => {
+      expect(variationMoveNumber(10, 0)).toBe(5)
     })
 
     test('branch at ply 10, index 5 is move 8', () => {
       expect(variationMoveNumber(10, 5)).toBe(8)
     })
 
-    test('branch at ply 20, index 0 is move 11', () => {
-      expect(variationMoveNumber(20, 0)).toBe(11)
+    test('branch at ply 20, index 0 is move 10', () => {
+      expect(variationMoveNumber(20, 0)).toBe(10)
     })
   })
 
@@ -122,11 +144,11 @@ describe('variationFormatter', () => {
     })
 
     test('black-starting variation (first move prefixed with ...)', () => {
-      // branchPly 2 = replacing 1...e5 (move 1 black, even ply = black)
-      // variationMoveNumber(2, 0) = ceil((2+1)/2) = ceil(1.5) = 2
-      // Second move: variationMoveNumber(2, 1) = ceil((3+1)/2) = ceil(2) = 2 (white)
+      // branchPly 2 = replacing 1...e5 (ply 2 = black move 1 → "1...")
+      // variationMoveNumber(2, 0) = ceil(2/2) = 1
+      // Second move: variationMoveNumber(2, 1) = ceil(3/2) = 2 (white)
       const result = formatVariationMovesForDisplay(['c5', 'Nf3'], 2)
-      expect(result).toBe('2... c5 2. Nf3')
+      expect(result).toBe('1... c5 2. Nf3')
     })
 
     test('variation starting mid-game from white ply', () => {
@@ -145,10 +167,10 @@ describe('variationFormatter', () => {
     })
 
     test('black-starting variation mid-game', () => {
-      // branchPly 10 = replacing 5...Nc6 (move 5 black, even = black)
-      // variationMoveNumber(10, 0) = ceil((10+1)/2) = ceil(5.5) = 6
+      // branchPly 10 = replacing 5...Nc6 (ply 10 = black move 5 → "5...")
+      // variationMoveNumber(10, 0) = ceil(10/2) = 5
       const result = formatVariationMovesForDisplay(['d5'], 10)
-      expect(result).toBe('6... d5')
+      expect(result).toBe('5... d5')
     })
   })
 })

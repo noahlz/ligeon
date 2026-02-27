@@ -87,9 +87,16 @@ describe('boardUtils', () => {
       expect(two).toBeGreaterThan(three)
     })
 
-    it('zero count: container defaults to 5% (guard)', () => {
-      const { containerWidthPct } = badgeContainerLayout(0)
+    it('zero count: container defaults to 5%, badge fills 100% (guard)', () => {
+      const { containerWidthPct, badgeWidthInContainerPct } = badgeContainerLayout(0)
       expect(containerWidthPct).toBe(5)
+      expect(badgeWidthInContainerPct).toBe(100)
+    })
+
+    it('negative count: treated same as zero (guard)', () => {
+      const { containerWidthPct, badgeWidthInContainerPct } = badgeContainerLayout(-3)
+      expect(containerWidthPct).toBe(5)
+      expect(badgeWidthInContainerPct).toBe(100)
     })
   })
 })

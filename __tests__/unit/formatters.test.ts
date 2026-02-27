@@ -46,11 +46,9 @@ describe('formatters', () => {
       expect(result).toMatch(/^A00 .+/)
     })
 
-    it('returns ECO code + name for a well-known opening', () => {
-      // E60 is King's Indian Defense territory in most ECO tables
+    it('returns ECO code + name for B20 (Sicilian Defense)', () => {
       const result = formatEcoWithOpening('B20')
-      // Should either be "B20 <name>" or just "B20" if unknown — both are valid formats
-      expect(result).toMatch(/^B20/)
+      expect(result).toMatch(/^B20 .+/)  // requires a name, not just the ECO prefix
     })
   })
 })

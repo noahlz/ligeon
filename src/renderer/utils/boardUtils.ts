@@ -38,7 +38,7 @@ export function badgeContainerLayout(count: number): {
   containerWidthPct: number
   badgeWidthInContainerPct: number
 } {
-  const containerWidthPct = count > 0 ? 5 + (count - 1) * 1.5 : 5
+  const containerWidthPct = count >= 1 ? 5 + (count - 1) * 1.5 : 5
   const badgeWidthInContainerPct = (5 / containerWidthPct) * 100
   return { containerWidthPct, badgeWidthInContainerPct }
 }
