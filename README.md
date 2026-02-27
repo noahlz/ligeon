@@ -9,13 +9,13 @@ Simple desktop chess game brower and study tool built with [Electron](https://ww
 
 ## Motivation
 
-My chess coach recommended reviewing master games, but existing free browsers are limited: ChessBase costs money, SCID is outdated. This app lets you import and browse unlimited PGN files locally.
+My chess coach recommended reviewing master games, but existing free browsers are limited: ChessBase costs money, SCID is old and hard to use. So, I did what any reasonable person would do: build my own application.
 
-Built as an experiment in using Claude Code to create a real desktop application. (Lichess studies are an alternative but limited to 64 chapters, and I always wanted to build an Electron app).
+(Mostly this is an experiment in using Claude Code to create a real desktop application. Lichess studies are great, but limited to 64 chapters – this can import nearly unlimited games. And I always wanted to build an Electron app.)
 
 ## Limitations
 
-This app imports free PGN records only. Headers/moves are not copyright protected, but comments and annotations are.
+This app imports "plain" PGN data only – no comments, variations or annotations supported. 
 
 **Design choices:**
 - No nested variations (single-level branches only)
@@ -37,9 +37,19 @@ If you need the full feature set of Lichess studies, this is not it. But the gam
 npm install
 ```
 
-## Building & Running
+### Run Tests
 
-### Run Locally
+Run just the tests:
+```bash
+npm test
+```
+
+To run all TypeScript checks, ES linting, dead code detection (knip) and vitest coverage checks:
+```bash
+npm run check
+```
+
+### Run Dev App
 
 Launch the Electron app with hot-reload:
 
