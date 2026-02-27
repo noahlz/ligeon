@@ -47,8 +47,8 @@ describe('getNagDescription', () => {
     expect(getNagDescription(4)).toBe('Blunder')
   })
 
-  test('returns "Forced move" for NAG 7', () => {
-    expect(getNagDescription(7)).toBe('Forced move')
+  test('returns "Only move" for NAG 7', () => {
+    expect(getNagDescription(7)).toBe('Only move')
   })
 
   test('returns "Time trouble" for NAG 32', () => {
@@ -67,8 +67,8 @@ describe('getNagCategory', () => {
     }
   })
 
-  test('NAG 7 (Forced move) returns "observation"', () => {
-    expect(getNagCategory(7)).toBe('observation')
+  test('NAG 7 (Only move) returns "move"', () => {
+    expect(getNagCategory(7)).toBe('move')
   })
 
   test('NAG 32 (Time trouble) returns "observation"', () => {

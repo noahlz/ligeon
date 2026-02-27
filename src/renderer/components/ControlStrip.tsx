@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { ExternalLink, Volume2, VolumeX, RefreshCcw } from 'lucide-react'
-import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn } from '../utils/externalLinks.js'
-import type { GameRow } from '../../shared/types/game.js'
+import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn, buildAnnotatedPgn } from '../utils/externalLinks.js'
+import type { GameRow, CommentData, AnnotationData, VariationData } from '../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,
@@ -22,9 +22,13 @@ interface ControlStripProps {
   soundEnabled: boolean
   onToggleSound: () => void
   onFlipBoard: () => void
+  comments?: CommentData[]
+  annotations?: AnnotationData[]
+  variations?: VariationData[]
+  variationComments?: Map<number, CommentData>
 }
 
-export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard }: ControlStripProps) {
+export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map() }: ControlStripProps) {
   const [lichessMenuOpen, setLichessMenuOpen] = useState(false)
   const [viewPgnOpen, setViewPgnOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
@@ -59,7 +63,7 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
     <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start">
       {game && (
         <ViewPgnDialog
-          pgn={buildFullPgn(game)}
+          pgn={buildAnnotatedPgn(game, comments, annotations, variations, variationComments)}
           open={viewPgnOpen}
           onClose={() => setViewPgnOpen(false)}
         />

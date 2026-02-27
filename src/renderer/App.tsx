@@ -354,6 +354,10 @@ export default function App() {
                   soundEnabled={soundEnabled}
                   onToggleSound={() => setSoundEnabled(!soundEnabled)}
                   onFlipBoard={handleFlipBoard}
+                  comments={commentState.comments}
+                  annotations={annotationState.annotations}
+                  variations={variationState.variations}
+                  variationComments={commentState.variationComments}
                 />
               </>
             ) : (

@@ -33,14 +33,14 @@ export interface NagDefinition {
 
 /** Supported NAG definitions, ordered for picker display */
 export const NAG_DEFINITIONS: NagDefinition[] = [
-  { nag: 3,  symbol: '!!',  description: 'Brilliant move',           category: 'move' },
-  { nag: 1,  symbol: '!',   description: 'Good move',                category: 'move' },
-  { nag: 5,  symbol: '!?',  description: 'Interesting move',         category: 'move' },
-  { nag: 6,  symbol: '?!',  description: 'Dubious move',             category: 'move' },
-  { nag: 2,  symbol: '?',   description: 'Mistake',                  category: 'move' },
-  { nag: 4,  symbol: '??',  description: 'Blunder',                  category: 'move' },
-  { nag: 7,  symbol: '\u25a1', description: 'Forced move',           category: 'observation' },
-  { nag: 32, symbol: '\u2295', description: 'Time trouble',          category: 'observation' },
+  { nag: 3,  symbol: '!!',     description: 'Brilliant move',  category: 'move' },
+  { nag: 1,  symbol: '!',      description: 'Good move',       category: 'move' },
+  { nag: 5,  symbol: '!?',     description: 'Interesting move',category: 'move' },
+  { nag: 6,  symbol: '?!',     description: 'Dubious move',    category: 'move' },
+  { nag: 2,  symbol: '?',      description: 'Mistake',         category: 'move' },
+  { nag: 4,  symbol: '??',     description: 'Blunder',         category: 'move' },
+  { nag: 7,  symbol: '\u25a1', description: 'Only move',       category: 'move' },
+  { nag: 32, symbol: '\u2295', description: 'Time trouble',    category: 'observation' },
   { nag: 13, symbol: '\u221e', description: 'Unclear position',      category: 'position' },
   { nag: 10, symbol: '=',   description: 'Equal position',           category: 'position' },
   { nag: 14, symbol: '⩲', description: 'Slight advantage: White', category: 'position' },
@@ -70,7 +70,7 @@ const NAG_CATEGORY_MAP = new Map<number, NagCategory>(
  * Get the description for a NAG code.
  *
  * @param nag - NAG code
- * @returns Description string (e.g. "Good move", "Forced move") or undefined if not found
+ * @returns Description string (e.g. "Good move", "Only move") or undefined if not found
  */
 export function getNagDescription(nag: number): string | undefined {
   return NAG_DESCRIPTION_MAP.get(nag)
