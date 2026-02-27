@@ -1,10 +1,6 @@
 # Ligeon TODOs
 
-## Online Help
-- Integrate driver.js to provide simple online help on first-open only.
-
 ## Code Quality
-- Extract logic out of render/util classes - or at least make sure they are tested. 
 - Full project code review / refactoring
 
 ## Testing
@@ -16,4 +12,9 @@
 - CI/CD: release Mac/Win packages on tag push.
 
 ## Style / UI
+- Allow user to change dark square color, maybe pieces (if other sets available with chessground?)
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
+
+## Online Help
+- Integrate driver.js to provide simple online help on first-open only.
+
