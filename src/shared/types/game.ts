@@ -41,11 +41,13 @@ export interface GameSearchResult {
 /**
  * Application settings
  */
-export type BoardTheme = 'brown' | 'green' | 'blue' | 'grey'
+export const BOARD_THEMES = ['brown', 'green', 'blue', 'grey'] as const
+export type BoardTheme = (typeof BOARD_THEMES)[number]
 
 export interface AppSettings {
   collectionsPath: string
   collectionsPathCustomized: boolean
+  boardTheme: BoardTheme
 }
 
 /**

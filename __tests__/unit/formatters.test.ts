@@ -1,7 +1,25 @@
 import { describe, it, expect } from 'vitest'
-import { formatPlayerWithElo, formatEcoWithOpening } from '../../src/renderer/utils/formatters.js'
+import { capitalizeFirst, formatPlayerWithElo, formatEcoWithOpening } from '../../src/renderer/utils/formatters.js'
 
 describe('formatters', () => {
+  describe('capitalizeFirst', () => {
+    it('capitalizes the first character', () => {
+      expect(capitalizeFirst('brown')).toBe('Brown')
+    })
+
+    it('handles already-capitalized strings', () => {
+      expect(capitalizeFirst('Green')).toBe('Green')
+    })
+
+    it('returns empty string for empty input', () => {
+      expect(capitalizeFirst('')).toBe('')
+    })
+
+    it('capitalizes single character', () => {
+      expect(capitalizeFirst('g')).toBe('G')
+    })
+  })
+
   describe('formatPlayerWithElo', () => {
     it('appends elo in parentheses when provided', () => {
       expect(formatPlayerWithElo('Magnus Carlsen', 2882)).toBe('Magnus Carlsen (2882)')

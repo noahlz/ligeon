@@ -5,7 +5,7 @@
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import type { AppSettings } from './settings.js'
+import type { MainSettings } from './settings.js'
 import { getDefaultSettings, getDefaultCollectionsPath } from './settings.js'
 
 const SETTINGS_DIR = path.join(os.homedir(), '.ligeon')
@@ -17,7 +17,7 @@ const SETTINGS_FILE = path.join(SETTINGS_DIR, 'settings.json')
  *
  * @returns Application settings
  */
-export function loadSettings(): AppSettings {
+export function loadSettings(): MainSettings {
   try {
     if (!fs.existsSync(SETTINGS_FILE)) {
       // Check if collections already exist at default location (migration path)
@@ -37,7 +37,7 @@ export function loadSettings(): AppSettings {
     }
 
     const content = fs.readFileSync(SETTINGS_FILE, 'utf-8')
-    const settings = JSON.parse(content) as AppSettings
+    const settings = JSON.parse(content) as MainSettings
 
     // Validate required fields
     if (!settings.collections?.path) {
@@ -57,7 +57,7 @@ export function loadSettings(): AppSettings {
  *
  * @param settings - Settings to save
  */
-export function saveSettings(settings: AppSettings): void {
+export function saveSettings(settings: MainSettings): void {
   try {
     // Ensure settings directory exists
     if (!fs.existsSync(SETTINGS_DIR)) {
@@ -90,7 +90,7 @@ export function getCollectionsPath(): string {
  * @param newPath - New collections path
  * @returns Updated settings
  */
-export function setCollectionsPath(newPath: string): AppSettings {
+export function setCollectionsPath(newPath: string): MainSettings {
   const settings = loadSettings()
   settings.collections.path = newPath
   settings.collections.custom = true

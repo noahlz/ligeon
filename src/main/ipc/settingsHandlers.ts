@@ -4,7 +4,7 @@
 
 import { dialog } from 'electron'
 import fs from 'fs'
-import type { AppSettings } from '../config/settings.js'
+import type { MainSettings } from '../config/settings.js'
 import { loadSettings, saveSettings, setCollectionsPath } from '../config/settingsStore.js'
 import { logError } from '../config/logger.js'
 
@@ -13,7 +13,7 @@ import { logError } from '../config/logger.js'
  *
  * @returns Current settings
  */
-export function getSettings(): AppSettings {
+export function getSettings(): MainSettings {
   try {
     return loadSettings()
   } catch (error) {
@@ -28,12 +28,12 @@ export function getSettings(): AppSettings {
  * @param updates - Partial settings to update
  * @returns Updated settings
  */
-export function updateSettings(updates: Partial<AppSettings>): AppSettings {
+export function updateSettings(updates: Partial<MainSettings>): MainSettings {
   try {
     const currentSettings = loadSettings()
 
     // Merge updates
-    const newSettings: AppSettings = {
+    const newSettings: MainSettings = {
       ...currentSettings,
       ...updates,
     }

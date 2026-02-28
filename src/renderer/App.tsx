@@ -16,6 +16,7 @@ import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { getCheckColor } from './utils/chessHelpers.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
+import { useBoardTheme } from './hooks/useBoardTheme.js'
 import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
@@ -48,20 +49,7 @@ export default function App() {
   const { audioInitialized } = useAudioInit()
 
   // Board theme
-  const [boardTheme, setBoardThemeState] = useState<string>('brown')
-
-  useEffect(() => {
-    void window.electron.getBoardTheme().then((theme) => {
-      setBoardThemeState(theme)
-      document.documentElement.dataset.boardTheme = theme
-    })
-  }, [])
-
-  const handleThemeChange = useCallback((theme: string) => {
-    setBoardThemeState(theme)
-    document.documentElement.dataset.boardTheme = theme
-    void window.electron.setBoardTheme(theme)
-  }, [])
+  const { boardTheme, handleThemeChange } = useBoardTheme()
 
   // Board orientation
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')

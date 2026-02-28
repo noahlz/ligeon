@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { ExternalLink, Volume2, VolumeX, RefreshCcw, Settings } from 'lucide-react'
 import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn, buildAnnotatedPgn } from '../utils/externalLinks.js'
-import type { GameRow, CommentData, AnnotationData, VariationData } from '../../shared/types/game.js'
+import type { GameRow, CommentData, AnnotationData, VariationData, BoardTheme } from '../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,
@@ -27,8 +27,8 @@ interface ControlStripProps {
   annotations?: AnnotationData[]
   variations?: VariationData[]
   variationComments?: Map<number, CommentData>
-  boardTheme: string
-  onThemeChange: (theme: string) => void
+  boardTheme: BoardTheme
+  onThemeChange: (theme: BoardTheme) => void
 }
 
 export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map(), boardTheme, onThemeChange }: ControlStripProps) {

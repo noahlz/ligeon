@@ -9,9 +9,9 @@ import type { BoardTheme } from '../../shared/types/game.js'
 export type { BoardTheme }
 
 /**
- * Application settings interface
+ * Main process application settings interface
  */
-export interface AppSettings {
+export interface MainSettings {
   collections: CollectionSettings
   logging: LogSettings
   boardTheme: BoardTheme
@@ -51,7 +51,7 @@ export function getDefaultCollectionsPath(): string {
  *
  * @returns Default settings object
  */
-export function getDefaultSettings(): AppSettings {
+export function getDefaultSettings(): MainSettings {
   return {
     collections: { path: getDefaultCollectionsPath(), custom: false },
     logging: {

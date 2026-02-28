@@ -5,6 +5,17 @@
 import { getOpeningByEco } from './openings.js'
 
 /**
+ * Capitalize the first character of a string.
+ *
+ * @example
+ * capitalizeFirst('brown') // => "Brown"
+ * capitalizeFirst('')      // => ""
+ */
+export function capitalizeFirst(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+/**
  * Format a player name with their Elo rating.
  *
  * @example
