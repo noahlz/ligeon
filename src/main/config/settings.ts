@@ -4,14 +4,17 @@
 
 import path from 'path'
 import os from 'os'
+import type { BoardTheme } from '../../shared/types/game.js'
+
+export type { BoardTheme }
 
 /**
- * Application settings interface
+ * Main process application settings interface
  */
-export interface AppSettings {
+export interface MainSettings {
   collections: CollectionSettings
   logging: LogSettings
-
+  boardTheme: BoardTheme
 }
 
 export interface CollectionSettings {
@@ -48,13 +51,14 @@ export function getDefaultCollectionsPath(): string {
  *
  * @returns Default settings object
  */
-export function getDefaultSettings(): AppSettings {
+export function getDefaultSettings(): MainSettings {
   return {
     collections: { path: getDefaultCollectionsPath(), custom: false },
     logging: {
       level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
       maxSize: '10m',
       retentionDays: 90
-    }
+    },
+    boardTheme: 'brown'
   }
 }

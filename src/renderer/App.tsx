@@ -16,6 +16,7 @@ import { createChessManager, type ChessManager } from './utils/chessManager.js'
 import { getCheckColor } from './utils/chessHelpers.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
+import { useBoardTheme } from './hooks/useBoardTheme.js'
 import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
@@ -46,6 +47,9 @@ export default function App() {
   // Audio & sound
   const [soundEnabled, setSoundEnabled] = useState(true)
   const { audioInitialized } = useAudioInit()
+
+  // Board theme
+  const { boardTheme, handleThemeChange } = useBoardTheme()
 
   // Board orientation
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
@@ -358,6 +362,8 @@ export default function App() {
                   annotations={annotationState.annotations}
                   variations={variationState.variations}
                   variationComments={commentState.variationComments}
+                  boardTheme={boardTheme}
+                  onThemeChange={handleThemeChange}
                 />
               </>
             ) : (

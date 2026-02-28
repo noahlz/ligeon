@@ -16,7 +16,9 @@ import { getCollectionsPath } from './config/paths.js'
 import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/settingsHandlers.js'
 import { logger } from './config/logger.js'
 import type { GameFilters, OptionFilters } from './ipc/types.js'
-import type { AppSettings } from './config/settings.js'
+import type { MainSettings } from './config/settings.js'
+import { BOARD_THEMES } from '../shared/types/game.js'
+import type { BoardTheme } from '../shared/types/game.js'
 
 // Get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -235,8 +237,20 @@ function setupIpcHandlers() {
 
   // Settings handlers
   ipcMain.handle('get-settings', () => getSettings())
-  ipcMain.handle('update-settings', (_event, { updates }: { updates: Partial<AppSettings> }) => updateSettings(updates))
+  ipcMain.handle('update-settings', (_event, { updates }: { updates: Partial<MainSettings> }) => updateSettings(updates))
   ipcMain.handle('select-collections-directory', () => selectCollectionsDirectory())
+
+  // Board theme
+  ipcMain.handle('get-board-theme', () => {
+    const s = getSettings()
+    return s.boardTheme
+  })
+  ipcMain.handle('set-board-theme', (_event, { theme }: { theme: string }) => {
+    if (!(BOARD_THEMES as readonly string[]).includes(theme)) {
+      throw new Error(`Invalid board theme: ${theme}`)
+    }
+    updateSettings({ boardTheme: theme as BoardTheme })
+  })
 
   logger.info('✓ IPC handlers set up')
 }

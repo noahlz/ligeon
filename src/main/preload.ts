@@ -101,6 +101,9 @@ contextBridge.exposeInMainWorld('electron', {
 
   selectCollectionsDirectory: () => ipcRenderer.invoke('select-collections-directory'),
 
+  getBoardTheme: () => ipcRenderer.invoke('get-board-theme'),
+  setBoardTheme: (theme: string) => ipcRenderer.invoke('set-board-theme', { theme }),
+
   // === Event Listeners ===
   /**
    * Listen for import progress events
