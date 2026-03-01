@@ -1,6 +1,5 @@
-import { useState, useRef, useCallback } from 'react'
-import { ExternalLink, Volume2, VolumeX, RefreshCcw, Settings, Sun, Moon } from 'lucide-react'
-import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn, buildAnnotatedPgn } from '../utils/externalLinks.js'
+import { useState } from 'react'
+import { Volume2, VolumeX, RefreshCcw, Settings } from 'lucide-react'
 import type { GameRow, CommentData, AnnotationData, VariationData, AppTheme, BoardTheme, PieceSet } from '../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
@@ -8,14 +7,9 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip.js'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu.js'
-import ViewPgnDialog from './ViewPgnDialog.js'
 import SettingsDialog from './SettingsDialog.js'
+import LichessMenuButton from './LichessMenuButton.js'
+import AppThemeToggleButton from './AppThemeToggleButton.js'
 
 interface ControlStripProps {
   game?: GameRow
@@ -35,47 +29,81 @@ interface ControlStripProps {
   onPieceSetChange: (set: PieceSet) => void
 }
 
-export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map(), appTheme, onAppThemeChange, boardTheme, onThemeChange, pieceSet, onPieceSetChange }: ControlStripProps) {
-  const [lichessMenuOpen, setLichessMenuOpen] = useState(false)
-  const [viewPgnOpen, setViewPgnOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [hovered, setHovered] = useState(false)
-  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const showLabel = useCallback(() => {
-    if (hoverTimeout.current) { clearTimeout(hoverTimeout.current); hoverTimeout.current = null }
-    if (game && !lichessMenuOpen) setHovered(true)
-  }, [game, lichessMenuOpen])
-
-  const scheduleHideLabel = useCallback(() => {
-    hoverTimeout.current = setTimeout(() => setHovered(false), 100)
-  }, [])
-
-  const handleImportGame = () => {
-    if (!game) return
-    void window.electron.openExternal(buildLichessURL(buildFullPgn(game)))
-  }
-
-  const handleAnalyzePosition = () => {
-    if (!fen) return
-    void window.electron.openExternal(buildLichessAnalysisURL(fen))
-  }
-
-  const openMenu = () => {
-    if (!game) return
-    setHovered(false)
-    setLichessMenuOpen(true)
-  }
-
+export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments, annotations, variations, variationComments, appTheme, onAppThemeChange, boardTheme, onThemeChange, pieceSet, onPieceSetChange }: ControlStripProps) {
   return (
     <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start">
-      {game && (
-        <ViewPgnDialog
-          pgn={buildAnnotatedPgn(game, comments, annotations, variations, variationComments)}
-          open={viewPgnOpen}
-          onClose={() => setViewPgnOpen(false)}
-        />
-      )}
+      <LichessMenuButton
+        game={game}
+        fen={fen}
+        comments={comments}
+        annotations={annotations}
+        variations={variations}
+        variationComments={variationComments}
+      />
+      <FlipBoardButton onFlipBoard={onFlipBoard} />
+      <SoundToggleButton soundEnabled={soundEnabled} onToggleSound={onToggleSound} />
+      <SettingsButton
+        appTheme={appTheme}
+        onAppThemeChange={onAppThemeChange}
+        boardTheme={boardTheme}
+        onThemeChange={onThemeChange}
+        pieceSet={pieceSet}
+        onPieceSetChange={onPieceSetChange}
+      />
+      <AppThemeToggleButton appTheme={appTheme} onAppThemeChange={onAppThemeChange} />
+    </div>
+  )
+}
+
+function FlipBoardButton({ onFlipBoard }: { onFlipBoard: () => void }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onFlipBoard}
+          className="bg-ui-bg-element hover:bg-ui-bg-hover"
+        >
+          <RefreshCcw size={18} />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="left">Flip Board</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function SoundToggleButton({ soundEnabled, onToggleSound }: { soundEnabled: boolean; onToggleSound: () => void }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleSound}
+          className="bg-ui-bg-element hover:bg-ui-bg-hover"
+        >
+          {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="left">{soundEnabled ? 'Sound Off' : 'Sound On'}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+interface SettingsButtonProps {
+  appTheme: AppTheme
+  onAppThemeChange: (theme: AppTheme) => void
+  boardTheme: BoardTheme
+  onThemeChange: (theme: BoardTheme) => void
+  pieceSet: PieceSet
+  onPieceSetChange: (set: PieceSet) => void
+}
+
+function SettingsButton({ appTheme, onAppThemeChange, boardTheme, onThemeChange, pieceSet, onPieceSetChange }: SettingsButtonProps) {
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  return (
+    <>
       <SettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
@@ -86,79 +114,6 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
         pieceSet={pieceSet}
         onPieceSetChange={onPieceSetChange}
       />
-      {/* View on Lichess — hover shows clickable label, click opens dropdown */}
-      <div
-        className="relative"
-        onMouseEnter={showLabel}
-        onMouseLeave={scheduleHideLabel}
-      >
-        <DropdownMenu open={lichessMenuOpen} onOpenChange={setLichessMenuOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              disabled={!game}
-              className="bg-ui-bg-element hover:bg-ui-bg-hover disabled:bg-ui-bg-box disabled:opacity-50"
-            >
-              <ExternalLink size={18} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="left" align="start">
-            <DropdownMenuItem onClick={handleImportGame}>
-              View Game
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleAnalyzePosition} disabled={!fen}>
-              Analyze Position
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => { setLichessMenuOpen(false); setViewPgnOpen(true) }}>
-              View PGN
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {/* Hover label — clickable, opens dropdown */}
-        {hovered && (
-          <button
-            onClick={openMenu}
-            onMouseEnter={showLabel}
-            onMouseLeave={scheduleHideLabel}
-            className="absolute right-full top-1/2 -translate-y-1/2 mr-2 whitespace-nowrap z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md cursor-pointer hover:bg-accent animate-in fade-in-0 zoom-in-95 slide-in-from-right-2"
-          >
-            View on Lichess
-          </button>
-        )}
-      </div>
-
-      {/* Flip board */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onFlipBoard}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover"
-          >
-            <RefreshCcw size={18} />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left">Flip Board</TooltipContent>
-      </Tooltip>
-
-      {/* Sound toggle */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleSound}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover"
-          >
-            {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left">{soundEnabled ? 'Sound Off' : 'Sound On'}</TooltipContent>
-      </Tooltip>
-
-      {/* Settings */}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -172,32 +127,6 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
         </TooltipTrigger>
         <TooltipContent side="left">Settings</TooltipContent>
       </Tooltip>
-
-      {/* App theme toggle — dark/light only; 'system' requires Settings */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              const effectiveDark = appTheme === 'system'
-                ? window.matchMedia('(prefers-color-scheme: dark)').matches
-                : appTheme === 'dark'
-              onAppThemeChange(effectiveDark ? 'light' : 'dark')
-            }}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover"
-          >
-            {(appTheme === 'dark' || (appTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches))
-              ? <Sun size={18} />
-              : <Moon size={18} />}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left">
-          {(appTheme === 'dark' || (appTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches))
-            ? 'Switch to Light Mode'
-            : 'Switch to Dark Mode'}
-        </TooltipContent>
-      </Tooltip>
-    </div>
+    </>
   )
 }
