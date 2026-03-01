@@ -74,3 +74,16 @@
 .driver-popover-arrow {
   border-color: var(--color-ui-bg-box);
 }
+
+/*
+ * Radix UI portals render outside the active element's DOM subtree, so
+ * Driver.js's blanket `pointer-events: none` on `.driver-active *` would block
+ * dropdown menus and other Radix overlays. Re-enable them here so the user can
+ * interact with (e.g.) the import dropdown during the welcome step.
+ */
+.driver-active [data-radix-popper-content-wrapper],
+.driver-active [data-radix-popper-content-wrapper] *,
+.driver-active [data-radix-portal],
+.driver-active [data-radix-portal] * {
+  pointer-events: auto !important;
+}

@@ -1,121 +1,145 @@
-import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import { driver } from 'driver.js'
 import '../styles/tour.css'
 import type { Driver } from 'driver.js'
 import type { GameRow } from '../../shared/types/game.js'
-import { markTourSeen } from '../utils/tourUtils.js'
-
-export interface UseTourReturn {
-  startTour: () => void
-}
+import {
+  shouldShowWelcome,
+  markWelcomeSeen,
+  shouldShowCollectionTour,
+  markCollectionTourSeen,
+  shouldShowGameTour,
+  markGameTourSeen,
+} from '../utils/tourUtils.js'
 
 /**
- * Manages the Driver.js guided tour instance.
+ * Fires three independent contextual tour popovers based on app state:
  *
- * - Steps 1 and 2 auto-advance when the user loads a collection or selects a game.
- * - Steps 3 and 4 require the user to click Next/Done.
- * - onDestroyed marks the tour as seen in localStorage regardless of
- *   whether the user completed or dismissed it.
+ * 1. On mount — welcome + import instructions (floating, no highlight)
+ * 2. When selectedCollectionId becomes non-null — game filter hint
+ * 3. When selectedGame becomes non-null — 2-step controls + move list sequence
+ *
+ * Each trigger fires at most once per install (localStorage gate).
+ * In dev mode all three always fire.
  */
 export function useTour(
   selectedCollectionId: string | null,
   selectedGame: GameRow | null,
-): UseTourReturn {
+): void {
   const driverRef = useRef<Driver | null>(null)
 
-  // Hold current state in refs for use inside startTour callback.
-  const collectionIdRef = useRef(selectedCollectionId)
-  const selectedGameRef = useRef(selectedGame)
-  useEffect(() => { collectionIdRef.current = selectedCollectionId }, [selectedCollectionId])
-  useEffect(() => { selectedGameRef.current = selectedGame }, [selectedGame])
+  const destroyActive = () => {
+    if (driverRef.current?.isActive()) driverRef.current.destroy()
+    driverRef.current = null
+  }
 
-  // Destroy any active tour when the component unmounts to release DOM listeners.
+  // Destroy on unmount.
+  useEffect(() => () => destroyActive(), [])
+
+  // 1. Welcome — shown on first launch.
   useEffect(() => {
-    return () => {
-      if (driverRef.current?.isActive()) {
-        driverRef.current.destroy()
-      }
-    }
-  }, [])
+    if (!shouldShowWelcome(import.meta.env.DEV)) return
 
-  const startTour = useCallback(() => {
-    // Prevent double-start (e.g. React strict-mode double-effect fire in dev).
-    if (driverRef.current?.isActive()) return
-
-    // Determine starting step based on what state already exists.
-    let startStep = 0
-    if (collectionIdRef.current !== null && selectedGameRef.current !== null) {
-      startStep = 2
-    } else if (collectionIdRef.current !== null) {
-      startStep = 1
-    }
-
-    const driverObj = driver({
-      showProgress: true,
-      steps: [
-        {
+    const timer = setTimeout(() => {
+      destroyActive()
+      const d = driver({
+        overlayOpacity: 0.3,
+        allowClose: false,
+        steps: [{
           element: '#tour-collection-selector',
           popover: {
             title: 'Welcome to Ligeon!',
             description: 'Import a PGN collection to get started — click the library icon.',
+            showButtons: ['next'],
+            nextBtnText: 'OK',
+            showProgress: false,
             side: 'right',
             align: 'start',
           },
-        },
-        {
+        }],
+        onDestroyed: () => { markWelcomeSeen(); driverRef.current = null },
+      })
+      driverRef.current = d
+      d.drive()
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  // 2. Collection filter hint — shown when first collection is loaded.
+  useEffect(() => {
+    if (selectedCollectionId === null) return
+    if (!shouldShowCollectionTour(import.meta.env.DEV)) return
+    if (driverRef.current?.isActive()) return
+
+    const timer = setTimeout(() => {
+      destroyActive()
+      const d = driver({
+        overlayOpacity: 0.3,
+        allowClose: false,
+        steps: [{
           element: '#tour-game-filter',
           popover: {
             title: 'Find Games',
             description: 'Filter and search by player, opening, or result. Select a game to view it.',
+            showButtons: ['next'],
+            nextBtnText: 'OK',
+            showProgress: false,
             side: 'right',
             align: 'start',
           },
-        },
-        {
-          element: '#tour-move-list',
-          popover: {
-            title: 'Move List',
-            description: 'Click any move to jump to that position. Add comments, annotations (!, ?), and create variations.',
-            side: 'left',
-            align: 'start',
-          },
-        },
-        {
-          element: '#tour-control-strip',
-          popover: {
-            title: 'Controls',
-            description: 'Flip the board, toggle sound, export to Lichess, and access settings.',
-            side: 'left',
-            align: 'start',
-          },
-        },
-      ],
-      onDestroyed: () => {
-        markTourSeen()
-        driverRef.current = null
-      },
-    })
+        }],
+        onDestroyed: () => { markCollectionTourSeen(); driverRef.current = null },
+      })
+      driverRef.current = d
+      d.drive()
+    }, 300)
 
-    driverRef.current = driverObj
-    driverObj.drive(startStep)
-  }, [])
-
-  // Auto-advance step 0 → 1 when a collection is loaded.
-  // Reads the live step index from the driver to avoid desync if the user clicks Next/Prev manually.
-  useEffect(() => {
-    const d = driverRef.current
-    if (d?.isActive() && d.getActiveIndex() === 0 && selectedCollectionId !== null) {
-      d.moveNext()
-    }
+    return () => clearTimeout(timer)
   }, [selectedCollectionId])
 
-  // Auto-advance step 1 → 2 when a game is selected.
+  // 3. Controls + move list — 2-step sequence shown when first game is selected.
   useEffect(() => {
-    const d = driverRef.current
-    if (d?.isActive() && d.getActiveIndex() === 1 && selectedGame !== null) {
-      d.moveNext()
-    }
-  }, [selectedGame])
+    if (selectedGame === null) return
+    if (!shouldShowGameTour(import.meta.env.DEV)) return
+    if (driverRef.current?.isActive()) return
 
-  return { startTour }
+    const timer = setTimeout(() => {
+      destroyActive()
+      const d = driver({
+        overlayOpacity: 0.3,
+        allowClose: false,
+        showProgress: false,
+        steps: [
+          {
+            element: '#tour-control-strip',
+            popover: {
+              title: 'Controls',
+              description: 'Flip the board, toggle sound, export to Lichess, and access settings.',
+              showButtons: ['next'],
+              nextBtnText: 'Next →',
+              side: 'left',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-move-list',
+            popover: {
+              title: 'Move List',
+              description: 'Click any move to jump to that position. Add comments, annotations (!, ?), and create variations.',
+              showButtons: ['previous', 'next'],
+              nextBtnText: 'Done',
+              side: 'left',
+              align: 'start',
+            },
+          },
+        ],
+        onDestroyed: () => { markGameTourSeen(); driverRef.current = null },
+      })
+      driverRef.current = d
+      d.drive()
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [selectedGame])
 }

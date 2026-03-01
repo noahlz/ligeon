@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { shouldShowTour, markTourSeen, TOUR_SEEN_KEY } from '../../src/renderer/utils/tourUtils.js'
+import {
+  shouldShowWelcome,
+  markWelcomeSeen,
+  shouldShowCollectionTour,
+  markCollectionTourSeen,
+  shouldShowGameTour,
+  markGameTourSeen,
+} from '../../src/renderer/utils/tourUtils.js'
 
 // happy-dom localStorage does not implement .clear(); use an in-memory mock instead.
 function makeLocalStorageMock() {
@@ -12,34 +19,52 @@ function makeLocalStorageMock() {
   }
 }
 
-describe('shouldShowTour', () => {
+describe('shouldShowWelcome', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', makeLocalStorageMock())
   })
 
-  it('returns true in dev mode even if tour was already seen', () => {
-    localStorage.setItem(TOUR_SEEN_KEY, 'true')
-    expect(shouldShowTour(true)).toBe(true)
+  it('returns true in dev mode even if welcome was already seen', () => {
+    markWelcomeSeen()
+    expect(shouldShowWelcome(true)).toBe(true)
   })
 
-  it('returns true in production when tour has not been seen', () => {
-    expect(shouldShowTour(false)).toBe(true)
+  it('returns true in production when welcome has not been seen', () => {
+    expect(shouldShowWelcome(false)).toBe(true)
   })
 
-  it('returns false in production when tour has already been seen', () => {
-    localStorage.setItem(TOUR_SEEN_KEY, 'true')
-    expect(shouldShowTour(false)).toBe(false)
+  it('returns false in production after markWelcomeSeen', () => {
+    markWelcomeSeen()
+    expect(shouldShowWelcome(false)).toBe(false)
   })
 })
 
-describe('markTourSeen', () => {
+describe('shouldShowCollectionTour', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', makeLocalStorageMock())
   })
 
-  it('sets the tour-seen key so shouldShowTour returns false in production', () => {
-    markTourSeen()
-    expect(localStorage.getItem(TOUR_SEEN_KEY)).toBe('true')
-    expect(shouldShowTour(false)).toBe(false)
+  it('returns true in production when collection tour has not been seen', () => {
+    expect(shouldShowCollectionTour(false)).toBe(true)
+  })
+
+  it('returns false in production after markCollectionTourSeen', () => {
+    markCollectionTourSeen()
+    expect(shouldShowCollectionTour(false)).toBe(false)
+  })
+})
+
+describe('shouldShowGameTour', () => {
+  beforeEach(() => {
+    vi.stubGlobal('localStorage', makeLocalStorageMock())
+  })
+
+  it('returns true in production when game tour has not been seen', () => {
+    expect(shouldShowGameTour(false)).toBe(true)
+  })
+
+  it('returns false in production after markGameTourSeen', () => {
+    markGameTourSeen()
+    expect(shouldShowGameTour(false)).toBe(false)
   })
 })

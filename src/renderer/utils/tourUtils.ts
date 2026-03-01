@@ -1,16 +1,30 @@
-export const TOUR_SEEN_KEY = 'ligeon-tour-seen'
+const WELCOME_KEY    = 'ligeon-tour-welcome-seen'
+const COLLECTION_KEY = 'ligeon-tour-collection-seen'
+const GAME_KEY       = 'ligeon-tour-game-seen'
 
-/**
- * Returns true if the guided tour should be shown.
- * In dev mode, always returns true for easy testing.
- * In production, returns true only if the tour has not been seen yet.
- */
-export function shouldShowTour(isDev: boolean): boolean {
+export function shouldShowWelcome(isDev: boolean): boolean {
   if (isDev) return true
-  return localStorage.getItem(TOUR_SEEN_KEY) === null
+  return localStorage.getItem(WELCOME_KEY) === null
 }
 
-/** Mark the tour as seen so it does not auto-trigger again. */
-export function markTourSeen(): void {
-  localStorage.setItem(TOUR_SEEN_KEY, 'true')
+export function markWelcomeSeen(): void {
+  localStorage.setItem(WELCOME_KEY, 'true')
+}
+
+export function shouldShowCollectionTour(isDev: boolean): boolean {
+  if (isDev) return true
+  return localStorage.getItem(COLLECTION_KEY) === null
+}
+
+export function markCollectionTourSeen(): void {
+  localStorage.setItem(COLLECTION_KEY, 'true')
+}
+
+export function shouldShowGameTour(isDev: boolean): boolean {
+  if (isDev) return true
+  return localStorage.getItem(GAME_KEY) === null
+}
+
+export function markGameTourSeen(): void {
+  localStorage.setItem(GAME_KEY, 'true')
 }
