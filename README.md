@@ -106,9 +106,11 @@ See: [lichess-org/lila/COPYING.md](https://github.com/lichess-org/lila/blob/mast
 
 | Set | Author | License |
 |-----|--------|---------|
-| **cburnett** | Colin M.L. Burnett | [GPLv2+](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) |
+| **cburnett** | [Colin M.L. Burnett](https://en.wikipedia.org/wiki/User:Cburnett) | [GPLv2+](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) |
 | **merida** | Armando Hernandez Marroquin | [GPLv2+](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) |
 | **alpha** | Eric Bentzen | Free for personal non-commercial use |
 | **companion** | David L. Brown | Freeware |
 | **fresca** | sadsnake1 | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) |
+| **mpchess** | [Maxime Chupin](https://github.com/chupinmaxime) | [GPL3v3+](https://www.gnu.org/licenses/quick-guide-gplv3.en.html) |
+| **xkcd** | [Randall Munroe](https://xkcd.com/about) | [CC BY-NC-SA 2.5](https://xkcd.com/license.html) |
 
