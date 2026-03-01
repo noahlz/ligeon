@@ -1,13 +1,11 @@
-import { useState } from 'react'
 import { Volume2, VolumeX, RefreshCcw, Settings } from 'lucide-react'
-import type { GameRow, CommentData, AnnotationData, VariationData, AppTheme, BoardTheme, PieceSet } from '../../shared/types/game.js'
+import type { GameRow, CommentData, AnnotationData, VariationData, AppTheme } from '../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip.js'
-import SettingsDialog from './SettingsDialog.js'
 import LichessMenuButton from './LichessMenuButton.js'
 import AppThemeToggleButton from './AppThemeToggleButton.js'
 
@@ -23,13 +21,10 @@ interface ControlStripProps {
   variationComments?: Map<number, CommentData>
   appTheme: AppTheme
   onAppThemeChange: (theme: AppTheme) => void
-  boardTheme: BoardTheme
-  onThemeChange: (theme: BoardTheme) => void
-  pieceSet: PieceSet
-  onPieceSetChange: (set: PieceSet) => void
+  onOpenSettings: () => void
 }
 
-export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments, annotations, variations, variationComments, appTheme, onAppThemeChange, boardTheme, onThemeChange, pieceSet, onPieceSetChange }: ControlStripProps) {
+export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments, annotations, variations, variationComments, appTheme, onAppThemeChange, onOpenSettings }: ControlStripProps) {
   return (
     <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start">
       <LichessMenuButton
@@ -42,14 +37,7 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
       />
       <FlipBoardButton onFlipBoard={onFlipBoard} />
       <SoundToggleButton soundEnabled={soundEnabled} onToggleSound={onToggleSound} />
-      <SettingsButton
-        appTheme={appTheme}
-        onAppThemeChange={onAppThemeChange}
-        boardTheme={boardTheme}
-        onThemeChange={onThemeChange}
-        pieceSet={pieceSet}
-        onPieceSetChange={onPieceSetChange}
-      />
+      <SettingsButton onOpen={onOpenSettings} />
       <AppThemeToggleButton appTheme={appTheme} onAppThemeChange={onAppThemeChange} />
     </div>
   )
@@ -91,42 +79,20 @@ function SoundToggleButton({ soundEnabled, onToggleSound }: { soundEnabled: bool
   )
 }
 
-interface SettingsButtonProps {
-  appTheme: AppTheme
-  onAppThemeChange: (theme: AppTheme) => void
-  boardTheme: BoardTheme
-  onThemeChange: (theme: BoardTheme) => void
-  pieceSet: PieceSet
-  onPieceSetChange: (set: PieceSet) => void
-}
-
-function SettingsButton({ appTheme, onAppThemeChange, boardTheme, onThemeChange, pieceSet, onPieceSetChange }: SettingsButtonProps) {
-  const [settingsOpen, setSettingsOpen] = useState(false)
+function SettingsButton({ onOpen }: { onOpen: () => void }) {
   return (
-    <>
-      <SettingsDialog
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        appTheme={appTheme}
-        onAppThemeChange={onAppThemeChange}
-        boardTheme={boardTheme}
-        onThemeChange={onThemeChange}
-        pieceSet={pieceSet}
-        onPieceSetChange={onPieceSetChange}
-      />
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSettingsOpen(true)}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover"
-          >
-            <Settings size={18} />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left">Settings</TooltipContent>
-      </Tooltip>
-    </>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onOpen}
+          className="bg-ui-bg-element hover:bg-ui-bg-hover"
+        >
+          <Settings size={18} />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="left">Settings</TooltipContent>
+    </Tooltip>
   )
 }

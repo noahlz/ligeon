@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ChessKnight } from 'lucide-react'
+import { ChessKnight, Settings } from 'lucide-react'
 import BoardDisplay from './components/BoardDisplay.js'
 import MoveList from './components/MoveList.js'
 import MoveNavigation from './components/MoveNavigation.js'
@@ -8,6 +8,7 @@ import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
 import ConfirmDialog from './components/ConfirmDialog.js'
 import ControlStrip from './components/ControlStrip.js'
+import SettingsDialog from './components/SettingsDialog.js'
 import PanelHandle from './components/PanelHandle.js'
 import { TooltipProvider } from '@/components/ui/tooltip.js'
 import { Toaster } from '@/components/ui/sonner.js'
@@ -46,6 +47,9 @@ export default function App() {
   const [selectedGameCollectionId, setSelectedGameCollectionId] = useState<string | null>(null)
   const [chessManager, setChessManager] = useState<ChessManager | null>(null)
 
+  // Settings dialog
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
   // Audio & sound
   const [soundEnabled, setSoundEnabled] = useState(true)
   const { audioInitialized } = useAudioInit()
@@ -78,6 +82,15 @@ export default function App() {
 
   // Move list parsing
   const { moves, result } = useGameMoves({ movesString: selectedGame?.moves })
+
+  // Open settings with `/` key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey) setSettingsOpen(true)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   // Load collections on mount
   useEffect(() => {
@@ -370,16 +383,19 @@ export default function App() {
                   variationComments={commentState.variationComments}
                   appTheme={appTheme}
                   onAppThemeChange={handleAppThemeChange}
-                  boardTheme={boardTheme}
-                  onThemeChange={handleThemeChange}
-                  pieceSet={pieceSet}
-                  onPieceSetChange={handlePieceSetChange}
+                  onOpenSettings={() => setSettingsOpen(true)}
                 />
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
                 <ChessKnight size={200} className="text-ui-text-dimmer mb-4" strokeWidth={1} />
                 <p className="text-lg text-ui-text-dim">Please select a game...</p>
+                <button
+                  onClick={() => setSettingsOpen(true)}
+                  className="mt-4 flex items-center gap-2 text-sm text-ui-text-dim hover:text-ui-text border-2 border-ui-border dark:border-white/30 rounded-md px-3 py-1.5 hover:cursor-pointer transition-colors"
+                >
+                  <Settings size={15} /> Settings...
+                </button>
               </div>
             )}
           </div>
@@ -505,6 +521,18 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {/* Settings dialog */}
+        <SettingsDialog
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          appTheme={appTheme}
+          onAppThemeChange={handleAppThemeChange}
+          boardTheme={boardTheme}
+          onThemeChange={handleThemeChange}
+          pieceSet={pieceSet}
+          onPieceSetChange={handlePieceSetChange}
+        />
 
         {/* Import dialog */}
         <ImportDialog
