@@ -1,8 +1,5 @@
 # Ligeon TODOs
 
-## Style / UI
-- Add "light" theme and add theme picker (light/dark/system) (on control strip)
-
 ## Testing
 - Improve coverage of render module with React Testing
 

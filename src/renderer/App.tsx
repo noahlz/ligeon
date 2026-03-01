@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ChessKnight } from 'lucide-react'
+import { ChessKnight, Settings } from 'lucide-react'
 import BoardDisplay from './components/BoardDisplay.js'
 import MoveList from './components/MoveList.js'
 import MoveNavigation from './components/MoveNavigation.js'
@@ -8,6 +8,7 @@ import GameListSidebar from './components/GameListSidebar.js'
 import ImportDialog from './components/ImportDialog.js'
 import ConfirmDialog from './components/ConfirmDialog.js'
 import ControlStrip from './components/ControlStrip.js'
+import SettingsDialog from './components/SettingsDialog.js'
 import PanelHandle from './components/PanelHandle.js'
 import { TooltipProvider } from '@/components/ui/tooltip.js'
 import { Toaster } from '@/components/ui/sonner.js'
@@ -17,6 +18,7 @@ import { getCheckColor } from './utils/chessHelpers.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardTheme } from './hooks/useBoardTheme.js'
+import { useAppTheme } from './hooks/useAppTheme.js'
 import { usePieceSet } from './hooks/usePieceSet.js'
 import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
@@ -34,7 +36,7 @@ interface Collection {
 }
 
 export default function App() {
-  // Collections state
+  // Game Collections state
   const [collections, setCollections] = useState<Collection[]>([])
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null)
   const [showImportDialog, setShowImportDialog] = useState(false)
@@ -45,17 +47,17 @@ export default function App() {
   const [selectedGameCollectionId, setSelectedGameCollectionId] = useState<string | null>(null)
   const [chessManager, setChessManager] = useState<ChessManager | null>(null)
 
-  // Audio & sound
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
   const [soundEnabled, setSoundEnabled] = useState(true)
   const { audioInitialized } = useAudioInit()
 
   // Board theme
   const { boardTheme, handleThemeChange } = useBoardTheme()
+  const { appTheme, effectiveTheme, handleAppThemeChange } = useAppTheme()
 
-  // Piece set
   const { pieceSet, handlePieceSetChange } = usePieceSet()
 
-  // Board orientation
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
 
   // Panel collapse state
@@ -74,8 +76,16 @@ export default function App() {
     updateBoardState,
   })
 
-  // Move list parsing
   const { moves, result } = useGameMoves({ movesString: selectedGame?.moves })
+
+  // Open settings with `/` key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey) setSettingsOpen(true)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   // Load collections on mount
   useEffect(() => {
@@ -98,13 +108,11 @@ export default function App() {
   const autoPlayStopRef = useRef<() => void>(() => {})
   const autoPlayStop = useCallback(() => autoPlayStopRef.current(), [])
 
-  // Comment state
   const commentState = useCommentState()
 
-  // Annotation state
   const annotationState = useAnnotationState()
 
-  // Variation state (uses stable stop ref — only called during user interactions, never during render)
+  // Note: Uses stable stop ref — only called during user interactions, never during render
   const variationState = useVariationState({
     chessManager,
     collectionId: selectedGameCollectionId,
@@ -134,7 +142,6 @@ export default function App() {
   // Populate stop ref after useAutoPlay is initialized
   autoPlayStopRef.current = autoPlay.stop
 
-  // Handle game selection
   const handleGameSelect = async (game: GameSearchResult) => {
     if (!selectedCollectionId) return
 
@@ -222,7 +229,6 @@ export default function App() {
     }
   }
 
-  // Handle import completion
   const handleImportComplete = async (collectionId: string) => {
     setShowImportDialog(false)
     setImportFilePath(null)
@@ -239,20 +245,16 @@ export default function App() {
     }
   }
 
-  // Handle import dialog close (cancelled)
   const handleImportClose = () => {
     setShowImportDialog(false)
     setImportFilePath(null)
   }
 
-  // Handle collection deletion
   const handleDeleteCollection = async (collectionId: string) => {
     try {
       await window.electron.deleteCollection(collectionId)
-      // Reload collections
       const cols = await window.electron.listCollections()
       setCollections(cols)
-      // Clear selection if deleted collection was selected
       if (selectedCollectionId === collectionId) {
         setSelectedCollectionId(cols.length > 0 ? cols[0].id : null)
         setSelectedGame(null)
@@ -263,9 +265,7 @@ export default function App() {
     }
   }
 
-  // Handle collection rename
   const handleRenameCollection = async () => {
-    // Reload collections to get updated name
     const cols = await window.electron.listCollections()
     setCollections(cols)
   }
@@ -355,7 +355,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Control Strip */}
                 <ControlStrip
                   game={selectedGame}
                   fen={fen}
@@ -366,16 +365,21 @@ export default function App() {
                   annotations={annotationState.annotations}
                   variations={variationState.variations}
                   variationComments={commentState.variationComments}
-                  boardTheme={boardTheme}
-                  onThemeChange={handleThemeChange}
-                  pieceSet={pieceSet}
-                  onPieceSetChange={handlePieceSetChange}
+                  effectiveTheme={effectiveTheme}
+                  onAppThemeChange={handleAppThemeChange}
+                  onOpenSettings={() => setSettingsOpen(true)}
                 />
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
                 <ChessKnight size={200} className="text-ui-text-dimmer mb-4" strokeWidth={1} />
                 <p className="text-lg text-ui-text-dim">Please select a game...</p>
+                <button
+                  onClick={() => setSettingsOpen(true)}
+                  className="mt-4 flex items-center gap-2 text-sm text-ui-text-dim hover:text-ui-text border-2 border-ui-border rounded-md px-3 py-1.5 hover:cursor-pointer transition-colors"
+                >
+                  <Settings size={15} /> Settings...
+                </button>
               </div>
             )}
           </div>
@@ -502,7 +506,17 @@ export default function App() {
           </div>
         </div>
 
-        {/* Import dialog */}
+        <SettingsDialog
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          appTheme={appTheme}
+          onAppThemeChange={handleAppThemeChange}
+          boardTheme={boardTheme}
+          onThemeChange={handleThemeChange}
+          pieceSet={pieceSet}
+          onPieceSetChange={handlePieceSetChange}
+        />
+
         <ImportDialog
           isOpen={showImportDialog}
           filePath={importFilePath}

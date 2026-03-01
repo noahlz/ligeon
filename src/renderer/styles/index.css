@@ -3,6 +3,7 @@
 @import '@lichess-org/chessground/assets/chessground.brown.css' layer(base);
 @import '@lichess-org/chessground/assets/chessground.cburnett.css' layer(base);
 @import 'tailwindcss';
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-ui-bg-page: hsl(37, 10%, 8%);
@@ -52,6 +53,9 @@
   --color-popover-foreground: hsl(0, 0%, 88%);
   --color-ring: hsl(22, 100%, 42%);
 
+  /* Board border color — dark default */
+  --color-board-border: #4a4848;
+
   @keyframes collapsible-down {
     from { height: 0; opacity: 0; }
     to { height: var(--radix-collapsible-content-height); opacity: 1; }
@@ -70,6 +74,68 @@
   --radius: 0.25rem;
 }
 
+/* Light mode token overrides — activated when .dark class is absent from <html> */
+html:not(.dark) {
+  /* UI semantic tokens */
+  --color-ui-bg-page:     hsl(0, 0%, 96%);
+  --color-ui-bg-box:      hsl(0, 0%, 92%);
+  --color-ui-bg-element:  hsl(0, 0%, 88%);
+  --color-ui-bg-hover:    hsl(0, 0%, 84%);
+  --color-ui-bg-zebra-1:  hsl(0, 0%, 90%);
+  --color-ui-bg-zebra-2:  hsl(0, 0%, 85%);
+  --color-ui-text:        hsl(0, 0%, 13%);
+  --color-ui-text-dim:    hsl(0, 0%, 35%);
+  --color-ui-text-dimmer: hsl(0, 0%, 52%);
+  --color-ui-border:      hsl(0, 0%, 78%);
+  --color-ui-border-light:hsl(0, 0%, 84%);
+  /* Accent: slightly lighter/brighter in light mode for contrast on light backgrounds */
+  --color-ui-accent:      hsl(22, 95%, 52%);
+  --color-accent:         hsl(22, 95%, 52%);
+
+  /* shadcn color system */
+  --color-background:           hsl(0, 0%, 96%);
+  --color-foreground:           hsl(0, 0%, 13%);
+  --color-card:                 hsl(0, 0%, 100%);
+  --color-card-foreground:      hsl(0, 0%, 13%);
+  --color-secondary:            hsl(0, 0%, 88%);
+  --color-secondary-foreground: hsl(0, 0%, 13%);
+  --color-muted:                hsl(0, 0%, 92%);
+  --color-muted-foreground:     hsl(0, 0%, 45%);
+  --color-border:               hsl(0, 0%, 78%);
+  --color-input:                hsl(0, 0%, 78%);
+  --color-popover:              hsl(0, 0%, 100%);
+  --color-popover-foreground:   hsl(0, 0%, 13%);
+
+  /* Board border color — light override */
+  --color-board-border: #787070;
+}
+
+/* Light mode: body uses CSS custom properties */
+html:not(.dark) body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Light mode: board border lighter */
+html:not(.dark) .board-coords-wrapper {
+  background: var(--color-board-border);
+}
+
+/* Light mode scrollbars */
+html:not(.dark) ::-webkit-scrollbar-track {
+  background: hsl(0, 0%, 90%);
+}
+html:not(.dark) ::-webkit-scrollbar-thumb {
+  background: hsl(0, 0%, 76%);
+  border-color: hsl(0, 0%, 90%);
+}
+html:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: hsl(0, 0%, 68%);
+}
+html:not(.dark) * {
+  scrollbar-color: hsl(0, 0%, 76%) hsl(0, 0%, 90%);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -78,8 +144,8 @@ body {
   font-family: var(--ui-font-system);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: hsl(37, 10%, 8%);
-  color: hsl(0, 0%, 73%);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 html {
@@ -187,7 +253,7 @@ html:not([data-board-theme]) cg-board,
   padding-right: 20px;
   padding-bottom: 28px;
   padding-top: 16px;
-  background: #4a4848;
+  background: var(--color-board-border);
   border-radius: 12px;
 }
 

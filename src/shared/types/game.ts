@@ -47,11 +47,15 @@ export type BoardTheme = (typeof BOARD_THEMES)[number]
 export const PIECE_SETS = ['cburnett', 'merida', 'alpha', 'companion', 'fresca', 'mpchess', 'xkcd'] as const
 export type PieceSet = (typeof PIECE_SETS)[number]
 
+export const APP_THEMES = ['dark', 'light', 'system'] as const
+export type AppTheme = (typeof APP_THEMES)[number]
+
 export interface AppSettings {
   collectionsPath: string
   collectionsPathCustomized: boolean
   boardTheme: BoardTheme
   pieceSet: PieceSet
+  appTheme: AppTheme
 }
 
 /**

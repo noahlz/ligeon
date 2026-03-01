@@ -15,6 +15,11 @@ describe('getDefaultSettings', () => {
     const settings = getDefaultSettings()
     expect(settings.boardTheme).toBe('brown')
   })
+
+  test('has dark as default app theme', () => {
+    const settings = getDefaultSettings()
+    expect(settings.appTheme).toBe('dark')
+  })
 })
 
 describe('loadSettingsFromPath', () => {
@@ -29,6 +34,7 @@ describe('loadSettingsFromPath', () => {
       const settings = loadSettingsFromPath(settingsFile)
       expect(settings.pieceSet).toBe('cburnett')
       expect(settings.boardTheme).toBe('brown')
+      expect(settings.appTheme).toBe('dark')
       expect(fs.existsSync(settingsFile)).toBe(true)
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true })
@@ -103,6 +109,47 @@ describe('loadSettingsFromPath', () => {
 
       const settings = loadSettingsFromPath(settingsFile)
       expect(settings.pieceSet).toBe('merida')
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test('migrates legacy settings missing appTheme', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const legacy = { ...getDefaultSettings() }
+      const { appTheme: _removed, ...withoutAppTheme } = legacy
+      fs.writeFileSync(settingsFile, JSON.stringify(withoutAppTheme, null, 2), 'utf-8')
+
+      const settings = loadSettingsFromPath(settingsFile)
+      expect(settings.appTheme).toBe('dark')
+      expect(settings.boardTheme).toBe(legacy.boardTheme)
+      expect(settings.pieceSet).toBe(legacy.pieceSet)
+      expect(settings.collections.path).toBe(legacy.collections.path)
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test('non-default appTheme is preserved through round-trip', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const original = { ...getDefaultSettings(), appTheme: 'light' as const }
+      saveSettingsToPath(settingsFile, original)
+      const loaded = loadSettingsFromPath(settingsFile)
+      expect(loaded.appTheme).toBe('light')
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test('non-default appTheme "system" is preserved through round-trip', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const original = { ...getDefaultSettings(), appTheme: 'system' as const }
+      saveSettingsToPath(settingsFile, original)
+      const loaded = loadSettingsFromPath(settingsFile)
+      expect(loaded.appTheme).toBe('system')
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true })
     }

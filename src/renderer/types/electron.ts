@@ -1,6 +1,6 @@
 // Type definitions for Electron IPC bridge exposed via preload.ts
 
-import type { GameRow, GameSearchResult, AppSettings, BoardTheme, PieceSet, OptionFilters, VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
+import type { GameRow, GameSearchResult, AppSettings, AppTheme, BoardTheme, PieceSet, OptionFilters, VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
 
 export interface CollectionMetadata {
   id: string
@@ -32,7 +32,7 @@ export type ImportProgressData =
   | { type: 'complete'; success?: boolean; collectionId: string; gamesIndexed: number; error?: string }
 
 // Re-export types from lib
-export type { GameRow, GameSearchResult, AppSettings, BoardTheme, PieceSet, OptionFilters, VariationData, CommentData, AnnotationData }
+export type { GameRow, GameSearchResult, AppSettings, AppTheme, BoardTheme, PieceSet, OptionFilters, VariationData, CommentData, AnnotationData }
 
 export interface EcoCodeWithCount {
   eco: string
