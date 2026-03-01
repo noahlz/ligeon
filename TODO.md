@@ -22,6 +22,3 @@
 - Game import should default to resources/sample-games/ in dev mode, home directory when deployed
 - CI/CD: release Mac/Win packages on tag push.
 
-## Online Help
-- Integrate driver.js to provide simple online help on first-open only.
-
