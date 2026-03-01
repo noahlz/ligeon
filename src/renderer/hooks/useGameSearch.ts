@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { GameSearchResult } from '../../shared/types/game.js'
 import type { GameFilterValues } from './useGameFilters.js'
-import { buildOptionFilters } from './useGameFilters.js'
 import { showErrorToast } from '../utils/errorToast.js'
+import { isDateStale, buildOptionFilters } from '../utils/filterValidation.js'
+
+const SEARCH_RESULT_LIMIT = 200
 
 export interface UseGameSearchParams {
   /** Currently selected collection ID */
@@ -44,6 +46,10 @@ export function useGameSearch({
   const [staleDateFrom, setStaleDateFrom] = useState(false)
   const [staleDateTo, setStaleDateTo] = useState(false)
 
+  // Always-current ref so the collectionId effect doesn't need onCollectionChange as a dep
+  const onCollectionChangeRef = useRef(onCollectionChange)
+  onCollectionChangeRef.current = onCollectionChange
+
   // Fetch game count when collection changes
   useEffect(() => {
     if (!collectionId) {
@@ -51,7 +57,7 @@ export function useGameSearch({
       setAvailableDates([])
       setStaleDateFrom(false)
       setStaleDateTo(false)
-      onCollectionChange?.()
+      onCollectionChangeRef.current?.()
       return
     }
 
@@ -62,8 +68,8 @@ export function useGameSearch({
       })
     setStaleDateFrom(false)
     setStaleDateTo(false)
-    onCollectionChange?.()
-  }, [collectionId]) // eslint-disable-line react-hooks/exhaustive-deps
+    onCollectionChangeRef.current?.()
+  }, [collectionId])
 
   // Re-fetch available dates when player/result filters change
   useEffect(() => {
@@ -80,11 +86,13 @@ export function useGameSearch({
     window.electron.getAvailableDates(collectionId, optionFilters).then((dates) => {
       setAvailableDates(dates)
       // Set stale flags if date selections are no longer available
-      setStaleDateFrom(filters.dateFrom != null && !dates.includes(filters.dateFrom))
-      setStaleDateTo(filters.dateTo != null && !dates.includes(filters.dateTo))
+      setStaleDateFrom(isDateStale(filters.dateFrom, dates))
+      setStaleDateTo(isDateStale(filters.dateTo, dates))
     }).catch((error) => {
       showErrorToast('Failed to load date filters', error)
     })
+  // filters.dateFrom and filters.dateTo are intentionally excluded: they are set *by* this effect
+  // (via setStaleDateFrom/setStaleDateTo) and would cause an infinite loop if included.
   }, [collectionId, searchTerm, filters.results]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Search games whenever filters change
@@ -95,12 +103,14 @@ export function useGameSearch({
     }
 
     window.electron.searchGames(collectionId, {
-      player: searchTerm || undefined,
-      results: filters.results.length > 0 ? filters.results : undefined,
-      dateFrom: filters.dateFrom ?? undefined,
-      dateTo: filters.dateTo ?? undefined,
+      ...buildOptionFilters({
+        player: searchTerm,
+        results: filters.results,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+      }),
       ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
-      limit: 200,
+      limit: SEARCH_RESULT_LIMIT,
     })
       .then(setGames)
       .catch((error) => {

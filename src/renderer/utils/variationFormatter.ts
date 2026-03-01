@@ -18,7 +18,24 @@ export function getVariationsAtPly(variations: VariationData[], ply: number): Va
 }
 
 /**
+ * Finds a saved variation at `branchPly` whose first move matches `san`.
+ * Returns undefined if no match is found.
+ */
+export function findMatchingVariation(
+  variations: VariationData[],
+  branchPly: number,
+  san: string,
+): VariationData | undefined {
+  return variations.find(s => {
+    if (s.branchPly !== branchPly) return false
+    return s.moves.split(' ')[0] === san
+  })
+}
+
+/**
  * Parse variation moves string into individual moves array.
+ * Handles simple space-separated SAN strings only (e.g. "e4 e5 Nf3").
+ * Do not use on full PGN notation with move numbers — use parseMoves instead.
  */
 export function parseVariationMoves(moves: string): string[] {
   return moves.trim().split(' ').filter(Boolean)
