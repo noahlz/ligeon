@@ -36,7 +36,7 @@ interface Collection {
 }
 
 export default function App() {
-  // Collections state
+  // Game Collections state
   const [collections, setCollections] = useState<Collection[]>([])
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null)
   const [showImportDialog, setShowImportDialog] = useState(false)
@@ -47,10 +47,8 @@ export default function App() {
   const [selectedGameCollectionId, setSelectedGameCollectionId] = useState<string | null>(null)
   const [chessManager, setChessManager] = useState<ChessManager | null>(null)
 
-  // Settings dialog
   const [settingsOpen, setSettingsOpen] = useState(false)
 
-  // Audio & sound
   const [soundEnabled, setSoundEnabled] = useState(true)
   const { audioInitialized } = useAudioInit()
 
@@ -58,10 +56,8 @@ export default function App() {
   const { boardTheme, handleThemeChange } = useBoardTheme()
   const { appTheme, effectiveTheme, handleAppThemeChange } = useAppTheme()
 
-  // Piece set
   const { pieceSet, handlePieceSetChange } = usePieceSet()
 
-  // Board orientation
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
 
   // Panel collapse state
@@ -80,7 +76,6 @@ export default function App() {
     updateBoardState,
   })
 
-  // Move list parsing
   const { moves, result } = useGameMoves({ movesString: selectedGame?.moves })
 
   // Open settings with `/` key
@@ -113,13 +108,11 @@ export default function App() {
   const autoPlayStopRef = useRef<() => void>(() => {})
   const autoPlayStop = useCallback(() => autoPlayStopRef.current(), [])
 
-  // Comment state
   const commentState = useCommentState()
 
-  // Annotation state
   const annotationState = useAnnotationState()
 
-  // Variation state (uses stable stop ref — only called during user interactions, never during render)
+  // Note: Uses stable stop ref — only called during user interactions, never during render
   const variationState = useVariationState({
     chessManager,
     collectionId: selectedGameCollectionId,
@@ -149,7 +142,6 @@ export default function App() {
   // Populate stop ref after useAutoPlay is initialized
   autoPlayStopRef.current = autoPlay.stop
 
-  // Handle game selection
   const handleGameSelect = async (game: GameSearchResult) => {
     if (!selectedCollectionId) return
 
@@ -237,7 +229,6 @@ export default function App() {
     }
   }
 
-  // Handle import completion
   const handleImportComplete = async (collectionId: string) => {
     setShowImportDialog(false)
     setImportFilePath(null)
@@ -254,20 +245,16 @@ export default function App() {
     }
   }
 
-  // Handle import dialog close (cancelled)
   const handleImportClose = () => {
     setShowImportDialog(false)
     setImportFilePath(null)
   }
 
-  // Handle collection deletion
   const handleDeleteCollection = async (collectionId: string) => {
     try {
       await window.electron.deleteCollection(collectionId)
-      // Reload collections
       const cols = await window.electron.listCollections()
       setCollections(cols)
-      // Clear selection if deleted collection was selected
       if (selectedCollectionId === collectionId) {
         setSelectedCollectionId(cols.length > 0 ? cols[0].id : null)
         setSelectedGame(null)
@@ -278,9 +265,7 @@ export default function App() {
     }
   }
 
-  // Handle collection rename
   const handleRenameCollection = async () => {
-    // Reload collections to get updated name
     const cols = await window.electron.listCollections()
     setCollections(cols)
   }
@@ -370,7 +355,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Control Strip */}
                 <ControlStrip
                   game={selectedGame}
                   fen={fen}
@@ -522,7 +506,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Settings dialog */}
         <SettingsDialog
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}
@@ -534,7 +517,6 @@ export default function App() {
           onPieceSetChange={handlePieceSetChange}
         />
 
-        {/* Import dialog */}
         <ImportDialog
           isOpen={showImportDialog}
           filePath={importFilePath}
