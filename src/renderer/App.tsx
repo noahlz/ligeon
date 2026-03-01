@@ -17,6 +17,7 @@ import { getCheckColor } from './utils/chessHelpers.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardTheme } from './hooks/useBoardTheme.js'
+import { useAppTheme } from './hooks/useAppTheme.js'
 import { usePieceSet } from './hooks/usePieceSet.js'
 import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
@@ -51,6 +52,7 @@ export default function App() {
 
   // Board theme
   const { boardTheme, handleThemeChange } = useBoardTheme()
+  const { appTheme, handleAppThemeChange } = useAppTheme()
 
   // Piece set
   const { pieceSet, handlePieceSetChange } = usePieceSet()
@@ -366,6 +368,8 @@ export default function App() {
                   annotations={annotationState.annotations}
                   variations={variationState.variations}
                   variationComments={commentState.variationComments}
+                  appTheme={appTheme}
+                  onAppThemeChange={handleAppThemeChange}
                   boardTheme={boardTheme}
                   onThemeChange={handleThemeChange}
                   pieceSet={pieceSet}

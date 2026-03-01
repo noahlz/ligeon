@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
-import { ExternalLink, Volume2, VolumeX, RefreshCcw, Settings } from 'lucide-react'
+import { ExternalLink, Volume2, VolumeX, RefreshCcw, Settings, Sun, Moon } from 'lucide-react'
 import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn, buildAnnotatedPgn } from '../utils/externalLinks.js'
-import type { GameRow, CommentData, AnnotationData, VariationData, BoardTheme, PieceSet } from '../../shared/types/game.js'
+import type { GameRow, CommentData, AnnotationData, VariationData, AppTheme, BoardTheme, PieceSet } from '../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,
@@ -27,13 +27,15 @@ interface ControlStripProps {
   annotations?: AnnotationData[]
   variations?: VariationData[]
   variationComments?: Map<number, CommentData>
+  appTheme: AppTheme
+  onAppThemeChange: (theme: AppTheme) => void
   boardTheme: BoardTheme
   onThemeChange: (theme: BoardTheme) => void
   pieceSet: PieceSet
   onPieceSetChange: (set: PieceSet) => void
 }
 
-export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map(), boardTheme, onThemeChange, pieceSet, onPieceSetChange }: ControlStripProps) {
+export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map(), appTheme, onAppThemeChange, boardTheme, onThemeChange, pieceSet, onPieceSetChange }: ControlStripProps) {
   const [lichessMenuOpen, setLichessMenuOpen] = useState(false)
   const [viewPgnOpen, setViewPgnOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -77,6 +79,8 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
       <SettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+        appTheme={appTheme}
+        onAppThemeChange={onAppThemeChange}
         boardTheme={boardTheme}
         onThemeChange={onThemeChange}
         pieceSet={pieceSet}
@@ -124,21 +128,6 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
         )}
       </div>
 
-      {/* Sound toggle */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleSound}
-            className="bg-ui-bg-element hover:bg-ui-bg-hover"
-          >
-            {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left">{soundEnabled ? 'Sound Off' : 'Sound On'}</TooltipContent>
-      </Tooltip>
-
       {/* Flip board */}
       <Tooltip>
         <TooltipTrigger asChild>
@@ -154,6 +143,21 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
         <TooltipContent side="left">Flip Board</TooltipContent>
       </Tooltip>
 
+      {/* Sound toggle */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleSound}
+            className="bg-ui-bg-element hover:bg-ui-bg-hover"
+          >
+            {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="left">{soundEnabled ? 'Sound Off' : 'Sound On'}</TooltipContent>
+      </Tooltip>
+
       {/* Settings */}
       <Tooltip>
         <TooltipTrigger asChild>
@@ -167,6 +171,32 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
           </Button>
         </TooltipTrigger>
         <TooltipContent side="left">Settings</TooltipContent>
+      </Tooltip>
+
+      {/* App theme toggle — dark/light only; 'system' requires Settings */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              const effectiveDark = appTheme === 'system'
+                ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                : appTheme === 'dark'
+              onAppThemeChange(effectiveDark ? 'light' : 'dark')
+            }}
+            className="bg-ui-bg-element hover:bg-ui-bg-hover"
+          >
+            {(appTheme === 'dark' || (appTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches))
+              ? <Sun size={18} />
+              : <Moon size={18} />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="left">
+          {(appTheme === 'dark' || (appTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches))
+            ? 'Switch to Light Mode'
+            : 'Switch to Dark Mode'}
+        </TooltipContent>
       </Tooltip>
     </div>
   )
