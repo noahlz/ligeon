@@ -66,7 +66,7 @@ export function loadSettingsFromPath(settingsFile: string): MainSettings {
     // Migrate: fill in defaults for fields added after initial release
     if (!settings.boardTheme) settings.boardTheme = 'brown'
     if (!settings.pieceSet) settings.pieceSet = 'cburnett'
-    if (!settings.appTheme) settings.appTheme = 'dark'
+    if (settings.appTheme == null) settings.appTheme = 'dark'
 
     return settings
   } catch (error) {

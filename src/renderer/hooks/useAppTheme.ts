@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { AppTheme } from '../../shared/types/game.js'
 
 export interface UseAppThemeReturn {
   appTheme: AppTheme
+  effectiveTheme: 'dark' | 'light'
   handleAppThemeChange: (theme: AppTheme) => void
 }
 
@@ -17,16 +18,18 @@ function applyTheme(theme: AppTheme, mediaQuery: MediaQueryList): void {
 }
 
 export function useAppTheme(): UseAppThemeReturn {
+  const mqRef = useRef<MediaQueryList | null>(null)
+
   const [appTheme, setAppTheme] = useState<AppTheme>(() => {
-    return (localStorage.getItem('appTheme') as AppTheme) ?? 'dark'
+    const theme = (localStorage.getItem('appTheme') as AppTheme) ?? 'dark'
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    applyTheme(theme, mq) // apply immediately — no flash
+    return theme
   })
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
-
-    // Apply cached value immediately (avoids flash-of-wrong-theme on load)
-    const cached = (localStorage.getItem('appTheme') as AppTheme) ?? 'dark'
-    applyTheme(cached, mq)
+    mqRef.current = mq
 
     // Load persisted setting from main process
     void window.electron.getSettings().then((settings) => {
@@ -48,12 +51,16 @@ export function useAppTheme(): UseAppThemeReturn {
   }, [])
 
   const handleAppThemeChange = useCallback((theme: AppTheme) => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const mq = mqRef.current ?? window.matchMedia('(prefers-color-scheme: dark)')
     setAppTheme(theme)
     localStorage.setItem('appTheme', theme)
     applyTheme(theme, mq)
     void window.electron.updateSettings({ appTheme: theme })
   }, [])
 
-  return { appTheme, handleAppThemeChange }
+  const effectiveTheme: 'dark' | 'light' = appTheme === 'system'
+    ? ((mqRef.current ?? window.matchMedia('(prefers-color-scheme: dark)')).matches ? 'dark' : 'light')
+    : appTheme
+
+  return { appTheme, effectiveTheme, handleAppThemeChange }
 }

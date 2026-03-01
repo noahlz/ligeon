@@ -56,7 +56,7 @@ export default function App() {
 
   // Board theme
   const { boardTheme, handleThemeChange } = useBoardTheme()
-  const { appTheme, handleAppThemeChange } = useAppTheme()
+  const { appTheme, effectiveTheme, handleAppThemeChange } = useAppTheme()
 
   // Piece set
   const { pieceSet, handlePieceSetChange } = usePieceSet()
@@ -381,7 +381,7 @@ export default function App() {
                   annotations={annotationState.annotations}
                   variations={variationState.variations}
                   variationComments={commentState.variationComments}
-                  appTheme={appTheme}
+                  effectiveTheme={effectiveTheme}
                   onAppThemeChange={handleAppThemeChange}
                   onOpenSettings={() => setSettingsOpen(true)}
                 />
@@ -392,7 +392,7 @@ export default function App() {
                 <p className="text-lg text-ui-text-dim">Please select a game...</p>
                 <button
                   onClick={() => setSettingsOpen(true)}
-                  className="mt-4 flex items-center gap-2 text-sm text-ui-text-dim hover:text-ui-text border-2 border-ui-border dark:border-white/30 rounded-md px-3 py-1.5 hover:cursor-pointer transition-colors"
+                  className="mt-4 flex items-center gap-2 text-sm text-ui-text-dim hover:text-ui-text border-2 border-ui-border rounded-md px-3 py-1.5 hover:cursor-pointer transition-colors"
                 >
                   <Settings size={15} /> Settings...
                 </button>

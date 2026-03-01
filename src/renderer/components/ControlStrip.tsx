@@ -19,12 +19,12 @@ interface ControlStripProps {
   annotations?: AnnotationData[]
   variations?: VariationData[]
   variationComments?: Map<number, CommentData>
-  appTheme: AppTheme
+  effectiveTheme: 'dark' | 'light'
   onAppThemeChange: (theme: AppTheme) => void
   onOpenSettings: () => void
 }
 
-export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments, annotations, variations, variationComments, appTheme, onAppThemeChange, onOpenSettings }: ControlStripProps) {
+export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments, annotations, variations, variationComments, effectiveTheme, onAppThemeChange, onOpenSettings }: ControlStripProps) {
   return (
     <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start">
       <LichessMenuButton
@@ -38,7 +38,7 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
       <FlipBoardButton onFlipBoard={onFlipBoard} />
       <SoundToggleButton soundEnabled={soundEnabled} onToggleSound={onToggleSound} />
       <SettingsButton onOpen={onOpenSettings} />
-      <AppThemeToggleButton appTheme={appTheme} onAppThemeChange={onAppThemeChange} />
+      <AppThemeToggleButton effectiveTheme={effectiveTheme} onAppThemeChange={onAppThemeChange} />
     </div>
   )
 }

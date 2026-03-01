@@ -8,14 +8,12 @@ import {
 } from '@/components/ui/tooltip.js'
 
 interface AppThemeToggleButtonProps {
-  appTheme: AppTheme
+  effectiveTheme: 'dark' | 'light'
   onAppThemeChange: (theme: AppTheme) => void
 }
 
-export default function AppThemeToggleButton({ appTheme, onAppThemeChange }: AppThemeToggleButtonProps) {
-  const effectiveDark = appTheme === 'system'
-    ? window.matchMedia('(prefers-color-scheme: dark)').matches
-    : appTheme === 'dark'
+export default function AppThemeToggleButton({ effectiveTheme, onAppThemeChange }: AppThemeToggleButtonProps) {
+  const effectiveDark = effectiveTheme === 'dark'
 
   return (
     <Tooltip>

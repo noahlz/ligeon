@@ -53,6 +53,9 @@
   --color-popover-foreground: hsl(0, 0%, 88%);
   --color-ring: hsl(22, 100%, 42%);
 
+  /* Board border color — dark default */
+  --color-board-border: #4a4848;
+
   @keyframes collapsible-down {
     from { height: 0; opacity: 0; }
     to { height: var(--radix-collapsible-content-height); opacity: 1; }
@@ -102,17 +105,20 @@ html:not(.dark) {
   --color-input:                hsl(0, 0%, 78%);
   --color-popover:              hsl(0, 0%, 100%);
   --color-popover-foreground:   hsl(0, 0%, 13%);
+
+  /* Board border color — light override */
+  --color-board-border: #787070;
 }
 
-/* Light mode: body hardcoded colors override */
+/* Light mode: body uses CSS custom properties */
 html:not(.dark) body {
-  background-color: hsl(0, 0%, 96%);
-  color: hsl(0, 0%, 13%);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 /* Light mode: board border lighter */
 html:not(.dark) .board-coords-wrapper {
-  background: #787070;
+  background: var(--color-board-border);
 }
 
 /* Light mode scrollbars */
@@ -138,8 +144,8 @@ body {
   font-family: var(--ui-font-system);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: hsl(37, 10%, 8%);
-  color: hsl(0, 0%, 73%);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 html {
@@ -247,7 +253,7 @@ html:not([data-board-theme]) cg-board,
   padding-right: 20px;
   padding-bottom: 28px;
   padding-top: 16px;
-  background: #4a4848;
+  background: var(--color-board-border);
   border-radius: 12px;
 }
 

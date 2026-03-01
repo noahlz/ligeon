@@ -34,6 +34,7 @@ describe('loadSettingsFromPath', () => {
       const settings = loadSettingsFromPath(settingsFile)
       expect(settings.pieceSet).toBe('cburnett')
       expect(settings.boardTheme).toBe('brown')
+      expect(settings.appTheme).toBe('dark')
       expect(fs.existsSync(settingsFile)).toBe(true)
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true })
@@ -123,6 +124,8 @@ describe('loadSettingsFromPath', () => {
       const settings = loadSettingsFromPath(settingsFile)
       expect(settings.appTheme).toBe('dark')
       expect(settings.boardTheme).toBe(legacy.boardTheme)
+      expect(settings.pieceSet).toBe(legacy.pieceSet)
+      expect(settings.collections.path).toBe(legacy.collections.path)
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true })
     }
@@ -135,6 +138,18 @@ describe('loadSettingsFromPath', () => {
       saveSettingsToPath(settingsFile, original)
       const loaded = loadSettingsFromPath(settingsFile)
       expect(loaded.appTheme).toBe('light')
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test('non-default appTheme "system" is preserved through round-trip', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const original = { ...getDefaultSettings(), appTheme: 'system' as const }
+      saveSettingsToPath(settingsFile, original)
+      const loaded = loadSettingsFromPath(settingsFile)
+      expect(loaded.appTheme).toBe('system')
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true })
     }
