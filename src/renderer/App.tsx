@@ -26,6 +26,7 @@ import { useGameMoves } from './hooks/useGameMoves.js'
 import { useVariationState } from './hooks/useVariationState.js'
 import { useCommentState } from './hooks/useCommentState.js'
 import { useAnnotationState } from './hooks/useAnnotationState.js'
+import { useTour } from './hooks/useTour.js'
 import { sortNagsByCategory } from './utils/nag.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 import type { Key } from '@lichess-org/chessground/types'
@@ -77,6 +78,8 @@ export default function App() {
   })
 
   const { moves, result } = useGameMoves({ movesString: selectedGame?.moves })
+
+  useTour(selectedCollectionId, selectedGame)
 
   // Open settings with `/` key
   useEffect(() => {

@@ -54,5 +54,8 @@ Fix: use `onInteractOutside` + `e.preventDefault()` on `PopoverContent` to veto 
 ### Circular Hook Dependencies via Refs
 `useAutoPlay` and `useVariationState` depend on each other. The dependency is broken by storing stop callbacks in refs (`autoPlayStopRef`) in `App.tsx`. Do not refactor this into state without understanding the cycle.
 
+### Driver.js Guided Tour
+`useTour` hook + `styles/tour.css`. Three independent contextual popovers (not a linear sequence). See the hook for implementation details.
+
 ### Chessground is Imperative — Two useEffect Pattern
 `BoardDisplay.tsx` uses two `useEffect` blocks: one to initialize Chessground on mount, one to update it via `.set()` when props change. Do not merge them. 
