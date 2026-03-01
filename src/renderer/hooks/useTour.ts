@@ -1,6 +1,6 @@
 import { useRef, useCallback, useEffect } from 'react'
 import { driver } from 'driver.js'
-import 'driver.js/dist/driver.css'
+import '../styles/tour.css'
 import type { Driver } from 'driver.js'
 import type { GameRow } from '../../shared/types/game.js'
 import { markTourSeen } from '../utils/tourUtils.js'
