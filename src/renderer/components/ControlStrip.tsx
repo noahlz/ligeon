@@ -26,7 +26,7 @@ interface ControlStripProps {
 
 export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments, annotations, variations, variationComments, effectiveTheme, onAppThemeChange, onOpenSettings }: ControlStripProps) {
   return (
-    <div className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start">
+    <div id="tour-control-strip" className="flex flex-col gap-2 items-center p-1 pt-0 h-full justify-start">
       <LichessMenuButton
         game={game}
         fen={fen}

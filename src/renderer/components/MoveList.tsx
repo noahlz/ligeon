@@ -288,6 +288,7 @@ export default function MoveList({
 
   return (
     <div
+      id="tour-move-list"
       className="overflow-y-auto flex-1 p-2 bg-ui-bg-element rounded-sm font-mono text-sm"
       onClick={() => { setCommentMenuPly(null); setAnnotationMenuPly(null) }}
     >

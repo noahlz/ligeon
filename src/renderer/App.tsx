@@ -26,7 +26,9 @@ import { useGameMoves } from './hooks/useGameMoves.js'
 import { useVariationState } from './hooks/useVariationState.js'
 import { useCommentState } from './hooks/useCommentState.js'
 import { useAnnotationState } from './hooks/useAnnotationState.js'
+import { useTour } from './hooks/useTour.js'
 import { sortNagsByCategory } from './utils/nag.js'
+import { shouldShowTour } from './utils/tourUtils.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
 import type { Key } from '@lichess-org/chessground/types'
 
@@ -78,6 +80,8 @@ export default function App() {
 
   const { moves, result } = useGameMoves({ movesString: selectedGame?.moves })
 
+  const { startTour } = useTour(selectedCollectionId, selectedGame)
+
   // Open settings with `/` key
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -99,6 +103,17 @@ export default function App() {
     void loadCollections()
   // Run once on mount only — selectedCollectionId intentionally excluded to avoid
   // re-fetching collections when a game is selected within the same session.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Show guided tour on first launch; always show in dev mode for testing.
+  useEffect(() => {
+    if (shouldShowTour(import.meta.env.DEV)) {
+      // Small delay ensures the DOM is painted before Driver.js queries elements.
+      const timer = setTimeout(startTour, 500)
+      return () => clearTimeout(timer)
+    }
+  // startTour is stable (useCallback with no deps); run once on mount only.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

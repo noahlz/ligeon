@@ -77,7 +77,7 @@ export default function GameListSidebar({
   }, [staleDateFrom, staleDateTo, setDateFrom, setDateTo])
 
   return (
-    <div data-testid="game-list-sidebar" className="flex flex-col gap-2 h-full">
+    <div id="tour-game-filter" data-testid="game-list-sidebar" className="flex flex-col gap-2 h-full">
       <CollectionSelector
         collections={collections}
         selectedId={selectedCollectionId}
