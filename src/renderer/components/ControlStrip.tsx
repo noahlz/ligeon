@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { ExternalLink, Volume2, VolumeX, RefreshCcw, Settings } from 'lucide-react'
 import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn, buildAnnotatedPgn } from '../utils/externalLinks.js'
-import type { GameRow, CommentData, AnnotationData, VariationData, BoardTheme } from '../../shared/types/game.js'
+import type { GameRow, CommentData, AnnotationData, VariationData, BoardTheme, PieceSet } from '../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,
@@ -29,9 +29,11 @@ interface ControlStripProps {
   variationComments?: Map<number, CommentData>
   boardTheme: BoardTheme
   onThemeChange: (theme: BoardTheme) => void
+  pieceSet: PieceSet
+  onPieceSetChange: (set: PieceSet) => void
 }
 
-export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map(), boardTheme, onThemeChange }: ControlStripProps) {
+export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, onFlipBoard, comments = [], annotations = [], variations = [], variationComments = new Map(), boardTheme, onThemeChange, pieceSet, onPieceSetChange }: ControlStripProps) {
   const [lichessMenuOpen, setLichessMenuOpen] = useState(false)
   const [viewPgnOpen, setViewPgnOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -77,6 +79,8 @@ export default function ControlStrip({ game, fen, soundEnabled, onToggleSound, o
         onClose={() => setSettingsOpen(false)}
         boardTheme={boardTheme}
         onThemeChange={onThemeChange}
+        pieceSet={pieceSet}
+        onPieceSetChange={onPieceSetChange}
       />
       {/* View on Lichess — hover shows clickable label, click opens dropdown */}
       <div

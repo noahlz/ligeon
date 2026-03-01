@@ -12,14 +12,32 @@ const SETTINGS_DIR = path.join(os.homedir(), '.ligeon')
 const SETTINGS_FILE = path.join(SETTINGS_DIR, 'settings.json')
 
 /**
- * Load application settings from disk
- * Creates default settings if file doesn't exist
- *
- * @returns Application settings
+ * Save settings to an arbitrary file path.
+ * Creates parent directory if needed.
  */
-export function loadSettings(): MainSettings {
+export function saveSettingsToPath(settingsFile: string, settings: MainSettings): void {
   try {
-    if (!fs.existsSync(SETTINGS_FILE)) {
+    const dir = path.dirname(settingsFile)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    const content = JSON.stringify(settings, null, 2)
+    fs.writeFileSync(settingsFile, content, 'utf-8')
+    console.log('✓ Settings saved')
+  } catch (error) {
+    console.error('Failed to save settings:', error)
+    throw error
+  }
+}
+
+/**
+ * Load settings from an arbitrary file path.
+ * Creates default settings if file doesn't exist.
+ * Applies migration guards for fields added after initial release.
+ */
+export function loadSettingsFromPath(settingsFile: string): MainSettings {
+  try {
+    if (!fs.existsSync(settingsFile)) {
       // Check if collections already exist at default location (migration path)
       const defaultPath = getDefaultCollectionsPath()
       const settings = getDefaultSettings()
@@ -32,11 +50,11 @@ export function loadSettings(): MainSettings {
       }
 
       // Save initial settings
-      saveSettings(settings)
+      saveSettingsToPath(settingsFile, settings)
       return settings
     }
 
-    const content = fs.readFileSync(SETTINGS_FILE, 'utf-8')
+    const content = fs.readFileSync(settingsFile, 'utf-8')
     const settings = JSON.parse(content) as MainSettings
 
     // Validate required fields
@@ -44,6 +62,10 @@ export function loadSettings(): MainSettings {
       console.warn('Invalid settings file - missing collectionsPath. Using defaults.')
       return getDefaultSettings()
     }
+
+    // Migrate: fill in defaults for fields added after initial release
+    if (!settings.boardTheme) settings.boardTheme = 'brown'
+    if (!settings.pieceSet) settings.pieceSet = 'cburnett'
 
     return settings
   } catch (error) {
@@ -53,24 +75,22 @@ export function loadSettings(): MainSettings {
 }
 
 /**
+ * Load application settings from disk
+ * Creates default settings if file doesn't exist
+ *
+ * @returns Application settings
+ */
+export function loadSettings(): MainSettings {
+  return loadSettingsFromPath(SETTINGS_FILE)
+}
+
+/**
  * Save application settings to disk
  *
  * @param settings - Settings to save
  */
 export function saveSettings(settings: MainSettings): void {
-  try {
-    // Ensure settings directory exists
-    if (!fs.existsSync(SETTINGS_DIR)) {
-      fs.mkdirSync(SETTINGS_DIR, { recursive: true })
-    }
-
-    const content = JSON.stringify(settings, null, 2)
-    fs.writeFileSync(SETTINGS_FILE, content, 'utf-8')
-    console.log('✓ Settings saved')
-  } catch (error) {
-    console.error('Failed to save settings:', error)
-    throw error
-  }
+  saveSettingsToPath(SETTINGS_FILE, settings)
 }
 
 /**

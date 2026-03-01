@@ -102,7 +102,12 @@ contextBridge.exposeInMainWorld('electron', {
   selectCollectionsDirectory: () => ipcRenderer.invoke('select-collections-directory'),
 
   getBoardTheme: () => ipcRenderer.invoke('get-board-theme'),
+  // boardTheme validated as BoardTheme in main.ts; ElectronAPI enforces the type on the renderer side
   setBoardTheme: (theme: string) => ipcRenderer.invoke('set-board-theme', { theme }),
+
+  getPieceSet: () => ipcRenderer.invoke('get-piece-set'),
+  // pieceSet validated as PieceSet in main.ts; ElectronAPI enforces the type on the renderer side
+  setPieceSet: (pieceSet: string) => ipcRenderer.invoke('set-piece-set', { pieceSet }),
 
   // === Event Listeners ===
   /**

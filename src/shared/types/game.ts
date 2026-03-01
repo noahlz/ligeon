@@ -41,13 +41,17 @@ export interface GameSearchResult {
 /**
  * Application settings
  */
-export const BOARD_THEMES = ['brown', 'green', 'blue', 'grey'] as const
+export const BOARD_THEMES = ['brown', 'green', 'blue', 'purple', 'grey'] as const
 export type BoardTheme = (typeof BOARD_THEMES)[number]
+
+export const PIECE_SETS = ['cburnett', 'merida', 'alpha', 'companion', 'fresca', 'mpchess', 'xkcd'] as const
+export type PieceSet = (typeof PIECE_SETS)[number]
 
 export interface AppSettings {
   collectionsPath: string
   collectionsPathCustomized: boolean
   boardTheme: BoardTheme
+  pieceSet: PieceSet
 }
 
 /**

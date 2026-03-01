@@ -17,8 +17,8 @@ import { getSettings, updateSettings, selectCollectionsDirectory } from './ipc/s
 import { logger } from './config/logger.js'
 import type { GameFilters, OptionFilters } from './ipc/types.js'
 import type { MainSettings } from './config/settings.js'
-import { BOARD_THEMES } from '../shared/types/game.js'
-import type { BoardTheme } from '../shared/types/game.js'
+import { BOARD_THEMES, PIECE_SETS } from '../shared/types/game.js'
+import type { BoardTheme, PieceSet } from '../shared/types/game.js'
 
 // Get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -250,6 +250,18 @@ function setupIpcHandlers() {
       throw new Error(`Invalid board theme: ${theme}`)
     }
     updateSettings({ boardTheme: theme as BoardTheme })
+  })
+
+  // Piece set
+  ipcMain.handle('get-piece-set', () => {
+    const s = getSettings()
+    return s.pieceSet
+  })
+  ipcMain.handle('set-piece-set', (_event, { pieceSet }: { pieceSet: string }) => {
+    if (!(PIECE_SETS as readonly string[]).includes(pieceSet)) {
+      throw new Error(`Invalid piece set: ${pieceSet}`)
+    }
+    updateSettings({ pieceSet: pieceSet as PieceSet })
   })
 
   logger.info('✓ IPC handlers set up')
