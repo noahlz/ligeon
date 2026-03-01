@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { parsePgn } from 'chessops/pgn'
+import { parseMoves } from '../utils/moveParser.js'
 
 export interface UseGameMovesParams {
   /** Raw moves string from game data (e.g., "1. e4 c5 2. Nf3 d6 1-0") */
@@ -19,14 +19,6 @@ export interface UseGameMovesReturn {
  * Result is memoized to prevent unnecessary re-parsing.
  */
 export function useGameMoves({ movesString }: UseGameMovesParams): UseGameMovesReturn {
-  const { moves, result } = useMemo(() => {
-    if (!movesString) return { moves: [], result: null }
-    const games = parsePgn(movesString)
-    if (games.length === 0) return { moves: [], result: null }
-    const sanMoves = [...games[0].moves.mainline()].map(n => n.san)
-    const gameResult = games[0].headers.get('Result') ?? null
-    return { moves: sanMoves, result: gameResult }
-  }, [movesString])
-
+  const { moves, result } = useMemo(() => parseMoves(movesString), [movesString])
   return { moves, result }
 }

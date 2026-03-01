@@ -1,5 +1,5 @@
 /**
- * DOM utilities for common element checks used across hooks and components.
+ * DOM utilities for common element checks and input event handling.
  */
 
 /**
@@ -10,4 +10,22 @@
  */
 export function isEditableInput(target: EventTarget | null): boolean {
   return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement
+}
+
+/**
+ * Maps a wheel event's deltaY to a navigation direction.
+ * Returns null when deltaY is zero (no movement).
+ */
+export function getWheelDirection(deltaY: number): 'next' | 'prev' | null {
+  if (deltaY > 0) return 'next'
+  if (deltaY < 0) return 'prev'
+  return null
+}
+
+/**
+ * Returns true if enough time has elapsed since the last scroll event
+ * to process a new wheel event (debounce guard).
+ */
+export function shouldProcessWheelEvent(now: number, lastScrollTime: number, debounceMs: number): boolean {
+  return now - lastScrollTime >= debounceMs
 }

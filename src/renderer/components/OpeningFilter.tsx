@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command.js'
 import { Badge } from '@/components/ui/badge.js'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip.js'
-import { buildOptionFilters } from '../hooks/useGameFilters.js'
+import { buildOptionFilters } from '../utils/filterValidation.js'
 import { showErrorToast } from '../utils/errorToast.js'
 
 interface OpeningFilterProps {

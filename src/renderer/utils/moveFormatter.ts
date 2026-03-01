@@ -1,3 +1,5 @@
+import type { CommentData } from '../../shared/types/game.js'
+
 export interface MovePair {
   white: string
   black?: string
@@ -60,4 +62,14 @@ export function groupMovesIntoPairs(moves: string[]): MovePair[] {
   }
 
   return movePairs
+}
+
+/**
+ * Converts a comments array into a ply-indexed Map for O(1) lookup.
+ * Accepts undefined so callers can pass optional comment arrays directly.
+ */
+export function createCommentsByPlyMap(comments: CommentData[] | undefined): Map<number, CommentData> {
+  const map = new Map<number, CommentData>()
+  comments?.forEach(c => map.set(c.ply, c))
+  return map
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { isEditableInput } from '../utils/domUtils.js'
+import { isEditableInput, getWheelDirection, shouldProcessWheelEvent } from '../utils/domUtils.js'
 
 const WHEEL_DEBOUNCE_MS = 50
 
@@ -72,12 +72,13 @@ export function useGameControls({
 
       // Debounce rapid scroll ticks
       const now = Date.now()
-      if (now - lastScrollTime.current < WHEEL_DEBOUNCE_MS) return
+      if (!shouldProcessWheelEvent(now, lastScrollTime.current, WHEEL_DEBOUNCE_MS)) return
 
-      if (e.deltaY > 0) {
+      const direction = getWheelDirection(e.deltaY)
+      if (direction === 'next') {
         e.preventDefault()
         onNext()
-      } else if (e.deltaY < 0) {
+      } else if (direction === 'prev') {
         e.preventDefault()
         onPrev()
       }

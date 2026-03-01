@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { groupMovesIntoPairs, pairIndexToPly, isCurrentMove } from '../../src/renderer/utils/moveFormatter.js'
+import { groupMovesIntoPairs, pairIndexToPly, isCurrentMove, createCommentsByPlyMap } from '../../src/renderer/utils/moveFormatter.js'
+import type { CommentData } from '../../src/shared/types/game.js'
+
+function makeComment(ply: number, text: string): CommentData {
+  return { gameId: 1, ply, variationId: null, text }
+}
 
 describe('moveFormatter', () => {
   describe('groupMovesIntoPairs', () => {
@@ -82,6 +87,31 @@ describe('moveFormatter', () => {
 
     it('returns false at start position (ply 0)', () => {
       expect(isCurrentMove(0, 1, false)).toBe(false)
+    })
+  })
+
+  describe('createCommentsByPlyMap', () => {
+    it('returns an empty Map for undefined input', () => {
+      expect(createCommentsByPlyMap(undefined).size).toBe(0)
+    })
+
+    it('returns an empty Map for an empty array', () => {
+      expect(createCommentsByPlyMap([]).size).toBe(0)
+    })
+
+    it('maps each comment by its ply', () => {
+      const map = createCommentsByPlyMap([makeComment(1, 'good move'), makeComment(3, 'mistake')])
+      expect(map.get(1)?.text).toBe('good move')
+      expect(map.get(3)?.text).toBe('mistake')
+    })
+
+    it('returns undefined for a ply with no comment', () => {
+      expect(createCommentsByPlyMap([makeComment(2, 'interesting')]).get(5)).toBeUndefined()
+    })
+
+    it('last write wins when two comments share the same ply', () => {
+      const map = createCommentsByPlyMap([makeComment(1, 'first'), makeComment(1, 'second')])
+      expect(map.get(1)?.text).toBe('second')
     })
   })
 })

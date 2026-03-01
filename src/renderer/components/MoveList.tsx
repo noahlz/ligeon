@@ -4,6 +4,8 @@ import { groupMovesIntoPairs, pairIndexToPly, isCurrentMove } from '../utils/mov
 import { getVariationsAtPly } from '../utils/variationFormatter.js'
 import type { VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
 import { groupAnnotationsByPly } from '../hooks/useAnnotationState.js'
+import { reorderVariationIds } from '../utils/variationReorder.js'
+import { createCommentsByPlyMap } from '../utils/moveFormatter.js'
 import {
   Table,
   TableBody,
@@ -96,15 +98,12 @@ export default function MoveList({
   const handleVariationDrop = useCallback((e: React.DragEvent, targetId: number, branchPly: number) => {
     e.preventDefault()
     const sourceId = parseInt(e.dataTransfer.getData('variationId'), 10)
-    if (isNaN(sourceId) || sourceId <= 0 || sourceId === targetId || !variations || !onReorderVariations) return
-    const plyVariations = variations.filter(v => v.branchPly === branchPly)
-    const sourceIdx = plyVariations.findIndex(v => v.id === sourceId)
-    const targetIdx = plyVariations.findIndex(v => v.id === targetId)
-    if (sourceIdx === -1 || targetIdx === -1) return
-    const reordered = [...plyVariations]
-    reordered.splice(sourceIdx, 1)
-    reordered.splice(targetIdx, 0, plyVariations[sourceIdx])
-    onReorderVariations(branchPly, reordered.map(v => v.id!))
+    // NaN guard catches unparseable strings; reorderVariationIds is the authoritative check
+    // that the parsed ID actually exists in the variation list for this branchPly.
+    if (isNaN(sourceId) || !variations || !onReorderVariations) return
+    const orderedIds = reorderVariationIds(sourceId, targetId, variations, branchPly)
+    if (!orderedIds) return
+    onReorderVariations(branchPly, orderedIds)
     setDraggedVariationId(null)
   }, [variations, onReorderVariations])
 
@@ -263,14 +262,10 @@ export default function MoveList({
   // Clean up timers on unmount
   useEffect(() => () => { clearHoverTimer(); clearHideTimer() }, [clearHoverTimer, clearHideTimer])
 
-  const movePairs = groupMovesIntoPairs(moves)
+  const movePairs = useMemo(() => groupMovesIntoPairs(moves), [moves])
 
   // O(1) ply lookup instead of O(n) find on every render cell
-  const commentsByPly = useMemo(() => {
-    const map = new Map<number, CommentData>()
-    comments?.forEach(c => map.set(c.ply, c))
-    return map
-  }, [comments])
+  const commentsByPly = useMemo(() => createCommentsByPlyMap(comments), [comments])
 
   const moveCellCommentCallbacks: MoveCellCommentCallbacks = {
     onCommentIconClick: handleCommentIconClick,

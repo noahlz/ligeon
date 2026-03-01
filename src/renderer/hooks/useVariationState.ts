@@ -6,7 +6,7 @@
  * for BoardDisplay (dests, turnColor) and MoveList (moves, ply).
  */
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useMemo } from 'react'
 import { showErrorToast } from '../utils/errorToast.js'
 import type { Key } from '@lichess-org/chessground/types'
 import type { VariationData } from '../../shared/types/game.js'
@@ -14,6 +14,7 @@ import type { ChessManager } from '../utils/chessManager.js'
 import type { NavigableManager } from '../types/navigableManager.js'
 import { createVariationManager, type VariationManager } from '../utils/variationManager.js'
 import { getCheckColor } from '../utils/chessHelpers.js'
+import { findMatchingVariation } from '../utils/variationFormatter.js'
 
 export interface UseVariationStateParams {
   chessManager: ChessManager | null
@@ -291,10 +292,7 @@ export function useVariationState({
 
       // Different move — check for a matching existing variation at this branch point.
       const branchPly = ply + 1
-      const matchingVariation = variations.find(s => {
-        if (s.branchPly !== branchPly) return false
-        return s.moves.split(' ')[0] === san
-      })
+      const matchingVariation = findMatchingVariation(variations, branchPly, san)
 
       if (matchingVariation) {
         // Enter the matching variation
@@ -346,33 +344,39 @@ export function useVariationState({
     })
   }, [navigateVariation])
 
-  const variationNav = {
-    first: useCallback(() => {
-      navigateVariation(() => 0)
-    }, [navigateVariation]),
+  const variationNavFirst = useCallback(() => {
+    navigateVariation(() => 0)
+  }, [navigateVariation])
 
-    prev: useCallback(() => {
-      navigateVariation(m => {
-        const ply = m.getCurrentPly()
-        return ply > 0 ? ply - 1 : null
-      })
-    }, [navigateVariation]),
+  const variationNavPrev = useCallback(() => {
+    navigateVariation(m => {
+      const ply = m.getCurrentPly()
+      return ply > 0 ? ply - 1 : null
+    })
+  }, [navigateVariation])
 
-    next: useCallback(() => {
-      navigateVariation(m => {
-        const ply = m.getCurrentPly()
-        return ply < m.getTotalPlies() ? ply + 1 : null
-      })
-    }, [navigateVariation]),
+  const variationNavNext = useCallback(() => {
+    navigateVariation(m => {
+      const ply = m.getCurrentPly()
+      return ply < m.getTotalPlies() ? ply + 1 : null
+    })
+  }, [navigateVariation])
 
-    last: useCallback(() => {
-      navigateVariation(m => m.getTotalPlies())
-    }, [navigateVariation]),
+  const variationNavLast = useCallback(() => {
+    navigateVariation(m => m.getTotalPlies())
+  }, [navigateVariation])
 
-    jump: useCallback((ply: number) => {
-      navigateVariation(() => ply)
-    }, [navigateVariation]),
-  }
+  const variationNavJump = useCallback((ply: number) => {
+    navigateVariation(() => ply)
+  }, [navigateVariation])
+
+  const variationNav = useMemo(() => ({
+    first: variationNavFirst,
+    prev: variationNavPrev,
+    next: variationNavNext,
+    last: variationNavLast,
+    jump: variationNavJump,
+  }), [variationNavFirst, variationNavPrev, variationNavNext, variationNavLast, variationNavJump])
 
   /**
    * Jump to a specific move in a variation by id.
