@@ -8,7 +8,6 @@
 
 ## Issues
 
-- CVEs - some packages have high and critical issues.
 - This odd issue:
 ```
 (!) Some chunks are larger than 500 kB after minification. Consider:
