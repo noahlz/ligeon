@@ -2,7 +2,6 @@
 @import '@lichess-org/chessground/assets/chessground.base.css' layer(base);
 @import '@lichess-org/chessground/assets/chessground.brown.css' layer(base);
 @import '@lichess-org/chessground/assets/chessground.cburnett.css' layer(base);
-
 @import 'tailwindcss';
 
 @theme {
@@ -117,6 +116,13 @@ html:not([data-board-theme]) cg-board,
 [data-board-theme="blue"] cg-board {
   background-color: #dee3e6;
   background-image: repeating-conic-gradient(#dee3e6 0% 25%, #8ca2ad 0% 50%);
+  background-size: 25% 25%;
+}
+
+/* Purple */
+[data-board-theme="purple"] cg-board {
+  background-color: #e8d8f0;
+  background-image: repeating-conic-gradient(#e8d8f0 0% 25%, #9b72b0 0% 50%);
   background-size: 25% 25%;
 }
 

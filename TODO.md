@@ -2,12 +2,6 @@
 
 ## Style / UI
 - Add "light" theme and add theme picker (light/dark/system) (on control strip)
-- Piece sets per https://github.com/lichess-org/lila/blob/master/COPYING.md
-  - cburnett
-  - merida 
-  - alpha 
-  - companion
-  - fresca
 
 ## Testing
 - Improve coverage of render module with React Testing

@@ -7,17 +7,24 @@ export interface UseBoardThemeReturn {
 }
 
 export function useBoardTheme(): UseBoardThemeReturn {
-  const [boardTheme, setBoardTheme] = useState<BoardTheme>('brown')
+  const [boardTheme, setBoardTheme] = useState<BoardTheme>(() => {
+    return (localStorage.getItem('boardTheme') as BoardTheme) ?? 'brown'
+  })
 
   useEffect(() => {
+    const cached = (localStorage.getItem('boardTheme') as BoardTheme) ?? 'brown'
+    document.documentElement.dataset.boardTheme = cached
+
     void window.electron.getBoardTheme().then((theme) => {
       setBoardTheme(theme)
+      localStorage.setItem('boardTheme', theme)
       document.documentElement.dataset.boardTheme = theme
     })
   }, [])
 
   const handleThemeChange = useCallback((theme: BoardTheme) => {
     setBoardTheme(theme)
+    localStorage.setItem('boardTheme', theme)
     document.documentElement.dataset.boardTheme = theme
     void window.electron.setBoardTheme(theme)
   }, [])

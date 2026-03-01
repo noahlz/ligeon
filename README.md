@@ -98,3 +98,17 @@ Sound files in `public/sounds/` copied from [Lichess](https://github.com/lichess
 
 See: [lichess-org/lila/COPYING.md](https://github.com/lichess-org/lila/blob/master/COPYING.md)
 
+## Piece Set Attribution
+
+Chess piece SVGs in `public/pieces/` sourced from [lichess-org/lila](https://github.com/lichess-org/lila).
+
+See: [lichess-org/lila/COPYING.md](https://github.com/lichess-org/lila/blob/master/COPYING.md)
+
+| Set | Author | License |
+|-----|--------|---------|
+| **cburnett** | Colin M.L. Burnett | [GPLv2+](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) |
+| **merida** | Armando Hernandez Marroquin | [GPLv2+](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) |
+| **alpha** | Eric Bentzen | Free for personal non-commercial use |
+| **companion** | David L. Brown | Freeware |
+| **fresca** | sadsnake1 | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) |
+

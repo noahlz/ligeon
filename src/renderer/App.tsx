@@ -17,6 +17,7 @@ import { getCheckColor } from './utils/chessHelpers.js'
 import { useAutoPlay } from './hooks/useAutoPlay.js'
 import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardTheme } from './hooks/useBoardTheme.js'
+import { usePieceSet } from './hooks/usePieceSet.js'
 import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
@@ -50,6 +51,9 @@ export default function App() {
 
   // Board theme
   const { boardTheme, handleThemeChange } = useBoardTheme()
+
+  // Piece set
+  const { pieceSet, handlePieceSetChange } = usePieceSet()
 
   // Board orientation
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
@@ -364,6 +368,8 @@ export default function App() {
                   variationComments={commentState.variationComments}
                   boardTheme={boardTheme}
                   onThemeChange={handleThemeChange}
+                  pieceSet={pieceSet}
+                  onPieceSetChange={handlePieceSetChange}
                 />
               </>
             ) : (

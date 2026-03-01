@@ -4,10 +4,11 @@ import { capitalizeFirst } from '../../utils/formatters.js'
 import { cn } from '@/lib/utils.js'
 
 const THEME_COLORS: Record<BoardTheme, { light: string; dark: string }> = {
-  brown: { light: '#f0d9b5', dark: '#b58863' },
-  green: { light: '#ffffdd', dark: '#86a666' },
-  blue:  { light: '#dee3e6', dark: '#8ca2ad' },
-  grey:  { light: '#c8c8c8', dark: '#7a7a7a' },
+  brown:  { light: '#f0d9b5', dark: '#b58863' },
+  green:  { light: '#ffffdd', dark: '#86a666' },
+  blue:   { light: '#dee3e6', dark: '#8ca2ad' },
+  purple: { light: '#e8d8f0', dark: '#9b72b0' },
+  grey:   { light: '#c8c8c8', dark: '#7a7a7a' },
 }
 
 interface BoardThemeSectionProps {
@@ -17,7 +18,7 @@ interface BoardThemeSectionProps {
 
 export function BoardThemeSection({ boardTheme, onThemeChange }: BoardThemeSectionProps) {
   return (
-    <div className="grid grid-cols-4 gap-3">
+    <div className="grid grid-cols-5 gap-3">
       {BOARD_THEMES.map((theme) => {
         const { light, dark } = THEME_COLORS[theme]
         const isActive = boardTheme === theme
