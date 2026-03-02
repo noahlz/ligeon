@@ -39,12 +39,12 @@ src/
 
 ## Barrel Exports
 
-`src/shared/` uses `index.ts` barrels — import from the directory.
+`src/shared/` uses `index.ts` barrels — import from the directory.  
 **`src/renderer/utils/` has NO barrel** — import directly from the individual file.
 
 ## Business Logic Extraction Rule
 
-**Pure function with no React dependencies → extract to `renderer/utils/` and add a unit test.**
+**Pure function with no React dependencies → extract to `renderer/utils/` and add a unit test.**  
 **Logic that reads/mutates React state → stays in hooks or components.**
 
 Before adding a utility, scan `renderer/utils/` for existing files that logically own the concept (e.g. board math → `boardUtils.ts`, string formatting → `formatters.ts`, move indexing → `moveFormatter.ts`). Do not create a new file when an existing one fits.
