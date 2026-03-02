@@ -1,23 +1,17 @@
 # Ligeon
 
-Electron desktop app for viewing chess games (PGN). Board UI powered by Lichess Chessground. Built with npm.
+Electron desktop app for viewing chess games. Board UI powered by Lichess Chessground.
 
-*Pre-release — move fast, break things.*
-
-See `package.json` for dependencies and npm scripts.
+> **NOTE: This project is pre-release!**
+> - If you change code, don't worry about making it "backwards-compatable"
+> - No data migrations. Users will delete and re-import game collections.
+> - When in doubt: "Move fast and break things."
 
 ## After Changes
 
 1. Use MCP `getDiagnostics` tool to check for issues with edited files.
 2. Run `npm run check > .logs/check.log 2>&1 && echo "✓ Tests passed." || echo "✗ Tests failed";`
 3. Inspect the log only if it fails (exit code != 0).
-
-**If `npm run check` fails**, read `check.log` to diagnose:
-- **Lint errors** (ESLint) — style/convention violations, fix with `npm run lint:fix`
-- **Type errors** (TypeScript) — type mismatches, load `.claude/memory/BUILD.md` for guidance
-- **Unused code** (knip) — unreachable exports or imports
-- **Test failures** — view test output and stack traces in the log; load `.claude/memory/TESTING.md` for test guidance
-- **Coverage threshold failures** — check `.coverage/coverage.json`
 
 ## Reference Files
 
