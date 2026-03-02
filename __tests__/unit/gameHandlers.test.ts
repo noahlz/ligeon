@@ -48,88 +48,89 @@ afterEach(() => {
 })
 
 describe('searchGames', () => {
-  test('returns all games with empty filters', async () => {
-    const result = await searchGames(TEST_COLLECTION, {}, tmpDir)
+  test('returns all games with empty filters', () => {
+    const result = searchGames(TEST_COLLECTION, {}, tmpDir)
     expect(result.length).toBe(3)
   })
 
-  test('returns empty array for invalid collectionId', async () => {
-    const result = await searchGames('', {}, tmpDir)
+  test('returns empty array for invalid collectionId', () => {
+    const result = searchGames('', {}, tmpDir)
     expect(result).toEqual([])
   })
 
-  test('filters by white player name (substring match)', async () => {
-    const result = await searchGames(TEST_COLLECTION, { white: 'Fischer' }, tmpDir)
+  test('filters by white player name (substring match)', () => {
+    const result = searchGames(TEST_COLLECTION, { white: 'Fischer' }, tmpDir)
     expect(result.length).toBe(1)
     expect(result[0].white).toBe('Fischer')
   })
 
-  test('returns empty array when no games match filter', async () => {
-    const result = await searchGames(TEST_COLLECTION, { white: 'Polgar' }, tmpDir)
+  test('returns empty array when no games match filter', () => {
+    const result = searchGames(TEST_COLLECTION, { white: 'Polgar' }, tmpDir)
     expect(result).toEqual([])
   })
 })
 
 describe('getGameMoves', () => {
-  test('returns full game data for valid id', async () => {
-    const result = await getGameMoves(TEST_COLLECTION, 1, tmpDir)
+  test('returns full game data for valid id', () => {
+    const result = getGameMoves(TEST_COLLECTION, 1, tmpDir)
     expect(result).not.toBeNull()
     expect(result!.id).toBe(1)
     expect(result!.white).toBe('Kasparov')
     expect(result!.moves).toBe('e4 e5 Nf3')
   })
 
-  test('returns null for non-existent gameId', async () => {
-    const result = await getGameMoves(TEST_COLLECTION, 9999, tmpDir)
+  test('returns null for non-existent gameId', () => {
+    const result = getGameMoves(TEST_COLLECTION, 9999, tmpDir)
     expect(result).toBeNull()
   })
 
-  test('returns null for invalid gameId (zero)', async () => {
-    const result = await getGameMoves(TEST_COLLECTION, 0, tmpDir)
+  test('returns null for invalid gameId (zero)', () => {
+    const result = getGameMoves(TEST_COLLECTION, 0, tmpDir)
     expect(result).toBeNull()
   })
 
-  test('returns null for invalid collectionId', async () => {
-    const result = await getGameMoves('', 1, tmpDir)
+  test('returns null for invalid collectionId', () => {
+    const result = getGameMoves('', 1, tmpDir)
     expect(result).toBeNull()
   })
 })
 
 describe('getGameCount', () => {
-  test('returns correct count after insertions', async () => {
-    const count = await getGameCount(TEST_COLLECTION, tmpDir)
+  test('returns correct count after insertions', () => {
+    const count = getGameCount(TEST_COLLECTION, tmpDir)
     expect(count).toBe(3)
   })
 
-  test('returns 0 for invalid collectionId', async () => {
-    const count = await getGameCount('', tmpDir)
+  test('returns 0 for invalid collectionId', () => {
+    const count = getGameCount('', tmpDir)
     expect(count).toBe(0)
   })
 })
 
 describe('getAvailableDates', () => {
-  test('returns sorted distinct dates as YYYYMMDD integers', async () => {
-    const dates = await getAvailableDates(TEST_COLLECTION, undefined, tmpDir)
+  test('returns sorted distinct dates as YYYYMMDD integers', () => {
+    const dates = getAvailableDates(TEST_COLLECTION, undefined, tmpDir)
     expect(dates).toEqual([19720701, 19850101, 19950301])
   })
 
-  test('returns empty array for invalid collectionId', async () => {
-    const dates = await getAvailableDates('', undefined, tmpDir)
+  test('returns empty array for invalid collectionId', () => {
+    const dates = getAvailableDates('', undefined, tmpDir)
     expect(dates).toEqual([])
   })
 })
 
 describe('getAvailableEcoCodes', () => {
-  test('returns ECO codes with counts', async () => {
-    const codes = await getAvailableEcoCodes(TEST_COLLECTION, undefined, tmpDir)
-    expect(codes.length).toBeGreaterThan(0)
+  test('returns ECO codes with counts', () => {
+    const codes = getAvailableEcoCodes(TEST_COLLECTION, undefined, tmpDir)
+    // Seed has exactly 2 distinct ECO codes: E12 (2 games) and C95 (1 game)
+    expect(codes.length).toBe(2)
     const e12 = codes.find(c => c.eco === 'E12')
     expect(e12).toBeDefined()
     expect(e12!.count).toBe(2)
   })
 
-  test('returns empty array for invalid collectionId', async () => {
-    const codes = await getAvailableEcoCodes('', undefined, tmpDir)
+  test('returns empty array for invalid collectionId', () => {
+    const codes = getAvailableEcoCodes('', undefined, tmpDir)
     expect(codes).toEqual([])
   })
 })

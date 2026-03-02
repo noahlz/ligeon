@@ -59,9 +59,9 @@ describe('PGN Import Flow - Integration Tests', () => {
     const firstGame = fischerWhiteGames[0]
     const gameWithMoves = db.getGameWithMoves(firstGame.id)
 
-    expect(gameWithMoves).toBeTruthy()
-    expect(gameWithMoves!.moves).toBeTruthy()
-    expect(gameWithMoves!.moves.length).toBeGreaterThan(0)
+    expect(gameWithMoves).not.toBeNull()
+    expect(gameWithMoves!.moves).not.toBe('')
+    expect(gameWithMoves!.moves.length).toBeGreaterThan(10)
 
     // Verify game has Fischer as white
     expect(gameWithMoves!.white).toContain('Fischer')
@@ -92,9 +92,6 @@ describe('PGN Import Flow - Integration Tests', () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ligeon-integration-'))
     try {
       const samplePgn = path.join(process.cwd(), 'resources', 'sample-games', 'tal-life-and-games.pgn')
-
-      // Verify sample file exists
-      expect(fs.existsSync(samplePgn)).toBe(true)
 
       const result = await importAndIndexPgn(
         samplePgn,

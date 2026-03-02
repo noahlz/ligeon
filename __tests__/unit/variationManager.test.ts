@@ -5,6 +5,9 @@ import {
 } from '../../src/renderer/utils/variationManager.js'
 
 const AFTER_E4_FEN = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+// chessops omits the en passant square when no adjacent pawn can actually capture
+const AFTER_E4_E5_FEN = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2'
+const AFTER_E4_E5_NF3_FEN = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'
 
 describe('VariationManager', () => {
   describe('creation', () => {
@@ -79,11 +82,11 @@ describe('VariationManager', () => {
 
       manager.goto(1)
       const fen1 = manager.getFen()
-      expect(fen1).toContain('4p3') // e5 pawn
+      expect(fen1).toBe(AFTER_E4_E5_FEN)
 
       manager.goto(2)
       const fen2 = manager.getFen()
-      expect(fen2).toContain('5N2') // Nf3
+      expect(fen2).toBe(AFTER_E4_E5_NF3_FEN)
     })
 
     test('getLastMove returns correct squares', () => {

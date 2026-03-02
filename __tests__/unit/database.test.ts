@@ -47,107 +47,33 @@ describe('GameDatabase', () => {
   })
 
   test('inserts game', () => {
-    const game: GameData = {
-      white: 'Kasparov',
-      black: 'Karpov',
-      event: 'Championship',
-      date: 19850315,
-      result: 1.0,
-      ecoCode: 'C95',
-      whiteElo: 2740,
-      blackElo: 2710,
-      site: 'Moscow',
-      round: '1',
-      moveCount: 42,
-      moves: '1. e4 c5...',
-    }
-    const result = db.insertGame(game)
+    const result = db.insertGame(makeGameData({
+      white: 'Kasparov', black: 'Karpov', event: 'Championship',
+      date: 19850315, result: 1.0, ecoCode: 'C95',
+      whiteElo: 2740, blackElo: 2710, site: 'Moscow', round: '1',
+      moveCount: 42, moves: '1. e4 c5...',
+    }))
     expect(result.changes).toBe(1)
   })
 
   test('searches by white player', () => {
-    db.insertGame({
-      white: 'Kasparov',
-      black: 'Karpov',
-      event: 'Test',
-      date: 19560101,
-      result: 1.0,
-      ecoCode: null,
-      whiteElo: 2740,
-      blackElo: 2710,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. e4',
-    })
+    db.insertGame(makeGameData({ white: 'Kasparov', black: 'Karpov', whiteElo: 2740, blackElo: 2710 }))
     const results = db.searchGames({ white: 'Kasparov' })
     expect(results.length).toBe(1)
     expect(results[0].white).toBe('Kasparov')
   })
 
   test('searches by black player', () => {
-    db.insertGame({
-      white: 'Anand',
-      black: 'Carlsen',
-      event: 'Test',
-      date: 19560101,
-      result: 0.0,
-      ecoCode: null,
-      whiteElo: 2800,
-      blackElo: 2850,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. e4',
-    })
+    db.insertGame(makeGameData({ white: 'Anand', black: 'Carlsen', result: 0.0, whiteElo: 2800, blackElo: 2850 }))
     const results = db.searchGames({ black: 'Carlsen' })
     expect(results.length).toBe(1)
     expect(results[0].black).toBe('Carlsen')
   })
 
   test('searches by player (white or black)', () => {
-    db.insertGame({
-      white: 'Fischer',
-      black: 'Spassky',
-      event: 'Test 1',
-      date: 19560101,
-      result: 1.0,
-      ecoCode: null,
-      whiteElo: 2700,
-      blackElo: 2650,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. e4',
-    })
-    db.insertGame({
-      white: 'Tal',
-      black: 'Fischer',
-      event: 'Test 2',
-      date: 19560315,
-      result: 0.0,
-      ecoCode: null,
-      whiteElo: 2680,
-      blackElo: 2700,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. d4',
-    })
-    db.insertGame({
-      white: 'Petrosian',
-      black: 'Korchnoi',
-      event: 'Test 3',
-      date: 19571231,
-      result: 0.5,
-      ecoCode: null,
-      whiteElo: 2650,
-      blackElo: 2640,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. c4',
-    })
+    db.insertGame(makeGameData({ white: 'Fischer', black: 'Spassky', event: 'Test 1', whiteElo: 2700, blackElo: 2650 }))
+    db.insertGame(makeGameData({ white: 'Tal', black: 'Fischer', event: 'Test 2', date: 19560315, result: 0.0, whiteElo: 2680, blackElo: 2700, moves: '1. d4' }))
+    db.insertGame(makeGameData({ white: 'Petrosian', black: 'Korchnoi', event: 'Test 3', date: 19571231, result: 0.5, whiteElo: 2650, blackElo: 2640, moves: '1. c4' }))
     const results = db.searchGames({ player: 'Fischer' })
     expect(results.length).toBe(2)
     expect(results.some(r => r.white === 'Fischer')).toBe(true)
@@ -155,59 +81,20 @@ describe('GameDatabase', () => {
   })
 
   test('searches by result', () => {
-    db.insertGame({
-      white: 'A',
-      black: 'B',
-      event: 'E',
-      date: 19560101,
-      result: 1.0,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. e4',
-    })
+    db.insertGame(makeGameData({ white: 'A', black: 'B', event: 'E', result: 1.0 }))
     const results = db.searchGames({ results: [1.0] })
     expect(results.length).toBe(1)
   })
 
   test('searches by ELO range', () => {
-    db.insertGame({
-      white: 'Player1',
-      black: 'Player2',
-      event: 'Test',
-      date: 19560101,
-      result: 0.5,
-      ecoCode: null,
-      whiteElo: 2500,
-      blackElo: 2400,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. e4',
-    })
+    db.insertGame(makeGameData({ result: 0.5, whiteElo: 2500, blackElo: 2400 }))
     const results = db.searchGames({ whiteEloMin: 2400, whiteEloMax: 2600 })
     expect(results.length).toBe(1)
     expect(results[0].whiteElo).toBe(2500)
   })
 
   test('retrieves game with moves', () => {
-    db.insertGame({
-      white: 'Test',
-      black: 'Player',
-      event: 'Event',
-      date: 19560101,
-      result: 1.0,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 3,
-      moves: '1. e4 c5 2. Nf3',
-    })
+    db.insertGame(makeGameData({ white: 'Test', black: 'Player', event: 'Event', moveCount: 3, moves: '1. e4 c5 2. Nf3' }))
     const game = db.getGameWithMoves(1)
     expect(game).not.toBeNull()
     expect(game?.moves).toBe('1. e4 c5 2. Nf3')
@@ -221,183 +108,39 @@ describe('GameDatabase', () => {
   test('returns game count', () => {
     const games: GameData[] = Array(5)
       .fill(null)
-      .map((_, i) => ({
-        white: `P${i}`,
-        black: 'O',
-        event: 'T',
-        date: 20000101 + i,
-        result: 1.0,
-        ecoCode: null,
-        whiteElo: null,
-        blackElo: null,
-        site: null,
-        round: null,
-        moveCount: 1,
-        moves: '1. e4',
-      }))
+      .map((_, i) => makeGameData({ white: `P${i}`, date: 20000101 + i }))
     db.insertGamesBatch(games)
     expect(db.getGameCount()).toBe(5)
   })
 
   test('batch insert works', () => {
-    const games: GameData[] = [
-      {
-        white: 'Player1',
-        black: 'Player2',
-        event: 'Game1',
-        date: 19560101,
-        result: 1.0,
-        ecoCode: null,
-        whiteElo: null,
-        blackElo: null,
-        site: null,
-        round: null,
-        moveCount: 1,
-        moves: '1. e4',
-      },
-      {
-        white: 'Player3',
-        black: 'Player4',
-        event: 'Game2',
-        date: 19560315,
-        result: 0.5,
-        ecoCode: null,
-        whiteElo: null,
-        blackElo: null,
-        site: null,
-        round: null,
-        moveCount: 1,
-        moves: '1. d4',
-      },
-    ]
-    db.insertGamesBatch(games)
+    db.insertGamesBatch([
+      makeGameData({ white: 'Player1', black: 'Player2', event: 'Game1' }),
+      makeGameData({ white: 'Player3', black: 'Player4', event: 'Game2', date: 19560315, result: 0.5, moves: '1. d4' }),
+    ])
     expect(db.getGameCount()).toBe(2)
   })
 
   test('clears all games', () => {
-    db.insertGame({
-      white: 'A',
-      black: 'B',
-      event: 'E',
-      date: 19560101,
-      result: 1.0,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. e4',
-    })
+    db.insertGame(makeGameData({ white: 'A', black: 'B', event: 'E' }))
     expect(db.getGameCount()).toBe(1)
     db.clearGames()
     expect(db.getGameCount()).toBe(0)
   })
 
   test('returns available dates (YYYYMMDD)', () => {
-    db.insertGame({
-      white: 'A',
-      black: 'B',
-      event: 'E1',
-      date: 19560101,
-      result: 1.0,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. e4',
-    })
-    db.insertGame({
-      white: 'C',
-      black: 'D',
-      event: 'E2',
-      date: 19560315,
-      result: 0.5,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. d4',
-    })
-    db.insertGame({
-      white: 'E',
-      black: 'F',
-      event: 'E3',
-      date: 19571231,
-      result: 0.0,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. c4',
-    })
-    db.insertGame({
-      white: 'G',
-      black: 'H',
-      event: 'E4',
-      date: 19560315, // Duplicate date
-      result: 1.0,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. Nf3',
-    })
+    db.insertGame(makeGameData({ white: 'A', black: 'B', event: 'E1', date: 19560101 }))
+    db.insertGame(makeGameData({ white: 'C', black: 'D', event: 'E2', date: 19560315, result: 0.5, moves: '1. d4' }))
+    db.insertGame(makeGameData({ white: 'E', black: 'F', event: 'E3', date: 19571231, result: 0.0, moves: '1. c4' }))
+    db.insertGame(makeGameData({ white: 'G', black: 'H', event: 'E4', date: 19560315, moves: '1. Nf3' })) // Duplicate date
     const dates = db.getAvailableDates()
     expect(dates).toEqual([19560101, 19560315, 19571231]) // Sorted, distinct
   })
 
   test('filters games by date range with null dates included', () => {
-    db.insertGame({
-      white: 'A',
-      black: 'B',
-      event: 'E1',
-      date: 19560101,
-      result: 1.0,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. e4',
-    })
-    db.insertGame({
-      white: 'C',
-      black: 'D',
-      event: 'E2',
-      date: 19560315,
-      result: 0.5,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. d4',
-    })
-    db.insertGame({
-      white: 'E',
-      black: 'F',
-      event: 'E3',
-      date: null, // Unknown date
-      result: 0.0,
-      ecoCode: null,
-      whiteElo: null,
-      blackElo: null,
-      site: null,
-      round: null,
-      moveCount: 1,
-      moves: '1. c4',
-    })
+    db.insertGame(makeGameData({ white: 'A', black: 'B', event: 'E1', date: 19560101 }))
+    db.insertGame(makeGameData({ white: 'C', black: 'D', event: 'E2', date: 19560315, result: 0.5, moves: '1. d4' }))
+    db.insertGame(makeGameData({ white: 'E', black: 'F', event: 'E3', date: null, result: 0.0, moves: '1. c4' })) // Unknown date
     // Filter for dates >= 19560315
     const results = db.searchGames({ dateFrom: 19560315 })
     // Should include both 19560315 and null date game
@@ -508,20 +251,10 @@ describe('GameDatabase', () => {
 
     beforeEach(() => {
       // Insert a test game
-      const result = db.insertGame({
-        white: 'Player1',
-        black: 'Player2',
-        event: 'Test',
-        date: 20200101,
-        result: 0.5,
-        ecoCode: 'C50',
-        whiteElo: 2000,
-        blackElo: 2000,
-        site: null,
-        round: null,
-        moveCount: 20,
-        moves: '1. e4 e5 2. Nf3 Nc6',
-      })
+      const result = db.insertGame(makeGameData({
+        ecoCode: 'C50', whiteElo: 2000, blackElo: 2000,
+        date: 20200101, result: 0.5, moveCount: 20, moves: '1. e4 e5 2. Nf3 Nc6',
+      }))
       gameId = result.lastInsertRowid as number
     })
 
