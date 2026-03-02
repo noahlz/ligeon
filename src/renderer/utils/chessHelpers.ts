@@ -15,21 +15,25 @@ import type { NormalMove, Role } from 'chessops/types'
 import type { MoveType } from '../types/moveTypes.js'
 
 /**
+ * Parse a FEN string into a Chess position, returning null on any error.
+ * Centralizes the parseFen → error check → Chess.fromSetup → error check pattern.
+ */
+function chessFromFen(fen: string): Chess | null {
+  const setup = parseFen(fen)
+  if (setup.isErr) { console.error('Failed to parse FEN:', fen, setup.error); return null }
+  const pos = Chess.fromSetup(setup.value)
+  if (pos.isErr) { console.error('Failed to create Chess from FEN:', fen, pos.error); return null }
+  return pos.value
+}
+
+/**
  * Get legal move destinations from a FEN position for chessground.
  * Returns empty map if FEN is invalid.
  */
 export function getDestsFromFen(fen: string): Map<string, string[]> {
-  const setup = parseFen(fen)
-  if (setup.isErr) {
-    console.error('Failed to parse FEN for getDests:', fen, setup.error)
-    return new Map()
-  }
-  const pos = Chess.fromSetup(setup.value)
-  if (pos.isErr) {
-    console.error('Failed to create Chess position from FEN:', fen, pos.error)
-    return new Map()
-  }
-  return chessgroundDests(pos.value)
+  const pos = chessFromFen(fen)
+  if (!pos) return new Map()
+  return chessgroundDests(pos)
 }
 
 /**
@@ -60,16 +64,8 @@ export function tryMoveFromFen(
   to: string,
   promotion?: string
 ): string | null {
-  const setup = parseFen(fen)
-  if (setup.isErr) {
-    console.error('Failed to parse FEN for tryMove:', fen, setup.error)
-    return null
-  }
-  const pos = Chess.fromSetup(setup.value)
-  if (pos.isErr) {
-    console.error('Failed to create Chess position from FEN:', fen, pos.error)
-    return null
-  }
+  const pos = chessFromFen(fen)
+  if (!pos) return null
 
   const fromSq = parseSquare(from)
   const toSq = parseSquare(to)
@@ -81,9 +77,8 @@ export function tryMoveFromFen(
     promotion: promotion as Role | undefined,
   }
 
-  // Check if the move is legal
-  if (!pos.value.isLegal(move)) return null
-  return makeSan(pos.value, move)
+  if (!pos.isLegal(move)) return null
+  return makeSan(pos, move)
 }
 
 /**

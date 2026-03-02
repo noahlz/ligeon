@@ -29,16 +29,12 @@ import { useAnnotationState } from './hooks/useAnnotationState.js'
 import { useTour } from './hooks/useTour.js'
 import { sortNagsByCategory } from './utils/nag.js'
 import type { GameRow, GameSearchResult } from '../shared/types/game.js'
+import type { CollectionMetadata } from './types/electron.js'
 import type { Key } from '@lichess-org/chessground/types'
-
-interface Collection {
-  id: string
-  name: string
-}
 
 export default function App() {
   // Game Collections state
-  const [collections, setCollections] = useState<Collection[]>([])
+  const [collections, setCollections] = useState<CollectionMetadata[]>([])
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [importFilePath, setImportFilePath] = useState<string | null>(null)
@@ -273,6 +269,52 @@ export default function App() {
     setCollections(cols)
   }
 
+  // Named handlers for MoveList annotation/comment actions.
+  // Guard pattern (selectedGameCollectionId && selectedGame) is centralized here
+  // rather than repeated inline across 7 JSX lambda props.
+
+  const handleSetAnnotation = useCallback((ply: number, nag: number) => {
+    if (!selectedGameCollectionId || !selectedGame) return
+    void annotationState.setAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
+  }, [selectedGameCollectionId, selectedGame, annotationState])
+
+  const handleRemoveAnnotation = useCallback((ply: number, nag: number) => {
+    if (!selectedGameCollectionId || !selectedGame) return
+    void annotationState.removeAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
+  }, [selectedGameCollectionId, selectedGame, annotationState])
+
+  const handleSaveComment = useCallback(() => {
+    if (!selectedGameCollectionId || !selectedGame) return
+    void commentState.saveComment(selectedGameCollectionId, selectedGame.id)
+  }, [selectedGameCollectionId, selectedGame, commentState])
+
+  const handleConfirmCommentDeletion = useCallback(() => {
+    if (!selectedGameCollectionId || !selectedGame) return
+    void commentState.confirmDeletion(selectedGameCollectionId, selectedGame.id)
+  }, [selectedGameCollectionId, selectedGame, commentState])
+
+  const handleSaveVariationComment = useCallback((variationId: number, text: string) => {
+    if (!selectedGameCollectionId || !selectedGame) return
+    void window.electron.upsertVariationComment(
+      selectedGameCollectionId, selectedGame.id, variationId, text
+    ).then(saved => {
+      if (saved) commentState.updateVariationComment(saved)
+    }).catch((error: unknown) => {
+      showErrorToast('Failed to save variation comment', error)
+    })
+  }, [selectedGameCollectionId, selectedGame, commentState])
+
+  const handleDeleteVariationComment = useCallback((variationId: number) => {
+    if (!selectedGameCollectionId || !selectedGame) return
+    void window.electron.deleteVariationComment(
+      selectedGameCollectionId, selectedGame.id, variationId
+    ).then(() => {
+      commentState.removeVariationComment(variationId)
+    }).catch((error: unknown) => {
+      showErrorToast('Failed to delete variation comment', error)
+    })
+  }, [selectedGameCollectionId, selectedGame, commentState])
+
   // Stable callback for drag-to-reorder variations.
   // Updates local state optimistically (no exitVariation side-effect) after IPC.
   const handleReorderVariations = useCallback(async (branchPly: number, orderedIds: number[]) => {
@@ -425,16 +467,8 @@ export default function App() {
                     isInVariation={variationState.isInVariation}
                     annotationHandlers={{
                       annotations: annotationState.annotations,
-                      onSetAnnotation: (ply, nag) => {
-                        if (selectedGameCollectionId && selectedGame) {
-                          void annotationState.setAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
-                        }
-                      },
-                      onRemoveAnnotation: (ply: number, nag: number) => {
-                        if (selectedGameCollectionId && selectedGame) {
-                          void annotationState.removeAnnotation(selectedGameCollectionId, selectedGame.id, ply, nag)
-                        }
-                      },
+                      onSetAnnotation: handleSetAnnotation,
+                      onRemoveAnnotation: handleRemoveAnnotation,
                     }}
                     commentHandlers={{
                       comments: commentState.comments,
@@ -442,34 +476,12 @@ export default function App() {
                       editValue: commentState.editValue,
                       onEdit: commentState.startEditing,
                       onValueChange: commentState.setEditValue,
-                      onSave: selectedGameCollectionId && selectedGame
-                        ? () => { void commentState.saveComment(selectedGameCollectionId, selectedGame.id) }
-                        : undefined,
+                      onSave: handleSaveComment,
                       onCancel: commentState.cancelEditing,
                       onDeleteRequest: commentState.requestDeletion,
                       variationComments: commentState.variationComments,
-                      onSaveVariationComment: (variationId: number, text: string) => {
-                        if (selectedGameCollectionId && selectedGame) {
-                          void window.electron.upsertVariationComment(
-                            selectedGameCollectionId, selectedGame.id, variationId, text
-                          ).then(saved => {
-                            if (saved) commentState.updateVariationComment(saved)
-                          }).catch((error: unknown) => {
-                            showErrorToast('Failed to save variation comment', error)
-                          })
-                        }
-                      },
-                      onDeleteVariationComment: (variationId: number) => {
-                        if (selectedGameCollectionId && selectedGame) {
-                          void window.electron.deleteVariationComment(
-                            selectedGameCollectionId, selectedGame.id, variationId
-                          ).then(() => {
-                            commentState.removeVariationComment(variationId)
-                          }).catch((error: unknown) => {
-                            showErrorToast('Failed to delete variation comment', error)
-                          })
-                        }
-                      },
+                      onSaveVariationComment: handleSaveVariationComment,
+                      onDeleteVariationComment: handleDeleteVariationComment,
                     }}
                   />
                 )}
@@ -532,11 +544,7 @@ export default function App() {
           isOpen={commentState.pendingDeletion !== null}
           title="Delete Comment"
           message="Delete this comment? This cannot be undone."
-          onConfirm={() => {
-            if (selectedGameCollectionId && selectedGame) {
-              void commentState.confirmDeletion(selectedGameCollectionId, selectedGame.id)
-            }
-          }}
+          onConfirm={handleConfirmCommentDeletion}
           onCancel={commentState.cancelDeletion}
           confirmIcon="trash"
         />

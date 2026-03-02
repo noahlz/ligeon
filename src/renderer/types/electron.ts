@@ -26,6 +26,8 @@ export interface GameFilters {
   limit?: number
 }
 
+// Kept in sync with the local ImportProgressData type in src/main/preload.ts.
+// See preload.ts for why the types cannot be shared (CJS/ESM boundary).
 export type ImportProgressData =
   | { type: 'progress'; parsed: number; indexed: number; skipped: number }
   | { type: 'log'; logs: Array<{ type: 'info' | 'success' | 'warning' | 'error' | 'debug'; message: string; timestamp: number }> }

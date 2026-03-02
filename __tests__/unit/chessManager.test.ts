@@ -1,9 +1,9 @@
 import { describe, test, expect } from 'vitest'
 import {
   createChessManager,
-  getResultDisplay,
   type ChessManager,
 } from '../../src/renderer/utils/chessManager.js'
+import { getResultDisplay } from '../../src/renderer/utils/formatters.js'
 
 describe('chessManager', () => {
   describe('getResultDisplay', () => {

@@ -90,12 +90,9 @@ export function useCommentState(): UseCommentStateReturn {
   const startEditing = useCallback((ply: number) => {
     setEditingPly(ply)
     // Pre-populate with existing comment text so user can edit rather than retype
-    setComments(current => {
-      const existing = current.find(c => c.ply === ply)
-      setEditValue(existing?.text ?? '')
-      return current
-    })
-  }, [])
+    const existing = comments.find(c => c.ply === ply)
+    setEditValue(existing?.text ?? '')
+  }, [comments])
 
   const saveComment = useCallback(async (collectionId: string, gameId: number) => {
     if (editingPly === null) return

@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react'
 import type { MutableRefObject } from 'react'
 import type { Key } from '@lichess-org/chessground/types'
+import { INITIAL_FEN } from 'chessops/fen'
 import type { NavigableManager } from '../types/navigableManager.js'
 import { playMoveSound } from '../utils/audioManager.js'
-
-const INITIAL_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 export interface UseBoardStateParams {
   /** Whether sound playback is enabled */
