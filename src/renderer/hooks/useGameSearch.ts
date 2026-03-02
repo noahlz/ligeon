@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import type { GameSearchResult } from '../../shared/types/game.js'
+import type { GameSearchResult, GameListLimit } from '../../shared/types/game.js'
 import type { GameFilterValues } from './useGameFilters.js'
 import { showErrorToast } from '../utils/errorToast.js'
 import { isDateStale, buildOptionFilters } from '../utils/filterValidation.js'
-
-const SEARCH_RESULT_LIMIT = 200
 
 export interface UseGameSearchParams {
   /** Currently selected collection ID */
@@ -13,6 +11,8 @@ export interface UseGameSearchParams {
   searchTerm: string
   /** Current filter values */
   filters: GameFilterValues
+  /** Maximum number of games to return (undefined = no limit) */
+  limit: GameListLimit
   /** Called when collectionId changes — use to reset filters */
   onCollectionChange?: () => void
 }
@@ -38,6 +38,7 @@ export function useGameSearch({
   collectionId,
   searchTerm,
   filters,
+  limit,
   onCollectionChange,
 }: UseGameSearchParams): UseGameSearchReturn {
   const [games, setGames] = useState<GameSearchResult[]>([])
@@ -110,13 +111,13 @@ export function useGameSearch({
         dateTo: filters.dateTo,
       }),
       ecoCodes: filters.ecoCodes.length > 0 ? filters.ecoCodes : undefined,
-      limit: SEARCH_RESULT_LIMIT,
+      limit: limit === 'unlimited' ? undefined : limit,
     })
       .then(setGames)
       .catch((error) => {
         showErrorToast('Failed to load games', error)
       })
-  }, [collectionId, searchTerm, filters])
+  }, [collectionId, searchTerm, filters, limit])
 
   return {
     games,

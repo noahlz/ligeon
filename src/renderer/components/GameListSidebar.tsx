@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Filter, SquareChevronDown } from 'lucide-react'
+import { AlertTriangle, Filter, SquareChevronDown } from 'lucide-react'
 import { yyyymmddToDisplay } from '../../shared/converters/dateConverter.js'
 import { resultNumericToDisplay, RESULT_FILTER_OPTIONS } from '../../shared/converters/resultConverter.js'
 import CollectionSelector from './CollectionSelector.js'
@@ -7,7 +7,8 @@ import OpeningFilter from './OpeningFilter.js'
 import { formatEcoWithOpening } from '../utils/formatters.js'
 import { useGameFilters } from '../hooks/useGameFilters.js'
 import { useGameSearch } from '../hooks/useGameSearch.js'
-import type { GameRow, GameSearchResult } from '../../shared/types/game.js'
+import type { GameRow, GameSearchResult, GameListLimit } from '../../shared/types/game.js'
+import { GAME_LIST_LIMITS } from '../../shared/types/game.js'
 import { Input } from '@/components/ui/input.js'
 import { Label } from '@/components/ui/label.js'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.js'
@@ -36,6 +37,8 @@ interface GameListSidebarProps {
   onRenameCollection?: () => void
   selectedGame: GameRow | null
   selectedGameCollectionId: string | null
+  gameListLimit: GameListLimit
+  onGameListLimitChange: (limit: GameListLimit) => void
 }
 
 export default function GameListSidebar({
@@ -49,6 +52,8 @@ export default function GameListSidebar({
   onRenameCollection,
   selectedGame,
   selectedGameCollectionId,
+  gameListLimit,
+  onGameListLimitChange,
 }: GameListSidebarProps) {
   const {
     searchTerm,
@@ -67,6 +72,7 @@ export default function GameListSidebar({
     collectionId,
     searchTerm,
     filters,
+    limit: gameListLimit,
     onCollectionChange: resetFilters,
   })
 
@@ -202,6 +208,39 @@ export default function GameListSidebar({
               </ToggleGroup>
             </div>
 
+            {/* Max games */}
+            <div className="flex items-center gap-3">
+              <Label className="text-ui-text-dim text-xs whitespace-nowrap">
+                Max games:
+              </Label>
+              <Select
+                value={String(gameListLimit)}
+                onValueChange={(value) => {
+                  const parsed = value === 'unlimited' ? 'unlimited' : (parseInt(value, 10) as GameListLimit)
+                  onGameListLimitChange(parsed)
+                }}
+              >
+                <SelectTrigger className="h-7 bg-ui-bg-element text-ui-text text-xs border-ui-border w-28 cursor-pointer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-ui-bg-box border-ui-border">
+                  {GAME_LIST_LIMITS.map((limit) => (
+                    <SelectItem key={String(limit)} value={String(limit)} className="text-xs cursor-pointer">
+                      {limit === 'unlimited' ? 'Unlimited' : limit.toLocaleString()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {gameListLimit === 'unlimited' && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertTriangle size={14} className="text-ui-accent cursor-default shrink-0" />
+                  </TooltipTrigger>
+                  <TooltipContent>Large game collections may affect performance</TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+
             {/* Reset Button */}
             <Button
               variant="secondary"
@@ -242,6 +281,11 @@ export default function GameListSidebar({
             </p>
           </div>
         ))}
+        {gameListLimit !== 'unlimited' && games.length >= gameListLimit && (
+          <div className="mt-1 px-2 py-1.5 text-xs text-ui-text-dim italic text-center">
+            More games available — use filters to narrow the list.
+          </div>
+        )}
       </div>
     </div>
   )
