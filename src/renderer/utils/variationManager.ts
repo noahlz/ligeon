@@ -11,9 +11,9 @@
 
 import { Chess } from 'chessops/chess'
 import { parseFen } from 'chessops/fen'
-import { parsePgn } from 'chessops/pgn'
 import type { NavigableManager } from '../types/navigableManager.js'
 import { type ParsedMove, playAndRecord } from './chessManager.js'
+import { parseMoves } from './moveParser.js'
 import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
 import { showErrorToast } from './errorToast.js'
 
@@ -64,13 +64,10 @@ export function createVariationManager(
   })
 
   // If existing moves provided, replay them.
-  // Route through parsePgn instead of simple split() to robustly handle move numbers,
-  // NAGs, and annotations that may be present in stored variation strings.
+  // Route through parseMoves() to robustly handle move numbers, NAGs, and annotations
+  // that may be present in stored variation strings.
   if (existingMoves && existingMoves.trim()) {
-    const games = parsePgn(existingMoves)
-    const sanMoves = games.length > 0
-      ? [...games[0].moves.mainline()].map(n => n.san)
-      : []
+    const { moves: sanMoves } = parseMoves(existingMoves)
 
     for (const san of sanMoves) {
       const parsed = playAndRecord(chess, san)

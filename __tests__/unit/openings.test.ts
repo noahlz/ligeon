@@ -19,10 +19,12 @@ describe('searchAvailableOpenings', () => {
   test('empty query returns all available codes with names and counts', () => {
     const result = searchAvailableOpenings('', sampleAvailable)
     expect(result.length).toBe(4)
+    // Each result should have a non-empty name and a count matching the input
     result.forEach(r => {
-      expect(r.eco).toBeDefined()
-      expect(r.name).toBeDefined()
-      expect(r.count).toBeGreaterThan(0)
+      const expected = sampleAvailable.find(s => s.eco === r.eco)!
+      expect(r.eco).not.toBe('')
+      expect(r.name).not.toBe('')
+      expect(r.count).toBe(expected.count)
     })
   })
 

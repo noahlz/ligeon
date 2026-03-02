@@ -8,6 +8,7 @@
  * Chess move number = Math.ceil(ply / 2).
  */
 
+import { parsePgn } from 'chessops/pgn'
 import type { VariationData } from '../../shared/types/game.js'
 
 /**
@@ -28,7 +29,9 @@ export function findMatchingVariation(
 ): VariationData | undefined {
   return variations.find(s => {
     if (s.branchPly !== branchPly) return false
-    return s.moves.split(' ')[0] === san
+    const games = parsePgn(s.moves)
+    const firstMove = games[0] ? [...games[0].moves.mainline()][0]?.san : undefined
+    return firstMove === san
   })
 }
 

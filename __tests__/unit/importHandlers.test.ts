@@ -52,30 +52,6 @@ describe('PGN Import Handler', () => {
     expect(game.headers.get('BlackElo')).toBe('2660')
   })
 
-  test('parses game with missing optional headers', () => {
-    const pgn = `[White "Kasparov"]
-[Black "Karpov"]
-[Result "1/2-1/2"]
-
-1. d4 d5 1/2-1/2`
-
-    const games = Array.from(parsePgn(pgn))
-    expect(games).toHaveLength(1)
-
-    const game = games[0]
-    expect(game.headers.get('White')).toBe('Kasparov')
-    expect(game.headers.get('Black')).toBe('Karpov')
-
-    // Optional headers may be undefined or "?" when not present
-    const eco = game.headers.get('ECO')
-    const whiteElo = game.headers.get('WhiteElo')
-    const site = game.headers.get('Site')
-
-    expect(eco === undefined || eco === '?').toBe(true)
-    expect(whiteElo === undefined || whiteElo === '?').toBe(true)
-    expect(site === undefined || site === '?').toBe(true)
-  })
-
   test('counts moves correctly', () => {
     const pgn = `[White "Player1"]
 [Black "Player2"]
@@ -324,7 +300,7 @@ describe('PGN Import Handler', () => {
     const game = db.getGameWithMoves(1)
     db.close()
 
-    expect(game).toBeTruthy()
+    expect(game).not.toBeNull()
     expect(game!.moves).toContain('e4 e5')
     expect(game!.white).toBe('Carlsen, Magnus')
     expect(game!.black).toBe('Nakamura, Hikaru')

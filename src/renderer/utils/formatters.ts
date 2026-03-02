@@ -1,5 +1,5 @@
 /**
- * Display formatting utilities for player names, ECO codes, and other UI strings.
+ * Display formatting utilities for player names, ECO codes, game results, and other UI strings.
  */
 
 import { getOpeningByEco } from './openings.js'
@@ -39,4 +39,26 @@ export function formatEcoWithOpening(ecoCode?: string | null): string {
   if (!ecoCode) return ''
   const opening = getOpeningByEco(ecoCode)
   return opening ? `${ecoCode} ${opening.name}` : ecoCode
+}
+
+/**
+ * Get display text for a game result token.
+ *
+ * @example
+ * getResultDisplay('1-0')     // => "1-0 (White Wins)"
+ * getResultDisplay('1/2-1/2') // => "1/2-1/2 (Draw)"
+ */
+export function getResultDisplay(result: string): string {
+  switch (result) {
+    case '1-0':
+      return '1-0 (White Wins)'
+    case '0-1':
+      return '0-1 (Black Wins)'
+    case '1/2-1/2':
+      return '1/2-1/2 (Draw)'
+    case '*':
+      return '* (Unfinished)'
+    default:
+      return result
+  }
 }

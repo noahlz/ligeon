@@ -8,6 +8,7 @@ import { GameDatabase, DatabaseManager } from '../../src/main/ipc/gameDatabase.j
 
 // We test via the handler functions (which go through validation + DB layer)
 // using a real in-memory SQLite database opened through the GameDatabase class.
+// All handlers are synchronous — no await needed.
 
 const TEST_COLLECTION = 'test-collection-variation-handlers'
 let tmpDir: string
@@ -31,15 +32,15 @@ afterEach(() => {
 })
 
 describe('getVariations', () => {
-  test('returns empty array when no variations exist', async () => {
-    const result = await getVariations(TEST_COLLECTION, 1, tmpDir)
+  test('returns empty array when no variations exist', () => {
+    const result = getVariations(TEST_COLLECTION, 1, tmpDir)
     expect(result).toEqual([])
   })
 
-  test('returns variations after creating some', async () => {
-    await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
-    await createVariation(TEST_COLLECTION, 1, 5, 'd4', tmpDir)
-    const result = await getVariations(TEST_COLLECTION, 1, tmpDir)
+  test('returns variations after creating some', () => {
+    createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    createVariation(TEST_COLLECTION, 1, 5, 'd4', tmpDir)
+    const result = getVariations(TEST_COLLECTION, 1, tmpDir)
     expect(result.length).toBe(2)
     expect(result[0].branchPly).toBe(3)
     expect(result[0].moves).toBe('e4')
@@ -47,20 +48,20 @@ describe('getVariations', () => {
     expect(result[1].moves).toBe('d4')
   })
 
-  test('returns empty array for invalid collectionId', async () => {
-    const result = await getVariations('', 1, tmpDir)
+  test('returns empty array for invalid collectionId', () => {
+    const result = getVariations('', 1, tmpDir)
     expect(result).toEqual([])
   })
 
-  test('returns empty array for invalid gameId', async () => {
-    const result = await getVariations(TEST_COLLECTION, 0, tmpDir)
+  test('returns empty array for invalid gameId', () => {
+    const result = getVariations(TEST_COLLECTION, 0, tmpDir)
     expect(result).toEqual([])
   })
 })
 
 describe('createVariation', () => {
-  test('creates a variation and returns VariationData with id', async () => {
-    const result = await createVariation(TEST_COLLECTION, 1, 3, 'e4 e5', tmpDir)
+  test('creates a variation and returns VariationData with id', () => {
+    const result = createVariation(TEST_COLLECTION, 1, 3, 'e4 e5', tmpDir)
     expect(result).not.toBeNull()
     expect(result!.id).toBeGreaterThan(0)
     expect(result!.branchPly).toBe(3)
@@ -68,9 +69,9 @@ describe('createVariation', () => {
     expect(result!.displayOrder).toBe(0)
   })
 
-  test('allows multiple variations at the same ply', async () => {
-    const first = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
-    const second = await createVariation(TEST_COLLECTION, 1, 3, 'd4', tmpDir)
+  test('allows multiple variations at the same ply', () => {
+    const first = createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const second = createVariation(TEST_COLLECTION, 1, 3, 'd4', tmpDir)
     expect(first).not.toBeNull()
     expect(second).not.toBeNull()
     expect(first!.displayOrder).toBe(0)
@@ -78,11 +79,9 @@ describe('createVariation', () => {
     expect(first!.id).not.toBe(second!.id)
   })
 
-  test('allows variations at different plies without limit', async () => {
-    const results = await Promise.all(
-      Array.from({ length: 20 }, (_, i) =>
-        createVariation(TEST_COLLECTION, 1, i + 1, 'e4', tmpDir)
-      )
+  test('allows variations at different plies without limit', () => {
+    const results = Array.from({ length: 20 }, (_, i) =>
+      createVariation(TEST_COLLECTION, 1, i + 1, 'e4', tmpDir)
     )
     expect(results.every(r => r !== null)).toBe(true)
     results.forEach((r, i) => {
@@ -91,39 +90,39 @@ describe('createVariation', () => {
     })
   })
 
-  test('returns null for invalid branchPly', async () => {
-    const result = await createVariation(TEST_COLLECTION, 1, 0, 'e4', tmpDir)
+  test('returns null for invalid branchPly', () => {
+    const result = createVariation(TEST_COLLECTION, 1, 0, 'e4', tmpDir)
     expect(result).toBeNull()
   })
 
-  test('returns null for invalid gameId', async () => {
-    const result = await createVariation(TEST_COLLECTION, 0, 3, 'e4', tmpDir)
+  test('returns null for invalid gameId', () => {
+    const result = createVariation(TEST_COLLECTION, 0, 3, 'e4', tmpDir)
     expect(result).toBeNull()
   })
 
-  test('returns null for invalid collectionId', async () => {
-    const result = await createVariation('', 1, 3, 'e4', tmpDir)
+  test('returns null for invalid collectionId', () => {
+    const result = createVariation('', 1, 3, 'e4', tmpDir)
     expect(result).toBeNull()
   })
 
-  test('returns null for empty moves string', async () => {
-    const result = await createVariation(TEST_COLLECTION, 1, 3, '   ', tmpDir)
+  test('returns null for empty moves string', () => {
+    const result = createVariation(TEST_COLLECTION, 1, 3, '   ', tmpDir)
     expect(result).toBeNull()
   })
 })
 
 describe('updateVariation', () => {
-  test('updates moves of an existing variation', async () => {
-    const created = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+  test('updates moves of an existing variation', () => {
+    const created = createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
     expect(created).not.toBeNull()
-    const updated = await updateVariation(TEST_COLLECTION, 1, created!.id!, 'e4 e5 Nf3', tmpDir)
+    const updated = updateVariation(TEST_COLLECTION, 1, created!.id!, 'e4 e5 Nf3', tmpDir)
     expect(updated).not.toBeNull()
     expect(updated!.moves).toBe('e4 e5 Nf3')
     expect(updated!.id).toBe(created!.id)
   })
 
-  test('returns null for invalid variation id', async () => {
-    const result = await updateVariation(TEST_COLLECTION, 1, 0, 'e4', tmpDir)
+  test('returns null for invalid variation id', () => {
+    const result = updateVariation(TEST_COLLECTION, 1, 0, 'e4', tmpDir)
     expect(result).toBeNull()
   })
 
@@ -131,55 +130,55 @@ describe('updateVariation', () => {
     expect(() => updateVariation(TEST_COLLECTION, 1, 9999, 'e4', tmpDir)).toThrow()
   })
 
-  test('returns null for invalid collectionId', async () => {
-    const result = await updateVariation('', 1, 1, 'e4', tmpDir)
+  test('returns null for invalid collectionId', () => {
+    const result = updateVariation('', 1, 1, 'e4', tmpDir)
     expect(result).toBeNull()
   })
 
-  test('returns null for empty moves string', async () => {
-    const created = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
-    const result = await updateVariation(TEST_COLLECTION, 1, created!.id!, '  ', tmpDir)
+  test('returns null for empty moves string', () => {
+    const created = createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const result = updateVariation(TEST_COLLECTION, 1, created!.id!, '  ', tmpDir)
     expect(result).toBeNull()
   })
 })
 
 describe('deleteVariation', () => {
-  test('deletes a variation by id', async () => {
-    const created = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+  test('deletes a variation by id', () => {
+    const created = createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
     expect(created).not.toBeNull()
-    const result = await deleteVariation(TEST_COLLECTION, 1, created!.id!, tmpDir)
+    const result = deleteVariation(TEST_COLLECTION, 1, created!.id!, tmpDir)
     expect(result.success).toBe(true)
     const remaining = db.getVariations(1)
     expect(remaining.find(v => v.id === created!.id)).toBeUndefined()
   })
 
-  test('only deletes the specified variation when multiple exist at same ply', async () => {
-    const first = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
-    const second = await createVariation(TEST_COLLECTION, 1, 3, 'd4', tmpDir)
-    await deleteVariation(TEST_COLLECTION, 1, first!.id!, tmpDir)
+  test('only deletes the specified variation when multiple exist at same ply', () => {
+    const first = createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const second = createVariation(TEST_COLLECTION, 1, 3, 'd4', tmpDir)
+    deleteVariation(TEST_COLLECTION, 1, first!.id!, tmpDir)
     const remaining = db.getVariations(1)
     expect(remaining.find(v => v.id === first!.id)).toBeUndefined()
     expect(remaining.find(v => v.id === second!.id)).toBeDefined()
   })
 
-  test('returns false for invalid id', async () => {
-    const result = await deleteVariation(TEST_COLLECTION, 1, 0, tmpDir)
+  test('returns false for invalid id', () => {
+    const result = deleteVariation(TEST_COLLECTION, 1, 0, tmpDir)
     expect(result.success).toBe(false)
   })
 
-  test('returns false for invalid collectionId', async () => {
-    const result = await deleteVariation('', 1, 1, tmpDir)
+  test('returns false for invalid collectionId', () => {
+    const result = deleteVariation('', 1, 1, tmpDir)
     expect(result.success).toBe(false)
   })
 })
 
 describe('reorderVariations', () => {
-  test('updates displayOrder of variations at a ply', async () => {
-    const first = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
-    const second = await createVariation(TEST_COLLECTION, 1, 3, 'd4', tmpDir)
-    const third = await createVariation(TEST_COLLECTION, 1, 3, 'c4', tmpDir)
+  test('updates displayOrder of variations at a ply', () => {
+    const first = createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const second = createVariation(TEST_COLLECTION, 1, 3, 'd4', tmpDir)
+    const third = createVariation(TEST_COLLECTION, 1, 3, 'c4', tmpDir)
     // Reverse the order
-    const result = await reorderVariations(TEST_COLLECTION, 1, 3, [third!.id!, second!.id!, first!.id!], tmpDir)
+    const result = reorderVariations(TEST_COLLECTION, 1, 3, [third!.id!, second!.id!, first!.id!], tmpDir)
     expect(result.success).toBe(true)
     const variations = db.getVariations(1) as VariationData[]
     const atPly = variations.filter(v => v.branchPly === 3)
@@ -188,34 +187,34 @@ describe('reorderVariations', () => {
     expect(atPly[2].id).toBe(first!.id)
   })
 
-  test('returns false for invalid branchPly', async () => {
-    const result = await reorderVariations(TEST_COLLECTION, 1, 0, [1, 2], tmpDir)
+  test('returns false for invalid branchPly', () => {
+    const result = reorderVariations(TEST_COLLECTION, 1, 0, [1, 2], tmpDir)
     expect(result.success).toBe(false)
   })
 
-  test('returns false for orderedIds containing invalid id', async () => {
-    const result = await reorderVariations(TEST_COLLECTION, 1, 3, [1, 0], tmpDir)
+  test('returns false for orderedIds containing invalid id', () => {
+    const result = reorderVariations(TEST_COLLECTION, 1, 3, [1, 0], tmpDir)
     expect(result.success).toBe(false)
   })
 
-  test('no-ops and returns success for empty orderedIds', async () => {
-    await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
-    const result = await reorderVariations(TEST_COLLECTION, 1, 3, [], tmpDir)
+  test('no-ops and returns success for empty orderedIds', () => {
+    createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const result = reorderVariations(TEST_COLLECTION, 1, 3, [], tmpDir)
     expect(result.success).toBe(true)
     // Existing variation unaffected
     const variations = db.getVariations(1)
     expect(variations.length).toBe(1)
   })
 
-  test('throws for IDs belonging to a different game', async () => {
+  test('throws for IDs belonging to a different game', () => {
     // Insert a second game
     db.insertGame({
       white: 'A', black: 'B', event: null, date: null,
       result: 0.5, ecoCode: null, whiteElo: null, blackElo: null,
       site: null, round: null, moveCount: 10, moves: 'd4 d5',
     })
-    const game1Var = await createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
-    const game2Var = await createVariation(TEST_COLLECTION, 2, 3, 'd4', tmpDir)
+    const game1Var = createVariation(TEST_COLLECTION, 1, 3, 'e4', tmpDir)
+    const game2Var = createVariation(TEST_COLLECTION, 2, 3, 'd4', tmpDir)
     expect(game1Var).not.toBeNull()
     expect(game2Var).not.toBeNull()
     // Try to reorder game 1's ply using a mix of IDs from both games

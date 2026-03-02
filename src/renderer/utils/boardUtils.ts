@@ -2,6 +2,8 @@
  * Board display utilities for annotation badge positioning and layout.
  */
 
+import { parseSquare, squareFile, squareRank } from 'chessops/util'
+
 /**
  * Convert a chess square notation (e.g. "e5") to CSS percentage offsets
  * for absolute positioning an overlay badge on the board.
@@ -15,10 +17,10 @@ export function squareToPercentPosition(
   square: string,
   orientation: 'white' | 'black',
 ): { leftPct: number; bottomPct: number } | null {
-  if (square.length !== 2) return null
-  const fileIndex = square.charCodeAt(0) - 'a'.charCodeAt(0) // 0–7
-  const rankIndex = parseInt(square[1], 10) - 1              // 0–7
-  if (fileIndex < 0 || fileIndex > 7 || rankIndex < 0 || rankIndex > 7) return null
+  const sq = parseSquare(square)
+  if (sq === undefined) return null
+  const fileIndex = squareFile(sq)
+  const rankIndex = squareRank(sq)
   return {
     leftPct: orientation === 'white' ? fileIndex * 12.5 : (7 - fileIndex) * 12.5,
     bottomPct: orientation === 'white' ? rankIndex * 12.5 : (7 - rankIndex) * 12.5,

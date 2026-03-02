@@ -9,15 +9,15 @@
  * using shared helpers from chessHelpers.ts.
  */
 
-import { Chess } from 'chessops/chess'
+import { Chess, castlingSide } from 'chessops/chess'
 import { parseFen, makeFen, INITIAL_FEN } from 'chessops/fen'
 import { parseSan } from 'chessops/san'
-import { parsePgn } from 'chessops/pgn'
 import { makeSquare, squareFile, squareRank } from 'chessops/util'
 
 import type { NavigableManager } from '../types/navigableManager.js'
 import type { MoveType } from '../types/moveTypes.js'
 import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
+import { parseMoves } from './moveParser.js'
 import { showErrorToast } from './errorToast.js'
 
 // Re-export MoveType for backward compatibility
@@ -44,24 +44,6 @@ export interface ParsedMove {
 }
 
 /**
- * Get display text for a game result
- */
-export function getResultDisplay(result: string): string {
-  switch (result) {
-    case '1-0':
-      return '1-0 (White Wins)'
-    case '0-1':
-      return '0-1 (Black Wins)'
-    case '1/2-1/2':
-      return '1/2-1/2 (Draw)'
-    case '*':
-      return '* (Unfinished)'
-    default:
-      return result
-  }
-}
-
-/**
  * Play a SAN move on a Chess position and record position metadata.
  * Returns null if the SAN is invalid or illegal.
  */
@@ -78,9 +60,10 @@ export function playAndRecord(chess: Chess, san: string): ParsedMove | null {
   const normal = move
   const from = makeSquare(normal.from)
 
-  // Detect castle and capture from pre-move position state
+  // Detect castle via chessops API; detect capture from board state before the move
   const role = chess.board.getRole(normal.from)
-  const isCastle = role === 'king' && chess.board[chess.turn].has(normal.to)
+  const castleSide = castlingSide(chess, normal)
+  const isCastle = castleSide !== undefined
   const isCapture = chess.board.occupied.has(normal.to) ||
     (role === 'pawn' && squareFile(normal.from) !== squareFile(normal.to))
 
@@ -89,8 +72,7 @@ export function playAndRecord(chess: Chess, san: string): ParsedMove | null {
   let to = makeSquare(normal.to)
   if (isCastle) {
     const rank = squareRank(normal.from)
-    const isKingside = squareFile(normal.to) > squareFile(normal.from)
-    to = makeSquare(rank * 8 + (isKingside ? 6 : 2))
+    to = makeSquare(rank * 8 + (castleSide === 'h' ? 6 : 2))
   }
 
   // Play move, then detect check/checkmate from resulting position
@@ -111,11 +93,7 @@ export function createChessManager(movesString: string): ChessManager {
   const positions: ParsedMove[] = []
   let currentPly = 0
 
-  // Parse moves using chessops PGN parser — handles move numbers, results, NAGs
-  const games = parsePgn(movesString)
-  const sanMoves = games.length > 0
-    ? [...games[0].moves.mainline()].map(n => n.san)
-    : []
+  const { moves: sanMoves } = parseMoves(movesString)
 
   // Initialize position
   const setupResult = parseFen(INITIAL_FEN)

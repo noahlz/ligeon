@@ -1,9 +1,9 @@
 import { Fragment, useRef, useEffect, useState, useCallback, useMemo } from 'react'
-import { getResultDisplay } from '../utils/chessManager.js'
+import { getResultDisplay } from '../utils/formatters.js'
 import { groupMovesIntoPairs, pairIndexToPly, isCurrentMove } from '../utils/moveFormatter.js'
 import { getVariationsAtPly } from '../utils/variationFormatter.js'
 import type { VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
-import { groupAnnotationsByPly } from '../hooks/useAnnotationState.js'
+import { groupAnnotationsByPly } from '../utils/annotationUtils.js'
 import { reorderVariationIds } from '../utils/variationReorder.js'
 import { createCommentsByPlyMap } from '../utils/moveFormatter.js'
 import {

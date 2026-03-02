@@ -14,23 +14,7 @@ import { useState, useCallback, useRef, useMemo } from 'react'
 import { showErrorToast } from '../utils/errorToast.js'
 import type { AnnotationData } from '../../shared/types/game.js'
 import { getNagCategory } from '../utils/nag.js'
-
-/**
- * Group a flat annotation array into a ply → annotations[] map.
- * Shared between this hook and MoveList.
- */
-export function groupAnnotationsByPly(annotations: AnnotationData[]): Map<number, AnnotationData[]> {
-  const map = new Map<number, AnnotationData[]>()
-  for (const a of annotations) {
-    const existing = map.get(a.ply)
-    if (existing) {
-      existing.push(a)
-    } else {
-      map.set(a.ply, [a])
-    }
-  }
-  return map
-}
+import { groupAnnotationsByPly } from '../utils/annotationUtils.js'
 
 export interface UseAnnotationStateReturn {
   /** All annotations for the current game */

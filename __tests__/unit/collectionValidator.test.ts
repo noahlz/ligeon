@@ -30,13 +30,8 @@ describe('collectionValidator', () => {
     })
 
     it('rejects duplicate name (case-insensitive)', () => {
-      const result = validateCollectionName('my games', collections)
-      expect(result).toEqual({ valid: false, error: 'duplicate' })
-    })
-
-    it('rejects duplicate name (mixed case)', () => {
-      const result = validateCollectionName('MY GAMES', collections)
-      expect(result).toEqual({ valid: false, error: 'duplicate' })
+      expect(validateCollectionName('my games', collections)).toEqual({ valid: false, error: 'duplicate' })
+      expect(validateCollectionName('MY GAMES', collections)).toEqual({ valid: false, error: 'duplicate' })
     })
 
     it('allows renaming to same name when excludeId provided', () => {

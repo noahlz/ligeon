@@ -3,11 +3,7 @@
 ## Testing
 - Improve coverage of render module with React Testing
 
-## Code Quality
-- Full project code review / refactoring
-
 ## Issues
-
 - This odd issue:
 ```
 (!) Some chunks are larger than 500 kB after minification. Consider:
