@@ -10,7 +10,6 @@ renderer → window.electron.fn() → preload (CJS bridge) → src/main/ipc/ han
 
 Validate all IPC handler inputs. See `src/main/ipc/validators.ts` for patterns.
 
-## IPC Gotchas 
+## IPC Gotchas
 
-- Preload is CJS — Electron sandbox forbids ESM in preload
-- SQLite is unavailable in the renderer — all DB access must go through IPC
+- Preload is CJS — see BUILD.md for details

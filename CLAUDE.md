@@ -54,8 +54,4 @@ Load `.claude/memory/BUILD.md` when:
 
 ## Reference Links
 
-This application leverages OSS chess libraries – references the below links when developing board display, pgn/fen parsing or game logic:
-
-- [chessops](https://github.com/niklasf/chessops) — chess move logic
-- [chessground](https://github.com/lichess-org/chessground) — chess board UI
-- [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) – display options 
+- [chessground config](https://raw.githubusercontent.com/lichess-org/chessground/refs/heads/master/src/config.ts) — full display options reference

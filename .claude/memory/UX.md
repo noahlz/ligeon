@@ -28,15 +28,9 @@ Rules:
 
 ## shadcn/ui
 
-`components/ui/` contains copy-pasted source — **not npm imports**. Add components via:
+`components/ui/` contains copy-pasted source — **not npm imports**. Keep `ui/` customizations minimal; compose in app components.
 
-```bash
-npx shadcn@latest add <name>
-```
-
-Keep `ui/` customizations minimal; compose in app components.
-
-### Import Fix After Adding Components
+### Import Fix After Adding Components (`npx shadcn@latest add <name>`)
 
 `npx shadcn@latest add` generates `import { cn } from "src/renderer/lib"` — manually fix to `"@/lib/utils.js"`.
 
