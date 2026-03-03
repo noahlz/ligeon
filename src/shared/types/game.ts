@@ -63,6 +63,12 @@ export function parseGameListLimit(value: string): GameListLimit {
     : 500
 }
 
+export interface ProductTourStatus {
+  welcomeSeen:    boolean
+  collectionSeen: boolean
+  gameSeen:       boolean
+}
+
 export interface AppSettings {
   collectionsPath: string
   collectionsPathCustomized: boolean
@@ -70,6 +76,7 @@ export interface AppSettings {
   pieceSet: PieceSet
   appTheme: AppTheme
   gameListLimit: GameListLimit
+  productTourStatus: ProductTourStatus
 }
 
 /**

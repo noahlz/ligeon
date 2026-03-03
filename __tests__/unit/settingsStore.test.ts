@@ -156,6 +156,63 @@ describe('loadSettingsFromPath', () => {
   })
 })
 
+describe('productTourStatus defaults', () => {
+  test('welcomeSeen defaults to false', () => {
+    const settings = getDefaultSettings()
+    expect(settings.productTourStatus.welcomeSeen).toBe(false)
+  })
+
+  test('collectionSeen defaults to false', () => {
+    const settings = getDefaultSettings()
+    expect(settings.productTourStatus.collectionSeen).toBe(false)
+  })
+
+  test('gameSeen defaults to false', () => {
+    const settings = getDefaultSettings()
+    expect(settings.productTourStatus.gameSeen).toBe(false)
+  })
+})
+
+describe('productTourStatus migration', () => {
+  function makeTmpFile(): { tmpDir: string; settingsFile: string } {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ligeon-settings-test-'))
+    return { tmpDir, settingsFile: path.join(tmpDir, 'settings.json') }
+  }
+
+  test('migrates legacy settings missing productTourStatus', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const legacy = { ...getDefaultSettings() }
+      const { productTourStatus: _removed, ...withoutTour } = legacy
+      fs.writeFileSync(settingsFile, JSON.stringify(withoutTour, null, 2), 'utf-8')
+
+      const settings = loadSettingsFromPath(settingsFile)
+      expect(settings.productTourStatus.welcomeSeen).toBe(false)
+      expect(settings.productTourStatus.collectionSeen).toBe(false)
+      expect(settings.productTourStatus.gameSeen).toBe(false)
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test('preserves productTourStatus through round-trip', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const original = {
+        ...getDefaultSettings(),
+        productTourStatus: { welcomeSeen: true, collectionSeen: true, gameSeen: false },
+      }
+      saveSettingsToPath(settingsFile, original)
+      const loaded = loadSettingsFromPath(settingsFile)
+      expect(loaded.productTourStatus.welcomeSeen).toBe(true)
+      expect(loaded.productTourStatus.collectionSeen).toBe(true)
+      expect(loaded.productTourStatus.gameSeen).toBe(false)
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+})
+
 describe('gameListLimit migration', () => {
   function makeTmpFile(): { tmpDir: string; settingsFile: string } {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ligeon-settings-test-'))

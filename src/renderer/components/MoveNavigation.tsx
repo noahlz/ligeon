@@ -46,7 +46,7 @@ export default function MoveNavigation({
   const isAtEnd = currentPly === totalPlies
 
   return (
-    <div className="flex flex-col gap-1 items-center py-2">
+    <div id="tour-move-navigation" className="flex flex-col gap-1 items-center py-2">
       {/* Navigation buttons */}
       <div className="flex gap-1.5 items-center justify-center">
         <Tooltip>
