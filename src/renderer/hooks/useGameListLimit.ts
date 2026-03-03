@@ -11,7 +11,7 @@ export function useGameListLimit(): UseGameListLimitReturn {
 
   useEffect(() => {
     void window.electron.getSettings().then((settings) => {
-      setGameListLimit(settings.gameListLimit ?? 500)
+      setGameListLimit(settings.gameListLimit)
     })
   }, [])
 

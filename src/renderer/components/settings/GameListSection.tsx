@@ -1,22 +1,28 @@
 import { AlertTriangle } from 'lucide-react'
-import { GAME_LIST_LIMITS, type GameListLimit } from '../../../shared/types/game.js'
+import { GAME_LIST_LIMITS, parseGameListLimit, type GameListLimit } from '../../../shared/types/game.js'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.js'
 
 interface GameListSectionProps {
   gameListLimit: GameListLimit
   onGameListLimitChange: (limit: GameListLimit) => void
+  triggerClassName?: string
+  showWarning?: boolean
 }
 
-export function GameListSection({ gameListLimit, onGameListLimitChange }: GameListSectionProps) {
+export function GameListSection({
+  gameListLimit,
+  onGameListLimitChange,
+  triggerClassName = 'w-40 bg-ui-bg-element text-ui-text border-ui-border',
+  showWarning = true,
+}: GameListSectionProps) {
   function handleChange(value: string) {
-    const parsed = value === 'unlimited' ? 'unlimited' : (parseInt(value, 10) as GameListLimit)
-    onGameListLimitChange(parsed)
+    onGameListLimitChange(parseGameListLimit(value))
   }
 
   return (
     <div className="flex flex-col gap-2">
       <Select value={String(gameListLimit)} onValueChange={handleChange}>
-        <SelectTrigger className="w-40 bg-ui-bg-element text-ui-text border-ui-border">
+        <SelectTrigger className={triggerClassName}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="bg-ui-bg-box border-ui-border">
@@ -27,7 +33,7 @@ export function GameListSection({ gameListLimit, onGameListLimitChange }: GameLi
           ))}
         </SelectContent>
       </Select>
-      {gameListLimit === 'unlimited' && (
+      {showWarning && gameListLimit === 'unlimited' && (
         <p className="flex items-center gap-1.5 text-xs text-ui-accent">
           <AlertTriangle size={12} />
           Warning: large game collections may affect performance
