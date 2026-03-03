@@ -38,7 +38,7 @@ export function useTour(
 
   // 1. Welcome — shown on first launch.
   useEffect(() => {
-    if (!shouldShowWelcome(import.meta.env.DEV)) return
+    if (!shouldShowWelcome()) return
 
     const timer = setTimeout(() => {
       destroyActive()
@@ -69,7 +69,7 @@ export function useTour(
   // 2. Collection filter hint — shown when first collection is loaded.
   useEffect(() => {
     if (selectedCollectionId === null) return
-    if (!shouldShowCollectionTour(import.meta.env.DEV)) return
+    if (!shouldShowCollectionTour()) return
     if (driverRef.current?.isActive()) return
 
     const timer = setTimeout(() => {
@@ -101,7 +101,7 @@ export function useTour(
   // 3. Controls + move list — 2-step sequence shown when first game is selected.
   useEffect(() => {
     if (selectedGame === null) return
-    if (!shouldShowGameTour(import.meta.env.DEV)) return
+    if (!shouldShowGameTour()) return
     if (driverRef.current?.isActive()) return
 
     const timer = setTimeout(() => {
