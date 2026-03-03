@@ -68,6 +68,7 @@ export function loadSettingsFromPath(settingsFile: string): MainSettings {
     if (!settings.pieceSet) settings.pieceSet = 'cburnett'
     if (settings.appTheme == null) settings.appTheme = 'dark'
     if (settings.gameListLimit == null) settings.gameListLimit = 500
+    if (settings.productTourStatus == null) settings.productTourStatus = { welcomeSeen: false, collectionSeen: false, gameSeen: false }
 
     return settings
   } catch (error) {

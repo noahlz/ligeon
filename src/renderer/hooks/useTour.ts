@@ -1,32 +1,37 @@
-import { useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { driver } from 'driver.js'
 import '../styles/tour.css'
 import type { Driver } from 'driver.js'
 import type { GameRow } from '../../shared/types/game.js'
-import {
-  shouldShowWelcome,
-  markWelcomeSeen,
-  shouldShowCollectionTour,
-  markCollectionTourSeen,
-  shouldShowGameTour,
-  markGameTourSeen,
-} from '../utils/tourUtils.js'
 
 /**
  * Fires three independent contextual tour popovers based on app state:
  *
  * 1. On mount — welcome + import instructions (floating, no highlight)
  * 2. When selectedCollectionId becomes non-null — game filter hint
- * 3. When selectedGame becomes non-null — 2-step controls + move list sequence
+ * 3. When selectedGame becomes non-null — 3-step controls + navigation + move list sequence
  *
- * Each trigger fires at most once per install (localStorage gate).
- * In dev mode all three always fire.
+ * Each trigger fires at most once per install (IPC settings gate).
  */
 export function useTour(
   selectedCollectionId: string | null,
   selectedGame: GameRow | null,
 ): void {
   const driverRef = useRef<Driver | null>(null)
+
+  const [tourState, setTourState] = useState<{
+    loaded:         boolean
+    welcomeSeen:    boolean
+    collectionSeen: boolean
+    gameSeen:       boolean
+  }>({ loaded: false, welcomeSeen: false, collectionSeen: false, gameSeen: false })
+
+  // Load tour status from IPC settings on mount.
+  useEffect(() => {
+    void window.electron.getSettings().then((s) => {
+      setTourState({ loaded: true, ...s.productTourStatus })
+    })
+  }, [])
 
   const destroyActive = () => {
     if (driverRef.current?.isActive()) driverRef.current.destroy()
@@ -38,12 +43,12 @@ export function useTour(
 
   // 1. Welcome — shown on first launch.
   useEffect(() => {
-    if (!shouldShowWelcome(import.meta.env.DEV)) return
+    if (!tourState.loaded || tourState.welcomeSeen) return
 
     const timer = setTimeout(() => {
       destroyActive()
       const d = driver({
-        overlayOpacity: 0.3,
+        overlayOpacity: 0.7,
         allowClose: false,
         steps: [{
           element: '#tour-collection-selector',
@@ -57,25 +62,28 @@ export function useTour(
             align: 'start',
           },
         }],
-        onDestroyed: () => { markWelcomeSeen(); driverRef.current = null },
+        onDestroyed: () => { driverRef.current = null },
       })
+      const next = { welcomeSeen: true, collectionSeen: tourState.collectionSeen, gameSeen: tourState.gameSeen }
+      setTourState(prev => ({ ...prev, welcomeSeen: true }))
+      void window.electron.updateSettings({ productTourStatus: next })
       driverRef.current = d
       d.drive()
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [tourState.loaded, tourState.welcomeSeen, tourState.collectionSeen, tourState.gameSeen])
 
   // 2. Collection filter hint — shown when first collection is loaded.
   useEffect(() => {
+    if (!tourState.loaded || tourState.collectionSeen) return
     if (selectedCollectionId === null) return
-    if (!shouldShowCollectionTour(import.meta.env.DEV)) return
     if (driverRef.current?.isActive()) return
 
     const timer = setTimeout(() => {
       destroyActive()
       const d = driver({
-        overlayOpacity: 0.3,
+        overlayOpacity: 0.7,
         allowClose: false,
         steps: [{
           element: '#tour-game-filter',
@@ -89,25 +97,28 @@ export function useTour(
             align: 'start',
           },
         }],
-        onDestroyed: () => { markCollectionTourSeen(); driverRef.current = null },
+        onDestroyed: () => { driverRef.current = null },
       })
+      const next = { welcomeSeen: tourState.welcomeSeen, collectionSeen: true, gameSeen: tourState.gameSeen }
+      setTourState(prev => ({ ...prev, collectionSeen: true }))
+      void window.electron.updateSettings({ productTourStatus: next })
       driverRef.current = d
       d.drive()
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [selectedCollectionId])
+  }, [tourState.loaded, tourState.welcomeSeen, tourState.collectionSeen, tourState.gameSeen, selectedCollectionId])
 
-  // 3. Controls + move list — 2-step sequence shown when first game is selected.
+  // 3. Controls + navigation + move list — 3-step sequence shown when first game is selected.
   useEffect(() => {
+    if (!tourState.loaded || tourState.gameSeen) return
     if (selectedGame === null) return
-    if (!shouldShowGameTour(import.meta.env.DEV)) return
     if (driverRef.current?.isActive()) return
 
     const timer = setTimeout(() => {
       destroyActive()
       const d = driver({
-        overlayOpacity: 0.3,
+        overlayOpacity: 0.7,
         allowClose: false,
         showProgress: false,
         steps: [
@@ -117,6 +128,17 @@ export function useTour(
               title: 'Controls',
               description: 'Flip the board, toggle sound, export to Lichess, and access settings.',
               showButtons: ['next'],
+              nextBtnText: 'Next →',
+              side: 'left',
+              align: 'start',
+            },
+          },
+          {
+            element: '#tour-move-navigation',
+            popover: {
+              title: 'Navigation',
+              description: 'Use arrow keys or the buttons to step through moves. Press Play to auto-advance through the game.',
+              showButtons: ['previous', 'next'],
               nextBtnText: 'Next →',
               side: 'left',
               align: 'start',
@@ -134,12 +156,15 @@ export function useTour(
             },
           },
         ],
-        onDestroyed: () => { markGameTourSeen(); driverRef.current = null },
+        onDestroyed: () => { driverRef.current = null },
       })
+      const next = { welcomeSeen: tourState.welcomeSeen, collectionSeen: tourState.collectionSeen, gameSeen: true }
+      setTourState(prev => ({ ...prev, gameSeen: true }))
+      void window.electron.updateSettings({ productTourStatus: next })
       driverRef.current = d
       d.drive()
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [selectedGame])
+  }, [tourState.loaded, tourState.welcomeSeen, tourState.collectionSeen, tourState.gameSeen, selectedGame])
 }
