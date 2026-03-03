@@ -4,9 +4,9 @@
 
 import path from 'path'
 import os from 'os'
-import type { BoardTheme, PieceSet, AppTheme } from '../../shared/types/game.js'
+import type { BoardTheme, PieceSet, AppTheme, GameListLimit } from '../../shared/types/game.js'
 
-export type { BoardTheme, PieceSet, AppTheme }
+export type { BoardTheme, PieceSet, AppTheme, GameListLimit }
 
 /**
  * Main process application settings interface
@@ -17,6 +17,7 @@ export interface MainSettings {
   boardTheme: BoardTheme
   pieceSet: PieceSet
   appTheme: AppTheme
+  gameListLimit: GameListLimit
 }
 
 export interface CollectionSettings {
@@ -64,5 +65,6 @@ export function getDefaultSettings(): MainSettings {
     boardTheme: 'brown',
     pieceSet: 'cburnett',
     appTheme: 'dark',
+    gameListLimit: 500,
   }
 }

@@ -72,6 +72,9 @@
 /* ShadCN border radius */
 :root {
   --radius: 0.25rem;
+  --color-scrollbar-track: hsl(37, 7%, 14%);      /* matches --color-ui-bg-box */
+  --color-scrollbar-thumb: hsl(37, 7%, 30%);
+  --color-scrollbar-thumb-hover: hsl(37, 7%, 38%);
 }
 
 /* Light mode token overrides — activated when .dark class is absent from <html> */
@@ -264,24 +267,24 @@ html:not([data-board-theme]) cg-board,
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(37, 7%, 14%);
+  background: var(--color-scrollbar-track);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(37, 7%, 18%);
+  background: var(--color-scrollbar-thumb);
   border-radius: 4px;
-  border: 2px solid hsl(37, 7%, 14%);
+  border: 2px solid var(--color-scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(37, 7%, 22%);
+  background: var(--color-scrollbar-thumb-hover);
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: hsl(37, 7%, 18%) hsl(37, 7%, 14%); /* thumb track */
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track); /* thumb track */
 }
 
 /* Board appearance animation */

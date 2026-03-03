@@ -50,12 +50,26 @@ export type PieceSet = (typeof PIECE_SETS)[number]
 export const APP_THEMES = ['dark', 'light', 'system'] as const
 export type AppTheme = (typeof APP_THEMES)[number]
 
+// null-style sentinel: "unlimited" stored as string in settings.json
+export const GAME_LIST_LIMITS = [200, 500, 1000, 5000, 'unlimited'] as const
+export type GameListLimit = (typeof GAME_LIST_LIMITS)[number]
+
+/** Parse a string value (e.g. from a Select onChange) into a valid GameListLimit. */
+export function parseGameListLimit(value: string): GameListLimit {
+  if (value === 'unlimited') return 'unlimited'
+  const n = parseInt(value, 10)
+  return (GAME_LIST_LIMITS as ReadonlyArray<number | string>).includes(n)
+    ? (n as GameListLimit)
+    : 500
+}
+
 export interface AppSettings {
   collectionsPath: string
   collectionsPathCustomized: boolean
   boardTheme: BoardTheme
   pieceSet: PieceSet
   appTheme: AppTheme
+  gameListLimit: GameListLimit
 }
 
 /**

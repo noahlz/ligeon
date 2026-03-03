@@ -155,3 +155,54 @@ describe('loadSettingsFromPath', () => {
     }
   })
 })
+
+describe('gameListLimit migration', () => {
+  function makeTmpFile(): { tmpDir: string; settingsFile: string } {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ligeon-settings-test-'))
+    return { tmpDir, settingsFile: path.join(tmpDir, 'settings.json') }
+  }
+
+  test('has 500 as default gameListLimit', () => {
+    const settings = getDefaultSettings()
+    expect(settings.gameListLimit).toBe(500)
+  })
+
+  test('migrates legacy settings missing gameListLimit to 500', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const legacy = { ...getDefaultSettings() }
+      const { gameListLimit: _removed, ...withoutLimit } = legacy
+      fs.writeFileSync(settingsFile, JSON.stringify(withoutLimit, null, 2), 'utf-8')
+
+      const settings = loadSettingsFromPath(settingsFile)
+      expect(settings.gameListLimit).toBe(500)
+      expect(settings.boardTheme).toBe(legacy.boardTheme)
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test('non-default gameListLimit is preserved through round-trip', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const original = { ...getDefaultSettings(), gameListLimit: 1000 as const }
+      saveSettingsToPath(settingsFile, original)
+      const loaded = loadSettingsFromPath(settingsFile)
+      expect(loaded.gameListLimit).toBe(1000)
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+
+  test('"unlimited" gameListLimit is preserved through round-trip', () => {
+    const { tmpDir, settingsFile } = makeTmpFile()
+    try {
+      const original = { ...getDefaultSettings(), gameListLimit: 'unlimited' as const }
+      saveSettingsToPath(settingsFile, original)
+      const loaded = loadSettingsFromPath(settingsFile)
+      expect(loaded.gameListLimit).toBe('unlimited')
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    }
+  })
+})

@@ -67,6 +67,7 @@ export function loadSettingsFromPath(settingsFile: string): MainSettings {
     if (!settings.boardTheme) settings.boardTheme = 'brown'
     if (!settings.pieceSet) settings.pieceSet = 'cburnett'
     if (settings.appTheme == null) settings.appTheme = 'dark'
+    if (settings.gameListLimit == null) settings.gameListLimit = 500
 
     return settings
   } catch (error) {

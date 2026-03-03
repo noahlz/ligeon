@@ -20,6 +20,7 @@ import { useAudioInit } from './hooks/useAudioInit.js'
 import { useBoardTheme } from './hooks/useBoardTheme.js'
 import { useAppTheme } from './hooks/useAppTheme.js'
 import { usePieceSet } from './hooks/usePieceSet.js'
+import { useGameListLimit } from './hooks/useGameListLimit.js'
 import { useBoardState } from './hooks/useBoardState.js'
 import { useGameNavigation } from './hooks/useGameNavigation.js'
 import { useGameMoves } from './hooks/useGameMoves.js'
@@ -54,6 +55,7 @@ export default function App() {
   const { appTheme, effectiveTheme, handleAppThemeChange } = useAppTheme()
 
   const { pieceSet, handlePieceSetChange } = usePieceSet()
+  const { gameListLimit, handleGameListLimitChange } = useGameListLimit()
 
   const [boardOrientation, setBoardOrientation] = useState<'white' | 'black'>('white')
 
@@ -349,6 +351,8 @@ export default function App() {
               onRenameCollection={() => { void handleRenameCollection() }}
               selectedGame={selectedGame}
               selectedGameCollectionId={selectedGameCollectionId}
+              gameListLimit={gameListLimit}
+              onGameListLimitChange={handleGameListLimitChange}
             />
           </div>
 
@@ -530,6 +534,8 @@ export default function App() {
           onThemeChange={handleThemeChange}
           pieceSet={pieceSet}
           onPieceSetChange={handlePieceSetChange}
+          gameListLimit={gameListLimit}
+          onGameListLimitChange={handleGameListLimitChange}
         />
 
         <ImportDialog

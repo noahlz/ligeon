@@ -6,11 +6,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog.js'
 import { Button } from '@/components/ui/button.js'
-import type { AppTheme, BoardTheme, PieceSet } from '../../shared/types/game.js'
+import type { AppTheme, BoardTheme, PieceSet, GameListLimit } from '../../shared/types/game.js'
 import { SettingsSection } from './settings/SettingsSection.js'
 import { AppThemeSection } from './settings/AppThemeSection.js'
 import { BoardThemeSection } from './settings/BoardThemeSection.js'
 import { PieceSetSection } from './settings/PieceSetSection.js'
+import { GameListSection } from './settings/GameListSection.js'
 
 interface SettingsDialogProps {
   open: boolean
@@ -21,6 +22,8 @@ interface SettingsDialogProps {
   onThemeChange: (theme: BoardTheme) => void
   pieceSet: PieceSet
   onPieceSetChange: (set: PieceSet) => void
+  gameListLimit: GameListLimit
+  onGameListLimitChange: (limit: GameListLimit) => void
 }
 
 export default function SettingsDialog({
@@ -32,6 +35,8 @@ export default function SettingsDialog({
   onThemeChange,
   pieceSet,
   onPieceSetChange,
+  gameListLimit,
+  onGameListLimitChange,
 }: SettingsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -48,6 +53,12 @@ export default function SettingsDialog({
           </SettingsSection>
           <SettingsSection label="Piece Set">
             <PieceSetSection pieceSet={pieceSet} onPieceSetChange={onPieceSetChange} />
+          </SettingsSection>
+          <SettingsSection label="Game List">
+            <GameListSection
+              gameListLimit={gameListLimit}
+              onGameListLimitChange={onGameListLimitChange}
+            />
           </SettingsSection>
         </div>
         <DialogFooter>
