@@ -48,7 +48,7 @@ export function useTour(
     const timer = setTimeout(() => {
       destroyActive()
       const d = driver({
-        overlayOpacity: 0.3,
+        overlayOpacity: 0.7,
         allowClose: false,
         steps: [{
           element: '#tour-collection-selector',
@@ -83,7 +83,7 @@ export function useTour(
     const timer = setTimeout(() => {
       destroyActive()
       const d = driver({
-        overlayOpacity: 0.3,
+        overlayOpacity: 0.7,
         allowClose: false,
         steps: [{
           element: '#tour-game-filter',
@@ -118,7 +118,7 @@ export function useTour(
     const timer = setTimeout(() => {
       destroyActive()
       const d = driver({
-        overlayOpacity: 0.3,
+        overlayOpacity: 0.7,
         allowClose: false,
         showProgress: false,
         steps: [
