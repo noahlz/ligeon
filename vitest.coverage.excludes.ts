@@ -101,8 +101,10 @@ export const coverageExcludes: string[] = [
   // Trivial useMemo wrapper over already-tested parseMoves
   'src/renderer/hooks/useGameMoves.ts',
 
-  // Not yet tested: useGameControls and useVariationState
-  'src/renderer/hooks/useGameControls.ts',
+  // Partially tested (14 tests cover core CRUD flows) but complex navigation paths
+  // (enterVariation, variationNav, jumpToVariationMove, handleUserMove in-variation)
+  // require multi-step setup with real FEN + VariationManager; drops coverage to 69%.
+  // See __tests__/hooks/useVariationState.test.ts for existing tests.
   'src/renderer/hooks/useVariationState.ts',
 
 ]
