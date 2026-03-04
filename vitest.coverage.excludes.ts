@@ -18,6 +18,7 @@
 export const coverageExcludes: string[] = [
   // Vitest defaults (kept explicit for clarity)
   'node_modules/',
+  '.worktrees/',
   '__tests__/',
   '*.config.*',
   'dist/',

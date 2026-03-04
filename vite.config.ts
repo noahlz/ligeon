@@ -18,6 +18,7 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
+    exclude: ['node_modules', '.worktrees'],
     reporters: process.env.GITHUB_ACTIONS ? ['tap-flat', 'github-actions'] : ['default'],
     outputFile: {
       tap: 'dist/test-results.tap',
