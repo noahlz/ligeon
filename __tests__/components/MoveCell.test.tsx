@@ -39,6 +39,8 @@ function renderMoveCell(props: Partial<React.ComponentProps<typeof MoveCell>> = 
   )
 }
 
+const STUB_COMMENT: CommentData = { id: 1, gameId: 1, ply: 2, variationId: null, text: 'good move' }
+
 describe('MoveCell', () => {
   beforeEach(() => {
     Element.prototype.scrollIntoView = vi.fn()
@@ -80,14 +82,12 @@ describe('MoveCell', () => {
   })
 
   it('comment present shows Collapse comment button', () => {
-    const comment: CommentData = { id: 1, gameId: 1, ply: 2, variationId: null, text: 'good move' }
-    renderMoveCell({ comment, isCollapsed: false })
+    renderMoveCell({ comment: STUB_COMMENT, isCollapsed: false })
     expect(screen.getByTitle('Collapse comment')).toBeInTheDocument()
   })
 
   it('isCollapsed=true with comment shows Expand comment button', () => {
-    const comment: CommentData = { id: 1, gameId: 1, ply: 2, variationId: null, text: 'good move' }
-    renderMoveCell({ comment, isCollapsed: true })
+    renderMoveCell({ comment: STUB_COMMENT, isCollapsed: true })
     expect(screen.getByTitle('Expand comment')).toBeInTheDocument()
   })
 

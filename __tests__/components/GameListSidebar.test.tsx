@@ -29,6 +29,18 @@ function renderWithTooltip(ui: React.ReactElement) {
   return render(<TooltipProvider>{ui}</TooltipProvider>)
 }
 
+function makeGame(overrides: Partial<GameSearchResult> = {}): GameSearchResult {
+  return {
+    id: 1, white: 'A', black: 'B', date: 20230101, result: 1,
+    event: null, whiteElo: null, blackElo: null, ecoCode: null,
+    ...overrides,
+  }
+}
+
+function makeGames(count: number, overrides: Partial<GameSearchResult> = {}): GameSearchResult[] {
+  return new Array(count).fill(makeGame(overrides))
+}
+
 const defaultGameSearch = {
   games: [],
   totalGameCount: 0,
@@ -59,21 +71,19 @@ describe('GameListSidebar', () => {
 
   it('renders game count from useGameSearch', () => {
     // games.length must equal totalGameCount to render "N games" (not "N of M games")
-    const games = new Array(42).fill({ id: 1, white: 'A', black: 'B', date: 20230101, result: 1, event: null, whiteElo: null, blackElo: null, ecoCode: null })
     ;(useGameSearch as ReturnType<typeof vi.fn>).mockReturnValue({
       ...defaultGameSearch,
       totalGameCount: 42,
-      games,
+      games: makeGames(42),
     })
     renderWithTooltip(<GameListSidebar {...defaultProps} />)
     expect(screen.getByText('42 games')).toBeInTheDocument()
   })
 
   it('shows "X of Y games" when filtered', () => {
-    const games = new Array(10).fill({ id: 1, white: 'A', black: 'B', date: 20230101, result: 1, event: null, whiteElo: null, blackElo: null, ecoCode: null })
     ;(useGameSearch as ReturnType<typeof vi.fn>).mockReturnValue({
       ...defaultGameSearch,
-      games,
+      games: makeGames(10),
       totalGameCount: 42,
     })
     renderWithTooltip(<GameListSidebar {...defaultProps} />)
@@ -105,17 +115,7 @@ describe('GameListSidebar', () => {
   })
 
   it('game rows render and clicking calls onGameSelect', async () => {
-    const game: GameSearchResult = {
-      id: 1,
-      white: 'Magnus',
-      black: 'Hikaru',
-      date: 20230101,
-      result: 1,
-      event: null,
-      whiteElo: null,
-      blackElo: null,
-      ecoCode: 'B20',
-    }
+    const game = makeGame({ white: 'Magnus', black: 'Hikaru', ecoCode: 'B20' })
     ;(useGameSearch as ReturnType<typeof vi.fn>).mockReturnValue({
       ...defaultGameSearch,
       games: [game],

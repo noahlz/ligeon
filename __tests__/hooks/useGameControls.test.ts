@@ -27,34 +27,16 @@ describe('useGameControls', () => {
 
   // ── Keyboard ──────────────────────────────────────────────────────────────
 
-  it('pressing ArrowLeft navigates to the previous move', () => {
+  it.each([
+    ['ArrowLeft', 'onPrev'],
+    ['ArrowRight', 'onNext'],
+    ['Home', 'onFirst'],
+    ['End', 'onLast'],
+    [' ', 'onTogglePlay'],
+  ] as const)('pressing %s calls %s', (key, cb) => {
     renderHook(() => useGameControls(callbacks))
-    fireEvent.keyDown(window, { key: 'ArrowLeft' })
-    expect(callbacks.onPrev).toHaveBeenCalledTimes(1)
-  })
-
-  it('pressing ArrowRight navigates to the next move', () => {
-    renderHook(() => useGameControls(callbacks))
-    fireEvent.keyDown(window, { key: 'ArrowRight' })
-    expect(callbacks.onNext).toHaveBeenCalledTimes(1)
-  })
-
-  it('pressing Home navigates to the first move', () => {
-    renderHook(() => useGameControls(callbacks))
-    fireEvent.keyDown(window, { key: 'Home' })
-    expect(callbacks.onFirst).toHaveBeenCalledTimes(1)
-  })
-
-  it('pressing End navigates to the last move', () => {
-    renderHook(() => useGameControls(callbacks))
-    fireEvent.keyDown(window, { key: 'End' })
-    expect(callbacks.onLast).toHaveBeenCalledTimes(1)
-  })
-
-  it('pressing Space toggles autoplay', () => {
-    renderHook(() => useGameControls(callbacks))
-    fireEvent.keyDown(window, { key: ' ' })
-    expect(callbacks.onTogglePlay).toHaveBeenCalledTimes(1)
+    fireEvent.keyDown(window, { key })
+    expect(callbacks[cb]).toHaveBeenCalledTimes(1)
   })
 
   it('key events on input elements are ignored', () => {

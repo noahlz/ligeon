@@ -5,12 +5,26 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import MoveList from '@/components/MoveList'
 import type { VariationData, CommentData } from '../../src/shared/types/game'
 
+type CommentHandlers = NonNullable<React.ComponentProps<typeof MoveList>['commentHandlers']>
+
+function makeCommentHandlers(overrides?: Partial<CommentHandlers>): CommentHandlers {
+  return {
+    onEdit: vi.fn(),
+    onValueChange: vi.fn(),
+    onSave: vi.fn(),
+    onCancel: vi.fn(),
+    onDeleteRequest: vi.fn(),
+    ...overrides,
+  }
+}
+
 function renderMoveList(
   moves: string[],
   result: string | null = null,
   currentPly = 0,
   variations?: VariationData[],
   onJump = vi.fn(),
+  commentHandlers?: CommentHandlers,
 ) {
   return { onJump, ...render(
     <TooltipProvider>
@@ -20,6 +34,7 @@ function renderMoveList(
         currentPly={currentPly}
         onJump={onJump}
         variations={variations}
+        commentHandlers={commentHandlers}
       />
     </TooltipProvider>
   )}
@@ -92,48 +107,18 @@ describe('MoveList', () => {
   })
 
   it('renders CommentRow in edit mode when editingPly matches', () => {
-    const { container } = render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={1}
-          onJump={vi.fn()}
-          commentHandlers={{
-            editingPly: 1,
-            editValue: 'test comment',
-            onEdit: vi.fn(),
-            onValueChange: vi.fn(),
-            onSave: vi.fn(),
-            onCancel: vi.fn(),
-            onDeleteRequest: vi.fn(),
-          }}
-        />
-      </TooltipProvider>
+    const { container } = renderMoveList(
+      ['e4', 'e5'], null, 1, undefined, vi.fn(),
+      makeCommentHandlers({ editingPly: 1, editValue: 'test comment' }),
     )
     // CommentRow in edit mode renders an input
     expect(container.querySelector('input[type="text"]')).toBeInTheDocument()
   })
 
   it('renders "..." continuation row when edit mode splits white/black', () => {
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={0}
-          onJump={vi.fn()}
-          commentHandlers={{
-            editingPly: 1,
-            editValue: '',
-            onEdit: vi.fn(),
-            onValueChange: vi.fn(),
-            onSave: vi.fn(),
-            onCancel: vi.fn(),
-            onDeleteRequest: vi.fn(),
-          }}
-        />
-      </TooltipProvider>
+    renderMoveList(
+      ['e4', 'e5'], null, 0, undefined, undefined,
+      makeCommentHandlers({ editingPly: 1, editValue: '' }),
     )
     expect(screen.getByText('...')).toBeInTheDocument()
   })
@@ -151,34 +136,14 @@ describe('MoveList', () => {
   // Cluster B — comment auto-collapse useEffect
   it('auto-collapses comments on mount (comment text not visible)', () => {
     const comments: CommentData[] = [{ id: 1, ply: 1, variationId: null, text: 'Opening move', gameId: 1 }]
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={1}
-          onJump={vi.fn()}
-          commentHandlers={{ comments }}
-        />
-      </TooltipProvider>
-    )
+    renderMoveList(['e4', 'e5'], null, 1, undefined, undefined, { comments })
     expect(screen.queryByText('Opening move')).not.toBeInTheDocument()
   })
 
   it('shows comment text after clicking Expand comment', async () => {
     const user = userEvent.setup()
     const comments: CommentData[] = [{ id: 1, ply: 1, variationId: null, text: 'Opening move', gameId: 1 }]
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={1}
-          onJump={vi.fn()}
-          commentHandlers={{ comments }}
-        />
-      </TooltipProvider>
-    )
+    renderMoveList(['e4', 'e5'], null, 1, undefined, undefined, { comments })
     await user.click(screen.getByTitle('Expand comment'))
     expect(screen.getByText('Opening move')).toBeInTheDocument()
   })
@@ -187,17 +152,7 @@ describe('MoveList', () => {
   it('hides comment text after clicking Collapse comment', async () => {
     const user = userEvent.setup()
     const comments: CommentData[] = [{ id: 1, ply: 1, variationId: null, text: 'Opening move', gameId: 1 }]
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={1}
-          onJump={vi.fn()}
-          commentHandlers={{ comments }}
-        />
-      </TooltipProvider>
-    )
+    renderMoveList(['e4', 'e5'], null, 1, undefined, undefined, { comments })
     await user.click(screen.getByTitle('Expand comment'))
     expect(screen.getByText('Opening move')).toBeInTheDocument()
     await user.click(screen.getByTitle('Collapse comment'))
@@ -206,24 +161,9 @@ describe('MoveList', () => {
 
   // Cluster E — CommentRow after black's move
   it('renders CommentRow in edit mode after black\'s move (ply 2)', () => {
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={2}
-          onJump={vi.fn()}
-          commentHandlers={{
-            editingPly: 2,
-            editValue: 'editing',
-            onEdit: vi.fn(),
-            onValueChange: vi.fn(),
-            onSave: vi.fn(),
-            onCancel: vi.fn(),
-            onDeleteRequest: vi.fn(),
-          }}
-        />
-      </TooltipProvider>
+    renderMoveList(
+      ['e4', 'e5'], null, 2, undefined, undefined,
+      makeCommentHandlers({ editingPly: 2, editValue: 'editing' }),
     )
     expect(screen.getAllByRole('textbox').length).toBeGreaterThan(0)
   })
@@ -231,17 +171,7 @@ describe('MoveList', () => {
   it('renders CommentRow in display mode after black\'s move when expanded', async () => {
     const user = userEvent.setup()
     const comments: CommentData[] = [{ id: 2, ply: 2, variationId: null, text: "Black's reply", gameId: 1 }]
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={2}
-          onJump={vi.fn()}
-          commentHandlers={{ comments }}
-        />
-      </TooltipProvider>
-    )
+    renderMoveList(['e4', 'e5'], null, 2, undefined, undefined, { comments })
     await user.click(screen.getByTitle('Expand comment'))
     expect(screen.getByText("Black's reply")).toBeInTheDocument()
   })
@@ -250,25 +180,9 @@ describe('MoveList', () => {
   it('calls onSave when Enter is pressed in comment input', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={1}
-          onJump={vi.fn()}
-          commentHandlers={{
-            editingPly: 1,
-            editValue: '',
-            comments: [],
-            onEdit: vi.fn(),
-            onValueChange: vi.fn(),
-            onSave,
-            onCancel: vi.fn(),
-            onDeleteRequest: vi.fn(),
-          }}
-        />
-      </TooltipProvider>
+    renderMoveList(
+      ['e4', 'e5'], null, 1, undefined, undefined,
+      makeCommentHandlers({ editingPly: 1, editValue: '', comments: [], onSave }),
     )
     const input = screen.getByRole('textbox')
     await user.type(input, '{Enter}')
@@ -278,23 +192,9 @@ describe('MoveList', () => {
   it('shows Add comment button on context menu and calls onEdit on click', async () => {
     const user = userEvent.setup()
     const onEdit = vi.fn()
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={0}
-          onJump={vi.fn()}
-          commentHandlers={{
-            comments: [],
-            onEdit,
-            onValueChange: vi.fn(),
-            onSave: vi.fn(),
-            onCancel: vi.fn(),
-            onDeleteRequest: vi.fn(),
-          }}
-        />
-      </TooltipProvider>
+    renderMoveList(
+      ['e4', 'e5'], null, 0, undefined, undefined,
+      makeCommentHandlers({ comments: [], onEdit }),
     )
     const cell = screen.getByText('e4').closest('td')!
     fireEvent.contextMenu(cell)
@@ -308,17 +208,7 @@ describe('MoveList', () => {
   it('shows Add annotation button on context menu and does not call onJump when ply === currentPly', async () => {
     const user = userEvent.setup()
     const onJump = vi.fn()
-    render(
-      <TooltipProvider>
-        <MoveList
-          moves={['e4', 'e5']}
-          result={null}
-          currentPly={1}
-          onJump={onJump}
-          commentHandlers={{ comments: [] }}
-        />
-      </TooltipProvider>
-    )
+    renderMoveList(['e4', 'e5'], null, 1, undefined, onJump, { comments: [] })
     const cell = screen.getByText('e4').closest('td')!
     fireEvent.contextMenu(cell)
     const annotationBtn = screen.getByTitle('Add annotation')

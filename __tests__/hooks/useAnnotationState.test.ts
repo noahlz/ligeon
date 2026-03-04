@@ -19,6 +19,16 @@ function makeAnnotation(overrides: Partial<AnnotationData> & Pick<AnnotationData
   return { id: 1, gameId: 42, ...overrides }
 }
 
+// Seeds a fresh hook with pre-loaded annotations. Skips loadAnnotations when empty.
+async function seedHook(annotations: AnnotationData[] = []) {
+  mockElectron.getAnnotations.mockResolvedValue(annotations)
+  const { result } = renderHook(() => useAnnotationState())
+  if (annotations.length > 0) {
+    await act(async () => { await result.current.loadAnnotations('col-1', 42) })
+  }
+  return result
+}
+
 describe('useAnnotationState', () => {
   describe('loadAnnotations', () => {
     it('calls getAnnotations with correct args and sets annotations state', async () => {
@@ -90,14 +100,7 @@ describe('useAnnotationState', () => {
   describe('setAnnotation — same-category replacement', () => {
     it('deletes the existing move annotation before upserting the new one; state has new nag only', async () => {
       const existing = makeAnnotation({ ply: 2, nag: 1 }) // nag=1 → 'move'
-      mockElectron.getAnnotations.mockResolvedValue([existing])
-
-      const { result } = renderHook(() => useAnnotationState())
-
-      // Seed state with the existing annotation
-      await act(async () => {
-        await result.current.loadAnnotations('col-1', 42)
-      })
+      const result = await seedHook([existing])
 
       const saved = makeAnnotation({ id: 2, ply: 2, nag: 2 }) // nag=2 → also 'move'
       mockElectron.upsertAnnotation.mockResolvedValue(saved)
@@ -119,13 +122,7 @@ describe('useAnnotationState', () => {
   describe('setAnnotation — observation (non-exclusive)', () => {
     it('does NOT delete any existing annotation and just upserts the observation nag', async () => {
       const existing = makeAnnotation({ ply: 5, nag: 1 }) // 'move' at same ply
-      mockElectron.getAnnotations.mockResolvedValue([existing])
-
-      const { result } = renderHook(() => useAnnotationState())
-
-      await act(async () => {
-        await result.current.loadAnnotations('col-1', 42)
-      })
+      const result = await seedHook([existing])
 
       const saved = makeAnnotation({ id: 2, ply: 5, nag: 32 }) // nag=32 → 'observation'
       mockElectron.upsertAnnotation.mockResolvedValue(saved)
@@ -146,13 +143,7 @@ describe('useAnnotationState', () => {
   describe('setAnnotation — idempotent', () => {
     it('does not duplicate an annotation already in state when upsertAnnotation returns the same record', async () => {
       const existing = makeAnnotation({ ply: 2, nag: 1 })
-      mockElectron.getAnnotations.mockResolvedValue([existing])
-
-      const { result } = renderHook(() => useAnnotationState())
-
-      await act(async () => {
-        await result.current.loadAnnotations('col-1', 42)
-      })
+      const result = await seedHook([existing])
 
       // upsertAnnotation returns the same record that's already in state
       mockElectron.upsertAnnotation.mockResolvedValue(existing)
@@ -169,14 +160,8 @@ describe('useAnnotationState', () => {
   describe('removeAnnotation', () => {
     it('calls deleteAnnotation and removes the annotation from state', async () => {
       const ann = makeAnnotation({ ply: 3, nag: 10 })
-      mockElectron.getAnnotations.mockResolvedValue([ann])
       mockElectron.deleteAnnotation.mockResolvedValue(undefined)
-
-      const { result } = renderHook(() => useAnnotationState())
-
-      await act(async () => {
-        await result.current.loadAnnotations('col-1', 42)
-      })
+      const result = await seedHook([ann])
 
       await act(async () => {
         await result.current.removeAnnotation('col-1', 42, 3, 10)

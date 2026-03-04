@@ -14,6 +14,15 @@ function mockManager(totalPlies = 5): NavigableManager {
   }
 }
 
+function makeNav(currentPly: number, totalPlies = 5) {
+  const updateBoardState = vi.fn()
+  const manager = mockManager(totalPlies)
+  const { result } = renderHook(() =>
+    useGameNavigation({ chessManager: manager, currentPly, updateBoardState })
+  )
+  return { result, updateBoardState, manager }
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -36,11 +45,7 @@ describe('useGameNavigation', () => {
 
   describe('handleFirst', () => {
     it('calls updateBoardState(manager, 0)', () => {
-      const updateBoardState = vi.fn()
-      const manager = mockManager()
-      const { result } = renderHook(() =>
-        useGameNavigation({ chessManager: manager, currentPly: 3, updateBoardState })
-      )
+      const { result, updateBoardState, manager } = makeNav(3)
       result.current.handleFirst()
       expect(updateBoardState).toHaveBeenCalledWith(manager, 0)
     })
@@ -48,21 +53,13 @@ describe('useGameNavigation', () => {
 
   describe('handlePrev', () => {
     it('at ply 3 calls updateBoardState(manager, 2)', () => {
-      const updateBoardState = vi.fn()
-      const manager = mockManager()
-      const { result } = renderHook(() =>
-        useGameNavigation({ chessManager: manager, currentPly: 3, updateBoardState })
-      )
+      const { result, updateBoardState, manager } = makeNav(3)
       result.current.handlePrev()
       expect(updateBoardState).toHaveBeenCalledWith(manager, 2)
     })
 
     it('at ply 0 clamps to 0 and calls updateBoardState(manager, 0)', () => {
-      const updateBoardState = vi.fn()
-      const manager = mockManager()
-      const { result } = renderHook(() =>
-        useGameNavigation({ chessManager: manager, currentPly: 0, updateBoardState })
-      )
+      const { result, updateBoardState, manager } = makeNav(0)
       result.current.handlePrev()
       expect(updateBoardState).toHaveBeenCalledWith(manager, 0)
     })
@@ -70,22 +67,14 @@ describe('useGameNavigation', () => {
 
   describe('handleNext', () => {
     it('at ply 2 with totalPlies=5 calls updateBoardState(manager, 3) and returns true', () => {
-      const updateBoardState = vi.fn()
-      const manager = mockManager(5)
-      const { result } = renderHook(() =>
-        useGameNavigation({ chessManager: manager, currentPly: 2, updateBoardState })
-      )
+      const { result, updateBoardState, manager } = makeNav(2, 5)
       const advanced = result.current.handleNext()
       expect(advanced).toBe(true)
       expect(updateBoardState).toHaveBeenCalledWith(manager, 3)
     })
 
     it('at ply 5 with totalPlies=5 does NOT call updateBoardState and returns false', () => {
-      const updateBoardState = vi.fn()
-      const manager = mockManager(5)
-      const { result } = renderHook(() =>
-        useGameNavigation({ chessManager: manager, currentPly: 5, updateBoardState })
-      )
+      const { result, updateBoardState } = makeNav(5, 5)
       const advanced = result.current.handleNext()
       expect(advanced).toBe(false)
       expect(updateBoardState).not.toHaveBeenCalled()
@@ -94,11 +83,7 @@ describe('useGameNavigation', () => {
 
   describe('handleLast', () => {
     it('calls updateBoardState(manager, getTotalPlies())', () => {
-      const updateBoardState = vi.fn()
-      const manager = mockManager(5)
-      const { result } = renderHook(() =>
-        useGameNavigation({ chessManager: manager, currentPly: 2, updateBoardState })
-      )
+      const { result, updateBoardState, manager } = makeNav(2, 5)
       result.current.handleLast()
       expect(updateBoardState).toHaveBeenCalledWith(manager, 5)
     })
@@ -106,21 +91,13 @@ describe('useGameNavigation', () => {
 
   describe('handleJump', () => {
     it('at currentPly=1 calls updateBoardState(manager, 3) when jumping to ply 3', () => {
-      const updateBoardState = vi.fn()
-      const manager = mockManager()
-      const { result } = renderHook(() =>
-        useGameNavigation({ chessManager: manager, currentPly: 1, updateBoardState })
-      )
+      const { result, updateBoardState, manager } = makeNav(1)
       result.current.handleJump(3)
       expect(updateBoardState).toHaveBeenCalledWith(manager, 3)
     })
 
     it('is a no-op when ply === currentPly', () => {
-      const updateBoardState = vi.fn()
-      const manager = mockManager()
-      const { result } = renderHook(() =>
-        useGameNavigation({ chessManager: manager, currentPly: 3, updateBoardState })
-      )
+      const { result, updateBoardState } = makeNav(3)
       result.current.handleJump(3)
       expect(updateBoardState).not.toHaveBeenCalled()
     })
