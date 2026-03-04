@@ -19,6 +19,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     exclude: ['node_modules', '.worktrees'],
+    setupFiles: ['__tests__/setup/rtl.ts'],
     reporters: process.env.GITHUB_ACTIONS ? ['tap-flat', 'github-actions'] : ['default'],
     outputFile: {
       tap: 'dist/test-results.tap',
