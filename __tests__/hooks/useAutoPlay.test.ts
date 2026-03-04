@@ -161,6 +161,13 @@ describe('useAutoPlay', () => {
   })
 
   describe('speed', () => {
+    it('has a default speed of 1000ms', () => {
+      const { result } = renderHook(() =>
+        useAutoPlay({ onAdvance: vi.fn(), currentPly: 0, maxPly: 5 })
+      )
+      expect(result.current.speed).toBe(1000)
+    })
+
     it('uses the new interval delay after setSpeed(500)', () => {
       const onAdvance = vi.fn().mockReturnValue(true)
       const { result } = renderHook(() =>

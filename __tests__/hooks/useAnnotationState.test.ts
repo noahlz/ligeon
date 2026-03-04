@@ -37,6 +37,36 @@ describe('useAnnotationState', () => {
       expect(mockElectron.getAnnotations).toHaveBeenCalledWith('col-1', 42)
       expect(result.current.annotations).toEqual(fetched)
     })
+
+    it('populates annotationsByPly Map grouped by ply', async () => {
+      const a1 = makeAnnotation({ ply: 2, nag: 1 })
+      const a2 = makeAnnotation({ id: 2, ply: 2, nag: 32 })
+      const a3 = makeAnnotation({ id: 3, ply: 4, nag: 10 })
+      mockElectron.getAnnotations.mockResolvedValue([a1, a2, a3])
+
+      const { result } = renderHook(() => useAnnotationState())
+      await act(async () => {
+        await result.current.loadAnnotations('col-1', 42)
+      })
+
+      expect(result.current.annotationsByPly.get(2)).toEqual([a1, a2])
+      expect(result.current.annotationsByPly.get(4)).toEqual([a3])
+      expect(result.current.annotationsByPly.get(99)).toBeUndefined()
+    })
+  })
+
+  describe('setAnnotation — IPC failure', () => {
+    it('does not update state when upsertAnnotation rejects', async () => {
+      mockElectron.getAnnotations.mockResolvedValue([])
+      mockElectron.upsertAnnotation.mockRejectedValue(new Error('DB error'))
+
+      const { result } = renderHook(() => useAnnotationState())
+      await act(async () => {
+        await result.current.setAnnotation('col-1', 42, 3, 1)
+      })
+
+      expect(result.current.annotations).toHaveLength(0)
+    })
   })
 
   describe('setAnnotation — no conflict', () => {

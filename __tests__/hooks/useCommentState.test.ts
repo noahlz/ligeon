@@ -77,6 +77,18 @@ describe('useCommentState', () => {
     })
   })
 
+  describe('saveComment — null editingPly guard', () => {
+    it('is a no-op when editingPly is null (saveComment called without startEditing)', async () => {
+      const { result } = renderHook(() => useCommentState())
+      // Do not call startEditing — editingPly stays null
+      await act(async () => {
+        await result.current.saveComment('col-1', 42)
+      })
+      expect(mockElectron.upsertComment).not.toHaveBeenCalled()
+      expect(mockElectron.deleteComment).not.toHaveBeenCalled()
+    })
+  })
+
   describe('saveComment — empty text, existing comment', () => {
     it('sets pendingDeletion to the ply and does NOT clear editingPly', async () => {
       const existing = makeComment({ ply: 4, text: 'Old comment' })

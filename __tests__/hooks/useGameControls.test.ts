@@ -27,37 +27,37 @@ describe('useGameControls', () => {
 
   // ── Keyboard ──────────────────────────────────────────────────────────────
 
-  it('ArrowLeft calls onPrev', () => {
+  it('pressing ArrowLeft navigates to the previous move', () => {
     renderHook(() => useGameControls(callbacks))
     fireEvent.keyDown(window, { key: 'ArrowLeft' })
     expect(callbacks.onPrev).toHaveBeenCalledTimes(1)
   })
 
-  it('ArrowRight calls onNext', () => {
+  it('pressing ArrowRight navigates to the next move', () => {
     renderHook(() => useGameControls(callbacks))
     fireEvent.keyDown(window, { key: 'ArrowRight' })
     expect(callbacks.onNext).toHaveBeenCalledTimes(1)
   })
 
-  it('Home calls onFirst', () => {
+  it('pressing Home navigates to the first move', () => {
     renderHook(() => useGameControls(callbacks))
     fireEvent.keyDown(window, { key: 'Home' })
     expect(callbacks.onFirst).toHaveBeenCalledTimes(1)
   })
 
-  it('End calls onLast', () => {
+  it('pressing End navigates to the last move', () => {
     renderHook(() => useGameControls(callbacks))
     fireEvent.keyDown(window, { key: 'End' })
     expect(callbacks.onLast).toHaveBeenCalledTimes(1)
   })
 
-  it('Space calls onTogglePlay', () => {
+  it('pressing Space toggles autoplay', () => {
     renderHook(() => useGameControls(callbacks))
     fireEvent.keyDown(window, { key: ' ' })
     expect(callbacks.onTogglePlay).toHaveBeenCalledTimes(1)
   })
 
-  it('keydown on HTMLInputElement is ignored', () => {
+  it('key events on input elements are ignored', () => {
     renderHook(() => useGameControls(callbacks))
     const input = document.createElement('input')
     document.body.appendChild(input)
@@ -66,13 +66,13 @@ describe('useGameControls', () => {
     document.body.removeChild(input)
   })
 
-  it('unrecognized key does nothing', () => {
+  it('unrecognized keys are ignored', () => {
     renderHook(() => useGameControls(callbacks))
     fireEvent.keyDown(window, { key: 'a' })
     Object.values(callbacks).forEach(fn => expect(fn).not.toHaveBeenCalled())
   })
 
-  it('removes keydown listener on unmount', () => {
+  it('keyboard listeners are removed on unmount', () => {
     const { unmount } = renderHook(() => useGameControls(callbacks))
     unmount()
     fireEvent.keyDown(window, { key: 'ArrowLeft' })
@@ -81,56 +81,57 @@ describe('useGameControls', () => {
 
   // ── Wheel ─────────────────────────────────────────────────────────────────
 
-  it('wheel down over board calls onNext', () => {
-    const board = document.createElement('div')
-    board.className = 'chessground-board'
-    document.body.appendChild(board)
+  describe('wheel', () => {
+    let board: HTMLDivElement
+    let panel: HTMLDivElement
 
-    renderHook(() => useGameControls(callbacks))
-    fireEvent.wheel(board, { deltaY: 10 })
-    expect(callbacks.onNext).toHaveBeenCalledTimes(1)
+    beforeEach(() => {
+      board = document.createElement('div')
+      board.className = 'chessground-board'
+      document.body.appendChild(board)
 
-    document.body.removeChild(board)
-  })
+      panel = document.createElement('div')
+      panel.setAttribute('data-testid', 'move-list-panel')
+      document.body.appendChild(panel)
+    })
 
-  it('wheel up over move-list panel calls onPrev', () => {
-    const panel = document.createElement('div')
-    panel.setAttribute('data-testid', 'move-list-panel')
-    document.body.appendChild(panel)
+    afterEach(() => {
+      board.remove()
+      panel.remove()
+    })
 
-    renderHook(() => useGameControls(callbacks))
-    fireEvent.wheel(panel, { deltaY: -10 })
-    expect(callbacks.onPrev).toHaveBeenCalledTimes(1)
+    it('scrolling down over the board navigates to the next move', () => {
+      renderHook(() => useGameControls(callbacks))
+      fireEvent.wheel(board, { deltaY: 10 })
+      expect(callbacks.onNext).toHaveBeenCalledTimes(1)
+    })
 
-    document.body.removeChild(panel)
-  })
+    it('scrolling up over the move-list panel navigates to the previous move', () => {
+      renderHook(() => useGameControls(callbacks))
+      fireEvent.wheel(panel, { deltaY: -10 })
+      expect(callbacks.onPrev).toHaveBeenCalledTimes(1)
+    })
 
-  it('wheel event outside board or panel is ignored', () => {
-    renderHook(() => useGameControls(callbacks))
-    // No board/panel elements in DOM
-    fireEvent.wheel(window, { deltaY: 10 })
-    expect(callbacks.onNext).not.toHaveBeenCalled()
-  })
+    it('scrolling over other elements is ignored', () => {
+      renderHook(() => useGameControls(callbacks))
+      fireEvent.wheel(window, { deltaY: 10 })
+      expect(callbacks.onNext).not.toHaveBeenCalled()
+    })
 
-  it('second wheel event within 50ms debounce window is ignored', () => {
-    const board = document.createElement('div')
-    board.className = 'chessground-board'
-    document.body.appendChild(board)
+    it('second scroll within 50ms is ignored (debounce)', () => {
+      renderHook(() => useGameControls(callbacks))
 
-    renderHook(() => useGameControls(callbacks))
+      fireEvent.wheel(board, { deltaY: 10 })
+      expect(callbacks.onNext).toHaveBeenCalledTimes(1)
 
-    fireEvent.wheel(board, { deltaY: 10 })
-    expect(callbacks.onNext).toHaveBeenCalledTimes(1)
+      // Fire again immediately (within debounce)
+      fireEvent.wheel(board, { deltaY: 10 })
+      expect(callbacks.onNext).toHaveBeenCalledTimes(1) // still 1
 
-    // Fire again immediately (within debounce)
-    fireEvent.wheel(board, { deltaY: 10 })
-    expect(callbacks.onNext).toHaveBeenCalledTimes(1) // still 1
-
-    // Advance past debounce window
-    vi.advanceTimersByTime(51)
-    fireEvent.wheel(board, { deltaY: 10 })
-    expect(callbacks.onNext).toHaveBeenCalledTimes(2)
-
-    document.body.removeChild(board)
+      // Advance past debounce window
+      vi.advanceTimersByTime(51)
+      fireEvent.wheel(board, { deltaY: 10 })
+      expect(callbacks.onNext).toHaveBeenCalledTimes(2)
+    })
   })
 })

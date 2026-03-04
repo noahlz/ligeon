@@ -27,6 +27,13 @@ describe('useGameFilters', () => {
       expect(result.current.filters.dateFrom).toBe(20230101)
     })
 
+    it('clears dateFrom when called with null', () => {
+      const { result } = renderHook(() => useGameFilters())
+      act(() => { result.current.setDateFrom(20230101) })
+      act(() => { result.current.setDateFrom(null) })
+      expect(result.current.filters.dateFrom).toBeNull()
+    })
+
     it('does NOT update state when dateFrom > dateTo (invalid)', () => {
       const { result } = renderHook(() => useGameFilters())
       act(() => {
@@ -57,6 +64,13 @@ describe('useGameFilters', () => {
         result.current.setDateTo(20230601)
       })
       expect(result.current.filters.dateTo).toBe(20230601)
+    })
+
+    it('clears dateTo when called with null', () => {
+      const { result } = renderHook(() => useGameFilters())
+      act(() => { result.current.setDateTo(20230601) })
+      act(() => { result.current.setDateTo(null) })
+      expect(result.current.filters.dateTo).toBeNull()
     })
 
     it('does NOT update state when dateTo < dateFrom (invalid)', () => {

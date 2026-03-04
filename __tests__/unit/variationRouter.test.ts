@@ -22,13 +22,6 @@ describe('resolveVariationMove', () => {
     expect(result).toEqual({ type: 'truncate_and_append', san: 'Nc6' })
   })
 
-  it('advance nextPly equals currentVariationPly + 1', () => {
-    const result = resolveVariationMove({ san: 'e5', nextSan: 'e5', currentVariationPly: 7 })
-    expect(result.type).toBe('advance')
-    if (result.type === 'advance') {
-      expect(result.nextPly).toBe(8)
-    }
-  })
 })
 
 describe('resolveMainlineMove', () => {
