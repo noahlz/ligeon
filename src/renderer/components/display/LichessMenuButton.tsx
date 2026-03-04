@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { ExternalLink } from 'lucide-react'
-import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn, buildAnnotatedPgn } from '../utils/externalLinks.js'
-import type { GameRow, CommentData, AnnotationData, VariationData } from '../../shared/types/game.js'
+import { buildLichessURL, buildLichessAnalysisURL, buildFullPgn, buildAnnotatedPgn } from '../../utils/externalLinks.js'
+import type { GameRow, CommentData, AnnotationData, VariationData } from '../../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu.js'
-import ViewPgnDialog from './ViewPgnDialog.js'
+import ViewPgnDialog from '../runtime/ViewPgnDialog.js'
 
 interface LichessMenuButtonProps {
   game?: GameRow

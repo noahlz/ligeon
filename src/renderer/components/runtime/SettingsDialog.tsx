@@ -6,12 +6,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog.js'
 import { Button } from '@/components/ui/button.js'
-import type { AppTheme, BoardTheme, PieceSet, GameListLimit } from '../../shared/types/game.js'
-import { SettingsSection } from './settings/SettingsSection.js'
-import { AppThemeSection } from './settings/AppThemeSection.js'
-import { BoardThemeSection } from './settings/BoardThemeSection.js'
-import { PieceSetSection } from './settings/PieceSetSection.js'
-import { GameListSection } from './settings/GameListSection.js'
+import type { AppTheme, BoardTheme, PieceSet, GameListLimit } from '../../../shared/types/game.js'
+import { SettingsSection } from '../settings/SettingsSection.js'
+import { AppThemeSection } from '../settings/AppThemeSection.js'
+import { BoardThemeSection } from '../settings/BoardThemeSection.js'
+import { PieceSetSection } from '../settings/PieceSetSection.js'
+import { GameListSection } from '../settings/GameListSection.js'
 
 interface SettingsDialogProps {
   open: boolean

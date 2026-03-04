@@ -5,8 +5,8 @@ import {
   variationMoveNumber,
   isVariationWhiteMove,
   formatVariationMovesForDisplay,
-} from '../utils/variationFormatter.js'
-import type { VariationData, CommentData } from '../../shared/types/game.js'
+} from '../../utils/variationFormatter.js'
+import type { VariationData, CommentData } from '../../../shared/types/game.js'
 import { TableRow, TableCell } from '@/components/ui/table.js'
 import {
   Tooltip,

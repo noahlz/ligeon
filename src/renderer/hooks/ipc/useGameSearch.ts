@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import type { GameSearchResult, GameListLimit } from '../../shared/types/game.js'
-import type { GameFilterValues } from './useGameFilters.js'
-import { showErrorToast } from '../utils/errorToast.js'
-import { isDateStale, buildOptionFilters } from '../utils/filterValidation.js'
+import type { GameSearchResult, GameListLimit } from '../../../shared/types/game.js'
+import type { GameFilterValues } from '../useGameFilters.js'
+import { showErrorToast } from '../../utils/errorToast.js'
+import { isDateStale, buildOptionFilters } from '../../utils/filterValidation.js'
 
 export interface UseGameSearchParams {
   /** Currently selected collection ID */

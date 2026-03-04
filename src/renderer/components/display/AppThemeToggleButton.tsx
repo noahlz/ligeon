@@ -1,5 +1,5 @@
 import { Sun, Moon } from 'lucide-react'
-import type { AppTheme } from '../../shared/types/game.js'
+import type { AppTheme } from '../../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,

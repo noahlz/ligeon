@@ -12,8 +12,8 @@ import {
   TableRow,
   TableCell,
 } from '@/components/ui/table.js'
-import { CommentRow } from './CommentRow.js'
-import { VariationRow } from './VariationRow.js'
+import { CommentRow } from './display/CommentRow.js'
+import { VariationRow } from './display/VariationRow.js'
 import { MoveCell } from './MoveCell.js'
 import type { MoveCellCommentCallbacks, MoveCellAnnotationCallbacks } from './MoveCell.js'
 

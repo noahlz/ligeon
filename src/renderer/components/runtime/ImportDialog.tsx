@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { deriveSuggestedName } from '@/utils/filenameConverter.js'
-import { useImportDialog } from '../hooks/useImportDialog.js'
-import { useImportProgress } from '../hooks/useImportProgress.js'
+import { useImportDialog } from '../../hooks/ipc/useImportDialog.js'
+import { useImportProgress } from '../../hooks/ipc/useImportProgress.js'
 import {
   Dialog,
   DialogContent,

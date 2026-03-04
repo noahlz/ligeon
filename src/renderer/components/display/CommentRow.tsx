@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { X, Trash2 } from 'lucide-react'
-import type { CommentData } from '../../shared/types/game.js'
+import type { CommentData } from '../../../shared/types/game.js'
 import { TableRow, TableCell } from '@/components/ui/table.js'
 
 export interface CommentRowProps {

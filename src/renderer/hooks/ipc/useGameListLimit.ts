@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { GameListLimit } from '../../shared/types/game.js'
+import type { GameListLimit } from '../../../shared/types/game.js'
 
 export interface UseGameListLimitReturn {
   gameListLimit: GameListLimit

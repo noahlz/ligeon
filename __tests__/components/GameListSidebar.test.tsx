@@ -5,11 +5,11 @@ import { installElectronMock } from '../helpers/electronMock'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { GameSearchResult } from '../../src/shared/types/game'
 
-vi.mock('@/hooks/useGameSearch', () => ({
+vi.mock('@/hooks/ipc/useGameSearch', () => ({
   useGameSearch: vi.fn(),
 }))
 
-vi.mock('@/components/CollectionSelector', () => ({
+vi.mock('@/components/runtime/CollectionSelector', () => ({
   default: () => <div data-testid="collection-selector" />,
 }))
 
@@ -21,7 +21,7 @@ vi.mock('@/components/settings/GameListSection', () => ({
   GameListSection: () => <div data-testid="game-list-section" />,
 }))
 
-import { useGameSearch } from '@/hooks/useGameSearch'
+import { useGameSearch } from '@/hooks/ipc/useGameSearch'
 import GameListSidebar from '@/components/GameListSidebar'
 
 // GameListSidebar renders Tooltip on the filter toggle button — must wrap in TooltipProvider

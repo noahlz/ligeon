@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { PieceSet } from '../../shared/types/game.js'
-import { PIECE_SETS } from '../../shared/types/game.js'
+import type { PieceSet } from '../../../shared/types/game.js'
+import { PIECE_SETS } from '../../../shared/types/game.js'
 
 export interface UsePieceSetReturn {
   pieceSet: PieceSet

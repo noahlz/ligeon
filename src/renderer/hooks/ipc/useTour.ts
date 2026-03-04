@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { driver } from 'driver.js'
-import '../styles/tour.css'
+import '../../styles/tour.css'
 import type { Driver } from 'driver.js'
-import type { GameRow } from '../../shared/types/game.js'
+import type { GameRow } from '../../../shared/types/game.js'
 
 /**
  * Fires three independent contextual tour popovers based on app state:

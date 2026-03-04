@@ -1,7 +1,7 @@
 import { PIECE_SETS, type PieceSet } from '../../../shared/types/game.js'
 import { capitalizeFirst } from '../../utils/formatters.js'
 import { cn } from '@/lib/utils.js'
-import { getPieceUrl } from '../../hooks/usePieceSet.js'
+import { getPieceUrl } from '../../hooks/ipc/usePieceSet.js'
 
 interface PieceSetSectionProps {
   pieceSet: PieceSet

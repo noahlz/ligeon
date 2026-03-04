@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { BoardTheme } from '../../shared/types/game.js'
+import type { BoardTheme } from '../../../shared/types/game.js'
 
 export interface UseBoardThemeReturn {
   boardTheme: BoardTheme

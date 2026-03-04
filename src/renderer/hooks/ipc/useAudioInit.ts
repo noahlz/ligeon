@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import type { MutableRefObject } from 'react'
-import { preloadAllSounds } from '../utils/audioManager.js'
+import { preloadAllSounds } from '../../utils/audioManager.js'
 
 export interface UseAudioInitReturn {
   /** Ref indicating whether audio has been initialized */

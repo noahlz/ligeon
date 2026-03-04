@@ -1,5 +1,5 @@
 import { Volume2, VolumeX, RefreshCcw, Settings } from 'lucide-react'
-import type { GameRow, CommentData, AnnotationData, VariationData, AppTheme } from '../../shared/types/game.js'
+import type { GameRow, CommentData, AnnotationData, VariationData, AppTheme } from '../../../shared/types/game.js'
 import { Button } from '@/components/ui/button.js'
 import {
   Tooltip,
