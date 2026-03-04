@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { SquareChevronDown, SquareMinus } from 'lucide-react'
-import { yyyymmddToDisplay } from '../../shared/converters/dateConverter.js'
-import { resultNumericToDisplay } from '../../shared/converters/resultConverter.js'
-import { formatPlayerWithElo, formatEcoWithOpening } from '../utils/formatters.js'
+import { yyyymmddToDisplay } from '../../../shared/converters/dateConverter.js'
+import { resultNumericToDisplay } from '../../../shared/converters/resultConverter.js'
+import { formatPlayerWithElo, formatEcoWithOpening } from '../../utils/formatters.js'
 import {
   Collapsible,
   CollapsibleTrigger,

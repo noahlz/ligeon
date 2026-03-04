@@ -14,7 +14,7 @@ import type { ChessManager } from '../utils/chessManager.js'
 import type { NavigableManager } from '../types/navigableManager.js'
 import { createVariationManager, type VariationManager } from '../utils/variationManager.js'
 import { getCheckColor } from '../utils/chessHelpers.js'
-import { findMatchingVariation } from '../utils/variationFormatter.js'
+import { resolveVariationMove, resolveMainlineMove } from '../utils/variationRouter.js'
 
 export interface UseVariationStateParams {
   chessManager: ChessManager | null
@@ -254,18 +254,19 @@ export function useVariationState({
         const san = activeVariation.tryMove(from, to)
         if (!san) return false
 
-        const nextSan = activeVariation.getNextSan()
-        if (nextSan === san) {
-          // Advance through existing variation without truncation
-          const nextPly = activeVariation.getCurrentPly() + 1
-          activeVariation.goto(nextPly)
-          updateBoardState(activeVariation, nextPly)
+        const action = resolveVariationMove({
+          san,
+          nextSan: activeVariation.getNextSan() ?? undefined,
+          currentVariationPly: activeVariation.getCurrentPly(),
+        })
+        if (action.type === 'advance') {
+          activeVariation.goto(action.nextPly)
+          updateBoardState(activeVariation, action.nextPly)
           syncVariationState(activeVariation)
           return true
         }
-
-        // Different move — truncate and append
-        activeVariation.appendMove(san)
+        // truncate_and_append
+        activeVariation.appendMove(action.san)
         updateBoardState(activeVariation, activeVariation.getCurrentPly())
         syncVariationState(activeVariation)
         persistVariation(activeBranchPly, activeVariation.getMovesString())
@@ -283,39 +284,35 @@ export function useVariationState({
       const san = chessManager.tryMove(from, to)
       if (!san) return false
 
-      const mainlineSan = chessManager.getMainlineSan(ply + 1)
-      if (mainlineSan === san) {
-        // Matches mainline — just advance
-        updateBoardState(chessManager, ply + 1)
+      const action = resolveMainlineMove({
+        san,
+        currentPly: ply,
+        mainlineSan: chessManager.getMainlineSan(ply + 1),
+        variations,
+      })
+      if (action.type === 'advance_mainline') {
+        updateBoardState(chessManager, action.nextPly)
         return true
       }
-
-      // Different move — check for a matching existing variation at this branch point.
-      const branchPly = ply + 1
-      const matchingVariation = findMatchingVariation(variations, branchPly, san)
-
-      if (matchingVariation) {
-        // Enter the matching variation
-        enterVariation(matchingVariation.id!, branchPly, 1)
+      if (action.type === 'enter_variation') {
+        enterVariation(action.id, action.branchPly, 1)
         return true
       }
-
-      // No matching variation — create a new one (stacks with any existing at this ply).
+      // create_variation
       const fen = chessManager.getFenAtPly(ply)
       if (!fen) return false
 
-      // Reset id ref so persistVariation calls createVariation
       activeVariationIdRef.current = null
       setActiveVariationId(null)
 
       const manager = createVariationManager(fen)
-      if (!manager.appendMove(san)) return false
+      if (!manager.appendMove(action.san)) return false
 
       setActiveVariation(manager)
-      setActiveBranchPly(branchPly)
+      setActiveBranchPly(action.branchPly)
       updateBoardState(manager, manager.getCurrentPly())
       syncVariationState(manager)
-      persistVariation(branchPly, manager.getMovesString())
+      persistVariation(action.branchPly, manager.getMovesString())
       return true
     }
 

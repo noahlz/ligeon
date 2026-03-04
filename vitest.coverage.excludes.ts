@@ -12,12 +12,12 @@
  *   - Browser-only modules  — depend on HTMLAudioElement; not unit-testable without heavy mocking
  *   - Config/infrastructure — OS-specific paths and file I/O; require heavy fs mocking for low value
  *   - CLI scripts           — not part of app runtime
- *   - React components      — see NOTE below
- *   - React hooks           — see NOTE below
+ *   - React display/runtime/ipc — directory names explain why; see ARCHITECTURE.md
  */
 export const coverageExcludes: string[] = [
   // Vitest defaults (kept explicit for clarity)
   'node_modules/',
+  '.worktrees/',
   '__tests__/',
   '*.config.*',
   'dist/',
@@ -73,28 +73,38 @@ export const coverageExcludes: string[] = [
   // Low-value in unit testing - delegates to other functions.
   'src/renderer/utils/errorToast.ts',
 
+  // Root React component — no RTL test yet
+  'src/renderer/App.tsx',
+
   // ===========================================================================
-  // FUTURE: React Testing Library
+  // DIRECTORY-BASED EXCLUSIONS
+  // Each directory name explains why the files in it are excluded.
   // ===========================================================================
-  // All React components and hooks below are excluded because Vitest alone
-  // cannot meaningfully test React component behaviour (rendering, events,
-  // state transitions, DOM output). The right tool is React Testing Library
-  // (+ @testing-library/user-event), which integrates with Vitest via
-  // @testing-library/react.
-  //
-  // When RTL is set up, remove these exclusions and add test files under:
-  //   __tests__/components/   for src/renderer/components/**
-  //   __tests__/hooks/        for src/renderer/hooks/**
-  //
-  // Priority order once RTL is available:
-  //   1. useGameNavigation, useBoardState  — core navigation logic
-  //   2. useGameMoves, useGameControls     — game loading and playback
-  //   3. MoveList, MoveCell               — most complex UI components
-  //   4. GameListSidebar                  — filtering + selection
-  //   5. useVariationState, useCommentState, useAnnotationState
-  //   6. Remaining components
+
+  // Pure presentation components — props-in → JSX-out, no testable state
+  'src/renderer/components/display/**',
+
+  // Runtime-coupled components — require Chessground canvas or Electron IPC
+  'src/renderer/components/runtime/**',
+
+  // Settings panel UI — display-only settings sections
+  'src/renderer/components/settings/**',
+
+  // IPC hooks — primary job is calling window.electron.* or browser APIs;
+  // testing would only assert that mocks were called
+  'src/renderer/hooks/ipc/**',
+
   // ===========================================================================
-  'src/renderer/App.tsx',        // root React component — same RTL story as components/
-  'src/renderer/components/**',
-  'src/renderer/hooks/**',
+  // INDIVIDUAL EXCLUSIONS — testable hooks/components not yet covered
+  // ===========================================================================
+
+  // Trivial useMemo wrapper over already-tested parseMoves
+  'src/renderer/hooks/useGameMoves.ts',
+
+  // Partially tested (14 tests cover core CRUD flows) but complex navigation paths
+  // (enterVariation, variationNav, jumpToVariationMove, handleUserMove in-variation)
+  // require multi-step setup with real FEN + VariationManager; drops coverage to 69%.
+  // See __tests__/hooks/useVariationState.test.ts for existing tests.
+  'src/renderer/hooks/useVariationState.ts',
+
 ]

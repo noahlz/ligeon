@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { showErrorToast } from '../utils/errorToast.js'
+import { showErrorToast } from '../../utils/errorToast.js'
 import { LibraryBig, Trash2, Pencil, Check, X } from 'lucide-react'
-import ConfirmDialog from './ConfirmDialog.js'
-import { validateCollectionName } from '../utils/collectionValidator.js'
+import ConfirmDialog from '../display/ConfirmDialog.js'
+import { validateCollectionName } from '../../utils/collectionValidator.js'
 import {
   DropdownMenu,
   DropdownMenuContent,

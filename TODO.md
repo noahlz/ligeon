@@ -1,8 +1,5 @@
 # Ligeon TODOs
 
-## Testing
-- Improve coverage of render module with React Testing
-
 ## Issues
 - This odd issue:
 ```

@@ -6,7 +6,7 @@ import {
   Play,
   Pause,
 } from 'lucide-react'
-import { useGameControls } from '../hooks/useGameControls.js'
+import { useGameControls } from '../../hooks/useGameControls.js'
 import { Slider } from '@/components/ui/slider.js'
 import { Button } from '@/components/ui/button.js'
 import {

@@ -2,8 +2,8 @@ import { useRef, useEffect } from 'react'
 import { Chessground } from '@lichess-org/chessground'
 import type { Api } from '@lichess-org/chessground/api'
 import type { Key } from '@lichess-org/chessground/types'
-import { getNagDescription, getNagSymbol } from '../utils/nag.js'
-import { squareToPercentPosition, badgeContainerLayout } from '../utils/boardUtils.js'
+import { getNagDescription, getNagSymbol } from '../../utils/nag.js'
+import { squareToPercentPosition, badgeContainerLayout } from '../../utils/boardUtils.js'
 import {
   Tooltip,
   TooltipTrigger,

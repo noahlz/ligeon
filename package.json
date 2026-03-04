@@ -60,7 +60,11 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
     "@tailwindcss/vite": "^4.1.18",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^24.10.10",
     "@types/path-browserify": "^1.0.3",
@@ -72,7 +76,6 @@
     "concurrently": "^9.1.2",
     "electron": "^39.2.7",
     "electron-builder": "^26.0.12",
-    "@electron/rebuild": "^4.0.3",
     "eslint": "^9.39.3",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",

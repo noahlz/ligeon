@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import type { AppTheme } from '../../shared/types/game.js'
+import type { AppTheme } from '../../../shared/types/game.js'
 
 export interface UseAppThemeReturn {
   appTheme: AppTheme
