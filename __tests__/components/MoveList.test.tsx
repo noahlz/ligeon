@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import MoveList from '@/components/MoveList'
-import type { VariationData } from '../../src/shared/types/game'
+import type { VariationData, CommentData } from '../../src/shared/types/game'
 
 function renderMoveList(
   moves: string[],
@@ -146,5 +146,184 @@ describe('MoveList', () => {
     // Variation is rendered — VariationRow should appear in the table
     expect(screen.getByText('1.')).toBeInTheDocument()
     expect(screen.getByText('e5')).toBeInTheDocument()
+  })
+
+  // Cluster B — comment auto-collapse useEffect
+  it('auto-collapses comments on mount (comment text not visible)', () => {
+    const comments: CommentData[] = [{ id: 1, ply: 1, variationId: null, text: 'Opening move', gameId: 1 }]
+    render(
+      <TooltipProvider>
+        <MoveList
+          moves={['e4', 'e5']}
+          result={null}
+          currentPly={1}
+          onJump={vi.fn()}
+          commentHandlers={{ comments }}
+        />
+      </TooltipProvider>
+    )
+    expect(screen.queryByText('Opening move')).not.toBeInTheDocument()
+  })
+
+  it('shows comment text after clicking Expand comment', async () => {
+    const user = userEvent.setup()
+    const comments: CommentData[] = [{ id: 1, ply: 1, variationId: null, text: 'Opening move', gameId: 1 }]
+    render(
+      <TooltipProvider>
+        <MoveList
+          moves={['e4', 'e5']}
+          result={null}
+          currentPly={1}
+          onJump={vi.fn()}
+          commentHandlers={{ comments }}
+        />
+      </TooltipProvider>
+    )
+    await user.click(screen.getByTitle('Expand comment'))
+    expect(screen.getByText('Opening move')).toBeInTheDocument()
+  })
+
+  // Cluster C — collapse/expand callbacks
+  it('hides comment text after clicking Collapse comment', async () => {
+    const user = userEvent.setup()
+    const comments: CommentData[] = [{ id: 1, ply: 1, variationId: null, text: 'Opening move', gameId: 1 }]
+    render(
+      <TooltipProvider>
+        <MoveList
+          moves={['e4', 'e5']}
+          result={null}
+          currentPly={1}
+          onJump={vi.fn()}
+          commentHandlers={{ comments }}
+        />
+      </TooltipProvider>
+    )
+    await user.click(screen.getByTitle('Expand comment'))
+    expect(screen.getByText('Opening move')).toBeInTheDocument()
+    await user.click(screen.getByTitle('Collapse comment'))
+    expect(screen.queryByText('Opening move')).not.toBeInTheDocument()
+  })
+
+  // Cluster E — CommentRow after black's move
+  it('renders CommentRow in edit mode after black\'s move (ply 2)', () => {
+    render(
+      <TooltipProvider>
+        <MoveList
+          moves={['e4', 'e5']}
+          result={null}
+          currentPly={2}
+          onJump={vi.fn()}
+          commentHandlers={{
+            editingPly: 2,
+            editValue: 'editing',
+            onEdit: vi.fn(),
+            onValueChange: vi.fn(),
+            onSave: vi.fn(),
+            onCancel: vi.fn(),
+            onDeleteRequest: vi.fn(),
+          }}
+        />
+      </TooltipProvider>
+    )
+    expect(screen.getAllByRole('textbox').length).toBeGreaterThan(0)
+  })
+
+  it('renders CommentRow in display mode after black\'s move when expanded', async () => {
+    const user = userEvent.setup()
+    const comments: CommentData[] = [{ id: 2, ply: 2, variationId: null, text: "Black's reply", gameId: 1 }]
+    render(
+      <TooltipProvider>
+        <MoveList
+          moves={['e4', 'e5']}
+          result={null}
+          currentPly={2}
+          onJump={vi.fn()}
+          commentHandlers={{ comments }}
+        />
+      </TooltipProvider>
+    )
+    await user.click(screen.getByTitle('Expand comment'))
+    expect(screen.getByText("Black's reply")).toBeInTheDocument()
+  })
+
+  // Cluster D — comment interaction callbacks
+  it('calls onSave when Enter is pressed in comment input', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(
+      <TooltipProvider>
+        <MoveList
+          moves={['e4', 'e5']}
+          result={null}
+          currentPly={1}
+          onJump={vi.fn()}
+          commentHandlers={{
+            editingPly: 1,
+            editValue: '',
+            comments: [],
+            onEdit: vi.fn(),
+            onValueChange: vi.fn(),
+            onSave,
+            onCancel: vi.fn(),
+            onDeleteRequest: vi.fn(),
+          }}
+        />
+      </TooltipProvider>
+    )
+    const input = screen.getByRole('textbox')
+    await user.type(input, '{Enter}')
+    expect(onSave).toHaveBeenCalledOnce()
+  })
+
+  it('shows Add comment button on context menu and calls onEdit on click', async () => {
+    const user = userEvent.setup()
+    const onEdit = vi.fn()
+    render(
+      <TooltipProvider>
+        <MoveList
+          moves={['e4', 'e5']}
+          result={null}
+          currentPly={0}
+          onJump={vi.fn()}
+          commentHandlers={{
+            comments: [],
+            onEdit,
+            onValueChange: vi.fn(),
+            onSave: vi.fn(),
+            onCancel: vi.fn(),
+            onDeleteRequest: vi.fn(),
+          }}
+        />
+      </TooltipProvider>
+    )
+    const cell = screen.getByText('e4').closest('td')!
+    fireEvent.contextMenu(cell)
+    const addBtn = screen.getByTitle('Add comment')
+    expect(addBtn).toBeInTheDocument()
+    await user.click(addBtn)
+    expect(onEdit).toHaveBeenCalledWith(1)
+  })
+
+  // Cluster F — handleAnnotationTriggerClick
+  it('shows Add annotation button on context menu and does not call onJump when ply === currentPly', async () => {
+    const user = userEvent.setup()
+    const onJump = vi.fn()
+    render(
+      <TooltipProvider>
+        <MoveList
+          moves={['e4', 'e5']}
+          result={null}
+          currentPly={1}
+          onJump={onJump}
+          commentHandlers={{ comments: [] }}
+        />
+      </TooltipProvider>
+    )
+    const cell = screen.getByText('e4').closest('td')!
+    fireEvent.contextMenu(cell)
+    const annotationBtn = screen.getByTitle('Add annotation')
+    expect(annotationBtn).toBeInTheDocument()
+    await user.click(annotationBtn)
+    expect(onJump).not.toHaveBeenCalled()
   })
 })
