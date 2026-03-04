@@ -6,6 +6,7 @@ import { coverageExcludes } from './vitest.coverage.excludes.js';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  base: './',
   build: {
     outDir: 'dist',
     emptyOutDir: true,

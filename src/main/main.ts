@@ -53,7 +53,7 @@ function createWindow() {
   // Determine start URL based on environment
   const startUrl = isDev
     ? 'http://localhost:5173'
-    : `file://${path.join(__dirname, '../dist/index.html')}`
+    : `file://${path.join(__dirname, '../../dist/index.html')}`
 
   void mainWindow.loadURL(startUrl)
 

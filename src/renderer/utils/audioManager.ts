@@ -1,11 +1,13 @@
 import type { MoveType } from '../types/moveTypes.js'
 
-// Sound file paths (relative to public directory)
+// Prefix with import.meta.env.BASE_URL so paths work over file:// in the
+// packaged app (where base is './' and '/sounds/...' would resolve to root).
+const base = import.meta.env.BASE_URL
 const SOUND_PATHS: Record<MoveType, string> = {
-  move: '/sounds/Move.ogg',
-  capture: '/sounds/Capture.ogg',
-  check: '/sounds/Check.ogg',
-  castle: '/sounds/Castles.ogg'
+  move: `${base}sounds/Move.ogg`,
+  capture: `${base}sounds/Capture.ogg`,
+  check: `${base}sounds/Check.ogg`,
+  castle: `${base}sounds/Castles.ogg`
 }
 
 // Cache for loaded audio elements
