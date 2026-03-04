@@ -15,9 +15,13 @@ src/
 
   renderer/            # React UI layer (Chessground board, move list, etc.)
     components/        # React components, no business logic
+      display/         # Pure display components (no IPC, no state)
+      runtime/         # Stateful/interactive components (game UI, dialogs)
+      settings/        # Settings UI components
       ui/              # shadcn/ui primitives (bundled, not node_modules)
     data/              # Static JSON (openings database)
     hooks/             # Custom React hooks managing state and effects
+      ipc/             # Hooks that call window.electron.* IPC methods
     lib/               # Helper functions (cn() for Tailwind)
     styles/            # CSS + Tailwind config
     types/             # TypeScript interfaces (IPC API, enums, type defs)

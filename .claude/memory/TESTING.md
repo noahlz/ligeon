@@ -1,5 +1,11 @@
 # Testing
 
+## React Testing Library
+
+- `__tests__/helpers/electronMock.ts` provides the `window.electron` mock for hook tests.
+- Components using Radix primitives (tooltips, etc.) must be wrapped in `<TooltipProvider>` when rendered in tests.
+- `Element.prototype.scrollIntoView` must be stubbed in `beforeEach` — not implemented in happy-dom.
+
 ## SQLite Testing Patterns
 
 No mocking — all DB tests use a real SQLite instance in a temp dir.
