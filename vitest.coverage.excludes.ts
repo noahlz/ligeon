@@ -105,6 +105,4 @@ export const coverageExcludes: string[] = [
   'src/renderer/hooks/useGameControls.ts',
   'src/renderer/hooks/useVariationState.ts',
 
-  // Not yet tested: MoveList (most complex component — Sessions 2+)
-  'src/renderer/components/MoveList.tsx',
 ]
