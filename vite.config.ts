@@ -34,7 +34,7 @@ export default defineConfig({
         statements: 90,
       },
       reportsDirectory: '.coverage',
-      reporter: process.env.GITHUB_ACTIONS ? ['text', 'clover'] : ['text', 'json', 'html', 'clover'],
+      reporter: ['text', 'lcov'] 
     },
   },
 });
