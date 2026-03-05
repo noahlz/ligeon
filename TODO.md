@@ -10,7 +10,5 @@
 ```
 
 ## Packaging
-- Package game with sample-games pre-loaded
-- Game import should default to resources/sample-games/ in dev mode, home directory when deployed
 - CI/CD: release Mac/Win packages on tag push.
 
