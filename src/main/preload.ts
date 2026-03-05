@@ -111,6 +111,16 @@ contextBridge.exposeInMainWorld('electron', {
 
   // === Event Listeners ===
   /**
+   * Listen for the "start tour" signal sent from the main-process Help menu.
+   * Returns unsubscribe function.
+   */
+  onStartTour: (callback: () => void) => {
+    const listener = () => callback()
+    ipcRenderer.on('start-tour', listener)
+    return () => ipcRenderer.removeListener('start-tour', listener)
+  },
+
+  /**
    * Listen for import progress events
    * Returns unsubscribe function
    */

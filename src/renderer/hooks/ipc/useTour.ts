@@ -24,12 +24,15 @@ export function useTour(
     welcomeSeen:    boolean
     collectionSeen: boolean
     gameSeen:       boolean
-  }>({ loaded: false, welcomeSeen: false, collectionSeen: false, gameSeen: false })
+    // True from the moment a restart is requested until the welcome step finishes.
+    // Prevents effects 2 and 3 from racing ahead of effect 1 during restart.
+    restarting:     boolean
+  }>({ loaded: false, welcomeSeen: false, collectionSeen: false, gameSeen: false, restarting: false })
 
   // Load tour status from IPC settings on mount.
   useEffect(() => {
     void window.electron.getSettings().then((s) => {
-      setTourState({ loaded: true, ...s.productTourStatus })
+      setTourState({ loaded: true, restarting: false, ...s.productTourStatus })
     })
   }, [])
 
@@ -40,6 +43,17 @@ export function useTour(
 
   // Destroy on unmount.
   useEffect(() => () => destroyActive(), [])
+
+  // Restart the tour when triggered from the Help menu.
+  useEffect(() => {
+    const unsubscribe = window.electron.onStartTour(() => {
+      destroyActive()
+      const reset = { welcomeSeen: false, collectionSeen: false, gameSeen: false }
+      void window.electron.updateSettings({ productTourStatus: reset })
+      setTourState(prev => ({ ...prev, ...reset, restarting: true }))
+    })
+    return unsubscribe
+  }, [])
 
   // 1. Welcome — shown on first launch.
   useEffect(() => {
@@ -62,7 +76,10 @@ export function useTour(
             align: 'start',
           },
         }],
-        onDestroyed: () => { driverRef.current = null },
+        onDestroyed: () => {
+          driverRef.current = null
+          setTourState(prev => ({ ...prev, restarting: false }))
+        },
       })
       const next = { welcomeSeen: true, collectionSeen: tourState.collectionSeen, gameSeen: tourState.gameSeen }
       setTourState(prev => ({ ...prev, welcomeSeen: true }))
@@ -76,7 +93,7 @@ export function useTour(
 
   // 2. Collection filter hint — shown when first collection is loaded.
   useEffect(() => {
-    if (!tourState.loaded || tourState.collectionSeen) return
+    if (!tourState.loaded || tourState.collectionSeen || tourState.restarting) return
     if (selectedCollectionId === null) return
     if (driverRef.current?.isActive()) return
 
@@ -107,11 +124,11 @@ export function useTour(
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [tourState.loaded, tourState.welcomeSeen, tourState.collectionSeen, tourState.gameSeen, selectedCollectionId])
+  }, [tourState.loaded, tourState.welcomeSeen, tourState.collectionSeen, tourState.gameSeen, tourState.restarting, selectedCollectionId])
 
   // 3. Controls + navigation + move list — 3-step sequence shown when first game is selected.
   useEffect(() => {
-    if (!tourState.loaded || tourState.gameSeen) return
+    if (!tourState.loaded || tourState.gameSeen || tourState.restarting) return
     if (selectedGame === null) return
     if (driverRef.current?.isActive()) return
 
@@ -166,5 +183,5 @@ export function useTour(
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [tourState.loaded, tourState.welcomeSeen, tourState.collectionSeen, tourState.gameSeen, selectedGame])
+  }, [tourState.loaded, tourState.welcomeSeen, tourState.collectionSeen, tourState.gameSeen, tourState.restarting, selectedGame])
 }

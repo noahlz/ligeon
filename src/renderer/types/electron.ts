@@ -92,6 +92,7 @@ export interface ElectronAPI {
   setPieceSet: (pieceSet: PieceSet) => Promise<void>
 
   // Event Listeners
+  onStartTour: (callback: () => void) => () => void
   onImportProgress: (callback: (data: ImportProgressData) => void) => () => void
 }
 

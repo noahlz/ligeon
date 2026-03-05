@@ -10,6 +10,12 @@
     "dist-electron/**/*",
     "package.json"
   ],
+  "asar": true,
+  "asarUnpack": [
+    "**/node_modules/better-sqlite3/**",
+    "**/node_modules/bindings/**",
+    "**/node_modules/file-uri-to-path/**"
+  ],
   "mac": {
     "target": ["dmg"],
     "category": "public.app-category.games",
@@ -20,6 +26,8 @@
     "icon": "resources/icons/win/icon.ico"
   },
   "linux": {
-    "icon": "resources/icons/png/icon.png"
+    "target": ["AppImage", "deb"],
+    "icon": "resources/icons/png/icon.png",
+    "category": "Game"
   }
 }

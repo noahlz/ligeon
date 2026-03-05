@@ -1,7 +1,8 @@
-import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell, Menu, nativeTheme } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
 import {
   listCollections,
   renameCollection,
@@ -23,6 +24,10 @@ import type { BoardTheme, PieceSet } from '../shared/types/game.js'
 // Get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+// Read package.json for author and other metadata not exposed by Electron's app API
+const _require = createRequire(import.meta.url)
+const pkg = _require('../../package.json') as { author: string; license: string }
 
 let mainWindow: BrowserWindow | null = null
 let importCancelled = false
@@ -53,7 +58,7 @@ function createWindow() {
   // Determine start URL based on environment
   const startUrl = isDev
     ? 'http://localhost:5173'
-    : `file://${path.join(__dirname, '../dist/index.html')}`
+    : `file://${path.join(__dirname, '../../dist/index.html')}`
 
   void mainWindow.loadURL(startUrl)
 
@@ -94,18 +99,25 @@ function initializeApp() {
 function setupIpcHandlers() {
   logger.info('Setting up IPC handlers...')
 
-  // File dialog for selecting PGN file
+  // File dialog for selecting PGN file.
+  // Temporarily reset nativeTheme to 'system' so the OS file picker respects
+  // the user's system preference rather than the app's custom theme.
   ipcMain.handle('select-file', async () => {
-    const result = await dialog.showOpenDialog(mainWindow!, {
-      properties: ['openFile'],
-      filters: [
-        { name: 'PGN Files', extensions: ['pgn'] },
-        { name: 'All Files', extensions: ['*'] },
-      ],
-    })
-
-    logger.debug('File dialog result:', result.filePaths[0] || 'cancelled')
-    return result.filePaths[0] || null
+    const savedTheme = nativeTheme.themeSource
+    nativeTheme.themeSource = 'system'
+    try {
+      const result = await dialog.showOpenDialog(mainWindow!, {
+        properties: ['openFile'],
+        filters: [
+          { name: 'PGN Files', extensions: ['pgn'] },
+          { name: 'All Files', extensions: ['*'] },
+        ],
+      })
+      logger.debug('File dialog result:', result.filePaths[0] || 'cancelled')
+      return result.filePaths[0] || null
+    } finally {
+      nativeTheme.themeSource = savedTheme
+    }
   })
 
   // Open external URL in system browser
@@ -237,7 +249,11 @@ function setupIpcHandlers() {
 
   // Settings handlers
   ipcMain.handle('get-settings', () => getSettings())
-  ipcMain.handle('update-settings', (_event, { updates }: { updates: Partial<MainSettings> }) => updateSettings(updates))
+  ipcMain.handle('update-settings', (_event, { updates }: { updates: Partial<MainSettings> }) => {
+    const result = updateSettings(updates)
+    if (updates.appTheme != null) applyNativeTheme(updates.appTheme)
+    return result
+  })
   ipcMain.handle('select-collections-directory', () => selectCollectionsDirectory())
 
   // Board theme
@@ -267,6 +283,76 @@ function setupIpcHandlers() {
   logger.info('✓ IPC handlers set up')
 }
 
+const README_URL = 'https://github.com/noahlz/ligeon/blob/main/README.md'
+
+/**
+ * Sync nativeTheme.themeSource with the app's appTheme setting so that
+ * native dialogs (and the OS chrome) match the user's chosen theme.
+ */
+function applyNativeTheme(appTheme: string) {
+  if (appTheme === 'dark' || appTheme === 'light') {
+    nativeTheme.themeSource = appTheme
+  } else {
+    nativeTheme.themeSource = 'system'
+  }
+}
+
+/**
+ * Build and set the application menu.
+ * Preserves all platform-default roles and adds Help entries.
+ */
+function setupMenu() {
+  const version = app.getVersion()
+  const author  = pkg.author
+  const license = pkg.license
+
+  const template: Electron.MenuItemConstructorOptions[] = [
+    { role: 'appMenu' },
+    { role: 'fileMenu' },
+    { role: 'editMenu' },
+    { role: 'viewMenu' },
+    { role: 'windowMenu' },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'App Tour',
+          click: () => mainWindow?.webContents.send('start-tour'),
+        },
+        { type: 'separator' },
+        {
+          label: 'About Ligeon\u2026',
+          click: () => {
+            void (async () => {
+              const { response } = await dialog.showMessageBox(mainWindow!, {
+                type: 'info',
+                title: 'About Ligeon',
+                message: 'Ligeon \u2014 Chess PGN Viewer',
+                detail: [
+                  `Version ${version}`,
+                  '',
+                  `Author: ${author}`,
+                  `License: ${license}`,
+                  '',
+                  'github.com/noahlz/ligeon',
+                ].join('\n'),
+                buttons: ['View README', 'OK'],
+                defaultId: 1,
+                cancelId: 1,
+              })
+              if (response === 0) {
+                await shell.openExternal(README_URL)
+              }
+            })()
+          },
+        },
+      ],
+    },
+  ]
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+}
+
 /**
  * App lifecycle events
  */
@@ -275,6 +361,8 @@ app.on('ready', () => {
     app.dock?.setIcon(path.join(__dirname, '..', '..', 'resources', 'icons', 'png', 'icon-dev.png'));
   }
   logger.info('App ready')
+  applyNativeTheme(getSettings().appTheme)
+  setupMenu()
   createWindow()
   initializeApp()
   setupIpcHandlers()
