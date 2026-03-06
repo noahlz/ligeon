@@ -284,6 +284,7 @@ function setupIpcHandlers() {
 }
 
 const README_URL = 'https://github.com/noahlz/ligeon/blob/main/README.md'
+const SAMPLE_GAMES_URL = 'https://github.com/noahlz/ligeon/blob/main/resources/sample-games/README.md'
 
 /**
  * Sync nativeTheme.themeSource with the app's appTheme setting so that
@@ -318,6 +319,10 @@ function setupMenu() {
         {
           label: 'App Tour',
           click: () => mainWindow?.webContents.send('start-tour'),
+        },
+        {
+          label: 'Get Sample Games\u2026 \u2197',
+          click: () => { void shell.openExternal(SAMPLE_GAMES_URL) },
         },
         { type: 'separator' },
         {
