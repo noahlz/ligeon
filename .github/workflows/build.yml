@@ -1,12 +1,7 @@
-name: Release
+name: Build
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
   test:
@@ -94,27 +89,3 @@ jobs:
             release/*.AppImage
           if-no-files-found: error
           retention-days: 1
-
-  release:
-    name: Create GitHub Release
-    needs: [build-mac, build-win, build-linux]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: release-mac
-          path: release-artifacts
-      - uses: actions/download-artifact@v4
-        with:
-          name: release-win
-          path: release-artifacts
-      - uses: actions/download-artifact@v4
-        with:
-          name: release-linux
-          path: release-artifacts
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: release-artifacts/**/*
-          generate_release_notes: true
-          prerelease: true
-          fail_on_unmatched_files: true
