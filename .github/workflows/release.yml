@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*.*.*'
+    paths:
+      - '.github/workflows/release.yml'
 
 permissions:
   contents: write
@@ -92,13 +94,13 @@ jobs:
           name: release-linux
           path: |
             release/*.AppImage
-            release/*.deb
           if-no-files-found: error
           retention-days: 1
 
   release:
     name: Create GitHub Release
     needs: [build-mac, build-win, build-linux]
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
