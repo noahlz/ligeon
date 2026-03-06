@@ -9,6 +9,7 @@
 
 # Git worktrees
 .worktrees/
+.claude/worktrees/
 
 # Custom skill configuration
 .claude/settings.plugins.*.json
