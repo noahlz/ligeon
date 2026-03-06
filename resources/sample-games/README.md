@@ -9,8 +9,7 @@ Download these PGN files directly into Ligeon via **File → Import PGN…**
 | Fischer – My 60 Memorable Games | [fischer-60-memorable.pgn](https://raw.githubusercontent.com/noahlz/ligeon/main/resources/sample-games/fischer-60-memorable.pgn) |
 | Tal – The Life and Games of Mikhail Tal | [tal-life-and-games.pgn](https://raw.githubusercontent.com/noahlz/ligeon/main/resources/sample-games/tal-life-and-games.pgn) |
 
-_Source: [brianerdelyi/ChessPGN](https://github.com/brianerdelyi/ChessPGN).
-Chess games cannot be copyrighted._
+_Source: [brianerdelyi/ChessPGN](https://github.com/brianerdelyi/ChessPGN). Per this repo, chess games cannot be copyrighted._
 
 ---
 

@@ -4,6 +4,8 @@ import '../../styles/tour.css'
 import type { Driver } from 'driver.js'
 import type { GameRow } from '../../../shared/types/game.js'
 
+const SAMPLE_GAMES_URL = 'https://github.com/noahlz/ligeon/blob/main/resources/sample-games/README.md'
+
 /**
  * Fires three independent contextual tour popovers based on app state:
  *
@@ -68,12 +70,20 @@ export function useTour(
           element: '#tour-collection-selector',
           popover: {
             title: 'Welcome to Ligeon!',
-            description: 'Import a PGN collection to get started — click the library icon.',
+            description: 'Import a PGN collection to get started — click the library icon.'
+              + '<br><br><a id="tour-sample-games" href="#">Download game collections ↗</a>',
             showButtons: ['next'],
             nextBtnText: 'OK',
             showProgress: false,
             side: 'right',
             align: 'start',
+            onPopoverRender: (popover) => {
+              popover.description.querySelector('#tour-sample-games')
+                ?.addEventListener('click', (e) => {
+                  e.preventDefault()
+                  void window.electron.openExternal(SAMPLE_GAMES_URL)
+                })
+            },
           },
         }],
         onDestroyed: () => {

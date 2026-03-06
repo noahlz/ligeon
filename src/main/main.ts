@@ -321,7 +321,7 @@ function setupMenu() {
           click: () => mainWindow?.webContents.send('start-tour'),
         },
         {
-          label: 'Get Sample Games\u2026 \u2197',
+          label: 'Download game collections… \u2026 \u2197',
           click: () => { void shell.openExternal(SAMPLE_GAMES_URL) },
         },
         { type: 'separator' },
