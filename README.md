@@ -1,28 +1,33 @@
 # Ligeon
 
-Simple desktop chess game browser and study tool built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and SQLite. Import, browse and replay chess games from plaintext PGN game files.
+Ligeon is a simple chess game browser / study tool built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and SQLite. Import, browse and replay chess games from plaintext PGN game files.
 
 [![Node.js CI](https://github.com/noahlz/ligeon/actions/workflows/ci.yml/badge.svg)](https://github.com/noahlz/ligeon/actions/workflows/ci.yml)
-
 
 <img src="./ligeon-screen.png" width="650" alt="Ligeon Screenshot">
 
 ## Motivation
 
-My chess coach recommended reviewing master games, but existing free browsers are limited: ChessBase costs money, SCID is old and hard to use. So, I did what any reasonable person would do: build my own application.
+My chess coach recommended reviewing master game collections to learn patterns and opening themes. However, existing free browsers are limited: ChessBase costs money, SCID vs. PC had a dated interface and was hard to use, and Lichess studies are limited to 64 chapters. 
 
-(Mostly this is an experiment in using Claude Code to create a real desktop application. Lichess studies are great, but limited to 64 chapters – this can import nearly unlimited games. And I always wanted to build an Electron app.)
+So, rather than use any of these, I did what any reasonable person would do: build my own application.
+
+> Mostly this is an experiment in using Claude Code to create a real Electron/React application. Lichess studies are still my tool of choice.
 
 ## Limitations
 
-This app imports "plain" PGN data only – no comments, variations or annotations supported. 
+This app imports "plain" PGN data only. It does not pull in comments, variations or annotations. This is becaus such additions to chess game moves are generally considered creative work and thus copyright protected (mere game moves and headers are "facts" and thus not copyright-protected). 
 
-**Design choices:**
+**Additional design choices:**
 - No nested variations (single-level branches only)
 - Simple comments and basic annotations.
-- No Stockfish engine integration - you really should analyze positions without an engine!
+- No Stockfish engine integration (you should really analyze positions without an engine!)
 
-If you need the full feature set of Lichess studies, this is not it. But the game export feature allows you to easily get positions or full games over to Lichess for further analysis.
+If you need the full feature set of Lichess studies, this is not it. However, if you need that, you can easily push positions and full games up to Lichess for further analysis.
+
+## Why "Ligeon?"
+
+Its a **Li**chess-based P**GN** browser.
 
 ## Development
 
