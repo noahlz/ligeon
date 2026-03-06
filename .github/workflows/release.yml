@@ -9,95 +9,12 @@ permissions:
   contents: write
 
 jobs:
-  test:
-    name: Test (Ubuntu)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run build
-      - run: npm run rebuild:sqlite
-      - run: npx vitest run
-
-  build-mac:
-    name: Build (macOS)
-    needs: test
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - run: npm run rebuild:electron
-      - run: npx electron-builder --mac --publish never
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-mac
-          path: |
-            release/*.dmg
-            release/*.blockmap
-          if-no-files-found: error
-          retention-days: 1
-
-  build-win:
-    name: Build (Windows)
-    needs: test
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - run: npm run rebuild:electron
-      - run: npx electron-builder --win --publish never
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-win
-          path: |
-            release/*.exe
-            release/*.blockmap
-          if-no-files-found: error
-          retention-days: 1
-
-  build-linux:
-    name: Build (Linux)
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - run: npm run rebuild:electron
-      - run: npx electron-builder --linux --publish never
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-linux
-          path: |
-            release/*.AppImage
-          if-no-files-found: error
-          retention-days: 1
+  build:
+    uses: ./.github/workflows/_build-artifacts.yml
 
   release:
     name: Create GitHub Release
-    needs: [build-mac, build-win, build-linux]
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

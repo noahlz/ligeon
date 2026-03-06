@@ -10,6 +10,7 @@
     "dist-electron/**/*",
     "package.json"
   ],
+  "artifactName": "ligeon-${version}-installer-${arch}.${ext}",
   "asar": true,
   "asarUnpack": [
     "**/node_modules/better-sqlite3/**",
