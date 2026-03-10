@@ -84,26 +84,19 @@ Example:
 npm run pgn-to-sqlite -- resources/sample-games/tal-life-and-games.pgn ./release
 ```
 
-## Authors
+## Attribution
 
-[@noahlz](https://github.com/noahlz)  
-[@claude](https://github.com/claude)  
-
-## License
-
-[GPLv3](./LICENSE) (because it uses Chessground)
-
-## Sample Games Attribution
+### Sample Games
 
 Sample games sourced from [brianerdelyi/ChessPGN](https://github.com/brianerdelyi/ChessPGN)
 
-## Sound Attribution
+### Sounds 
 
 Sound files in `public/sounds/` copied from [Lichess](https://github.com/lichess-org/lila), licenced under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) by EdinburghCollective.
 
 See: [lichess-org/lila/COPYING.md](https://github.com/lichess-org/lila/blob/master/COPYING.md)
 
-## Piece Set Attribution
+### Piece Sets
 
 Chess piece SVGs in `public/pieces/` sourced from [lichess-org/lila](https://github.com/lichess-org/lila).
 
@@ -118,4 +111,17 @@ See: [lichess-org/lila/COPYING.md](https://github.com/lichess-org/lila/blob/mast
 | **fresca** | sadsnake1 | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) |
 | **mpchess** | [Maxime Chupin](https://github.com/chupinmaxime) | [GPL3v3+](https://www.gnu.org/licenses/quick-guide-gplv3.en.html) |
 | **xkcd** | [Randall Munroe](https://xkcd.com/about) | [CC BY-NC-SA 2.5](https://xkcd.com/license.html) |
+
+### Icons
+
+This application uses [Lucide](https://lucide.dev/) icons, including for the application logo. [License](https://lucide.dev/license)
+
+## Authors
+
+[@noahlz](https://github.com/noahlz)  
+[@claude](https://github.com/claude)  
+
+## License
+
+[GPLv3](./LICENSE) (because it uses Chessground)
 
