@@ -22,7 +22,7 @@
     "category": "public.app-category.games",
     "icon": "resources/icons/mac/icon.icns",
     "notarize": {
-      "teamId": "YOUR_APPLE_TEAM_ID"
+      "teamId": "2R45ZG5BZL"
     }
   },
   "win": {
