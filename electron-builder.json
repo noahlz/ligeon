@@ -21,9 +21,7 @@
     "target": ["dmg"],
     "category": "public.app-category.games",
     "icon": "resources/icons/mac/icon.icns",
-    "notarize": {
-      "teamId": "2R45ZG5BZL"
-    }
+    "notarize": true
   },
   "win": {
     "target": ["nsis"],

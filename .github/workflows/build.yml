@@ -4,5 +4,23 @@ on:
   workflow_dispatch:
 
 jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute build version
+        id: ver
+        run: |
+          BASE=$(node -p "require('./package.json').version")
+          STAMP=$(date -u +%Y%m%d.%H%M%S)
+          echo "version=${BASE}-dev.${STAMP}" >> $GITHUB_OUTPUT
+
   build:
+    needs: prepare
     uses: ./.github/workflows/_build-artifacts.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
+    secrets: inherit
