@@ -21,7 +21,11 @@
     "target": ["dmg"],
     "category": "public.app-category.games",
     "icon": "resources/icons/mac/icon.icns",
-    "notarize": true
+    "notarize": true,
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.inherit.plist"
   },
   "win": {
     "target": ["nsis"],
