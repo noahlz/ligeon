@@ -53,6 +53,7 @@ jobs:
           retention-days: 1
 
   build-win:
+    # TODO: Code Signing
     name: Build (Windows)
     needs: test
     runs-on: windows-latest
@@ -72,28 +73,6 @@ jobs:
           $ver = node -p "require('./package.json').version"
           "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
         shell: pwsh
-      # TODO: Add SignPath signing when account is ready
-      # - name: Upload unsigned artifacts for signing
-      #   id: upload-unsigned
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: unsigned-win-${{ steps.version.outputs.version }}
-      #     path: |
-      #       release/*.exe
-      #       release/*.blockmap
-      #     if-no-files-found: error
-      #     retention-days: 1
-      # - name: Sign with SignPath
-      #   uses: signpath/github-action-submit-signing-request@v1
-      #   with:
-      #     api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-      #     organization-id: ${{ vars.SIGNPATH_ORG_ID }}
-      #     project-slug: 'ligeon'
-      #     signing-policy-slug: 'release-signing'
-      #     artifact-configuration-slug: 'windows-installer'
-      #     github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
-      #     wait-for-completion: true
-      #     output-artifact-directory: release-signed/
       - uses: actions/upload-artifact@v4
         with:
           name: Ligeon-${{ steps.version.outputs.version }}-win
