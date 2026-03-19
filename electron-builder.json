@@ -24,8 +24,9 @@
     "notarize": true,
     "hardenedRuntime": true,
     "gatekeeperAssess": false,
-    "entitlements": "build/entitlements.mac.plist",
-    "entitlementsInherit": "build/entitlements.mac.inherit.plist"
+    "entitlements": "resources/entitlements.mac.plist",
+    "entitlementsInherit": "resources/entitlements.mac.inherit.plist",
+    "electronLanguages": ["en"]
   },
   "win": {
     "target": ["nsis"],
