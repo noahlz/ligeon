@@ -1,6 +1,6 @@
 {
   "name": "Ligeon",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Browse and replay chess games from PGN databases",
   "author": "Noah Zucker",
