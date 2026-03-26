@@ -9,8 +9,26 @@ permissions:
   contents: write
 
 jobs:
+  verify-version:
+    name: Verify tag matches package.json version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check tag vs package.json
+        run: |
+          TAG_VERSION="${{ github.ref_name }}"
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "❌ Tag '$TAG_VERSION' does not match package.json version '$PKG_VERSION'."
+            echo "   Fix: update package.json version to match the tag, or re-tag the correct commit."
+            exit 1
+          fi
+          echo "✅ Tag '$TAG_VERSION' matches package.json version."
+
   build:
+    needs: verify-version
     uses: ./.github/workflows/_build-artifacts.yml
+    secrets: inherit
 
   release:
     name: Create GitHub Release
@@ -19,15 +37,15 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: release-mac
+          name: ligeon-mac
           path: release-artifacts
       - uses: actions/download-artifact@v4
         with:
-          name: release-win
+          name: ligeon-win
           path: release-artifacts
       - uses: actions/download-artifact@v4
         with:
-          name: release-linux
+          name: ligeon-linux
           path: release-artifacts
       - uses: softprops/action-gh-release@v2
         with:
