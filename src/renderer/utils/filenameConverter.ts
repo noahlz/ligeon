@@ -13,7 +13,10 @@ import { titleCase } from 'text-title-case';
  */
 export function deriveSuggestedName(filePath: string): string {
   if (filePath) {
-    const baseName = path.parse(filePath).name;
+    // Normalize Windows backslashes to POSIX separators before parsing,
+    // since path-browserify is POSIX-only and won't split on backslashes.
+    const normalizedPath = filePath.replace(/\\/g, '/');
+    const baseName = path.parse(normalizedPath).name;
     return titleCase(baseName);
   } else {
     return '';

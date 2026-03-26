@@ -31,6 +31,10 @@ describe('filenameConverter', () => {
       expect(deriveSuggestedName('local.pgn')).toBe('Local')
     })
 
+    it('handles Windows path with backslash separators', () => {
+      expect(deriveSuggestedName('C:\\Users\\josh\\Downloads\\my-60-memorable-games.pgn')).toBe('My 60 Memorable Games')
+    })
+
     it('handles empty filename parts', () => {
       expect(deriveSuggestedName('   .pgn')).toBe('')
     })
