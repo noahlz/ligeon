@@ -24,7 +24,8 @@
     "lint:fix": "eslint src/ --fix",
     "check": "npm run lint && npm run typecheck && npm run knip && npm run test:coverage",
     "pgn-to-sqlite": "npm run rebuild:sqlite && tsx scripts/pgn-to-sqlite.ts",
-    "knip": "knip"
+    "knip": "knip",
+    "release": "release-it"
   },
   "engines": {
     "node": ">=24.0.0"
@@ -81,6 +82,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "happy-dom": "^20.7.0",
     "knip": "^5.83.0",
+    "release-it": "^19.2.4",
     "rimraf": "^6.1.2",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.19.0",

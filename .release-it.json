@@ -1,0 +1,17 @@
+{
+  "git": {
+    "commitMessage": "chore: release v${version}",
+    "tagName": "v${version}",
+    "tagAnnotation": "Release v${version}"
+  },
+  "npm": {
+    "publish": false
+  },
+  "github": {
+    "release": false
+  },
+  "hooks": {
+    "after:bump": "echo 'Version bumped to ${version}'",
+    "after:release": "npm version --no-git-tag-version prepatch && git add package.json package-lock.json && git commit -m 'chore: post-release working version is v$(node -p \"require('./package.json').version\")'"
+  }
+}
