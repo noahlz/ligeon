@@ -6,6 +6,12 @@ Ligeon is a simple chess game browser / study tool built with [Electron](https:/
 
 <img src="./ligeon-screen.png" width="650" alt="Ligeon Screenshot">
 
+## Installation
+
+**[Download](https://github.com/noahlz/ligeon/releases/latest)** the latest release for your platform.
+
+> **Windows users:** The installer is not code-signed, so Windows Defender SmartScreen will show a warning. Click "More info" then "Run anyway" to proceed.
+
 ## Motivation
 
 My chess coach recommended reviewing master game collections to learn patterns and opening themes. However, existing free browsers are limited: ChessBase costs money, SCID vs. PC had a dated interface and was hard to use, and Lichess studies are limited to 64 chapters. 
@@ -24,12 +30,6 @@ This app imports "plain" PGN data only. It does not pull in comments, variations
 - No Stockfish engine integration (you should really analyze positions without an engine!)
 
 If you need the full feature set of Lichess studies, this is not it. However, if you need that, you can easily push positions and full games up to Lichess for further analysis.
-
-## Download
-
-**[Download the latest release](https://github.com/noahlz/ligeon/releases/latest)** — choose the installer for your platform (macOS `.dmg`, Windows `.exe`, Linux `.AppImage`).
-
-> **Windows users:** The installer is not code-signed, so Windows Defender SmartScreen will show a warning. Click "More info" then "Run anyway" to proceed.
 
 ## Why "Ligeon?"
 
