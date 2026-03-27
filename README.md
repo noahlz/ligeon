@@ -25,6 +25,12 @@ This app imports "plain" PGN data only. It does not pull in comments, variations
 
 If you need the full feature set of Lichess studies, this is not it. However, if you need that, you can easily push positions and full games up to Lichess for further analysis.
 
+## Download
+
+**[Download the latest release](https://github.com/noahlz/ligeon/releases/latest)** — choose the installer for your platform (macOS `.dmg`, Windows `.exe`, Linux `.AppImage`).
+
+> **Windows users:** The installer is not code-signed, so Windows Defender SmartScreen will show a warning. Click "More info" then "Run anyway" to proceed.
+
 ## Why "Ligeon?"
 
 Its a **Li**chess-based P**GN** browser.
@@ -69,6 +75,12 @@ npm run package
 ```
 
 Creates distributable app bundles in `release/`.
+
+### Release
+
+```bash
+npm run release
+```
 
 ## CLI Tool: PGN to SQLite
 
