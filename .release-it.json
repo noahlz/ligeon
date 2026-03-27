@@ -13,6 +13,6 @@
   },
   "hooks": {
     "after:bump": "echo 'Version bumped to ${version}'",
-    "after:release": "npm version --no-git-tag-version patch && git add package.json package-lock.json && git commit -m 'chore: post-release working version is v$(node -p \"require('./package.json').version\")'"
+    "after:release": "bash scripts/post-release.sh"
   }
 }
