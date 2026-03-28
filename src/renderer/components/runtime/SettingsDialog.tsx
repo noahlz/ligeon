@@ -54,7 +54,7 @@ export default function SettingsDialog({
           <SettingsSection label="Piece Set">
             <PieceSetSection pieceSet={pieceSet} onPieceSetChange={onPieceSetChange} />
           </SettingsSection>
-          <SettingsSection label="Game List">
+          <SettingsSection label="Game List Limit">
             <GameListSection
               gameListLimit={gameListLimit}
               onGameListLimitChange={onGameListLimitChange}
