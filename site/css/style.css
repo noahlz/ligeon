@@ -1,0 +1,273 @@
+/* ── Reset & base ───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #c7d2e0;
+  --text: #1e293b;
+  --text-muted: #475569;
+  --btn-bg: #1e293b;
+  --btn-text: #f8fafc;
+  --card-bg: rgba(255, 255, 255, 0.5);
+  --card-border: rgba(255, 255, 255, 0.75);
+  --shadow: 0 4px 24px rgba(30, 41, 59, 0.18);
+  --radius: 10px;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 3rem;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  opacity: 0.75;
+}
+
+/* ── GitHub corner ribbon (github-fork-ribbon-css) ─────── */
+.github-fork-ribbon::before {
+  background-color: #92750c !important;
+}
+
+/* ── Hero ───────────────────────────────────────────────── */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 1.5rem 2.5rem;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+}
+
+.hero-tagline {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  max-width: 480px;
+  margin-bottom: 2.25rem;
+}
+
+.hero-screenshot {
+  width: 100%;
+  max-width: 650px;
+  height: auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), 0 0 0 1px rgba(30, 41, 59, 0.08);
+  display: block;
+}
+
+/* ── Downloads ──────────────────────────────────────────── */
+.downloads {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.downloads-heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+
+.download-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+  justify-content: center;
+}
+
+.btn-download {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  text-decoration: none;
+  padding: 0.75rem 2rem;
+  border-radius: var(--radius);
+  min-width: 130px;
+  transition: background 0.15s, transform 0.1s;
+  font-weight: 600;
+}
+
+.btn-download:hover {
+  background: #334155;
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+.btn-platform {
+  font-size: 1rem;
+}
+
+.btn-format {
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.7;
+  font-family: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
+}
+
+.downloads-fallback {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.downloads-fallback a {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Features ───────────────────────────────────────────── */
+.features {
+  padding: 1rem 1.5rem 2.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.feature-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.feature-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(6px);
+  padding: 1.25rem 1.5rem;
+  flex: 1 1 180px;
+  min-width: 168px;
+  max-width: 240px;
+}
+
+.feature-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.feature-card p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.feature-card a {
+  color: var(--text-muted);
+}
+
+/* ── Lichess attribution medallion ─────────────────────── */
+.attribution {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1.5rem 2rem;
+}
+
+.medallion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--btn-bg);
+  border: 1.5px solid var(--btn-bg);
+  border-radius: 999px;
+  padding: 0.55rem 1.25rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--btn-text);
+  transition: background 0.15s, transform 0.1s;
+}
+
+.medallion:hover {
+  background: #334155;
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+.medallion-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+  padding: 1.5rem 1.5rem 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.footer-sep {
+  opacity: 0.5;
+}
+
+.site-footer a {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-tagline {
+    font-size: 1rem;
+  }
+
+  /* Stack download buttons full-width on narrow viewports */
+  .download-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .btn-download {
+    min-width: unset;
+    padding: 0.875rem 1.5rem;
+  }
+
+  /* Stack feature cards to two columns on narrow viewports */
+  .feature-card {
+    flex: 1 1 calc(50% - 0.5rem);
+    max-width: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .feature-card {
+    flex: 1 1 100%;
+  }
+}

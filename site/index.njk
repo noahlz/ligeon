@@ -1,0 +1,92 @@
+---
+layout: layout.njk
+---
+
+{# GitHub corner ribbon — github-fork-ribbon-css #}
+<a class="github-fork-ribbon" href="https://github.com/noahlz/ligeon" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">
+  Fork me on GitHub
+</a>
+
+{# ── Hero ───────────────────────────────────────────────── #}
+<section class="hero">
+  <h1 class="hero-title">Ligeon</h1>
+  <p class="hero-tagline">Browse and replay chess games from PGN databases</p>
+  <img
+    class="hero-screenshot"
+    src="/ligeon-screen.png"
+    alt="Ligeon application screenshot showing a chess board with game notation"
+    width="650"
+  />
+</section>
+
+{# ── Downloads ──────────────────────────────────────────── #}
+<section class="downloads">
+  {% if release.version %}
+    <h2 class="downloads-heading">Download v{{ release.version }}</h2>
+    <div class="download-buttons">
+      {% if release.mac %}
+        <a class="btn-download" href="{{ release.mac.url }}" download="{{ release.mac.filename }}">
+          <span class="btn-platform">macOS</span>
+          <span class="btn-format">.dmg</span>
+        </a>
+      {% endif %}
+      {% if release.win %}
+        <a class="btn-download" href="{{ release.win.url }}" download="{{ release.win.filename }}">
+          <span class="btn-platform">Windows</span>
+          <span class="btn-format">.exe</span>
+        </a>
+      {% endif %}
+      {% if release.linux %}
+        <a class="btn-download" href="{{ release.linux.url }}" download="{{ release.linux.filename }}">
+          <span class="btn-platform">Linux</span>
+          <span class="btn-format">.AppImage</span>
+        </a>
+      {% endif %}
+    </div>
+  {% else %}
+    <p class="downloads-fallback">
+      No release found yet. Check the
+      <a href="https://github.com/noahlz/ligeon/releases" target="_blank" rel="noopener">
+        GitHub Releases page
+      </a>
+      for the latest downloads.
+    </p>
+  {% endif %}
+</section>
+
+{# ── Features ───────────────────────────────────────────── #}
+<section class="features">
+  <div class="feature-cards">
+    <div class="feature-card">
+      <h3>Import PGN</h3>
+      <p>Load game collections from plain-text PGN files</p>
+    </div>
+    <div class="feature-card">
+      <h3>Replay Games</h3>
+      <p>Step through games move by move</p>
+    </div>
+    <div class="feature-card">
+      <h3>Annotate</h3>
+      <p>Add comments, annotations and variations</p>
+    </div>
+    <div class="feature-card">
+      <h3>View on Lichess</h3>
+      <p>Export to <a href="https://lichess.org" target="_blank" rel="noopener">lichess.org</a> for engine analysis</p>
+    </div>
+  </div>
+</section>
+
+{# ── Lichess Attribution Medallion ──────────────────────── #}
+<section class="attribution">
+  <a class="medallion" href="https://lichess.org/source" target="_blank" rel="noopener">
+    <svg class="medallion-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="20" height="20" aria-hidden="true"><path fill="#fff" stroke="#fff" stroke-linejoin="round" d="M38.956.5c-3.53.418-6.452.902-9.286 2.984C5.534 1.786-.692 18.533.68 29.364 3.493 50.214 31.918 55.785 41.329 41.7c-7.444 7.696-19.276 8.752-28.323 3.084S-.506 27.392 4.683 17.567C9.873 7.742 18.996 4.535 29.03 6.405c2.43-1.418 5.225-3.22 7.655-3.187l-1.694 4.86 12.752 21.37c-.439 5.654-5.459 6.112-5.459 6.112-.574-1.47-1.634-2.942-4.842-6.036-3.207-3.094-17.465-10.177-15.788-16.207-2.001 6.967 10.311 14.152 14.04 17.663 3.73 3.51 5.426 6.04 5.795 6.756 0 0 9.392-2.504 7.838-8.927L37.4 7.171z"/></svg>
+    <span class="medallion-text">Built with Lichess open&#8209;source components</span>
+  </a>
+</section>
+
+{# ── Footer ─────────────────────────────────────────────── #}
+<footer class="site-footer">
+  <a href="https://github.com/noahlz/ligeon#readme" target="_blank" rel="noopener">View README</a>
+  <span class="footer-sep">&bull;</span>
+  <span>GPLv3</span>
+</footer>

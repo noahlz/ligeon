@@ -89,5 +89,8 @@ vite.config.ts.timestamp-*
 src/main/*.js
 /main.js
 
-# Superpowers skill scratch files
-.superpowers
+# Eleventy site build output
+site/_site/
+
+# Superpowers brainstorming sessions
+.superpowers/
