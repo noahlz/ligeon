@@ -1,6 +1,6 @@
 # Ligeon
 
-Ligeon is a simple chess game browser / study tool built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and SQLite. Import, browse and replay chess games from plaintext PGN game files.
+Ligeon is a simple chess game browser / study tool built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and SQLite. Import, browse and replay chess games from plain text PGN game files.
 
 [![Node.js CI](https://github.com/noahlz/ligeon/actions/workflows/ci.yml/badge.svg)](https://github.com/noahlz/ligeon/actions/workflows/ci.yml)
 
@@ -22,7 +22,7 @@ So, rather than use any of these, I did what any reasonable person would do: bui
 
 ## Limitations
 
-This app imports "plain" PGN data only. It does not pull in comments, variations or annotations. This is becaus such additions to chess game moves are generally considered creative work and thus copyright protected (mere game moves and headers are "facts" and thus not copyright-protected). 
+This app imports "plain" PGN data only. It does not pull in comments, variations or annotations. This is because such additions to chess game moves are generally considered creative work and thus copyright protected (mere game moves and headers are "facts" and thus not copyright-protected). 
 
 **Additional design choices:**
 - No nested variations (single-level branches only)
