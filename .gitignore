@@ -88,3 +88,6 @@ vite.config.ts.timestamp-*
 # Compiled Electron files
 src/main/*.js
 /main.js
+
+# Superpowers skill scratch files
+.superpowers
