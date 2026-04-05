@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   verify-version:
@@ -53,4 +54,9 @@ jobs:
           generate_release_notes: false
           make_latest: true
           fail_on_unmatched_files: true
+      - name: Trigger site deploy
+        run: |
+          gh workflow run site-ci.yml --ref main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
