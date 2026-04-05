@@ -56,7 +56,7 @@ export default defineConfig({
         statements: 90,
       },
       reportsDirectory: '.coverage',
-      reporter: ['text', 'lcov'] 
+      reporter: ['text', 'lcov']
     },
   },
 });
