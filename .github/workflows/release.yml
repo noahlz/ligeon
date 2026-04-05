@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   verify-version:
@@ -56,25 +54,3 @@ jobs:
           prerelease: true
           fail_on_unmatched_files: true
 
-  deploy-pages:
-    name: Deploy GitHub Pages
-    needs: release
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Install dependencies
-        run: cd site && npm ci
-      - name: Build site
-        run: cd site && npx @11ty/eleventy
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site/_site
-      - uses: actions/deploy-pages@v4
-        id: deployment
