@@ -31,6 +31,14 @@ const { updateElectronApp } = _require('update-electron-app') as typeof import('
 
 If rebuild succeeds but fails at runtime: `rm -rf node_modules/better-sqlite3/build` and retry.
 
+### `ignore-scripts=true` breaks `npm rebuild`
+
+**Symptom:** `npm rebuild better-sqlite3` silently skips all scripts — `.node` binary missing at runtime ("Could not locate the bindings file").
+
+**Cause:** `ignore-scripts=true` in `~/.npmrc` suppresses `prebuild-install`, which downloads the binary into `build/Release/`.
+
+**Fix:** `rebuild:sqlite` passes `--ignore-scripts=false` to override. Preserve this flag if the script changes.
+
 ## macOS Code Signing & Notarization
 
 `electron-builder` + `@electron/osx-sign`. Entitlements in `resources/` (tracked; `build/` is gitignored):
