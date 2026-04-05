@@ -2,13 +2,6 @@
 
 Source of truth: `src/shared/database/schema.ts`
 
-## Tables (4)
-
-- **games** — primary game records
-- **variations** — branching move sequences attached to a game
-- **comments** — text annotations per ply (mainline or for a variation)
-- **annotations** — NAG codes per ply (numeric; multiple per ply allowed)
-
 ## Variation Architecture
 
 - `branchPly` (1-based): the mainline ply the variation *replaces*, not branches from. Odd = white, even = black.

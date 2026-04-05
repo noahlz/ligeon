@@ -22,9 +22,8 @@ Load `.claude/references/TESTING.md` when:
 - Investigating test failures
 
 Load `.claude/references/ARCHITECTURE.md` when:
-- Exploring or searching the codebase — ALWAYS consult the project diagram first, narrow exploration accordingly
 - Planning or implementing a major refactor or new feature
-- Working with `src/shared/` or cross-target imports
+- Understanding non-obvious design decisions (state management, factory patterns, IPC aggregation)
 
 Load `.claude/references/SCHEMA.md` when:
 - Adding or modifying database tables, columns, or data models
@@ -37,11 +36,6 @@ Load `.claude/references/UX.md` when:
 - Fixing a popover, overlay, or Radix UI bug
 - Configuring Chessground board display
 
-Load `.claude/references/REACT.md` when:
-- Adding or modifying renderer components or hooks
-- Using or debugging the `@/` import alias
-- Fixing React UI behavior bugs
-
 Load `.claude/references/IPC.md` when:
 - Adding or modifying IPC handlers or the preload bridge
 - Calling `window.electron.*` from the renderer
@@ -51,6 +45,10 @@ Load `.claude/references/BUILD.md` when:
 - Debugging TypeScript or compile errors
 - Fixing import errors or module resolution failures
 - Rebuilding or troubleshooting `better-sqlite3` native bindings
+
+## Maintaining Reference Files
+
+After major changes (new abstractions, architectural shifts, new gotchas discovered), review and update the relevant `.claude/references/` file. These files should only contain non-obvious knowledge — workarounds, gotchas, and intentional design constraints — not anything derivable from code inspection.
 
 ## Reference Links
 

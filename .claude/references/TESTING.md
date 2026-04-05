@@ -1,11 +1,5 @@
 # Testing
 
-## React Testing Library
-
-- `__tests__/helpers/electronMock.ts` provides the `window.electron` mock for hook tests.
-- Components using Radix primitives (tooltips, etc.) must be wrapped in `<TooltipProvider>` when rendered in tests.
-- `Element.prototype.scrollIntoView` must be stubbed in `beforeEach` — not implemented in happy-dom.
-
 ## SQLite Testing Patterns
 
 No mocking — all DB tests use a real SQLite instance in a temp dir.
@@ -26,16 +20,3 @@ Prefer exact values. `toBeGreaterThan(0)` / `toBeTruthy()` pass even when functi
 - Assert exact game counts for known PGN fixtures in `resources/`
 - Assert exact strings for ECO/opening lookups — check `openings.json` for the value
 - After delete: re-fetch and assert the item is gone (don't rely on return value alone)
-
-## Shared Helpers
-
-- `__tests__/helpers/dbTestSetup.ts` — `createTestDb(id)` / `teardownTestDb(id, dir)` for DB setup/teardown
-- Use factory functions at module scope (`makeGameData()`, `makeGame()`) rather than repeating literals
-- Use `beforeAll` (not `beforeEach`) for expensive operations like large PGN imports — share the result
-
-## Model Test Files
-
-- `chessHelpers.test.ts` — pure functions: named constants, no magic values
-- `externalLinks.test.ts` — factory helpers at module scope
-- `annotationHandlers.test.ts` — CRUD lifecycle with cross-verification
-- `nag.test.ts` — references production constants so new values break the test automatically
