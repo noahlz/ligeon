@@ -29,6 +29,10 @@ const __dirname = path.dirname(__filename)
 const _require = createRequire(import.meta.url)
 const pkg = _require('../../package.json') as { author: string; license: string }
 
+// CJS package — use require() to avoid NodeNext module resolution issues with ESM import
+const { updateElectronApp } = _require('update-electron-app') as typeof import('update-electron-app')
+updateElectronApp()
+
 let mainWindow: BrowserWindow | null = null
 let importCancelled = false
 

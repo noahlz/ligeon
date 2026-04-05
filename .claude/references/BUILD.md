@@ -11,6 +11,18 @@ import { extractGameData } from './gameExtractor.js'  // correct
 import { extractGameData } from './gameExtractor'      // wrong — breaks ESM
 ```
 
+### CJS Packages in ESM Main Process
+
+`module: "NodeNext"` enforces strict ESM/CJS boundaries. CJS-only packages (no `exports`, no `type: "module"`) fail ESM `import` with "not callable" or "no call signatures" TS errors.
+
+Use `_require` (already in `main.ts` via `createRequire`):
+
+```typescript
+const { updateElectronApp } = _require('update-electron-app') as typeof import('update-electron-app')
+```
+
+`typeof import(...)` preserves type safety.
+
 ### Rebuild better-sqlite3
 
 `npm test` auto-rebuilds for Node.js. Manual commands:
