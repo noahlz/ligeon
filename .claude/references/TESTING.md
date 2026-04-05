@@ -17,6 +17,8 @@ Many IPC handlers are synchronous despite using DB. Check signature first.
 ## Assertion Strength
 
 Prefer exact values — `toBeGreaterThan(0)` / `toBeTruthy()` pass even when functionality is broken.
+
+Examples:
 - Assert exact game counts for known PGN fixtures in `resources/`
 - Assert exact strings for ECO/opening lookups — check `openings.json` for the value
 - After delete: re-fetch and assert the item is gone (don't rely on return value alone)

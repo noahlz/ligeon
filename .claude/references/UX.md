@@ -1,6 +1,6 @@
 # UI / UX
 
-App screenshot: `ligeon-screen.png` (repo root).
+App screenshot: `ligeon-screen.png` (project root).
 
 ## Gotchas
 

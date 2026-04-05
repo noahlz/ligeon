@@ -12,7 +12,7 @@ Electron desktop app for viewing chess games. Board UI powered by Lichess Chessg
 
 ## Reference Files
 
-All paths under `.claude/references/`. Non-obvious knowledge only — workarounds, gotchas, design constraints.
+During development, read additional reference files under `.claude/references/` as-needed. These offer on-obvious project info — workarounds, gotchas, design constraints.
 
 | File | Load when |
 |------|-----------|
@@ -23,7 +23,7 @@ All paths under `.claude/references/`. Non-obvious knowledge only — workaround
 | `IPC.md` | IPC handlers, preload bridge, `window.electron.*`, renderer-main debugging |
 | `BUILD.md` | TS/compile errors, import failures, `better-sqlite3` rebuild |
 
-After major changes, review and update the relevant reference file.
+> After you make major code changes, review and update the relevant reference file (if needed).
 
 ## Reference Links
 
