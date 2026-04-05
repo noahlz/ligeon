@@ -7,19 +7,24 @@
 
 :root {
   --bg: #0f0f0f;
+  --accent-rgb: 201 162 39;
   --bg-surface: #1a1a1a;
   --text: #f5f0e8;
   --text-muted: #a89f8f;
   --accent: #c9a227;
   --accent-hover: #d4a843;
-  --accent-glow: rgba(201, 162, 39, 0.15);
+  --accent-glow: rgb(var(--accent-rgb) / 0.15);
   --card-bg: rgba(255, 255, 255, 0.04);
-  --card-border: rgba(201, 162, 39, 0.12);
-  --card-border-hover: rgba(201, 162, 39, 0.4);
+  --card-border: rgb(var(--accent-rgb) / 0.12);
+  --card-border-hover: rgb(var(--accent-rgb) / 0.4);
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   --radius: 12px;
   --font-display: 'Cinzel', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 body {
@@ -29,10 +34,12 @@ body {
   font-size: 1rem;
   line-height: 1.6;
   min-height: 100vh;
+  padding-bottom: 1.5rem;
+}
+
+.container {
   max-width: 920px;
   margin: 0 auto;
-  padding-bottom: 1.5rem;
-  overflow-x: hidden;
 }
 
 a {
@@ -104,7 +111,7 @@ a:hover {
   width: 600px;
   height: 400px;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(201, 162, 39, 0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgb(var(--accent-rgb) / 0.08) 0%, transparent 70%);
   pointer-events: none;
   top: 50%;
   left: 50%;
@@ -125,17 +132,17 @@ a:hover {
   width: 72px;
   height: 72px;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 20px rgba(201, 162, 39, 0.3));
+  filter: drop-shadow(0 0 20px rgb(var(--accent-rgb) / 0.3));
 }
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: 4.5rem;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
   font-weight: 900;
   letter-spacing: -0.02em;
   line-height: 1.1;
   color: var(--text);
-  text-shadow: 0 0 40px rgba(201, 162, 39, 0.15);
+  text-shadow: 0 0 40px rgb(var(--accent-rgb) / 0.15);
 }
 
 .hero-screenshot-wrapper {
@@ -151,7 +158,7 @@ a:hover {
   max-width: 620px;
   height: auto;
   border-radius: var(--radius);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 162, 39, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgb(var(--accent-rgb) / 0.1);
   display: block;
   transform: rotateX(2deg);
   transition: transform 0.4s ease, box-shadow 0.4s ease;
@@ -159,7 +166,7 @@ a:hover {
 
 .hero-screenshot:hover {
   transform: rotateX(0deg);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(201, 162, 39, 0.2);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgb(var(--accent-rgb) / 0.2);
 }
 
 /* ── Downloads ──────────────────────────────────────────── */
@@ -200,7 +207,7 @@ a:hover {
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 16px rgba(201, 162, 39, 0.25);
+  box-shadow: 0 4px 16px rgb(var(--accent-rgb) / 0.25);
 }
 
 .btn-download::after {
@@ -214,7 +221,7 @@ a:hover {
 
 .btn-download:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(201, 162, 39, 0.35);
+  box-shadow: 0 8px 24px rgb(var(--accent-rgb) / 0.35);
   opacity: 1;
   color: #0f0f0f;
 }
@@ -257,8 +264,6 @@ a:hover {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   padding: 0.6rem 0.75rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   animation: fadeUp 0.6s ease-out both;
@@ -271,11 +276,11 @@ a:hover {
 
 .feature-card:hover {
   border-color: var(--card-border-hover);
-  box-shadow: 0 0 20px rgba(201, 162, 39, 0.08);
+  box-shadow: 0 0 20px rgb(var(--accent-rgb) / 0.08);
   transform: translateY(-3px);
 }
 
-.feature-card h3 {
+.feature-card h2 {
   font-size: 0.95rem;
   font-weight: 700;
   margin-bottom: 0.1rem;
@@ -304,8 +309,8 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  background: rgba(201, 162, 39, 0.1);
-  border: 1.5px solid rgba(201, 162, 39, 0.25);
+  background: rgb(var(--accent-rgb) / 0.1);
+  border: 1.5px solid rgb(var(--accent-rgb) / 0.25);
   border-radius: 999px;
   padding: 0.55rem 1.25rem;
   font-size: 0.875rem;
@@ -323,11 +328,6 @@ a:hover {
   stroke: var(--text);
 }
 
-.medallion-icon {
-  font-size: 1.1rem;
-  line-height: 1;
-}
-
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 600px) {
   .hero-icon {
@@ -337,14 +337,6 @@ a:hover {
 
   .hero-brand {
     gap: 0.75rem;
-  }
-
-  .hero-title {
-    font-size: 3rem;
-  }
-
-  .hero-tagline {
-    font-size: 0.95rem;
   }
 
   .hero-glow {
