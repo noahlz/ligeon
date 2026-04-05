@@ -65,8 +65,8 @@ a:hover {
 .hero-tagline {
   font-size: 1.2rem;
   color: var(--text-muted);
-  max-width: 480px;
-  margin-bottom: 1.25rem;
+  white-space: nowrap;
+  margin-top: 1rem;
 }
 
 .hero-screenshot {
@@ -156,19 +156,19 @@ a:hover {
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   backdrop-filter: blur(6px);
-  padding: 0.875rem 1rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .feature-card h3 {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.15rem;
 }
 
 .feature-card p {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
-  line-height: 1.45;
+  line-height: 1.35;
 }
 
 .feature-card a {
