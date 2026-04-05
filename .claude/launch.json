@@ -9,8 +9,8 @@
     },
     {
       "name": "static-site",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["@11ty/eleventy", "--serve"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "serve"],
       "port": 8080,
       "cwd": "site",
       "autoPort": false
