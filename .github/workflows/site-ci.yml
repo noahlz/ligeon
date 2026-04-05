@@ -5,10 +5,14 @@ on:
     branches: [main]
     paths:
       - 'site/**'
+      - 'resources/icons/**'
+      - 'ligeon-screen.png'
   pull_request:
     branches: [main]
     paths:
       - 'site/**'
+      - 'resources/icons/**'
+      - 'ligeon-screen.png'
 
 # Never cancel a mid-flight Pages deployment — queue instead.
 concurrency:
@@ -33,6 +37,8 @@ jobs:
         run: cd site && npm ci
       - name: Build site
         run: cd site && npx @11ty/eleventy
+      - name: Generate OG image
+        run: cd site && node scripts/generate-og-image.js
       - uses: actions/configure-pages@v5
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       - uses: actions/upload-pages-artifact@v3
