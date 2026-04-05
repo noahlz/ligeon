@@ -18,6 +18,7 @@
     "**/node_modules/file-uri-to-path/**"
   ],
   "dmg": {
+    "title": "Install Ligeon",
     "icon": false,
     "background": "resources/background.png",
     "contents": [
