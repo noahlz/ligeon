@@ -107,4 +107,9 @@ export const coverageExcludes: string[] = [
   // See __tests__/hooks/useVariationState.test.ts for existing tests.
   'src/renderer/hooks/useVariationState.ts',
 
+  // ===========================================================================
+  // STATIC SITE
+  // ===========================================================================
+
+  'site/**'
 ]

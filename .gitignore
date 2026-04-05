@@ -20,6 +20,7 @@
 # Dependencies
 node_modules/
 package-lock.json
+!site/package-lock.json
 
 # Build output
 dist/
@@ -88,3 +89,9 @@ vite.config.ts.timestamp-*
 # Compiled Electron files
 src/main/*.js
 /main.js
+
+# Eleventy site build output
+site/_site/
+
+# Superpowers brainstorming sessions
+.superpowers/

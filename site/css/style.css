@@ -1,0 +1,379 @@
+/* ── Reset & base ───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0f0f0f;
+  --accent-rgb: 201 162 39;
+  --bg-surface: #1a1a1a;
+  --text: #f5f0e8;
+  --text-muted: #a89f8f;
+  --accent: #c9a227;
+  --accent-hover: #d4a843;
+  --accent-glow: rgb(var(--accent-rgb) / 0.15);
+  --card-bg: rgba(255, 255, 255, 0.04);
+  --card-border: rgb(var(--accent-rgb) / 0.12);
+  --card-border-hover: rgb(var(--accent-rgb) / 0.4);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --radius: 12px;
+  --font-display: 'Cinzel', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 1.5rem;
+}
+
+.container {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent-hover);
+  opacity: 1;
+}
+
+/* ── Animations ─────────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Background grain overlay ──────────────────────────── */
+.bg-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ── GitHub link ───────────────────────────────────────── */
+.github-link {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.5rem;
+  z-index: 100;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  opacity: 0.7;
+}
+
+.github-link:hover {
+  color: var(--text);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* ── Hero ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 1.5rem 1rem;
+  text-align: center;
+}
+
+.hero-glow {
+  position: absolute;
+  width: 600px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(var(--accent-rgb) / 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  z-index: 0;
+}
+
+.hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.8s ease-out both;
+}
+
+.hero-icon {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 20px rgb(var(--accent-rgb) / 0.3));
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text);
+  text-shadow: 0 0 40px rgb(var(--accent-rgb) / 0.15);
+}
+
+.hero-screenshot-wrapper {
+  perspective: 1200px;
+  margin-top: 1rem;
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.8s ease-out 0.4s both;
+}
+
+.hero-screenshot {
+  width: 100%;
+  max-width: 620px;
+  height: auto;
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgb(var(--accent-rgb) / 0.1);
+  display: block;
+  transform: rotateX(2deg);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.hero-screenshot:hover {
+  transform: rotateX(0deg);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgb(var(--accent-rgb) / 0.2);
+}
+
+/* ── Downloads ──────────────────────────────────────────── */
+.downloads {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  flex-wrap: wrap;
+  animation: fadeUp 0.6s ease-out 0.35s both;
+}
+
+.downloads-heading {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.download-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #c9a227, #d4a843);
+  color: #0f0f0f;
+  text-decoration: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 0.875rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 16px rgb(var(--accent-rgb) / 0.25);
+}
+
+.btn-download::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.btn-download:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgb(var(--accent-rgb) / 0.35);
+  opacity: 1;
+  color: #0f0f0f;
+}
+
+.btn-download:hover::after {
+  transform: translateX(100%);
+}
+
+.btn-icon {
+  flex-shrink: 0;
+}
+
+.btn-platform {
+  font-size: 0.875rem;
+}
+
+.downloads-fallback {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.downloads-fallback a {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Features ───────────────────────────────────────────── */
+.feature-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 920px;
+  margin-top: 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.feature-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.75rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  animation: fadeUp 0.6s ease-out both;
+}
+
+.feature-card:nth-child(1) { animation-delay: 0.4s; }
+.feature-card:nth-child(2) { animation-delay: 0.5s; }
+.feature-card:nth-child(3) { animation-delay: 0.6s; }
+.feature-card:nth-child(4) { animation-delay: 0.7s; }
+
+.feature-card:hover {
+  border-color: var(--card-border-hover);
+  box-shadow: 0 0 20px rgb(var(--accent-rgb) / 0.08);
+  transform: translateY(-3px);
+}
+
+.feature-card h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.1rem;
+  color: var(--text);
+}
+
+.feature-card p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.feature-card a {
+  color: var(--accent);
+}
+
+/* ── Lichess attribution medallion ─────────────────────── */
+.attribution {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 1.5rem 1.25rem;
+  animation: fadeUp 0.6s ease-out 0.8s both;
+}
+
+.medallion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgb(var(--accent-rgb) / 0.1);
+  border: 1.5px solid rgb(var(--accent-rgb) / 0.25);
+  border-radius: 999px;
+  padding: 0.55rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.medallion a {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+.medallion-logo path {
+  fill: var(--text);
+  stroke: var(--text);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .hero-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .hero-brand {
+    gap: 0.75rem;
+  }
+
+  .hero-glow {
+    width: 350px;
+    height: 250px;
+  }
+
+  .hero-screenshot {
+    transform: rotateX(0deg);
+  }
+
+  .downloads {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .download-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .feature-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 380px) {
+  .feature-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Accessibility ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
+}
