@@ -1,6 +1,6 @@
 # Ligeon
 
-Ligeon is a simple chess game browser / study tool built with [Electron](https://www.electronjs.org/), [React](https://react.dev/), and SQLite. Import, browse and replay chess games from plain text PGN game files.
+Ligeon is a simple chess game browser / study tool built with [Electron](https://www.electronjs.org/) and [React](https://react.dev/). Import, browse and replay chess games from plain text PGN game files.
 
 [![Node.js CI](https://github.com/noahlz/ligeon/actions/workflows/ci.yml/badge.svg)](https://github.com/noahlz/ligeon/actions/workflows/ci.yml)
 
@@ -14,11 +14,11 @@ Ligeon is a simple chess game browser / study tool built with [Electron](https:/
 
 ## Motivation
 
-My chess coach recommended reviewing master game collections to learn patterns and opening themes. However, existing free browsers are limited: ChessBase costs money, SCID vs. PC had a dated interface and was hard to use, and Lichess studies are limited to 64 chapters. 
+My chess coach recommended reviewing master game collections to learn patterns and opening themes. However, existing free browsers are limited: ChessBase is expensive, SCID vs. PC had a dated interface and was hard to use, and Lichess studies are limited to 64 chapters.
 
 So, rather than use any of these, I did what any reasonable person would do: build my own application.
 
-> Mostly this is an experiment in using Claude Code to create a real Electron/React application. Lichess studies are still my tool of choice.
+> Mostly this was an experiment in using Claude Code to create a real Electron/React application. Lichess studies are still my tool of choice.
 
 ## Limitations
 
@@ -130,7 +130,7 @@ This application uses [Lucide](https://lucide.dev/) icons, including for the app
 
 ## Authors
 
-[@noahlz](https://github.com/noahlz)  
+[@noahlz](https://github.com/noahlz) ([Lichess profile](https://lichess.org/@/noahlz))  
 [@claude](https://github.com/claude)  
 
 ## License
