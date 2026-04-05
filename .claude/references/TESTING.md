@@ -10,13 +10,13 @@ No mocking — all DB tests use a real SQLite instance in a temp dir.
 
 ## Handler Sync/Async: Check Before Writing
 
-Many IPC handlers are **synchronous** (not async), even those that use DB. Check the function signature first.
+Many IPC handlers are synchronous despite using DB. Check signature first.
 - Sync throws: `expect(() => fn()).toThrow()`
 - Async rejects: `await expect(fn()).rejects.toThrow()`
 
 ## Assertion Strength
 
-Prefer exact values. `toBeGreaterThan(0)` / `toBeTruthy()` pass even when functionality is broken.
+Prefer exact values — `toBeGreaterThan(0)` / `toBeTruthy()` pass even when functionality is broken.
 - Assert exact game counts for known PGN fixtures in `resources/`
 - Assert exact strings for ECO/opening lookups — check `openings.json` for the value
 - After delete: re-fetch and assert the item is gone (don't rely on return value alone)

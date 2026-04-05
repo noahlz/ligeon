@@ -21,17 +21,15 @@ If rebuild succeeds but fails at runtime: `rm -rf node_modules/better-sqlite3/bu
 
 ## macOS Code Signing & Notarization
 
-Signing is handled by `electron-builder` via `@electron/osx-sign`. Entitlements files are in `resources/` (tracked in git — `build/` is gitignored):
+`electron-builder` + `@electron/osx-sign`. Entitlements in `resources/` (tracked; `build/` is gitignored):
 
 - `resources/entitlements.mac.plist` — main process
 - `resources/entitlements.mac.inherit.plist` — helper processes (Electron Framework, GPU, renderer, etc.)
 
-Both grant the same three entitlements required for Electron apps under hardened runtime:
-
 | Entitlement | Why |
 |-------------|-----|
-| `com.apple.security.cs.allow-jit` | V8 JavaScript engine requires JIT |
-| `com.apple.security.cs.allow-unsigned-executable-memory` | Electron renderer process |
-| `com.apple.security.cs.disable-library-validation` | Loading native modules (better-sqlite3) |
+| `com.apple.security.cs.allow-jit` | V8 requires JIT |
+| `com.apple.security.cs.allow-unsigned-executable-memory` | Electron renderer |
+| `com.apple.security.cs.disable-library-validation` | Native modules (better-sqlite3) |
 
 Notarization uses App Store Connect API key auth (not Apple ID + password). Required GitHub secrets: `APPLE_API_KEY_CONTENT`, `APPLE_API_KEY_ID`, `APPLE_API_ISSUER`, `CSC_LINK`, `CSC_KEY_PASSWORD`.
