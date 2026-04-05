@@ -3,22 +3,12 @@ name: Node.js CI
 on:
   push:
     branches: [ main ]
-    paths:
-      - '*.html'
-      - '*.json'
-      - '*.ts'
-      - '**/*/*.json'
-      - '**/*/*.ts'
-      - '**/*/*.tsx'
+    paths-ignore:
+      - 'site/**'
   pull_request:
     branches: [ main ]
-    paths:
-      - '*.html'
-      - '*.json'
-      - '*.ts'
-      - '**/*/*.json'
-      - '**/*/*.ts'
-      - '**/*/*.tsx'
+    paths-ignore:
+      - 'site/**'
 
 jobs:
   build-and-test:
