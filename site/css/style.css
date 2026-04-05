@@ -24,7 +24,9 @@ body {
   font-size: 1rem;
   line-height: 1.6;
   min-height: 100vh;
-  padding-bottom: 3rem;
+  max-width: 860px;
+  margin: 0 auto;
+  padding-bottom: 1.5rem;
   overflow-x: hidden;
 }
 
@@ -48,7 +50,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4rem 1.5rem 2.5rem;
+  padding: 2.5rem 1.5rem 1.5rem;
   text-align: center;
 }
 
@@ -64,12 +66,12 @@ a:hover {
   font-size: 1.2rem;
   color: var(--text-muted);
   max-width: 480px;
-  margin-bottom: 2.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .hero-screenshot {
   width: 100%;
-  max-width: 650px;
+  max-width: 600px;
   height: auto;
   border-radius: var(--radius);
   box-shadow: var(--shadow), 0 0 0 1px rgba(30, 41, 59, 0.08);
@@ -79,55 +81,50 @@ a:hover {
 /* ── Downloads ──────────────────────────────────────────── */
 .downloads {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 2.5rem 1.5rem;
-  text-align: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  flex-wrap: wrap;
 }
 
 .downloads-heading {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 1.25rem;
+  white-space: nowrap;
 }
 
 .download-buttons {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.875rem;
-  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-download {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 0.4rem;
   background: var(--btn-bg);
   color: var(--btn-text);
   text-decoration: none;
-  padding: 0.75rem 2rem;
+  padding: 0.5rem 1rem;
   border-radius: var(--radius);
-  min-width: 130px;
   transition: background 0.15s, transform 0.1s;
   font-weight: 600;
+  font-size: 0.875rem;
 }
 
 .btn-download:hover {
   background: #334155;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   opacity: 1;
 }
 
-.btn-platform {
-  font-size: 1rem;
+.btn-icon {
+  flex-shrink: 0;
 }
 
-.btn-format {
-  font-size: 0.75rem;
-  font-weight: 400;
-  opacity: 0.7;
-  font-family: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
+.btn-platform {
+  font-size: 0.875rem;
 }
 
 .downloads-fallback {
@@ -142,17 +139,16 @@ a:hover {
 
 /* ── Features ───────────────────────────────────────────── */
 .features {
-  padding: 1rem 1.5rem 2.5rem;
-  max-width: 900px;
+  padding: 0.75rem 1.5rem 1.25rem;
+  max-width: 860px;
   margin: 0 auto;
   width: 100%;
 }
 
 .feature-cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
 }
 
 .feature-card {
@@ -160,10 +156,7 @@ a:hover {
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   backdrop-filter: blur(6px);
-  padding: 1.25rem 1.5rem;
-  flex: 1 1 180px;
-  min-width: 168px;
-  max-width: 240px;
+  padding: 0.875rem 1rem;
 }
 
 .feature-card h3 {
@@ -186,7 +179,7 @@ a:hover {
 .attribution {
   display: flex;
   justify-content: center;
-  padding: 0.5rem 1.5rem 2rem;
+  padding: 0.25rem 1.5rem 1rem;
 }
 
 .medallion {
@@ -197,17 +190,14 @@ a:hover {
   border: 1.5px solid var(--btn-bg);
   border-radius: 999px;
   padding: 0.55rem 1.25rem;
-  text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--btn-text);
-  transition: background 0.15s, transform 0.1s;
 }
 
-.medallion:hover {
-  background: #334155;
-  transform: translateY(-1px);
-  opacity: 1;
+.medallion a {
+  color: var(--btn-text);
+  text-underline-offset: 2px;
 }
 
 .medallion-icon {
@@ -222,7 +212,7 @@ a:hover {
   justify-content: center;
   align-items: center;
   gap: 0.4rem 0.75rem;
-  padding: 1.5rem 1.5rem 0;
+  padding: 0.75rem 1.5rem 0;
   font-size: 0.8rem;
   color: var(--text-muted);
 }
@@ -246,28 +236,23 @@ a:hover {
     font-size: 1rem;
   }
 
-  /* Stack download buttons full-width on narrow viewports */
-  .download-buttons {
+  .downloads {
     flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    max-width: 320px;
+    gap: 0.5rem;
   }
 
-  .btn-download {
-    min-width: unset;
-    padding: 0.875rem 1.5rem;
+  .download-buttons {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  /* Stack feature cards to two columns on narrow viewports */
-  .feature-card {
-    flex: 1 1 calc(50% - 0.5rem);
-    max-width: none;
+  .feature-cards {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 380px) {
-  .feature-card {
-    flex: 1 1 100%;
+  .feature-cards {
+    grid-template-columns: 1fr;
   }
 }
