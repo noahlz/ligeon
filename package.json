@@ -11,7 +11,7 @@
   "scripts": {
     "clean": "rimraf dist dist-electron release .logs coverage",
     "app": "npm run build:main && npm run rebuild:electron && concurrently \"vite\" \"wait-on http://localhost:5173 && ELECTRON_IS_DEV=true electron .\"",
-    "rebuild:sqlite": "rm -rf node_modules/better-sqlite3/build && npm rebuild better-sqlite3",
+    "rebuild:sqlite": "cd node_modules/better-sqlite3 && npm run install",
     "rebuild:electron": "electron-rebuild -f -w better-sqlite3",
     "test": "npm run rebuild:sqlite && vitest run; CODE=$?; npm run rebuild:electron || CODE=$?; exit $CODE",
     "test:watch": "npm run rebuild:sqlite && vitest run --watch; CODE=$?; npm run rebuild:electron || CODE=$?; exit $CODE",
