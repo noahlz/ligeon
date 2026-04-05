@@ -3,6 +3,7 @@
   "version": "0.2.2",
   "type": "module",
   "description": "Browse and replay chess games from PGN databases",
+  "repository": "https://github.com/noahlz/ligeon",
   "author": "Noah Zucker",
   "license": "GPL-3.0",
   "main": "dist-electron/main/main.js",
