@@ -20,6 +20,7 @@
 # Dependencies
 node_modules/
 package-lock.json
+!site/package-lock.json
 
 # Build output
 dist/
