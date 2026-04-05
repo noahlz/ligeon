@@ -4,11 +4,62 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ligeon — Chess Game Browser</title>
-    <meta name="description" content="Browse and replay chess games from PGN databases" />
+    <meta name="description" content="Free desktop chess game browser. Import PGN files, replay games move by move, add annotations, and export to Lichess for engine analysis." />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://noahlz.github.io/ligeon/" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#1a1a1a" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://noahlz.github.io/ligeon/" />
+    <meta property="og:title" content="Ligeon — Chess Game Browser" />
+    <meta property="og:description" content="Browse and replay chess games from PGN databases. Import PGN files, step through moves, annotate, and export to Lichess." />
+    <meta property="og:image" content="https://noahlz.github.io/ligeon/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ligeon — Chess Game Browser" />
+    <meta name="twitter:description" content="Browse and replay chess games from PGN databases. Import PGN files, step through moves, annotate, and export to Lichess." />
+    <meta name="twitter:image" content="https://noahlz.github.io/ligeon/og-image.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" />
     <link rel="stylesheet" href="/css/style.css" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Ligeon",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "macOS, Windows, Linux",
+  "description": "Free desktop chess game browser. Import PGN files, replay games move by move, add annotations, and export to Lichess for engine analysis.",
+  "url": "https://noahlz.github.io/ligeon/",
+  "image": "https://noahlz.github.io/ligeon/og-image.png",
+  "author": {
+    "@type": "Person",
+    "name": "noahlz",
+    "url": "https://github.com/noahlz"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+    </script>
   </head>
   <body>
     {{ content | safe }}
