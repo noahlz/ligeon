@@ -18,7 +18,7 @@
     "build:renderer": "tsc -p src/renderer/tsconfig.json && vite build",
     "build:main": "tsc -p src/main/tsconfig.json && tsc -p src/main/tsconfig.preload.json",
     "build": "npm run build:renderer && npm run build:main",
-    "package": "npm run build && npm run rebuild:electron && electron-builder && bash scripts/fix-dmg-background.sh",
+    "package": "npm run build && npm run rebuild:electron && electron-builder",
     "typecheck": "tsc -p src/renderer/tsconfig.json --noEmit && tsc -p src/main/tsconfig.json --noEmit && tsc -p src/main/tsconfig.preload.json --noEmit",
     "lint": "eslint src/ --max-warnings 0",
     "lint:fix": "eslint src/ --fix",
