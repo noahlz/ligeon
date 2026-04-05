@@ -56,7 +56,7 @@ jobs:
           fail_on_unmatched_files: true
       - name: Trigger site deploy
         run: |
-          gh workflow run site-ci.yml --ref main
+          gh workflow run site-ci.yml --repo ${{ github.repository }} --ref main
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
