@@ -17,6 +17,20 @@
     "**/node_modules/bindings/**",
     "**/node_modules/file-uri-to-path/**"
   ],
+  "dmg": {
+    "icon": false,
+    "background": "resources/background.png",
+    "contents": [
+      { "x": 130, "y": 160, "type": "file" },
+      { "x": 410, "y": 160, "type": "link", "path": "/Applications" }
+    ],
+    "window": {
+      "x": 200,
+      "y": 200,
+      "width": 540,
+      "height": 400
+    }
+  },
   "mac": {
     "target": ["dmg"],
     "category": "public.app-category.games",
