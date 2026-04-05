@@ -9,10 +9,10 @@
     },
     {
       "name": "static-site",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "serve"],
+      "runtimeExecutable": "/bin/zsh",
+      "runtimeArgs": ["-c", "source ~/.nvm/nvm.sh && npm run serve"],
       "port": 8080,
-      "cwd": "site",
+      "cwd": "/Users/noahlz/projects/ligeon/site",
       "autoPort": false
     }
   ]

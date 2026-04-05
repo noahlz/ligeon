@@ -248,6 +248,23 @@ a:hover {
   font-weight: 600;
 }
 
+.release-notes-link {
+  flex-basis: 100%;
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.45;
+}
+
+.release-notes-link a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.release-notes-link a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 /* ── Features ───────────────────────────────────────────── */
 .feature-cards {
   display: grid;
