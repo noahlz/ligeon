@@ -95,3 +95,6 @@ site/_site/
 
 # Superpowers brainstorming sessions
 .superpowers/
+
+# Fallow output
+.fallow/
