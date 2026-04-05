@@ -8,7 +8,13 @@
   "files": [
     "dist/**/*",
     "dist-electron/**/*",
-    "package.json"
+    "package.json",
+    "!node_modules/moment/locale/**",
+    "!node_modules/moment/min/**",
+    "!node_modules/prebuild-install/**",
+    "!**/node_modules/@types/**",
+    "!**/*.map",
+    "!**/*.d.ts"
   ],
   "artifactName": "ligeon-${version}-installer-${arch}.${ext}",
   "asar": true,
