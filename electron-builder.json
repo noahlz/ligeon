@@ -33,7 +33,7 @@
     }
   },
   "mac": {
-    "target": ["dmg"],
+    "target": ["dmg", "zip"],
     "category": "public.app-category.games",
     "icon": "resources/icons/mac/icon.icns",
     "notarize": true,
