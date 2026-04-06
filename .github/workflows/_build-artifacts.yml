@@ -68,6 +68,8 @@ jobs:
           name: ligeon-mac
           path: |
             release/*.dmg
+            release/*.zip
+            release/*.yml
             release/*.blockmap
           if-no-files-found: error
           retention-days: 1
@@ -95,6 +97,7 @@ jobs:
           name: ligeon-win
           path: |
             release/*.exe
+            release/*.yml
             release/*.blockmap
           if-no-files-found: error
           retention-days: 1
