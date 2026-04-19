@@ -346,11 +346,19 @@ export function useVariationState({
   }, [navigateVariation])
 
   const variationNavPrev = useCallback(() => {
+    // At variation ply <= 1, "back" exits the variation and lands on the mainline
+    // at branchPly - 1 (the parent position). At ply 1 this moves the board one step
+    // back; at ply 0 it just clears variation state (board FEN is already equal).
+    if (activeVariation && activeBranchPly !== null && chessManager && activeVariation.getCurrentPly() <= 1) {
+      exitVariation()
+      updateBoardState(chessManager, Math.max(0, activeBranchPly - 1))
+      return
+    }
     navigateVariation(m => {
       const ply = m.getCurrentPly()
       return ply > 0 ? ply - 1 : null
     })
-  }, [navigateVariation])
+  }, [navigateVariation, activeVariation, activeBranchPly, chessManager, exitVariation, updateBoardState])
 
   const variationNavNext = useCallback(() => {
     navigateVariation(m => {
