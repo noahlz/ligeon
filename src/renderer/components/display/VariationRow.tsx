@@ -13,6 +13,12 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip.js'
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+} from '@/components/ui/context-menu.js'
 
 export interface VariationRowProps {
   variation: VariationData
@@ -21,6 +27,7 @@ export interface VariationRowProps {
   variationPly?: number
   onVariationJump?: (id: number, branchPly: number, ply: number) => void
   onDismiss?: (id: number) => void
+  onTrimFrom?: (id: number, ply: number) => void
   isInVariation?: boolean
   comment?: CommentData
   onSaveComment?: (variationId: number, text: string) => void
@@ -40,6 +47,7 @@ export function VariationRow({
   variationPly,
   onVariationJump,
   onDismiss,
+  onTrimFrom,
   isInVariation,
   comment,
   onSaveComment,
@@ -250,6 +258,19 @@ export function VariationRow({
                   const moveNum = variationMoveNumber(variation.branchPly, i)
                   const ply = i + 1
                   const isCurrent = isInVariation && isActive && variationPly === ply
+                  const moveId = variation.id
+                  const canTrim = moveId != null && onTrimFrom != null
+
+                  const moveSpan = (
+                    <span
+                      onClick={() => moveId != null && onVariationJump?.(moveId, variation.branchPly, ply)}
+                      className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
+                        isCurrent ? 'bg-ui-accent text-white font-bold' : ''
+                      }`}
+                    >
+                      {move}
+                    </span>
+                  )
 
                   return (
                     <span key={i} className="inline-flex items-center">
@@ -259,14 +280,24 @@ export function VariationRow({
                           {moveNum}.{!isWhite && '..'}
                         </span>
                       )}
-                      <span
-                        onClick={() => variation.id != null && onVariationJump?.(variation.id, variation.branchPly, ply)}
-                        className={`px-1 rounded cursor-pointer hover:bg-ui-bg-hover ${
-                          isCurrent ? 'bg-ui-accent text-white font-bold' : ''
-                        }`}
-                      >
-                        {move}
-                      </span>
+                      {canTrim ? (
+                        <ContextMenu>
+                          <ContextMenuTrigger asChild>
+                            {moveSpan}
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem
+                              onSelect={() => onTrimFrom(moveId, ply)}
+                              className="gap-2 text-red-400 focus:text-red-300"
+                            >
+                              <Trash2 size={12} />
+                              Delete from here
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
+                      ) : (
+                        moveSpan
+                      )}
                     </span>
                   )
                 })}

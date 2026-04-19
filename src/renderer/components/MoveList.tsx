@@ -43,6 +43,7 @@ interface MoveListProps {
   variationPly?: number
   onVariationJump?: (id: number, branchPly: number, ply: number) => void
   onDismissVariation?: (id: number) => void
+  onTrimFrom?: (id: number, ply: number) => void
   onReorderVariations?: (branchPly: number, orderedIds: number[]) => void
   isInVariation?: boolean
   commentHandlers?: CommentHandlers
@@ -58,7 +59,7 @@ interface AnnotationHandlers {
 export default function MoveList({
   moves, result, currentPly, onJump,
   variations, activeVariationBranchPly, activeVariationId, variationMoves,
-  variationPly, onVariationJump, onDismissVariation, onReorderVariations, isInVariation,
+  variationPly, onVariationJump, onDismissVariation, onTrimFrom, onReorderVariations, isInVariation,
   commentHandlers,
   annotationHandlers,
 }: MoveListProps) {
@@ -401,6 +402,7 @@ export default function MoveList({
                     variationPly={variationPly}
                     onVariationJump={onVariationJump}
                     onDismiss={onDismissVariation}
+                    onTrimFrom={onTrimFrom}
                     isInVariation={isInVariation}
                     comment={sl.id != null ? variationComments?.get(sl.id) : undefined}
                     onSaveComment={onSaveVariationComment}
@@ -463,6 +465,7 @@ export default function MoveList({
                     variationPly={variationPly}
                     onVariationJump={onVariationJump}
                     onDismiss={onDismissVariation}
+                    onTrimFrom={onTrimFrom}
                     isInVariation={isInVariation}
                     comment={sl.id != null ? variationComments?.get(sl.id) : undefined}
                     onSaveComment={onSaveVariationComment}
@@ -487,6 +490,7 @@ export default function MoveList({
               variationPly={variationPly}
               onVariationJump={onVariationJump}
               onDismiss={onDismissVariation}
+              onTrimFrom={onTrimFrom}
               isInVariation={isInVariation}
               comment={sl.id != null ? variationComments?.get(sl.id) : undefined}
               onSaveComment={onSaveVariationComment}
