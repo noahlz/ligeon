@@ -264,6 +264,18 @@ export default function MoveList({
 
   const movePairs = useMemo(() => groupMovesIntoPairs(moves), [moves])
 
+  // Variations whose branchPly is beyond the last pair's blackPly slot (e.g.,
+  // user played an alternative at the final ply of a game that ends with
+  // black's move, or on an empty game). These are missed by the per-pair query
+  // so render them below the last move pair. When the mainline ends with
+  // white's move, the trailing pair's blackPly slot catches ply moves.length+1
+  // inline — don't double-render by using moves.length as the threshold.
+  // DB query already orders by (branchPly, displayOrder).
+  const trailingVariations = useMemo(
+    () => (variations ?? []).filter(v => v.branchPly > movePairs.length * 2),
+    [variations, movePairs.length],
+  )
+
   // O(1) ply lookup instead of O(n) find on every render cell
   const commentsByPly = useMemo(() => createCommentsByPlyMap(comments), [comments])
 
@@ -465,6 +477,27 @@ export default function MoveList({
               </Fragment>
             )
           })}
+
+          {trailingVariations.map(sl => (
+            <VariationRow
+              key={`sl-${sl.id ?? sl.branchPly}`}
+              variation={sl}
+              isActive={activeVariationBranchPly === sl.branchPly && activeVariationId === sl.id}
+              variationMoves={activeVariationBranchPly === sl.branchPly && activeVariationId === sl.id ? variationMoves : undefined}
+              variationPly={variationPly}
+              onVariationJump={onVariationJump}
+              onDismiss={onDismissVariation}
+              isInVariation={isInVariation}
+              comment={sl.id != null ? variationComments?.get(sl.id) : undefined}
+              onSaveComment={onSaveVariationComment}
+              onDeleteComment={onDeleteVariationComment}
+              onDragStart={onReorderVariations ? handleVariationDragStart : undefined}
+              onDragOver={onReorderVariations ? handleVariationDragOver : undefined}
+              onDrop={onReorderVariations ? (e, id) => handleVariationDrop(e, id, sl.branchPly) : undefined}
+              onDragEnd={onReorderVariations ? handleVariationDragEnd : undefined}
+              isDragging={draggedVariationId === sl.id}
+            />
+          ))}
 
           {result && (
             <TableRow className="border-0 hover:bg-transparent">

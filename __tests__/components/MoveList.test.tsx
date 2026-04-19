@@ -133,6 +133,35 @@ describe('MoveList', () => {
     expect(screen.getByText('e5')).toBeInTheDocument()
   })
 
+  // Trailing variations: branchPly beyond the last mainline ply
+  it('renders variation created at final ply when game ends with black (even moves)', () => {
+    const variations: VariationData[] = [
+      { id: 10, gameId: 1, branchPly: 5, moves: 'Nc3' },
+    ]
+    renderMoveList(['e4', 'e5', 'Nf3', 'Nc6'], null, 4, variations)
+    // Collapsed VariationRow preview renders "3. Nc3" (branchPly 5 = white move 3)
+    expect(screen.getByText(/3\.\s*Nc3/)).toBeInTheDocument()
+  })
+
+  it('renders variation at branchPly=1 when game has no moves', () => {
+    const variations: VariationData[] = [
+      { id: 11, gameId: 1, branchPly: 1, moves: 'e4' },
+    ]
+    renderMoveList([], null, 0, variations)
+    expect(screen.getByText(/1\.\s*e4/)).toBeInTheDocument()
+  })
+
+  it('does not duplicate variation when game ends with white move (odd moves.length)', () => {
+    // Mainline ends at ply 3 (white). Variation at branchPly=4 (black's response).
+    // Pair 1 has black=undefined and blackPly=4, so this variation is caught
+    // inline. The trailing-variation block must not also render it.
+    const variations: VariationData[] = [
+      { id: 12, gameId: 1, branchPly: 4, moves: 'Nc6' },
+    ]
+    renderMoveList(['e4', 'e5', 'Nf3'], null, 3, variations)
+    expect(screen.getAllByText(/2\.\.\.\s*Nc6/).length).toBe(1)
+  })
+
   // Cluster B — comment auto-collapse useEffect
   it('auto-collapses comments on mount (comment text not visible)', () => {
     const comments: CommentData[] = [{ id: 1, ply: 1, variationId: null, text: 'Opening move', gameId: 1 }]
