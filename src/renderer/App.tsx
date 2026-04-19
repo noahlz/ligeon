@@ -467,6 +467,7 @@ export default function App() {
                     variationPly={variationState.variationPly}
                     onVariationJump={variationState.jumpToVariationMove}
                     onDismissVariation={variationState.requestDeletion}
+                    onTrimFrom={variationState.trimVariationFrom}
                     onReorderVariations={selectedGameCollectionId && selectedGame ? (branchPly, orderedIds) => { void handleReorderVariations(branchPly, orderedIds) } : undefined}
                     isInVariation={variationState.isInVariation}
                     annotationHandlers={{

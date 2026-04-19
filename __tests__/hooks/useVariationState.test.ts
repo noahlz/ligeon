@@ -1,9 +1,8 @@
 /**
- * Tests for useVariationState — core CRUD flows only.
+ * Tests for useVariationState — core CRUD flows, variationNav.prev, and trimVariationFrom.
  *
  * NOT tested here (require multi-step setup with real FEN + VariationManager):
- *   - enterVariation / jumpToVariationMove (entering an existing variation)
- *   - variationNav.first/prev/next/last/jump (navigation within active variation)
+ *   - variationNav.first/next/last/jump (navigation within active variation)
  *   - handleUserMove while already in a variation (appending / advancing)
  *   - handleUserMove entering a matching saved variation
  *   - persistVariation sentinel guard (concurrent create prevention)
@@ -12,12 +11,14 @@
  * coverage threshold in vitest.coverage.excludes.ts to prevent a false failure.
  */
 
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import { useVariationState } from '@/hooks/useVariationState'
 import { mockElectron, installElectronMock } from '../helpers/electronMock'
 import type { VariationData } from '../../src/shared/types/game'
 import type { ChessManager } from '../../src/renderer/utils/chessManager'
+import { createVariationManager } from '../../src/renderer/utils/variationManager'
+import type { VariationManager } from '../../src/renderer/utils/variationManager'
 
 // Mock variationManager to avoid real chessops dependency in handleUserMove tests
 vi.mock('../../src/renderer/utils/variationManager', () => ({
@@ -56,6 +57,57 @@ function makeVariation(overrides: Partial<VariationData> = {}): VariationData {
   return { id: 1, gameId: 42, branchPly: 2, moves: 'd4', ...overrides }
 }
 
+/** VariationManager mock with configurable ply / totalPlies / moves. */
+function makeVariationManagerMock(opts: {
+  ply?: number
+  totalPlies?: number
+  moves?: string
+} = {}): VariationManager {
+  return {
+    appendMove: vi.fn().mockReturnValue(true),
+    getCurrentPly: vi.fn().mockReturnValue(opts.ply ?? 1),
+    getTotalPlies: vi.fn().mockReturnValue(opts.totalPlies ?? 1),
+    getMovesString: vi.fn().mockReturnValue(opts.moves ?? 'd4'),
+    getDests: vi.fn().mockReturnValue(new Map()),
+    getTurnColor: vi.fn().mockReturnValue('black'),
+    getMoveType: vi.fn().mockReturnValue('normal'),
+    goto: vi.fn(),
+    tryMove: vi.fn(),
+    getNextSan: vi.fn(),
+    truncateAfterCurrent: vi.fn(),
+  } as unknown as VariationManager
+}
+
+const INITIAL_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+/**
+ * Load variations, enter one as active, then clear updateBoardState call history
+ * so downstream assertions see only post-setup calls.
+ */
+async function setupActiveVariation(
+  variations: VariationData[],
+  vm: VariationManager,
+  activeId: number,
+  activeBranchPly: number,
+  targetPly: number,
+) {
+  vi.mocked(createVariationManager).mockReturnValueOnce(vm)
+  mockElectron.getVariations.mockResolvedValue(variations)
+  const chess = makeMockChessManager({ getFenAtPly: vi.fn().mockReturnValue(INITIAL_FEN) })
+  const params = makeHookParams({ chessManager: chess })
+  const { result } = renderHook(() => useVariationState(params))
+
+  await act(async () => {
+    await result.current.loadVariations('col-1', 42)
+  })
+  act(() => {
+    result.current.jumpToVariationMove(activeId, activeBranchPly, targetPly)
+  })
+  vi.mocked(params.updateBoardState).mockClear()
+
+  return { result, params, chess }
+}
+
 function makeHookParams(overrides = {}) {
   return {
     chessManager: makeMockChessManager(),
@@ -72,6 +124,10 @@ function makeHookParams(overrides = {}) {
 beforeEach(() => {
   installElectronMock()
   vi.clearAllMocks()
+  // Drain any mockReturnValueOnce queue from the prior test, then reinstall the
+  // default factory. clearAllMocks preserves the Once queue, which would leak.
+  vi.mocked(createVariationManager).mockReset()
+  vi.mocked(createVariationManager).mockImplementation(() => makeVariationManagerMock())
 })
 
 describe('useVariationState', () => {
@@ -271,7 +327,6 @@ describe('useVariationState', () => {
       // tryMove returns 'd4' (a non-mainline move)
       // getMainlineSan returns 'e4' (mainline differs)
       // getFenAtPly returns a valid FEN for the initial position
-      const INITIAL_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       const manager = makeMockChessManager({
         tryMove: vi.fn().mockReturnValue('d4'),
         getMainlineSan: vi.fn().mockReturnValue('e4'),
@@ -284,15 +339,152 @@ describe('useVariationState', () => {
       const params = makeHookParams({ chessManager: manager, currentPly: 0 })
       const { result } = renderHook(() => useVariationState(params))
 
-      await act(async () => {
+      act(() => {
         result.current.handleUserMove('d2', 'd4')
-        // Wait for IPC round-trip
-        await Promise.resolve()
-        await Promise.resolve()
       })
 
-      expect(mockElectron.createVariation).toHaveBeenCalledWith('col-1', 42, 1, 'd4')
+      await waitFor(() => {
+        expect(mockElectron.createVariation).toHaveBeenCalledWith('col-1', 42, 1, 'd4')
+      })
       expect(result.current.isInVariation).toBe(true)
+    })
+  })
+
+  // ── variationNav.prev ─────────────────────────────────────────────────────
+
+  describe('variationNav.prev', () => {
+    it('exits to mainline ply branchPly-1 when pressing back at variation ply 1', async () => {
+      const v = makeVariation({ id: 1, branchPly: 3, moves: 'd4' })
+      const vm = makeVariationManagerMock({ ply: 1, totalPlies: 1, moves: 'd4' })
+      const { result, params, chess } = await setupActiveVariation([v], vm, 1, 3, 1)
+
+      act(() => {
+        result.current.variationNav.prev()
+      })
+
+      expect(result.current.isInVariation).toBe(false)
+      expect(params.updateBoardState).toHaveBeenCalledWith(chess, 2)
+    })
+
+    it('clamps mainline to ply 0 when branchPly is 1', async () => {
+      const v = makeVariation({ id: 1, branchPly: 1, moves: 'd4' })
+      const vm = makeVariationManagerMock({ ply: 1, totalPlies: 1, moves: 'd4' })
+      const { result, params, chess } = await setupActiveVariation([v], vm, 1, 1, 1)
+
+      act(() => {
+        result.current.variationNav.prev()
+      })
+
+      expect(params.updateBoardState).toHaveBeenCalledWith(chess, 0)
+    })
+
+    it('stays in variation and steps back when variation ply > 1', async () => {
+      const v = makeVariation({ id: 1, branchPly: 3, moves: '1. d4 d5 2. c4' })
+      const vm = makeVariationManagerMock({ ply: 3, totalPlies: 3, moves: '1. d4 d5 2. c4' })
+      const { result, params } = await setupActiveVariation([v], vm, 1, 3, 3)
+
+      act(() => {
+        result.current.variationNav.prev()
+      })
+
+      expect(result.current.isInVariation).toBe(true)
+      expect(params.updateBoardState).toHaveBeenCalledWith(vm, 2)
+    })
+  })
+
+  // ── trimVariationFrom ─────────────────────────────────────────────────────
+
+  describe('trimVariationFrom', () => {
+    it('opens delete confirmation when trimming from the first move', async () => {
+      const v = makeVariation({ id: 7, moves: '1. d4 d5' })
+      mockElectron.getVariations.mockResolvedValue([v])
+      const { result } = renderHook(() => useVariationState(makeHookParams()))
+
+      await act(async () => {
+        await result.current.loadVariations('col-1', 42)
+      })
+
+      act(() => {
+        result.current.trimVariationFrom(7, 1)
+      })
+
+      expect(result.current.pendingDeletion).toBe(7)
+      expect(mockElectron.updateVariation).not.toHaveBeenCalled()
+    })
+
+    it('persists truncated moves and updates local state for a loaded variation', async () => {
+      const v = makeVariation({ id: 1, moves: '1. d4 d5 2. c4' })
+      const saved = makeVariation({ id: 1, moves: 'd4' })
+      mockElectron.updateVariation.mockResolvedValue(saved)
+      mockElectron.getVariations.mockResolvedValue([v])
+      const { result } = renderHook(() => useVariationState(makeHookParams()))
+
+      await act(async () => {
+        await result.current.loadVariations('col-1', 42)
+      })
+
+      act(() => {
+        result.current.trimVariationFrom(1, 2)
+      })
+
+      await waitFor(() => {
+        expect(mockElectron.updateVariation).toHaveBeenCalledWith('col-1', 42, 1, 'd4')
+      })
+      await waitFor(() => {
+        expect(result.current.variations[0].moves).toBe('d4')
+      })
+    })
+
+    it('persists trim on a non-active variation without touching the active one', async () => {
+      const v1 = makeVariation({ id: 1, branchPly: 3, moves: 'd4' })
+      const v2 = makeVariation({ id: 2, branchPly: 3, moves: '1. e4 e5 2. Nf3' })
+      const vm1 = makeVariationManagerMock({ ply: 1, totalPlies: 1, moves: 'd4' })
+      mockElectron.updateVariation.mockResolvedValue(makeVariation({ id: 2, branchPly: 3, moves: 'e4' }))
+      const { result, params } = await setupActiveVariation([v1, v2], vm1, 1, 3, 1)
+
+      act(() => {
+        result.current.trimVariationFrom(2, 2)
+      })
+
+      await waitFor(() => {
+        expect(mockElectron.updateVariation).toHaveBeenCalledWith('col-1', 42, 2, 'e4')
+      })
+      expect(params.updateBoardState).not.toHaveBeenCalled()
+      expect(result.current.activeVariationId).toBe(1)
+    })
+
+    it('preserves current ply and persists trimmed moves when trim point is past current ply', async () => {
+      const v = makeVariation({ id: 1, branchPly: 3, moves: '1. d4 d5 2. c4' })
+      const vm = makeVariationManagerMock({ ply: 1, totalPlies: 3, moves: '1. d4 d5 2. c4' })
+      mockElectron.updateVariation.mockResolvedValue(makeVariation({ id: 1, branchPly: 3, moves: '1. d4 d5' }))
+      const { result, params } = await setupActiveVariation([v], vm, 1, 3, 1)
+
+      act(() => {
+        result.current.trimVariationFrom(1, 3)
+      })
+
+      await waitFor(() => {
+        expect(mockElectron.updateVariation).toHaveBeenCalledWith('col-1', 42, 1, 'd4 d5')
+      })
+      expect(params.updateBoardState).not.toHaveBeenCalled()
+      expect(result.current.variationPly).toBe(1)
+    })
+
+    it('rewinds board to ply-1 and truncates manager when trim point is at or before current ply', async () => {
+      const v = makeVariation({ id: 1, branchPly: 3, moves: '1. d4 d5 2. c4' })
+      const vm = makeVariationManagerMock({ ply: 3, totalPlies: 3, moves: '1. d4 d5 2. c4' })
+      mockElectron.updateVariation.mockResolvedValue(makeVariation({ id: 1, branchPly: 3, moves: 'd4' }))
+      const { result, params } = await setupActiveVariation([v], vm, 1, 3, 3)
+
+      act(() => {
+        result.current.trimVariationFrom(1, 2)
+      })
+
+      await waitFor(() => {
+        expect(mockElectron.updateVariation).toHaveBeenCalledWith('col-1', 42, 1, 'd4')
+      })
+      expect(params.updateBoardState).toHaveBeenCalledWith(vm, 1)
+      expect(vm.truncateAfterCurrent).toHaveBeenCalledTimes(1)
     })
   })
 })

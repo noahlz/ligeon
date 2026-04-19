@@ -11,6 +11,7 @@
   "scripts": {
     "clean": "rimraf dist dist-electron release .logs coverage",
     "app": "npm run build:main && npm run rebuild:electron && concurrently \"vite\" \"wait-on http://localhost:5173 && ELECTRON_IS_DEV=true electron .\"",
+    "dev": "npm run app",
     "rebuild:sqlite": "npm rebuild better-sqlite3 --ignore-scripts=false",
     "rebuild:electron": "electron-rebuild -f -w better-sqlite3",
     "test": "npm run rebuild:sqlite && vitest run; CODE=$?; npm run rebuild:electron || CODE=$?; exit $CODE",
@@ -32,6 +33,7 @@
     "node": ">=24.0.0"
   },
   "dependencies": {
+    "@radix-ui/react-context-menu": "2.2.16",
     "better-sqlite3": "^12.6.0",
     "chessops": "^0.15.0",
     "update-electron-app": "3.1.2",

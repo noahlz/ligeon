@@ -15,6 +15,7 @@ import type { NavigableManager } from '../types/navigableManager.js'
 import { createVariationManager, type VariationManager } from '../utils/variationManager.js'
 import { getCheckColor } from '../utils/chessHelpers.js'
 import { resolveVariationMove, resolveMainlineMove } from '../utils/variationRouter.js'
+import { parseMoves } from '../utils/moveParser.js'
 
 export interface UseVariationStateParams {
   chessManager: ChessManager | null
@@ -38,6 +39,7 @@ export interface UseVariationStateReturn {
   exitVariation: () => void
   jumpToVariationMove: (id: number, branchPly: number, ply: number) => void
   dismissVariation: (id: number) => Promise<void>
+  trimVariationFrom: (id: number, ply: number) => void
   advanceVariation: () => boolean
   variationNav: {
     first: () => void
@@ -243,6 +245,53 @@ export function useVariationState({
     setPendingDeletion(null)
   }, [])
 
+  /**
+   * Trim a variation inclusive of `ply`. If ply === 1, delegate to the existing
+   * confirmation flow (full delete); otherwise mutate the manager in place,
+   * preserve the user's ply when it falls within the kept range, and persist.
+   */
+  const trimVariationFrom = useCallback((id: number, ply: number) => {
+    if (!collectionId || gameId === null) return
+
+    if (ply <= 1) {
+      requestDeletion(id)
+      return
+    }
+
+    const target = variations.find(v => v.id === id)
+    if (!target) return
+
+    // Use parseMoves to handle stored strings that may contain move numbers, NAGs,
+    // or annotations — matches what variationManager uses when hydrating.
+    const { moves } = parseMoves(target.moves)
+    const keptMoves = moves.slice(0, ply - 1)
+    const newMovesStr = keptMoves.join(' ')
+
+    const isActiveTarget = activeVariationId === id && activeVariation !== null
+    if (isActiveTarget && activeVariation) {
+      const prevPly = activeVariation.getCurrentPly()
+      activeVariation.goto(ply - 1)
+      activeVariation.truncateAfterCurrent()
+      if (prevPly >= ply) {
+        syncVariationState(activeVariation)
+        updateBoardState(activeVariation, ply - 1)
+      } else {
+        activeVariation.goto(prevPly)
+        syncVariationState(activeVariation)
+      }
+    }
+
+    window.electron.updateVariation(collectionId, gameId, id, newMovesStr)
+      .then(saved => {
+        if (saved) {
+          setVariations(prev => prev.map(v => v.id === id ? saved : v))
+        }
+      })
+      .catch(error => {
+        showErrorToast('Failed to trim variation', error)
+      })
+  }, [collectionId, gameId, variations, activeVariation, activeVariationId, requestDeletion, syncVariationState, updateBoardState])
+
   const handleUserMove = useCallback((from: string, to: string) => {
     if (!chessManager || !collectionId || gameId === null) return
 
@@ -346,11 +395,16 @@ export function useVariationState({
   }, [navigateVariation])
 
   const variationNavPrev = useCallback(() => {
+    if (activeVariation && activeBranchPly !== null && chessManager && activeVariation.getCurrentPly() <= 1) {
+      exitVariation()
+      updateBoardState(chessManager, Math.max(0, activeBranchPly - 1))
+      return
+    }
     navigateVariation(m => {
       const ply = m.getCurrentPly()
       return ply > 0 ? ply - 1 : null
     })
-  }, [navigateVariation])
+  }, [navigateVariation, activeVariation, activeBranchPly, chessManager, exitVariation, updateBoardState])
 
   const variationNavNext = useCallback(() => {
     navigateVariation(m => {
@@ -400,6 +454,7 @@ export function useVariationState({
     exitVariation,
     jumpToVariationMove,
     dismissVariation,
+    trimVariationFrom,
     advanceVariation,
     variationNav,
     loadVariations,
