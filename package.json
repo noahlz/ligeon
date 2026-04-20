@@ -1,6 +1,6 @@
 {
   "name": "Ligeon",
-  "version": "0.2.5",
+  "version": "0.2.6-dev.0",
   "type": "module",
   "description": "Browse and replay chess games from PGN databases",
   "repository": "https://github.com/noahlz/ligeon",
