@@ -16,7 +16,7 @@ import { makeSquare, squareFile, squareRank } from 'chessops/util'
 
 import type { NavigableManager } from '../types/navigableManager.js'
 import type { MoveType } from '../types/moveTypes.js'
-import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
+import { createNavigableMethods, type NavState } from './navigableHelpers.js'
 import { parseMoves } from './moveParser.js'
 import { showErrorToast } from './errorToast.js'
 
@@ -90,8 +90,8 @@ export function playAndRecord(chess: Chess, san: string): ParsedMove | null {
  * Create a chess manager for replaying and navigating through a game
  */
 export function createChessManager(movesString: string): ChessManager {
-  const positions: ParsedMove[] = []
-  let currentPly = 0
+  const state: NavState = { positions: [], currentPly: 0 }
+  const { positions } = state
 
   const { moves: sanMoves } = parseMoves(movesString)
 
@@ -123,55 +123,31 @@ export function createChessManager(movesString: string): ChessManager {
   }
 
   return {
-    getFen: () => positions[currentPly].fen,
-
-    getLastMove: () => positions[currentPly].lastMove,
-
-    getMoveType: (ply: number) => {
-      if (ply < 0 || ply >= positions.length) return undefined
-      return positions[ply].type
-    },
-
-    goto: (ply: number) => {
-      if (ply >= 0 && ply < positions.length) {
-        currentPly = ply
-      }
-    },
+    ...createNavigableMethods(state),
 
     next: () => {
-      if (currentPly < positions.length - 1) {
-        currentPly++
+      if (state.currentPly < positions.length - 1) {
+        state.currentPly++
         return true
       }
       return false
     },
 
     prev: () => {
-      if (currentPly > 0) {
-        currentPly--
+      if (state.currentPly > 0) {
+        state.currentPly--
         return true
       }
       return false
     },
 
     first: () => {
-      currentPly = 0
+      state.currentPly = 0
     },
 
     last: () => {
-      currentPly = positions.length - 1
+      state.currentPly = positions.length - 1
     },
-
-    getCurrentPly: () => currentPly,
-
-    getTotalPlies: () => positions.length - 1, // Don't count initial position as a ply
-
-    getDests: () => getDestsFromFen(positions[currentPly].fen),
-
-    getTurnColor: () => getTurnColorFromFen(positions[currentPly].fen),
-
-    tryMove: (from: string, to: string, promotion?: string) =>
-      tryMoveFromFen(positions[currentPly].fen, from, to, promotion),
 
     getMainlineSan: (ply: number) => {
       if (ply < 1 || ply >= positions.length) return undefined

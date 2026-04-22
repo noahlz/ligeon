@@ -91,6 +91,28 @@ export interface OptionFilters {
 }
 
 /**
+ * Filters for searching games.
+ *
+ * Shared between the main-process IPC handlers and the renderer preload bridge.
+ * Structurally identical on both sides of the IPC boundary.
+ */
+export interface GameFilters {
+  player?: string
+  white?: string
+  black?: string
+  event?: string
+  dateFrom?: number | null
+  dateTo?: number | null
+  results?: number[]
+  ecoCodes?: string[]
+  whiteEloMin?: number | null
+  whiteEloMax?: number | null
+  blackEloMin?: number | null
+  blackEloMax?: number | null
+  limit?: number
+}
+
+/**
  * Variation data structure
  */
 export interface VariationData {

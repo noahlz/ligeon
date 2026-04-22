@@ -43,6 +43,22 @@ export function useTour(
     driverRef.current = null
   }
 
+  // Mark one step of the three-step tour (welcome / collection / game) as seen.
+  // Updates local state for re-render gating and persists via IPC so the step
+  // doesn't re-fire on future launches.
+  const markSeen = (key: 'welcomeSeen' | 'collectionSeen' | 'gameSeen') => {
+    setTourState(prev => {
+      const next = {
+        welcomeSeen: prev.welcomeSeen,
+        collectionSeen: prev.collectionSeen,
+        gameSeen: prev.gameSeen,
+        [key]: true,
+      }
+      void window.electron.updateSettings({ productTourStatus: next })
+      return { ...prev, [key]: true }
+    })
+  }
+
   // Destroy on unmount.
   useEffect(() => () => destroyActive(), [])
 
@@ -91,9 +107,7 @@ export function useTour(
           setTourState(prev => ({ ...prev, restarting: false }))
         },
       })
-      const next = { welcomeSeen: true, collectionSeen: tourState.collectionSeen, gameSeen: tourState.gameSeen }
-      setTourState(prev => ({ ...prev, welcomeSeen: true }))
-      void window.electron.updateSettings({ productTourStatus: next })
+      markSeen('welcomeSeen')
       driverRef.current = d
       d.drive()
     }, 500)
@@ -126,9 +140,7 @@ export function useTour(
         }],
         onDestroyed: () => { driverRef.current = null },
       })
-      const next = { welcomeSeen: tourState.welcomeSeen, collectionSeen: true, gameSeen: tourState.gameSeen }
-      setTourState(prev => ({ ...prev, collectionSeen: true }))
-      void window.electron.updateSettings({ productTourStatus: next })
+      markSeen('collectionSeen')
       driverRef.current = d
       d.drive()
     }, 300)
@@ -185,9 +197,7 @@ export function useTour(
         ],
         onDestroyed: () => { driverRef.current = null },
       })
-      const next = { welcomeSeen: tourState.welcomeSeen, collectionSeen: tourState.collectionSeen, gameSeen: true }
-      setTourState(prev => ({ ...prev, gameSeen: true }))
-      void window.electron.updateSettings({ productTourStatus: next })
+      markSeen('gameSeen')
       driverRef.current = d
       d.drive()
     }, 300)

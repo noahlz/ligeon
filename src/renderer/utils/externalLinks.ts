@@ -34,40 +34,10 @@ export function buildLichessAnalysisURL(fen: string): string {
 }
 
 /**
- * Build a full PGN string with headers from a GameRow
+ * Build PGN header lines from a GameRow.
  *
- * Always includes: Event, Site, Date, Round, White, Black, Result
- * Includes if non-null: WhiteElo, BlackElo, ECO
- *
- * @param game - GameRow with game metadata and moves
- * @returns Full PGN string with headers and movetext
- */
-export function buildFullPgn(game: GameRow): string {
-  const headers: string[] = []
-
-  headers.push(`[Event "${game.event ?? '?'}"]`)
-  headers.push(`[Site "${game.site ?? '?'}"]`)
-  headers.push(`[Date "${yyyymmddToPgnDate(game.date)}"]`)
-  headers.push(`[Round "${game.round ?? '?'}"]`)
-  headers.push(`[White "${game.white}"]`)
-  headers.push(`[Black "${game.black}"]`)
-  headers.push(`[Result "${resultNumericToPgn(game.result)}"]`)
-
-  if (game.whiteElo != null) {
-    headers.push(`[WhiteElo "${game.whiteElo}"]`)
-  }
-  if (game.blackElo != null) {
-    headers.push(`[BlackElo "${game.blackElo}"]`)
-  }
-  if (game.ecoCode != null) {
-    headers.push(`[ECO "${game.ecoCode}"]`)
-  }
-
-  return headers.join('\n') + '\n\n' + game.moves
-}
-
-/**
- * Build PGN header lines from a GameRow (shared helper).
+ * Always includes: Event, Site, Date, Round, White, Black, Result.
+ * Includes if non-null: WhiteElo, BlackElo, ECO.
  */
 function buildPgnHeaders(game: GameRow): string[] {
   const headers: string[] = []
@@ -82,6 +52,16 @@ function buildPgnHeaders(game: GameRow): string[] {
   if (game.blackElo != null) headers.push(`[BlackElo "${game.blackElo}"]`)
   if (game.ecoCode != null) headers.push(`[ECO "${game.ecoCode}"]`)
   return headers
+}
+
+/**
+ * Build a full PGN string with headers from a GameRow.
+ *
+ * @param game - GameRow with game metadata and moves
+ * @returns Full PGN string with headers and movetext
+ */
+export function buildFullPgn(game: GameRow): string {
+  return buildPgnHeaders(game).join('\n') + '\n\n' + game.moves
 }
 
 /**

@@ -12,9 +12,9 @@
 import { Chess } from 'chessops/chess'
 import { parseFen } from 'chessops/fen'
 import type { NavigableManager } from '../types/navigableManager.js'
-import { type ParsedMove, playAndRecord } from './chessManager.js'
+import { playAndRecord } from './chessManager.js'
 import { parseMoves } from './moveParser.js'
-import { getDestsFromFen, getTurnColorFromFen, tryMoveFromFen } from './chessHelpers.js'
+import { createNavigableMethods, type NavState } from './navigableHelpers.js'
 import { showErrorToast } from './errorToast.js'
 
 export interface VariationManager extends NavigableManager {
@@ -44,8 +44,8 @@ export function createVariationManager(
   startFen: string,
   existingMoves?: string
 ): VariationManager {
-  const positions: ParsedMove[] = []
-  let currentPly = 0
+  const state: NavState = { positions: [], currentPly: 0 }
+  const { positions } = state
 
   // Parse the starting FEN to create initial position
   const setupResult = parseFen(startFen)
@@ -81,42 +81,16 @@ export function createVariationManager(
   }
 
   return {
-    getFen: () => positions[currentPly].fen,
-
-    getLastMove: () => positions[currentPly].lastMove,
-
-    getMoveType: (ply: number) => {
-      if (ply < 0 || ply >= positions.length) return undefined
-      return positions[ply].type
-    },
-
-    goto: (ply: number) => {
-      if (ply >= 0 && ply < positions.length) {
-        currentPly = ply
-      }
-    },
-
-    getCurrentPly: () => currentPly,
-
-    // Exclude initial position (positions[0]) from ply count — it's the starting FEN,
-    // not a move that was played.
-    getTotalPlies: () => positions.length - 1,
-
-    getDests: () => getDestsFromFen(positions[currentPly].fen),
-
-    getTurnColor: () => getTurnColorFromFen(positions[currentPly].fen),
-
-    tryMove: (from: string, to: string, promotion?: string) =>
-      tryMoveFromFen(positions[currentPly].fen, from, to, promotion),
+    ...createNavigableMethods(state),
 
     appendMove: (san: string) => {
       // Truncate any moves after current position
-      positions.length = currentPly + 1
+      positions.length = state.currentPly + 1
 
       // Reconstruct Chess position from FEN instead of keeping a live Chess instance.
       // Positions are stored as FEN strings for consistency with ChessManager and to avoid
       // state drift between the position array and a mutable object.
-      const fen = positions[currentPly].fen
+      const fen = positions[state.currentPly].fen
       const setup = parseFen(fen)
       if (setup.isErr) return false
       const chess = Chess.fromSetup(setup.value)
@@ -128,12 +102,12 @@ export function createVariationManager(
 
       // Add to positions and advance ply
       positions.push(parsed)
-      currentPly++
+      state.currentPly++
       return true
     },
 
     truncateAfterCurrent: () => {
-      positions.length = currentPly + 1
+      positions.length = state.currentPly + 1
     },
 
     getMovesString: () => {
@@ -141,7 +115,7 @@ export function createVariationManager(
     },
 
     getNextSan: () => {
-      const nextPly = currentPly + 1
+      const nextPly = state.currentPly + 1
       return nextPly < positions.length ? positions[nextPly].san : null
     }
   }

@@ -29,16 +29,9 @@ export default function PanelHandle({ side, isOpen, onToggle }: PanelHandleProps
           <div
             className="absolute w-1 h-32 rounded-sm bg-ui-bg-hover border border-ui-border-light shadow-[0_0_4px_rgba(0,0,0,0.4)] flex flex-col gap-1.5 items-center justify-center"
           >
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
-            <div className="w-0.5 h-0.5 rounded-full bg-white/25" />
+            {Array.from({ length: 10 }, (_, i) => (
+              <div key={i} className="w-0.5 h-0.5 rounded-full bg-white/25" />
+            ))}
           </div>
         </button>
       </TooltipTrigger>

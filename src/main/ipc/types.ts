@@ -1,24 +1,5 @@
-import type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
-export type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters, VariationData, CommentData, AnnotationData }
-
-/**
- * Filters for searching games
- */
-export interface GameFilters {
-  player?: string
-  white?: string
-  black?: string
-  event?: string
-  dateFrom?: number | null
-  dateTo?: number | null
-  results?: number[]
-  ecoCodes?: string[]
-  whiteEloMin?: number | null
-  whiteEloMax?: number | null
-  blackEloMin?: number | null
-  blackEloMax?: number | null
-  limit?: number
-}
+import type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters, GameFilters, VariationData, CommentData, AnnotationData } from '../../shared/types/game.js'
+export type { GameData, GameRow, GameSearchResult, AppSettings, OptionFilters, GameFilters, VariationData, CommentData, AnnotationData }
 
 export interface CollectionMetadata {
   id: string

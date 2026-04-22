@@ -145,44 +145,18 @@ export default function GameListSidebar({
 
             {/* Date Range Selectors */}
             <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-ui-text-dimmer text-xs">From</Label>
-                <Select
-                  value={filters.dateFrom?.toString() ?? 'all'}
-                  onValueChange={(value) => setDateFrom(value === 'all' ? null : parseInt(value, 10))}
-                >
-                  <SelectTrigger className="h-7 bg-ui-bg-element text-ui-text text-xs border-ui-border">
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-ui-bg-box border-ui-border">
-                    <SelectItem value="all" className="text-xs">All</SelectItem>
-                    {availableDates.map((date) => (
-                      <SelectItem key={date} value={date.toString()} className="text-xs">
-                        {yyyymmddToDisplay(date)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-ui-text-dimmer text-xs">To</Label>
-                <Select
-                  value={filters.dateTo?.toString() ?? 'all'}
-                  onValueChange={(value) => setDateTo(value === 'all' ? null : parseInt(value, 10))}
-                >
-                  <SelectTrigger className="h-7 bg-ui-bg-element text-ui-text text-xs border-ui-border">
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-ui-bg-box border-ui-border">
-                    <SelectItem value="all" className="text-xs">All</SelectItem>
-                    {availableDates.map((date) => (
-                      <SelectItem key={date} value={date.toString()} className="text-xs">
-                        {yyyymmddToDisplay(date)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <DateBoundSelect
+                label="From"
+                value={filters.dateFrom}
+                onChange={setDateFrom}
+                availableDates={availableDates}
+              />
+              <DateBoundSelect
+                label="To"
+                value={filters.dateTo}
+                onChange={setDateTo}
+                availableDates={availableDates}
+              />
             </div>
 
             {/* Winner Toggles (Centered Axis) */}
@@ -274,6 +248,37 @@ export default function GameListSidebar({
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+interface DateBoundSelectProps {
+  label: string
+  value: number | null | undefined
+  onChange: (value: number | null) => void
+  availableDates: number[]
+}
+
+function DateBoundSelect({ label, value, onChange, availableDates }: DateBoundSelectProps) {
+  return (
+    <div>
+      <Label className="text-ui-text-dimmer text-xs">{label}</Label>
+      <Select
+        value={value?.toString() ?? 'all'}
+        onValueChange={(v) => onChange(v === 'all' ? null : parseInt(v, 10))}
+      >
+        <SelectTrigger className="h-7 bg-ui-bg-element text-ui-text text-xs border-ui-border">
+          <SelectValue placeholder="All" />
+        </SelectTrigger>
+        <SelectContent className="bg-ui-bg-box border-ui-border">
+          <SelectItem value="all" className="text-xs">All</SelectItem>
+          {availableDates.map((date) => (
+            <SelectItem key={date} value={date.toString()} className="text-xs">
+              {yyyymmddToDisplay(date)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }
